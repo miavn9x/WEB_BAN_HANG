@@ -1,0 +1,160 @@
+/* Toàn bộ container */
+.container_custom {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Sidebar */
+.category-list {
+    border: none;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: visible;
+    /* Đảm bảo menu con hiển thị ngoài */
+}
+
+/* Các mục trong sidebar */
+.category-list .list-group-item {
+    font-size: 16px;
+    padding: 12px 20px;
+    color: #333;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.category-list .list-group-item:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.category-list .list-group-item i {
+    font-size: 20px;
+    margin-right: 8px;
+}
+
+/* Subcategory Menu */
+.category-item {
+    position: relative;
+}
+
+.subcategory-menu {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    /* Đảm bảo menu con hiển thị trên các phần tử khác */
+    min-width: 200px;
+    padding: 8px 0;
+    display: none;
+    /* Ẩn menu con mặc định */
+}
+
+.category-item:hover .subcategory-menu {
+    display: block;
+    /* Hiển thị khi hover */
+}
+
+.subcategory-item {
+    padding: 8px 15px;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.subcategory-item:hover {
+    background-color: #f8f9fa;
+    color: #dc3545;
+}
+
+/* Carousel */
+.carousel-item img {
+    height: 400px;
+    object-fit: cover;
+    width: 100%;
+    border-radius: 8px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.carousel-item img:hover {
+    transform: scale(1.05);
+}
+
+/* Info Section */
+.info-section .info-item {
+    background-color: #ffffff;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    text-align: center;
+    padding: 15px;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.info-section .info-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.info-section .info-item .me-2 {
+    font-size: 24px;
+    color: #dc3545;
+    margin-bottom: 10px;
+}
+
+.info-section .info-item span {
+    font-size: 16px;
+    color: #333;
+    line-height: 1.5;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .info-section .info-item {
+        margin-bottom: 15px;
+    }
+
+    .carousel-item img {
+        height: 250px;
+    }
+}
+
+@media (max-width: 576px) {
+    .carousel-item img {
+        height: 150px;
+    }
+
+    .info-section .info-item span {
+        font-size: 14px;
+    }
+}
+
+/* Card Body (Căn chỉnh các phần tử InfoCard) */
+.info-item .card-body {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.info-item .icon-container {
+    margin-right: 15px;
+    font-size: 24px;
+}
+
+.info-item .text-container {
+    font-size: 14px;
+    color: #666;
+}
+
+.info-item .text-container strong {
+    font-size: 16px;
+    color: #333;
+    font-weight: bold;
+}

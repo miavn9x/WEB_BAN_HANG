@@ -1,15 +1,17 @@
+import Carouselandmenu from "../Carousel/Carouselandmenu";
 import MyNavbar from "../Nav/Navbar";
-import ProductLayout from "../product/ProductLayout";
 
 const Header = () => {
-    return (
-      <>
-        <div>
-          <MyNavbar />
-          <ProductLayout />
-        </div>
-      </>
-    );
-}
+  return (
+    <>
+      <div>
+        <MyNavbar />
+      </div>
+      <div>
+        <Carouselandmenu />
+      </div>
+    </>
+  );
+};
 
-export default Header
+export default Header;

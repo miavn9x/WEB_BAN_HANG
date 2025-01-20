@@ -18,6 +18,15 @@ import {
   FaShoppingCart,
   FaStore,
   FaPhone,
+  FaBabyCarriage,
+  FaGlassWhiskey,
+  FaTags,
+  FaPuzzlePiece,
+  FaHome,
+  FaTshirt,
+  FaCapsules,
+  FaUtensils,
+  FaBaby,
 } from "react-icons/fa";
 import "../../styles/Navbar.css";
 
@@ -54,9 +63,9 @@ const MyNavbar = () => {
             </Col>
 
             {/* Phần phải - Các biểu tượng (Chỉ hiển thị trên di động) */}
-            <Col xs={5} className="d-lg-none text-end pe-3">
+            <Col xs={7} className="d-lg-none text-end pe-3">
               <Nav className="justify-content-end">
-                <div className="d-flex align-items-center">
+                <div className="d-flex align-items-center ms-auto">
                   {/* Biểu tượng tài khoản người dùng */}
                   <Nav.Link
                     onClick={() => handleLinkClick("Tài Khoản")}
@@ -88,7 +97,7 @@ const MyNavbar = () => {
             </Col>
 
             {/* Nút Toggle (Chỉ hiển thị trên di động) */}
-            <Col xs={3} className="d-lg-none px-0 text-center">
+            <Col xs={1} className="d-lg-none px-0 text-center">
               <Navbar.Toggle
                 aria-controls="navbarSupportedContent"
                 className="border-0"
@@ -109,24 +118,61 @@ const MyNavbar = () => {
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="w-100">
                       <Dropdown.Item
-                        onClick={() => handleLinkClick("Đồ chơi trẻ em")}
+                        onClick={() => handleLinkClick("sua-bot-cao-cap")}
                       >
-                        Đồ chơi trẻ em
+                        Sữa bột cao cấp
                       </Dropdown.Item>
+
                       <Dropdown.Item
-                        onClick={() => handleLinkClick("Quần áo trẻ em")}
+                        onClick={() => handleLinkClick("sua-tuoi")}
                       >
-                        Quần áo trẻ em
+                        Sữa tươi dinh dưỡng
                       </Dropdown.Item>
-                      <Dropdown.Item
-                        onClick={() => handleLinkClick("Đồ dùng cho mẹ")}
-                      >
-                        Đồ dùng cho mẹ
+
+                      <Dropdown.Item onClick={() => handleLinkClick("bim-ta")}>
+                        Bỉm & tã em bé
                       </Dropdown.Item>
+
                       <Dropdown.Item
-                        onClick={() => handleLinkClick("Sữa và thực phẩm")}
+                        onClick={() => handleLinkClick("do-choi-phat-trien")}
                       >
-                        Sữa và thực phẩm
+                        Đồ chơi phát triển
+                      </Dropdown.Item>
+
+                      <Dropdown.Item
+                        onClick={() => handleLinkClick("cham-soc-me-be")}
+                      >
+                        Chăm sóc mẹ và bé
+                      </Dropdown.Item>
+
+                      <Dropdown.Item
+                        onClick={() => handleLinkClick("thoi-trang-me-be")}
+                      >
+                        Thời trang mẹ và bé
+                      </Dropdown.Item>
+
+                      <Dropdown.Item
+                        onClick={() => handleLinkClick("dinh-duong-ba-bau")}
+                      >
+                        Dinh dưỡng bà bầu
+                      </Dropdown.Item>
+
+                      <Dropdown.Item
+                        onClick={() => handleLinkClick("an-dam-cho-be")}
+                      >
+                        Ăn dặm cho bé
+                      </Dropdown.Item>
+
+                      <Dropdown.Item
+                        onClick={() => handleLinkClick("dinh-duong-cho-be")}
+                      >
+                        Dinh dưỡng cho bé
+                      </Dropdown.Item>
+
+                      <Dropdown.Item
+                        onClick={() => handleLinkClick("do-dung-thiet-yeu")}
+                      >
+                        Đồ dùng thiết yếu
                       </Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
@@ -141,24 +187,81 @@ const MyNavbar = () => {
                       </Dropdown.Toggle>
                       <Dropdown.Menu>
                         <Dropdown.Item
-                          onClick={() => handleLinkClick("Đồ chơi trẻ em")}
+                          onClick={() => handleLinkClick("sua-bot-cao-cap")}
                         >
-                          Đồ chơi trẻ em
+                          <FaBabyCarriage className="me-2" />
+                          Sữa bột cao cấp
                         </Dropdown.Item>
+
                         <Dropdown.Item
-                          onClick={() => handleLinkClick("Quần áo trẻ em")}
+                          onClick={() => handleLinkClick("sua-tuoi")}
                         >
-                          Quần áo trẻ em
+                          <FaGlassWhiskey className="me-2" />
+                          Sữa tươi dinh dưỡng
                         </Dropdown.Item>
+
                         <Dropdown.Item
-                          onClick={() => handleLinkClick("Đồ dùng cho mẹ")}
+                          onClick={() => handleLinkClick("bim-ta")}
                         >
-                          Đồ dùng cho mẹ
+                          <FaTags className="me-2" />
+                          Bỉm & tã em bé
                         </Dropdown.Item>
+
                         <Dropdown.Item
-                          onClick={() => handleLinkClick("Sữa và thực phẩm")}
+                          onClick={() => handleLinkClick("do-choi-phat-trien")}
                         >
-                          Sữa và thực phẩm
+                          <FaPuzzlePiece className="me-2" />
+                          Đồ chơi phát triển
+                        </Dropdown.Item>
+
+                        <Dropdown.Item
+                          onClick={() => handleLinkClick("cham-soc-me-be")}
+                        >
+                          <FaHome className="me-2" />
+                          Chăm sóc mẹ và bé
+                        </Dropdown.Item>
+
+                        <Dropdown.Item
+                          onClick={() => handleLinkClick("thoi-trang-me-be")}
+                        >
+                          <FaTshirt className="me-2" />
+                          Thời trang mẹ và bé
+                        </Dropdown.Item>
+
+                        <Dropdown.Item
+                          onClick={() => handleLinkClick("dinh-duong-ba-bau")}
+                        >
+                          <FaCapsules className="me-2" />
+                          Dinh dưỡng bà bầu
+                        </Dropdown.Item>
+
+                        <Dropdown.Item
+                          onClick={() => handleLinkClick("an-dam-cho-be")}
+                        >
+                          <FaUtensils className="me-2" />
+                          Ăn dặm cho bé
+                        </Dropdown.Item>
+
+                        <Dropdown.Item
+                          onClick={() => handleLinkClick("dinh-duong-cho-be")}
+                        >
+                          <FaCapsules className="me-2" />
+                          Dinh dưỡng cho bé
+                        </Dropdown.Item>
+
+                        <Dropdown.Item
+                          onClick={() => handleLinkClick("do-dung-thiet-yeu")}
+                        >
+                          <FaBaby className="me-2" />
+                          Đồ dùng thiết yếu
+                        </Dropdown.Item>
+
+                        <Dropdown.Divider />
+
+                        <Dropdown.Item
+                          onClick={() => handleLinkClick("tat-ca-san-pham")}
+                        >
+                          Xem tất cả sản phẩm
                         </Dropdown.Item>
                       </Dropdown.Menu>
                     </Dropdown>
@@ -282,6 +385,13 @@ const MyNavbar = () => {
                 style={{ cursor: "pointer" }}
               >
                 GIỚI THIỆU
+              </Nav.Link>
+              <Nav.Link
+                onClick={() => handleLinkClick("Bài Viết")}
+                className="text-white me-3"
+                style={{ cursor: "pointer" }}
+              >
+                BÀI VIẾT
               </Nav.Link>
             </Nav>
             {/* Phần thông tin hệ thống cửa hàng (Ẩn trên di động) */}
