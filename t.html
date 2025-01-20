@@ -1,181 +1,345 @@
-<html lang="en">
+<html>
  <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>
-   Product Categories
+   Tất cả sản phẩm
   </title>
   <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
   <style>
    body {
-            background-color: #f8f9fa;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
         }
-        .category-list {
+        .product-card {
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
             background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
+            margin-bottom: 20px;
         }
-        .category-list h5 {
+        .product-card img {
+            max-width: 100%;
+            height: auto;
+        }
+        .product-card .price {
+            color: #ff0066;
             font-weight: bold;
         }
-        .category-list ul {
-            list-style: none;
-            padding: 0;
+        .product-card .old-price {
+            text-decoration: line-through;
+            color: #999;
         }
-        .category-list ul li {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
+        .product-card .rating i {
+            color: #ffcc00;
         }
-        .category-list ul li i {
-            margin-right: 10px;
+        .product-card .out-of-stock {
+            color: #ff0066;
+            font-weight: bold;
         }
-        .carousel-item img {
-            width: 100%;
-            border-radius: 8px;
-        }
-        .info-section {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-        .info-section .info-item {
-            display: flex;
-            align-items: center;
+        .sidebar {
             background-color: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            width: 24%;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
         }
-        .info-section .info-item i {
-            margin-right: 10px;
+        .sidebar h5 {
+            font-weight: bold;
+        }
+        .pagination {
+            justify-content: center;
+        }
+        .btn-buy-now {
+            background-color: #ff0066;
+            color: #fff;
+            width: 48%;
+            font-size: 0.9rem;
+            padding: 5px;
+        }
+        .btn-outline-danger {
+            width: 48%;
+            font-size: 0.9rem;
+            padding: 5px;
         }
   </style>
  </head>
  <body>
-  <div class="container mt-4">
+  <div class="container-fluid">
    <div class="row">
-    <div class="col-md-3">
-     <div class="category-list">
+    <div class="col-md-2">
+     <div class="sidebar">
       <h5>
-       Danh mục sản phẩm
+       Giá
       </h5>
-      <ul>
-       <li>
-        <i class="fas fa-baby-bottle">
-        </i>
-        Sữa bột cao cấp
-       </li>
-       <li>
-        <i class="fas fa-glass-whiskey">
-        </i>
-        Sữa tươi các loại
-       </li>
-       <li>
-        <i class="fas fa-tags">
-        </i>
-        Bỉm tã khuyến mãi
-       </li>
-       <li>
-        <i class="fas fa-utensils">
-        </i>
-        Ăn dặm, dinh dưỡng
-       </li>
-       <li>
-        <i class="fas fa-capsules">
-        </i>
-        Sức khoẻ &amp; Vitamin
-       </li>
-       <li>
-        <i class="fas fa-baby">
-        </i>
-        Đồ dùng mẹ &amp; bé
-       </li>
-       <li>
-        <i class="fas fa-puzzle-piece">
-        </i>
-        Đồ chơi, học tập
-       </li>
-       <li>
-        <i class="fas fa-home">
-        </i>
-        Chăm sóc gia đình
-       </li>
-       <li>
-        <i class="fas fa-tshirt">
-        </i>
-        Thời trang và phụ kiện
-       </li>
-      </ul>
+      <div class="form-check">
+       <input class="form-check-input" id="price1" name="price" type="radio"/>
+       <label class="form-check-label" for="price1">
+        Giá dưới 1.000.000đ
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="price2" name="price" type="radio"/>
+       <label class="form-check-label" for="price2">
+        1.000.000đ - 2.000.000đ
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="price3" name="price" type="radio"/>
+       <label class="form-check-label" for="price3">
+        2.000.000đ - 3.000.000đ
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="price4" name="price" type="radio"/>
+       <label class="form-check-label" for="price4">
+        3.000.000đ - 5.000.000đ
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="price5" name="price" type="radio"/>
+       <label class="form-check-label" for="price5">
+        5.000.000đ - 7.000.000đ
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="price6" name="price" type="radio"/>
+       <label class="form-check-label" for="price6">
+        7.000.000đ - 10.000.000đ
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="price7" name="price" type="radio"/>
+       <label class="form-check-label" for="price7">
+        Trên 10.000.000đ
+       </label>
+      </div>
+      <h5>
+       Hãng sản xuất
+      </h5>
+      <div class="form-check">
+       <input class="form-check-input" id="brand1" type="checkbox"/>
+       <label class="form-check-label" for="brand1">
+        Agudha
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="brand2" type="checkbox"/>
+       <label class="form-check-label" for="brand2">
+        Aptamil
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="brand3" type="checkbox"/>
+       <label class="form-check-label" for="brand3">
+        Biminu
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="brand4" type="checkbox"/>
+       <label class="form-check-label" for="brand4">
+        Bobby
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="brand5" type="checkbox"/>
+       <label class="form-check-label" for="brand5">
+        CHREE
+       </label>
+      </div>
+      <a href="#">
+       Xem thêm &gt;
+      </a>
+      <h5>
+       Loại sản phẩm
+      </h5>
+      <div class="form-check">
+       <input class="form-check-input" id="type1" type="checkbox"/>
+       <label class="form-check-label" for="type1">
+        1.Đồ ăn uống
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="type2" type="checkbox"/>
+       <label class="form-check-label" for="type2">
+        10.Hàng ký gửi
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="type3" type="checkbox"/>
+       <label class="form-check-label" for="type3">
+        5.Hoa mỹ phẩm
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="type4" type="checkbox"/>
+       <label class="form-check-label" for="type4">
+        6.Sữa
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="type5" type="checkbox"/>
+       <label class="form-check-label" for="type5">
+        BE.TPCN Cho Bé
+       </label>
+      </div>
+      <a href="#">
+       Xem thêm &gt;
+      </a>
+      <h5>
+       Tags
+      </h5>
+      <div class="form-check">
+       <input class="form-check-input" id="tag1" type="checkbox"/>
+       <label class="form-check-label" for="tag1">
+        Flash Sale
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="tag2" type="checkbox"/>
+       <label class="form-check-label" for="tag2">
+        Giao Nhanh 2h
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="tag3" type="checkbox"/>
+       <label class="form-check-label" for="tag3">
+        Chính hãng
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="tag4" type="checkbox"/>
+       <label class="form-check-label" for="tag4">
+        Ngại nhập
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" id="tag5" type="checkbox"/>
+       <label class="form-check-label" for="tag5">
+        Xả kho
+       </label>
+      </div>
      </div>
     </div>
-    <div class="col-md-9">
-     <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-indicators">
-       <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-       <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-       <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-      </div>
-      <div class="carousel-inner">
-       <div class="carousel-item active">
-        <img src="https://placehold.co/800x300?text=Banner+1" class="d-block w-100" alt="Promotional banner with various baby products and text indicating a 36% discount until 10/9/2024">
-       </div>
-       <div class="carousel-item">
-        <img src="https://placehold.co/800x300?text=Banner+2" class="d-block w-100" alt="Promotional banner with various baby products and text indicating a 36% discount until 10/9/2024">
-       </div>
-       <div class="carousel-item">
-        <img src="https://placehold.co/800x300?text=Banner+3" class="d-block w-100" alt="Promotional banner with various baby products and text indicating a 36% discount until 10/9/2024">
-       </div>
-      </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-       <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-       <span class="visually-hidden">Previous</span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-       <span class="carousel-control-next-icon" aria-hidden="true"></span>
-       <span class="visually-hidden">Next</span>
-      </button>
+    <div class="col-md-10">
+     <h2 class="my-4">
+      Tất cả sản phẩm
+     </h2>
+     <div class="d-flex justify-content-end mb-3">
+      <select class="form-select w-auto">
+       <option selected="">
+        Mặc định
+       </option>
+       <option value="1">
+        Giá tăng dần
+       </option>
+       <option value="2">
+        Giá giảm dần
+       </option>
+       <option value="3">
+        Mới nhất
+       </option>
+      </select>
      </div>
-     <div class="info-section">
-      <div class="info-item">
-       <i class="fas fa-shipping-fast">
-       </i>
-       <span>
-        Giao hoả tốc
-        <br/>
-        Nội thành TP. HCM trong 4h
-       </span>
+     <div class="row">
+      <div class="col-md-3 col-sm-6">
+       <div class="product-card">
+        <img alt="Tã dán Merries size L 54 miếng (9-14kg)" height="200" src="https://storage.googleapis.com/a1aa/image/6DYfwxao46zlYiXLTgxo9PAgZaThyw3u5wf7iFVJIq17MeNoA.jpg" width="200"/>
+        <p>
+         Tã dán Merries size L 54 miếng (9-14kg)
+        </p>
+        <div class="rating">
+         <i class="fas fa-star">
+         </i>
+         <i class="fas fa-star">
+         </i>
+         <i class="fas fa-star">
+         </i>
+         <i class="fas fa-star">
+         </i>
+         <i class="fas fa-star-half-alt">
+         </i>
+        </div>
+        <p class="price">
+         421.000đ
+        </p>
+        <div class="d-flex justify-content-between">
+         <button class="btn btn-outline-danger">
+          <i class="fas fa-shopping-cart">
+          </i>
+         </button>
+         <button class="btn btn-buy-now">
+          Mua ngay
+         </button>
+        </div>
+       </div>
       </div>
-      <div class="info-item">
-       <i class="fas fa-undo">
-       </i>
-       <span>
-        Đổi trả miễn phí
-        <br/>
-        Trong vòng 30 ngày miễn phí
-       </span>
+      <div class="col-md-3 col-sm-6">
+       <div class="product-card">
+        <img alt="Gối Cao Su Non Size To Cho Bé" height="200" src="https://storage.googleapis.com/a1aa/image/21fDmhXJ3BRDTqXpEzIu4zY3RADNwXDKvDMkqY7sXRoWGfGUA.jpg" width="200"/>
+        <p>
+         Gối Cao Su Non Size To Cho Bé
+        </p>
+        <div class="rating">
+         <i class="fas fa-star">
+         </i>
+         <i class="fas fa-star">
+         </i>
+         <i class="fas fa-star">
+         </i>
+         <i class="fas fa-star">
+         </i>
+         <i class="fas fa-star-half-alt">
+         </i>
+        </div>
+        <p class="price">
+         82.000đ
+        </p>
+        <div class="d-flex justify-content-between">
+         <button class="btn btn-outline-danger">
+          <i class="fas fa-shopping-cart">
+          </i>
+         </button>
+         <button class="btn btn-buy-now">
+          Mua ngay
+         </button>
+        </div>
+       </div>
       </div>
-      <div class="info-item">
-       <i class="fas fa-headset">
-       </i>
-       <span>
-        Hỗ trợ 24/7
-        <br/>
-        Hỗ trợ khách hàng 24/7
-       </span>
-      </div>
-      <div class="info-item">
-       <i class="fas fa-bolt">
-       </i>
-       <span>
-        Deal hot bùng nổ
-        <br/>
-        Flash sale giảm giá cực sốc
-       </span>
+      <div class="col-md-3 col-sm-6">
+       <div class="product-card">
+        <img alt="Chiếu điều hòa cao su non cho bé sơ sinh - 60x100cm" height="200" src="https://storage.googleapis.com/a1aa/image/UDmFTsEgEfUgSKLKezCIeMkdNk3BQYc6suTxTLL7QQndZ8NoA.jpg" width="200"/>
+        <p>
+         Chiếu điều hòa cao su non cho bé sơ sinh - 60x100cm
+        </p>
+        <div class="rating">
+         <i class="fas fa-star">
+         </i>
+         <i class="fas fa-star">
+         </i>
+         <i class="fas fa-star">
+         </i>
+         <i class="fas fa-star">
+         </i>
+         <i class="fas fa-star-half-alt">
+         </i>
+        </div>
+        <p class="price">
+         99.000đ
+        </p>
+        <div class="d-flex justify-content-between">
+         <button class="btn btn-outline-danger">
+          <i class="fas fa-shopping-cart">
+          </i>
+         </button>
+         <button class="btn btn-buy-now">
+          Mua ngay
+         </button>
+        </div>
+       </div>
       </div>
      </div>
     </div>
    </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" 
+ </body>
+</html>

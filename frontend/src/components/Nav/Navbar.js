@@ -29,11 +29,13 @@ import {
   FaBaby,
 } from "react-icons/fa";
 import "../../styles/Navbar.css";
+import { useNavigate } from "react-router-dom";
 
 const MyNavbar = () => {
-  const handleLinkClick = (page) => {
-    console.log(`Navigating to ${page}`);
- 
+  const navigate = useNavigate(); // Sử dụng hook useNavigate
+
+  const handleLinkClick = (path) => {
+    navigate(path); // Gọi navigate đúng cách
   };
 
   return (
@@ -43,9 +45,13 @@ const MyNavbar = () => {
         <Container>
           <Row className="w-100 align-items-center">
             {/* Phần trái - Logo */}
-            <Col xs={4} lg={3} className="pe-0">
+            <Col
+              xs={4}
+              lg={3}
+              className="pe-0"
+              onClick={() => handleLinkClick("/")}
+            >
               <Navbar.Brand
-                onClick={() => handleLinkClick("Trang Chủ")}
                 className="d-flex align-items-center"
                 style={{ cursor: "pointer" }}
               >
@@ -289,7 +295,10 @@ const MyNavbar = () => {
                   <Nav.Link href="/" className="text-dark">
                     TRANG CHỦ
                   </Nav.Link>
-                  <Nav.Link href="/products" className="text-dark">
+                  <Nav.Link
+                    onClick={() => handleLinkClick("/products")}
+                    className="text-dark"
+                  >
                     TẤT CẢ SẢN PHẨM
                   </Nav.Link>
                   <Nav.Link href="/promotions" className="text-dark">
@@ -342,12 +351,11 @@ const MyNavbar = () => {
           </Row>
         </Container>
       </Navbar>
-
       {/* Navbar bổ sung - Hiển thị trên màn hình lớn */}
       <Navbar expand="lg" className="bg-danger text-white d-none d-lg-block">
         <Container>
           <Navbar.Brand
-            onClick={() => handleLinkClick("Trang Chủ")}
+            onClick={() => handleLinkClick("/")}
             className="text-white me-4"
             style={{ cursor: "pointer" }}
           >
@@ -356,7 +364,7 @@ const MyNavbar = () => {
           <Navbar.Collapse id="navbarNav">
             <Nav className="me-auto mb-2 mb-lg-0">
               <Nav.Link
-                onClick={() => handleLinkClick("Tất Cả Sản Phẩm")}
+                onClick={() => handleLinkClick("/products")}
                 className="text-white me-3"
                 style={{ cursor: "pointer" }}
               >

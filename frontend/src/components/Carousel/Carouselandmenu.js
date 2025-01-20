@@ -204,6 +204,7 @@ const categories = [
   return (
     <Container className=" mt-1 mt-sm-1 mt-md-1 mt-lg-3 mt-xl-3  container_custom">
       <Row>
+        
         {/* Sidebar */}
         <Col xs={12} lg={3} className="d-none d-lg-block">
           <CategoryMenu categories={categories} />
@@ -214,14 +215,14 @@ const categories = [
           <Carousel id="carouselExampleIndicators" className="carousel-custom">
             <Carousel.Item>
               <img
-                src="https://bizweb.dktcdn.net/100/531/894/themes/976680/assets/home_slider_2.jpg?1737185932904"
+                src="https://bizweb.dktcdn.net/100/531/894/themes/976680/assets/home_slider_2.jpg"
                 className="d-block w-100"
                 alt="Banner 1"
               />
             </Carousel.Item>
             <Carousel.Item>
               <img
-                src="https://bizweb.dktcdn.net/100/531/894/themes/976680/assets/home_slider_1.jpg?1737185932904"
+                src="https://bizweb.dktcdn.net/100/531/894/themes/976680/assets/home_slider_1.jpg"
                 className="d-block w-100"
                 alt="Banner 2"
               />
@@ -229,6 +230,13 @@ const categories = [
             <Carousel.Item>
               <img
                 src="https://cdn1.concung.com/themes/images/2025/01/5/1736149668_image_title_pc.png"
+                className="d-block w-100"
+                alt="Banner 3"
+              />
+            </Carousel.Item>
+            <Carousel.Item>
+              <img
+                src="https://cdn1.concung.com/img/adds/2025/01/1736402117-banner-2400x906-1-.png"
                 className="d-block w-100"
                 alt="Banner 3"
               />
