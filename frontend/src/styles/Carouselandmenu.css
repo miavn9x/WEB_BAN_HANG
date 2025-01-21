@@ -65,7 +65,7 @@
 }
 
 .subcategory-item:hover {
-background-color: #FF6F91;
+    background-color: #FF6F91;
     color: white;
     border-radius: 7px;
 }
@@ -88,8 +88,13 @@ background-color: #FF6F91;
     box-shadow: 0 2px 12px #f8c8d0;
     border-radius: 8px;
     text-align: center;
-    padding: 15px;
+    padding: 5px 0px;
     transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    flex: 1 1 24%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 140px;
 }
 
 .info-section .info-item:hover {
@@ -98,16 +103,11 @@ background-color: #FF6F91;
 }
 
 .info-section .info-item .me-2 {
-    font-size: 24px;
+    font-size: 30px;
     color: #dc3545;
     margin-bottom: 10px;
 }
 
-.info-section .info-item span {
-    font-size: 16px;
-    color: #333;
-    line-height: 1.5;
-}
 
 @media (max-width: 768px) {
     .info-section .info-item {
@@ -128,6 +128,10 @@ background-color: #FF6F91;
         font-size: 14px;
     }
 }
+
+
+
+
 
 .info-item .card-body {
     display: flex;
@@ -150,3 +154,5 @@ background-color: #FF6F91;
     color: #333;
     font-weight: bold;
 }
+
+

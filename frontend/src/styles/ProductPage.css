@@ -1,0 +1,145 @@
+.filter-modal {
+    position: fixed;
+    right: 0;
+    top: 0;
+    margin: 0;
+    height: 100%;
+}
+
+.filter-modal .modal-dialog {
+    position: fixed;
+    right: 0;
+    top: 0;
+    margin: 0;
+    height: 100%;
+    width: 350px;
+    max-width: 100%;
+}
+
+.filter-modal .modal-content {
+    height: 100%;
+    border-radius: 0;
+}
+
+.filter-modal .modal-body {
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.filter-modal.fade .modal-dialog {
+    transform: translateX(100%);
+    transition: transform 0.3s ease-out;
+}
+
+.filter-modal.show .modal-dialog {
+    transform: translateX(0);
+}
+
+
+.filter-header {
+    width: 100%;
+    padding: 15px 0;
+}
+
+.product-title {
+    margin: 0;
+    font-weight: 600;
+}
+
+.filter-button {
+    padding: 6px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background: white;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.sort-dropdown {
+    min-width: 120px;
+}
+
+.sort-wrapper {
+    white-space: nowrap;
+}
+
+@media (max-width: 991.98px) {
+    .filter-header {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-title-wrapper {
+        text-align: center;
+    }
+
+    .product-title {
+        font-size: 1.25rem;
+    }
+
+    .filter-controls {
+        width: 100%;
+        padding: 0 15px;
+    }
+
+    .sort-dropdown {
+        font-size: 14px;
+        padding: 6px 10px;
+        min-width: 160px;
+    }
+}
+
+@media (min-width: 992px) {
+    .filter-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .product-title {
+        font-size: 1.5rem;
+    }
+
+    .filter-controls {
+        display: flex;
+        align-items: center;
+    }
+
+    .sort-dropdown {
+        min-width: 160px;
+        height: 38px;
+    }
+
+    .sort-label {
+        line-height: 38px;
+    }
+}
+
+.sort-wrapper .dropdown-toggle {
+    vertical-align: middle;
+}
+
+.sort-label {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* css nut close */
+.custom-close {
+    border: none;
+    background: none;
+    color: #bb2d3b;
+    font-size: 38px;
+    font-weight: bold;
+    position: absolute;
+    top: 0px !important;
+    right: 20px !important;
+    
+}
+
+.custom-close:hover {
+    color: #FF6F91;
+}
+
