@@ -1,0 +1,39 @@
+.banner-container {
+    text-align: center;
+}
+
+.banner-image {
+    width: 100%;
+    height: auto;
+    display: none;
+}
+
+@media (min-width: 1025px) {
+    .banner-pc {
+        display: block;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+
+    .banner-pc,
+    .banner-mobile {
+        display: none;
+    }
+
+    .banner-ipad {
+        display: block;
+    }
+}
+
+@media (max-width: 767px) {
+
+    .banner-pc,
+    .banner-ipad {
+        display: none;
+    }
+
+    .banner-mobile {
+        display: block;
+    }
+}

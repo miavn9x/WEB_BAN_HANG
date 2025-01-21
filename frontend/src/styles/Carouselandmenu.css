@@ -1,23 +1,17 @@
-/* Toàn bộ container */
 .container_custom {
 
     margin: 0 auto;
 }
-/* .CategoryMenu{
-    margin: 5px;
-} */
 
-/* Sidebar */
+
 .category-list {
     border: none;
     background-color: #f8f9fa;
-    box-shadow: 0 2px 8px #f8c8d0;
+    box-shadow: 2px 2px 8px #f8c8d0;
     border-radius: 8px;
     overflow: visible;
-    /* Đảm bảo menu con hiển thị ngoài */
 }
 
-/* Các mục trong sidebar */
 .category-list .list-group-item {
     font-size: 16px;
     padding: 12px 20px;
@@ -39,7 +33,6 @@
     margin-right: 8px;
 }
 
-/* Subcategory Menu */
 .category-item {
     position: relative;
 }
@@ -57,12 +50,10 @@
     height: auto;
     padding: 0cqmin 0;
     display: none;
-    /* Ẩn menu con mặc định */
 }
 
 .category-item:hover .subcategory-menu {
     display: block;
-    /* Hiển thị khi hover */
 }
 
 .subcategory-item {
@@ -92,7 +83,6 @@ background-color: #FF6F91;
     transform: scale(1.05);
 }
 
-/* Info Section */
 .info-section .info-item {
     background-color: #ffffff;
     box-shadow: 0 2px 12px #f8c8d0;
@@ -119,7 +109,6 @@ background-color: #FF6F91;
     line-height: 1.5;
 }
 
-/* Responsive Styles */
 @media (max-width: 768px) {
     .info-section .info-item {
         margin-bottom: 15px;
@@ -140,7 +129,6 @@ background-color: #FF6F91;
     }
 }
 
-/* Card Body (Căn chỉnh các phần tử InfoCard) */
 .info-item .card-body {
     display: flex;
     align-items: center;
