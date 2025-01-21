@@ -1,343 +1,215 @@
-<html>
+<html lang="en">
  <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>
-   Tất cả sản phẩm
+   Baby Mart EGA
   </title>
   <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
   <style>
    body {
-            background-color: #f5f5f5;
             font-family: Arial, sans-serif;
         }
-        .product-card {
-            border: 1px solid #eee;
-            border-radius: 5px;
-            padding: 10px;
+        .footer {
+            padding: 20px 0;
+            background-color: #f8f9fa;
+        }
+        .footer .logo img {
+            width: 50px;
+            height: 50px;
+        }
+        .footer .social-icons img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        .footer .payment-methods img {
+            width: 50px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        .footer .subscribe-btn {
+            background-color: #ff4081;
+            color: white;
+        }
+        .footer .subscribe-btn:hover {
+            background-color: #e91e63;
+        }
+        .footer .contact-info i {
+            margin-right: 5px;
+        }
+        .footer .contact-info a {
+            color: #ff4081;
+            text-decoration: none;
+        }
+        .footer .contact-info a:hover {
+            text-decoration: underline;
+        }
+        .footer .copyright {
             text-align: center;
-            background-color: #fff;
-            margin-bottom: 20px;
-        }
-        .product-card img {
-            max-width: 100%;
-            height: auto;
-        }
-        .product-card .price {
-            color: #ff0066;
-            font-weight: bold;
-        }
-        .product-card .old-price {
-            text-decoration: line-through;
-            color: #999;
-        }
-        .product-card .rating i {
-            color: #ffcc00;
-        }
-        .product-card .out-of-stock {
-            color: #ff0066;
-            font-weight: bold;
-        }
-        .sidebar {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .sidebar h5 {
-            font-weight: bold;
-        }
-        .pagination {
-            justify-content: center;
-        }
-        .btn-buy-now {
-            background-color: #ff0066;
-            color: #fff;
-            width: 48%;
-            font-size: 0.9rem;
-            padding: 5px;
-        }
-        .btn-outline-danger {
-            width: 48%;
-            font-size: 0.9rem;
-            padding: 5px;
+            margin-top: 20px;
         }
   </style>
  </head>
  <body>
-  <div class="container-fluid">
+  <div class="container footer">
    <div class="row">
-    <div class="col-md-2">
-     <div class="sidebar">
-      <h5>
-       Giá
-      </h5>
-      <div class="form-check">
-       <input class="form-check-input" id="price1" name="price" type="radio"/>
-       <label class="form-check-label" for="price1">
-        Giá dưới 1.000.000đ
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="price2" name="price" type="radio"/>
-       <label class="form-check-label" for="price2">
-        1.000.000đ - 2.000.000đ
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="price3" name="price" type="radio"/>
-       <label class="form-check-label" for="price3">
-        2.000.000đ - 3.000.000đ
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="price4" name="price" type="radio"/>
-       <label class="form-check-label" for="price4">
-        3.000.000đ - 5.000.000đ
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="price5" name="price" type="radio"/>
-       <label class="form-check-label" for="price5">
-        5.000.000đ - 7.000.000đ
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="price6" name="price" type="radio"/>
-       <label class="form-check-label" for="price6">
-        7.000.000đ - 10.000.000đ
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="price7" name="price" type="radio"/>
-       <label class="form-check-label" for="price7">
-        Trên 10.000.000đ
-       </label>
-      </div>
-      <h5>
-       Hãng sản xuất
-      </h5>
-      <div class="form-check">
-       <input class="form-check-input" id="brand1" type="checkbox"/>
-       <label class="form-check-label" for="brand1">
-        Agudha
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="brand2" type="checkbox"/>
-       <label class="form-check-label" for="brand2">
-        Aptamil
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="brand3" type="checkbox"/>
-       <label class="form-check-label" for="brand3">
-        Biminu
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="brand4" type="checkbox"/>
-       <label class="form-check-label" for="brand4">
-        Bobby
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="brand5" type="checkbox"/>
-       <label class="form-check-label" for="brand5">
-        CHREE
-       </label>
-      </div>
-      <a href="#">
-       Xem thêm &gt;
-      </a>
-      <h5>
-       Loại sản phẩm
-      </h5>
-      <div class="form-check">
-       <input class="form-check-input" id="type1" type="checkbox"/>
-       <label class="form-check-label" for="type1">
-        1.Đồ ăn uống
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="type2" type="checkbox"/>
-       <label class="form-check-label" for="type2">
-        10.Hàng ký gửi
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="type3" type="checkbox"/>
-       <label class="form-check-label" for="type3">
-        5.Hoa mỹ phẩm
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="type4" type="checkbox"/>
-       <label class="form-check-label" for="type4">
-        6.Sữa
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="type5" type="checkbox"/>
-       <label class="form-check-label" for="type5">
-        BE.TPCN Cho Bé
-       </label>
-      </div>
-      <a href="#">
-       Xem thêm &gt;
-      </a>
-      <h5>
-       Tags
-      </h5>
-      <div class="form-check">
-       <input class="form-check-input" id="tag1" type="checkbox"/>
-       <label class="form-check-label" for="tag1">
-        Flash Sale
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="tag2" type="checkbox"/>
-       <label class="form-check-label" for="tag2">
-        Giao Nhanh 2h
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="tag3" type="checkbox"/>
-       <label class="form-check-label" for="tag3">
-        Chính hãng
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="tag4" type="checkbox"/>
-       <label class="form-check-label" for="tag4">
-        Ngại nhập
-       </label>
-      </div>
-      <div class="form-check">
-       <input class="form-check-input" id="tag5" type="checkbox"/>
-       <label class="form-check-label" for="tag5">
-        Xả kho
-       </label>
-      </div>
+    <div class="col-md-3">
+     <div class="logo">
+      <img alt="Baby Mart Logo" height="50" src="https://storage.googleapis.com/a1aa/image/MdLwuiGffMoW7kfKtxEuQfyzrc2EzabZDB8tRHOcP9Alve5gC.jpg" width="50"/>
+      <span class="h5">
+       Baby Mart
+       <span class="badge bg-info text-dark">
+        EGA
+       </span>
+      </span>
+     </div>
+     <p>
+      Siêu thị Baby Mart EGA
+     </p>
+     <p>
+      Thương hiệu mẹ và bé uy tín và chất lượng, cam kết mang đến những trải nghiệm mua sắm tiện lợi, hiện đại và phong phú
+     </p>
+     <p>
+      Mã số thuế: 12345678999
+     </p>
+     <div class="contact-info">
+      <p>
+       <i class="fas fa-map-marker-alt">
+       </i>
+       Địa chỉ: 70 Lu Gia, District 11, Ho Chi Minh City
+      </p>
+      <p>
+       <i class="fas fa-phone">
+       </i>
+       Hotline:
+       <a href="tel:19006750">
+        19006750
+       </a>
+      </p>
+      <p>
+       <i class="fas fa-envelope">
+       </i>
+       Email:
+       <a href="mailto:support@sapo.vn">
+        support@sapo.vn
+       </a>
+      </p>
+     </div>
+     <div class="social-icons">
+      <img alt="Facebook Icon" height="30" src="https://storage.googleapis.com/a1aa/image/KBsRDdjVKDL1PxWErt0sCT1AX4UOeJTEBV5IzEDr7P7frPHUA.jpg" width="30"/>
+      <img alt="YouTube Icon" height="30" src="https://storage.googleapis.com/a1aa/image/nvqvqbtLqrbeD6IX0KCf2QZ55rrAB5O6oPlMiuGWnRKBsPHUA.jpg" width="30"/>
+      <img alt="TikTok Icon" height="30" src="https://storage.googleapis.com/a1aa/image/dFokUJA8tr4SGV1m659vpdIghGCkPmbASdPlOCfMF3KfrPHUA.jpg" width="30"/>
+      <img alt="Instagram Icon" height="30" src="https://storage.googleapis.com/a1aa/image/EYeSpbvVIzz5eE2AUclfXnccOCrsLOouaeFpbb8EqNFxve5gC.jpg" width="30"/>
+      <img alt="Twitter Icon" height="30" src="https://storage.googleapis.com/a1aa/image/GfLUWIKhNKxsdCoLeM3sKDLImNIQfl8oJM4peUI7995tve5gC.jpg" width="30"/>
      </div>
     </div>
-    <div class="col-md-10">
-     <h2 class="my-4">
-      Tất cả sản phẩm
-     </h2>
-     <div class="d-flex justify-content-end mb-3">
-      <select class="form-select w-auto">
-       <option selected="">
-        Mặc định
-       </option>
-       <option value="1">
-        Giá tăng dần
-       </option>
-       <option value="2">
-        Giá giảm dần
-       </option>
-       <option value="3">
-        Mới nhất
-       </option>
-      </select>
+    <div class="col-md-2">
+     <h5>
+      Hỗ trợ khách hàng
+     </h5>
+     <ul class="list-unstyled">
+      <li>
+       <a href="#">
+        Câu hỏi thường gặp
+       </a>
+      </li>
+      <li>
+       <a href="#">
+        Hệ thống cửa hàng
+       </a>
+      </li>
+      <li>
+       <a href="#">
+        Tìm kiếm
+       </a>
+      </li>
+      <li>
+       <a href="#">
+        Giới thiệu
+       </a>
+      </li>
+      <li>
+       <a href="#">
+        Liên hệ
+       </a>
+      </li>
+      <li>
+       <a href="#">
+        Chương trình cộng tác viên
+       </a>
+      </li>
+     </ul>
+    </div>
+    <div class="col-md-2">
+     <h5>
+      Chính sách
+     </h5>
+     <ul class="list-unstyled">
+      <li>
+       <a href="#">
+        Chính sách đổi trả
+       </a>
+      </li>
+      <li>
+       <a href="#">
+        Chính sách bảo mật
+       </a>
+      </li>
+      <li>
+       <a href="#">
+        Điều khoản dịch vụ
+       </a>
+      </li>
+     </ul>
+     <h5>
+      Tổng đài hỗ trợ
+     </h5>
+     <p>
+      Gọi mua hàng:
+      <a href="tel:19006750">
+       19006750
+      </a>
+      (8h-20h)
+     </p>
+     <p>
+      Gọi bảo hành:
+      <a href="tel:19006750">
+       19006750
+      </a>
+      (8h-20h)
+     </p>
+    </div>
+    <div class="col-md-3">
+     <h5>
+      Đăng ký nhận ưu đãi
+     </h5>
+     <p>
+      Bạn muốn nhận khuyến mãi đặc biệt? Đăng kí tham gia ngay cộng đồng hơn 68.000+ người theo dõi của chúng tôi để cập nhật khuyến mãi ngay lập tức
+     </p>
+     <div class="input-group mb-3">
+      <input class="form-control" placeholder="Email của bạn..." type="email"/>
+      <button class="btn subscribe-btn" type="button">
+       Đăng ký
+      </button>
      </div>
-     <div class="row">
-      <div class="col-md-3 col-sm-6">
-       <div class="product-card">
-        <img alt="Tã dán Merries size L 54 miếng (9-14kg)" height="200" src="https://storage.googleapis.com/a1aa/image/6DYfwxao46zlYiXLTgxo9PAgZaThyw3u5wf7iFVJIq17MeNoA.jpg" width="200"/>
-        <p>
-         Tã dán Merries size L 54 miếng (9-14kg)
-        </p>
-        <div class="rating">
-         <i class="fas fa-star">
-         </i>
-         <i class="fas fa-star">
-         </i>
-         <i class="fas fa-star">
-         </i>
-         <i class="fas fa-star">
-         </i>
-         <i class="fas fa-star-half-alt">
-         </i>
-        </div>
-        <p class="price">
-         421.000đ
-        </p>
-        <div class="d-flex justify-content-between">
-         <button class="btn btn-outline-danger">
-          <i class="fas fa-shopping-cart">
-          </i>
-         </button>
-         <button class="btn btn-buy-now">
-          Mua ngay
-         </button>
-        </div>
-       </div>
-      </div>
-      <div class="col-md-3 col-sm-6">
-       <div class="product-card">
-        <img alt="Gối Cao Su Non Size To Cho Bé" height="200" src="https://storage.googleapis.com/a1aa/image/21fDmhXJ3BRDTqXpEzIu4zY3RADNwXDKvDMkqY7sXRoWGfGUA.jpg" width="200"/>
-        <p>
-         Gối Cao Su Non Size To Cho Bé
-        </p>
-        <div class="rating">
-         <i class="fas fa-star">
-         </i>
-         <i class="fas fa-star">
-         </i>
-         <i class="fas fa-star">
-         </i>
-         <i class="fas fa-star">
-         </i>
-         <i class="fas fa-star-half-alt">
-         </i>
-        </div>
-        <p class="price">
-         82.000đ
-        </p>
-        <div class="d-flex justify-content-between">
-         <button class="btn btn-outline-danger">
-          <i class="fas fa-shopping-cart">
-          </i>
-         </button>
-         <button class="btn btn-buy-now">
-          Mua ngay
-         </button>
-        </div>
-       </div>
-      </div>
-      <div class="col-md-3 col-sm-6">
-       <div class="product-card">
-        <img alt="Chiếu điều hòa cao su non cho bé sơ sinh - 60x100cm" height="200" src="https://storage.googleapis.com/a1aa/image/UDmFTsEgEfUgSKLKezCIeMkdNk3BQYc6suTxTLL7QQndZ8NoA.jpg" width="200"/>
-        <p>
-         Chiếu điều hòa cao su non cho bé sơ sinh - 60x100cm
-        </p>
-        <div class="rating">
-         <i class="fas fa-star">
-         </i>
-         <i class="fas fa-star">
-         </i>
-         <i class="fas fa-star">
-         </i>
-         <i class="fas fa-star">
-         </i>
-         <i class="fas fa-star-half-alt">
-         </i>
-        </div>
-        <p class="price">
-         99.000đ
-        </p>
-        <div class="d-flex justify-content-between">
-         <button class="btn btn-outline-danger">
-          <i class="fas fa-shopping-cart">
-          </i>
-         </button>
-         <button class="btn btn-buy-now">
-          Mua ngay
-         </button>
-        </div>
-       </div>
-      </div>
+     <h5>
+      PHƯƠNG THỨC THANH TOÁN
+     </h5>
+     <div class="payment-methods">
+      <img alt="Visa Icon" height="30" src="https://storage.googleapis.com/a1aa/image/MjwtVTaFbsKeYaySylBKde4yBh9xbhTQpfEN75NB2AL6XfcQB.jpg" width="50"/>
+      <img alt="MasterCard Icon" height="30" src="https://storage.googleapis.com/a1aa/image/BPp8rmSHYf1GZKA9tRXlOeM1iYCJTolgKybQxuP2Wid6rPHUA.jpg" width="50"/>
+      <img alt="MoMo Icon" height="30" src="https://storage.googleapis.com/a1aa/image/cuXncYilEWLDAt9DnjWfVQrb84PgSC7SOJgB1vAsce9DsPHUA.jpg" width="50"/>
+      <img alt="ZaloPay Icon" height="30" src="https://storage.googleapis.com/a1aa/image/0N9RYF0MJU6PPBbtfcllBDuAGo8f05aF0ZcaaDJuJfZFYfcQB.jpg" width="50"/>
      </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-12">
+     <p class="copyright">
+      © Bản quyền thuộc về EGANY | Cung cấp bởi Sapo
+     </p>
     </div>
    </div>
   </div>

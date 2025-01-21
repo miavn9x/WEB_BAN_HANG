@@ -1,4 +1,4 @@
-import Carouselandmenu from "../Carousel/Carouselandmenu";
+// import Carouselandmenu from "../Carousel/Carouselandmenu";
 import MyNavbar from "../Nav/Navbar";
 
 const Header = () => {
@@ -7,9 +7,9 @@ const Header = () => {
       <div>
         <MyNavbar />
       </div>
-      <div>
+      {/* <div>
         <Carouselandmenu />
-      </div>
+      </div> */}
     </>
   );
 };

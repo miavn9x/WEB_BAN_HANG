@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Header from "./components/header/header";
 import ProductPage from "./components/Product/ProductPage";
 import "./styles/App.css";
+import Home from "./pages/Home";
 
 function App() {
   return (
@@ -16,8 +17,5 @@ function App() {
 }
 
 // Example Home component (you can define your own)
-function Home() {
-  return <div>Welcome to the Home Page</div>;
-}
 
 export default App;

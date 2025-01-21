@@ -56,10 +56,10 @@ const MyNavbar = () => {
                 style={{ cursor: "pointer" }}
               >
                 <img
-                  alt="Logo của bé đội mũ"
-                  src="https://storage.googleapis.com/a1aa/image/qzIhiJwb8PbmDVnu5zoheAQw6s01Y84KfJeEO7kL9oM2AvNoA.jpg"
+                  alt="Logo"
+                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1737451253/1_vmcjnj.png"
                   className="me-2"
-                  height="40"
+                  height="60"
                 />
                 <span className="logo-text">
                   <span className="text-danger fw-bold">Baby</span>
@@ -74,7 +74,7 @@ const MyNavbar = () => {
                 <div className="d-flex align-items-center ms-auto">
                   {/* Biểu tượng tài khoản người dùng */}
                   <Nav.Link
-                    onClick={() => handleLinkClick("Tài Khoản")}
+                    onClick={() => handleLinkClick("/tai-khoan")}
                     className="p-2 ms-2 icon-wrapper"
                     style={{ cursor: "pointer" }}
                   >
@@ -352,7 +352,11 @@ const MyNavbar = () => {
         </Container>
       </Navbar>
       {/* Navbar bổ sung - Hiển thị trên màn hình lớn */}
-      <Navbar expand="lg" className="bg-danger text-white d-none d-lg-block">
+      <Navbar
+        expand="lg"
+        className=" text-white d-none d-lg-block"
+        style={{ background: "#FFB6C1" }}
+      >
         <Container>
           <Navbar.Brand
             onClick={() => handleLinkClick("/")}

@@ -1,14 +1,17 @@
 /* Toàn bộ container */
 .container_custom {
-    max-width: 1200px;
+
     margin: 0 auto;
 }
+/* .CategoryMenu{
+    margin: 5px;
+} */
 
 /* Sidebar */
 .category-list {
     border: none;
     background-color: #f8f9fa;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px #f8c8d0;
     border-radius: 8px;
     overflow: visible;
     /* Đảm bảo menu con hiển thị ngoài */
@@ -27,7 +30,7 @@
 }
 
 .category-list .list-group-item:hover {
-    background-color: #dc3545;
+    background-color: #FF6F91;
     color: white;
 }
 
@@ -46,13 +49,13 @@
     top: 0;
     left: 100%;
     background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #f8c8d0;
+    border-radius: 7px;
+    box-shadow: 0 4px 8px #f8c8d0;
     z-index: 1000;
-    /* Đảm bảo menu con hiển thị trên các phần tử khác */
-    min-width: 200px;
-    padding: 8px 0;
+    min-width: 300px;
+    height: auto;
+    padding: 0cqmin 0;
     display: none;
     /* Ẩn menu con mặc định */
 }
@@ -63,7 +66,7 @@
 }
 
 .subcategory-item {
-    padding: 8px 15px;
+    padding: 12px 15px;
     color: #333;
     font-size: 14px;
     cursor: pointer;
@@ -71,8 +74,9 @@
 }
 
 .subcategory-item:hover {
-    background-color: #f8f9fa;
-    color: #dc3545;
+background-color: #FF6F91;
+    color: white;
+    border-radius: 7px;
 }
 
 /* Carousel */
@@ -91,7 +95,7 @@
 /* Info Section */
 .info-section .info-item {
     background-color: #ffffff;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 12px #f8c8d0;
     border-radius: 8px;
     text-align: center;
     padding: 15px;
@@ -100,7 +104,7 @@
 
 .info-section .info-item:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 20px #f8c8d0;
 }
 
 .info-section .info-item .me-2 {
