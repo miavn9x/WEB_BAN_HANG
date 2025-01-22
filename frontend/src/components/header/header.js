@@ -2,6 +2,7 @@
 import Banner from "../Nav/Banner";
 import MyNavbar from "../Nav/Navbar";
 
+
 const Header = () => {
   return (
     <>

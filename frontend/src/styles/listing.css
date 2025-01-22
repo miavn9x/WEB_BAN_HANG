@@ -1,0 +1,104 @@
+/* listing.css */
+.products__container {
+    display: grid;
+    gap: 8px!important;
+    width: 100%;
+    padding: 15px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+@media (min-width: 1270px) {
+    .products__container {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1269px) {
+    .products__container {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 15px;
+    }
+}
+
+/* Medium devices (768px - 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    .products__container {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+    }
+}
+
+/* Small devices (<768px) */
+@media (max-width: 767px) {
+    .products__container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 10px;
+    }
+}
+
+/* Styles for minimal screen size */
+@media (max-width: 375px) {
+    .products__container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 8px;
+    }
+}
+
+/* Container style */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.product__item {
+    width: 100%;
+    /* Đảm bảo item không rộng hơn column */
+    min-width: 0;
+    /* Ngăn item co lại nhỏ hơn container */
+}
+
+/* Đảm bảo ảnh không vượt quá kích thước container */
+.product__img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+}
+
+.product__img img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Đảm bảo text không tràn */
+.product__name {
+    word-wrap: break-word;
+}
+
+/* Responsive prices */
+.product__price {
+    flex-wrap: wrap;
+}
+
+@media (max-width: 576px) {
+    .product__item {
+        padding: 8px;
+    }
+
+    .product__name {
+        font-size: 12px !important;
+    }
+
+    .product__price__reduce {
+        font-size: 12px !important;
+    }
+
+    .product__price__increase {
+        font-size: 14px !important;
+    }
+}

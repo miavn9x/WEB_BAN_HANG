@@ -1,6 +1,10 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import { Link } from "react-router-dom";
+import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
+import { IoLogoTiktok } from "react-icons/io5";
+import "../../styles/Footer.css";
 
 const Footer = () => {
   return (
@@ -28,8 +32,8 @@ const Footer = () => {
             <p>Mã số thuế: 12345678999</p>
             <div className="contact-info">
               <p>
-                <i className="fas fa-map-marker-alt"></i> Địa chỉ: 70 Lu Gia,
-                District 11, Ho Chi Minh City
+                <i className="fas fa-map-marker-alt"></i> Địa chỉ: 12 Trịnh Đình Thảo,
+                Q. Tân Phú, Ho Chi Minh City
               </p>
               <p>
                 <i className="fas fa-phone"></i> Hotline:
@@ -81,6 +85,31 @@ const Footer = () => {
               <button className="btn text-primary p-0">19006750</button>
               (8h-20h)
             </p>
+            <div className="footer__social ">
+              <h5>Theo dõi chúng tôi</h5>
+              <ul className="footer__social-icons ">
+                <li>
+                  <Link to="https://www.facebook.com/tungmia9x">
+                    <FaFacebookF />
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/">
+                    <FaInstagram />
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/">
+                    <FaTwitter />
+                  </Link>
+                </li>
+                <li>
+                  <Link to="https://www.tiktok.com/@miavn9x?is_from_webapp=1&sender_device=pc">
+                    <IoLogoTiktok />
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </div>
 
           <div className="col-lg-3 col-md-6 col-sm-12 mb-4">

@@ -46,6 +46,11 @@
     font-weight: 600;
 }
 
+.filter-controls {
+    padding: 0!important;
+    margin: 0 !important;
+}
+
 .filter-button {
     padding: 6px 12px;
     border: 1px solid #dee2e6;
@@ -54,6 +59,7 @@
     font-size: 14px;
     display: flex;
     align-items: center;
+        transition: all 0.3s ease!important;
 }
 
 .sort-dropdown {
@@ -88,14 +94,19 @@
         padding: 6px 10px;
         min-width: 160px;
     }
+        .filter-button {
+            transition: all 0.3s ease !important;
+        }
 }
 
 @media (min-width: 992px) {
+    
     .filter-header {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
+        max-width: 100%;
     }
 
     .product-title {
@@ -115,8 +126,68 @@
     .sort-label {
         line-height: 38px;
     }
+        .filter-button {
+            transition: all 0.3s ease !important;
+        }
 }
 
+@media (max-width: 350px) {
+    .filter-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .product-title-wrapper {
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .product-title {
+        font-size: 1.2rem;
+        margin: 0;
+    }
+
+    .filter-controls {
+        width: 100%;
+        transition: all 0.3s ease !important;
+
+    }
+
+    .filter-controls>div {
+        flex-direction: column;
+    }
+
+    .filter-button {
+  transition: all 0.3s ease!important;
+    }
+
+    .sort-wrapper {
+        width: 100%;
+    }
+
+    .sort-dropdown {
+        width: 100%;
+    }
+
+    /* Căn giữa nút dropdown */
+    .dropdown-toggle {
+        width: 100%;
+        text-align: center !important;
+    }
+
+    /* Điều chỉnh menu dropdown */
+    .dropdown-menu {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .sidebar-wrapper {
+        display: none !important;
+    }
+}
 .sort-wrapper .dropdown-toggle {
     vertical-align: middle;
 }
@@ -126,7 +197,6 @@
     vertical-align: middle;
 }
 
-/* css nut close */
 .custom-close {
     border: none;
     background: none;

@@ -1,0 +1,32 @@
+.footer__social {
+    text-align: left;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+
+
+/* Container cho icons */
+.footer__social-icons {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Style cho từng icon */
+.footer__social-icons li a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #f5f5f5;
+    color: #666;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
