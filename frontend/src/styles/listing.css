@@ -57,12 +57,9 @@
 
 .product__item {
     width: 100%;
-    /* Đảm bảo item không rộng hơn column */
     min-width: 0;
-    /* Ngăn item co lại nhỏ hơn container */
 }
 
-/* Đảm bảo ảnh không vượt quá kích thước container */
 .product__img {
     width: 100%;
     height: auto;
@@ -75,12 +72,10 @@
     object-fit: contain;
 }
 
-/* Đảm bảo text không tràn */
 .product__name {
     word-wrap: break-word;
 }
 
-/* Responsive prices */
 .product__price {
     flex-wrap: wrap;
 }

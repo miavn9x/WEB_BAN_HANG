@@ -37,21 +37,22 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        `/api/auth/register/`,
         formData
       );
       setSuccess("Đăng ký thành công! Vui lòng đăng nhập.");
       setError(""); // Xóa thông báo lỗi
-      console.log(response.data); // Log thông tin người dùng mới
+      console.log("Đăng ký thành công:", response.data); // Log thông tin người dùng mới
 
-      // Điều hướng đến trang đăng nhập sau khi đăng ký thành công
       setTimeout(() => navigate("/login"), 2000); // Chuyển hướng sau 2 giây
     } catch (err) {
+      console.error("Lỗi đăng ký:", err.response?.data); // In chi tiết lỗi trả về từ server
       setError(err.response?.data?.message || "Đăng ký thất bại!");
       setSuccess(""); // Xóa thông báo thành công
     } finally {
       setLoading(false); // Tắt trạng thái loading
     }
+
   };
 
   return (

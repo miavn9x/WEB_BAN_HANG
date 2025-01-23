@@ -1,0 +1,81 @@
+.login__menu {
+    position: absolute;
+    top: 100%;
+  
+    z-index: 1000;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 31px !important;
+    width: 200px;
+    left: -85px!important;
+    border-radius: 2px!important;
+    
+}
+
+.login__menu .dropdown-item {
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.login__menu .dropdown-item:hover {
+    background-color: #F0A3B2;
+}
+
+.login__menu .dropdown-divider {
+    margin: 0;
+}
+
+.login__menu .dropdown-item:last-child {
+    background-color: #F0A3B2;
+    color: white;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 5px 0;
+}
+
+
+@media (min-width: 91px) and (max-width: 991px) {
+    .login__menu {
+        display: block !important;
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 80% !important;
+        max-width: 400px !important;
+    border-radius: 2px !important;
+        z-index: 1050 !important;
+        margin-top: 0 !important;
+    }
+
+    .login__menu .dropdown-item {
+        font-size: 16px !important;
+        padding: 10px 15px !important;
+    }
+
+    .login__menu .menu-item {
+        text-align: center !important;
+    }
+
+    .close-button {
+        position: absolute;
+        top: 0px ;
+        right: 0px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 24px;
+    }
+
+    .user-icon {
+        border: none !important;
+    }
+
+    .dropdown-menu {
+        border: none !important;
+    }
+
+}

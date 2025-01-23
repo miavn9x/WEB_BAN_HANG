@@ -3,6 +3,7 @@ import { Container, Form, Button } from "react-bootstrap";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../../../styles/Login.css";
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -12,14 +13,27 @@ const Login = () => {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Hook để chuyển hướng
-  const location = useLocation(); // Hook để lấy đường dẫn hiện tại
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    // Kiểm tra xem người dùng đã đăng nhập chưa
-    if (localStorage.getItem("token")) {
-      // Nếu có token, chuyển hướng đến trang dashboard
-      navigate("/dashboard");
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        if (decodedToken.exp * 1000 > Date.now()) {
+          navigate("/Error403");
+        } else {
+          localStorage.removeItem("token");
+          navigate("/login");
+        }
+      } catch (error) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+    } else {
+      navigate("/login");
     }
   }, [navigate]);
 
@@ -37,24 +51,19 @@ const Login = () => {
     setError("");
 
     try {
-      console.log("Đang gửi request đăng nhập với:", formData);
-
       const response = await axios.post(`/api/auth/login/`, formData, {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      console.log("Phản hồi từ server:", response.data);
-
       if (response.data.token) {
-        // Lưu thông tin vào localStorage
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.user));
+        localStorage.setItem("userRole", response.data.user.role);
 
-        // Lưu lại trang trước khi đăng nhập
-        const redirectTo = location.state?.from || "/"; // Lấy URL trước khi đăng nhập
-        navigate(redirectTo); // Chuyển hướng đến trang cũ
+        const redirectTo = location.state?.from || "/";
+        navigate(redirectTo);
       }
     } catch (err) {
       console.error("Chi tiết lỗi:", err.response?.data);
@@ -67,7 +76,6 @@ const Login = () => {
     }
   };
 
-  // Thông báo tắt sau 2 giây
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
@@ -106,6 +114,7 @@ const Login = () => {
             onChange={handleChange}
             placeholder="Email"
             required
+            style={{ padding: "10px" }}
           />
         </Form.Group>
 
@@ -120,6 +129,7 @@ const Login = () => {
             onChange={handleChange}
             placeholder="Mật khẩu"
             required
+            style={{ padding: "10px" }}
           />
         </Form.Group>
 

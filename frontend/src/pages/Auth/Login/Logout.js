@@ -1,14 +1,13 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Logout = () => {
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    // Xóa token và thông tin user khỏi localStorage
+  const location = useLocation();   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    // Chuyển hướng về trang login
-    navigate("/login");
+
+    const previousPage = location.state?.from || "/";
+    navigate(previousPage); 
   };
 
   return (

@@ -85,6 +85,7 @@ const ResetPassword = () => {
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Nhập lại mật khẩu mới"
             required
+            style={{ padding: "10px" }}
           />
         </Form.Group>
 

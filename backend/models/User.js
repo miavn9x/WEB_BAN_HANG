@@ -28,46 +28,30 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user",
+      enum: ["user", "admin"], // Chỉ cho phép 'user' hoặc 'admin'
+      default: "user", // Mặc định là 'user'
     },
-    // Thêm các trường cho reset password
+    // Các trường hỗ trợ chức năng đặt lại mật khẩu
     resetPasswordToken: String,
     resetPasswordExpires: Date,
   },
   { timestamps: true }
 );
 
-// Middleware tự động hash password trước khi lưu
+// Middleware để tự động mã hóa mật khẩu trước khi lưu vào DB
 UserSchema.pre("save", async function (next) {
-  // Chỉ hash password khi nó được thay đổi
   if (!this.isModified("password")) return next();
 
   try {
-    // Tạo salt và hash password
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    const salt = await bcrypt.genSalt(10); // Tạo salt
+    this.password = await bcrypt.hash(this.password, salt); // Mã hóa mật khẩu
     next();
   } catch (error) {
     next(error);
   }
 });
-UserSchema.methods.comparePassword = async function (candidatePassword) {
-  try {
-    console.log("Comparing passwords:");
-    console.log("Candidate password length:", candidatePassword?.length);
-    console.log("Stored hash length:", this.password?.length);
 
-    const isMatch = await bcrypt.compare(candidatePassword, this.password);
-    console.log("Password comparison result:", isMatch);
-
-    return isMatch;
-  } catch (error) {
-    console.error("Password comparison error:", error);
-    throw error;
-  }
-};
-// Phương thức so sánh password
+// Phương thức so sánh mật khẩu khi đăng nhập
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   try {
     return await bcrypt.compare(candidatePassword, this.password);
@@ -76,12 +60,12 @@ UserSchema.methods.comparePassword = async function (candidatePassword) {
   }
 };
 
-// Không trả về thông tin nhạy cảm trong JSON
+// Không trả về các thông tin nhạy cảm trong JSON response
 UserSchema.methods.toJSON = function () {
   const userObject = this.toObject();
-  delete userObject.password;
-  delete userObject.resetPasswordToken;
-  delete userObject.resetPasswordExpires;
+  delete userObject.password; // Xóa mật khẩu
+  delete userObject.resetPasswordToken; // Xóa token reset password
+  delete userObject.resetPasswordExpires; // Xóa token hết hạn
   return userObject;
 };
 

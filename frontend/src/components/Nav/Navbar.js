@@ -1,73 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Navbar,
-  Nav,
-  Button,
-  Form,
-  FormControl,
-  Container,
-  Row,
-  Col,
-  Dropdown,
-  NavDropdown,
+  Navbar,Nav,Button,Form,FormControl,Container,Row,Col,Dropdown,NavDropdown,
 } from "react-bootstrap";
-import {
-  FaUser,
-  FaBell,
-  FaSearch,
-  FaShoppingCart,
-  FaStore,
-  FaPhone,
-  FaBabyCarriage,
-  FaGlassWhiskey,
-  FaTags,
-  FaPuzzlePiece,
-  FaHome,
-  FaTshirt,
-  FaCapsules,
-  FaUtensils,
-  FaBaby,
+import {FaUser,FaBell,FaSearch,FaShoppingCart,FaStore,FaPhone,FaBabyCarriage,FaGlassWhiskey,FaTags,FaPuzzlePiece,FaHome,FaTshirt,FaCapsules,FaUtensils,FaBaby,
 } from "react-icons/fa";
 import "../../styles/Navbar.css";
 import { useNavigate } from "react-router-dom";
+import LoginMenu from "../../pages/Auth/Login/LoginMenu";
 const categories = [
-  {
-    path: "sua-bot-cao-cap",
-    label: "Sữa bột cao cấp",
-    icon: <FaBabyCarriage />,
+  {path: "sua-bot-cao-cap",label: "Sữa bột cao cấp",icon: <FaBabyCarriage />,
   },
   { path: "sua-tuoi", label: "Sữa tươi dinh dưỡng", icon: <FaGlassWhiskey /> },
   { path: "bim-ta", label: "Bỉm & tã em bé", icon: <FaTags /> },
-  {
-    path: "do-choi-phat-trien",
-    label: "Đồ chơi phát triển",
-    icon: <FaPuzzlePiece />,
+  {path: "do-choi-phat-trien",label: "Đồ chơi phát triển",icon: <FaPuzzlePiece />,
   },
   { path: "cham-soc-me-be", label: "Chăm sóc mẹ và bé", icon: <FaHome /> },
-  {
-    path: "thoi-trang-me-be",
-    label: "Thời trang mẹ và bé",
-    icon: <FaTshirt />,
+  {path: "thoi-trang-me-be",label: "Thời trang mẹ và bé",icon: <FaTshirt />,
   },
-  {
-    path: "dinh-duong-ba-bau",
-    label: "Dinh dưỡng bà bầu",
-    icon: <FaCapsules />,
+  {path: "dinh-duong-ba-bau",label: "Dinh dưỡng bà bầu",icon: <FaCapsules />,
   },
   { path: "an-dam-cho-be", label: "Ăn dặm cho bé", icon: <FaUtensils /> },
-  {
-    path: "dinh-duong-cho-be",
-    label: "Dinh dưỡng cho bé",
-    icon: <FaCapsules />,
+  {path: "dinh-duong-cho-be",label: "Dinh dưỡng cho bé",icon: <FaCapsules />,
   },
   { path: "do-dung-thiet-yeu", label: "Đồ dùng thiết yếu", icon: <FaBaby /> },
 ];
 
 const NavMenu = [
   { path: "/", label: "TRANG CHỦ" },
-  { path: "/products", label: "TẤT CẢ SẢN PHẨM" }, 
+  { path: "/products", label: "TẤT CẢ SẢN PHẨM" },
   { path: "Giới Thiệu", label: "GIỚI THIỆU" },
   { path: "Bài Viết", label: "BÀI VIẾT" },
+  { path: "hệ thông cửa hàng", label: "Hệ thống cửa hàng"   },
+  { path: "Hotline", label: "Hotline: 099999998"   },
 ];
 
 const systemInfo = [
@@ -81,6 +45,48 @@ const MyNavbar = () => {
   const handleLinkClick = (path) => {
     navigate(path); // Gọi navigate đúng cách
   };
+  const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+    <div
+      ref={ref}
+      onClick={(e) => {
+        e.preventDefault();
+        onClick(e);
+      }}
+    >
+      {children}
+    </div>
+  ));
+
+ const [isMenuVisible, setIsMenuVisible] = useState(false);
+
+//  const handleOpenMenu = () => {
+//    setIsMenuVisible(true);
+//  };
+
+ const handleCloseMenu = () => {
+   setIsMenuVisible(false);
+ };
+
+ const isLoggedIn = !!localStorage.getItem("token");
+
+
+
+const [isLargeScreen, setIsLargeScreen] = useState(false);
+
+// Cập nhật trạng thái màn hình
+useEffect(() => {
+  const handleResize = () => {
+    setIsLargeScreen(window.innerWidth >= 991); // Kiểm tra nếu kích thước >= 991px
+  };
+
+  handleResize(); // Gọi ngay khi component được render
+  window.addEventListener("resize", handleResize); // Lắng nghe sự thay đổi kích thước
+
+  return () => window.removeEventListener("resize", handleResize); // Cleanup khi component bị huỷ
+}, []);
+
+
+
 
   return (
     <>
@@ -102,11 +108,11 @@ const MyNavbar = () => {
                 <img
                   alt="Logo"
                   src="https://res.cloudinary.com/div27nz1j/image/upload/v1737451253/1_vmcjnj.png"
-                  className="me-2"
+                  className="me-2 Logo_image"
                   height="60"
                 />
                 <span className="logo-text">
-                  <span className="text-danger fw-bold">Baby</span>
+                  <span className="text-danger fw-bold me-1">Baby</span>
                   <span className="text-primary fw-bold">Mart</span>
                 </span>
               </Navbar.Brand>
@@ -118,12 +124,37 @@ const MyNavbar = () => {
                 <div className="d-flex align-items-center ms-auto">
                   {/* Biểu tượng tài khoản người dùng */}
                   <Nav.Link
-                    onClick={() => handleLinkClick("/login")}
-                    className="p-1 pb-2 ms-2 icon-wrapper"
+                    className="pb-3 me-1 icon_user"
                     style={{ cursor: "pointer" }}
                   >
-                    <FaUser className="text-dark" size={20} />
+                    {isLoggedIn ? (
+                      <Dropdown
+                        show={isMenuVisible}
+                        onToggle={(isOpen) => setIsMenuVisible(isOpen)} // Sync the dropdown state
+                      >
+                        <Dropdown.Toggle
+                          as={CustomToggle} // Custom toggle without default styles
+                          id="dropdown-custom-components"
+                        >
+                          <FaUser size={20} className="user-icon logged-in" />
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu
+                          className="custom-dropdown-menu"
+                          style={{
+                            position: "absolute",
+                            zIndex: 1050, // Ensure it stays above other elements
+                          }}
+                        >
+                          <LoginMenu onClose={handleCloseMenu} />
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    ) : (
+                      <div onClick={() => navigate("/login")}>
+                        <FaUser size={20} className="user-icon" />
+                      </div>
+                    )}
                   </Nav.Link>
+
                   {/* Biểu tượng thông báo */}
                   <Nav.Link
                     onClick={() => handleLinkClick("/dang-xuat")}
@@ -187,7 +218,7 @@ const MyNavbar = () => {
 
                 {/* Form Tìm kiếm */}
                 <Form className="d-flex w-100">
-                  <div className="d-none d-lg-block me-2 ">
+                  <div className="d-none d-lg-block me-2 p-0">
                     <Dropdown>
                       <Dropdown.Toggle
                         variant="outline-secondary"
@@ -218,7 +249,7 @@ const MyNavbar = () => {
                   </div>
 
                   {/* Search Input */}
-                  <div className="search-container flex-grow-1">
+                  <div className="search-container flex-grow-1   ">
                     <FormControl
                       type="search"
                       placeholder="Tìm theo tên sản phẩm..."
@@ -253,13 +284,25 @@ const MyNavbar = () => {
             {/* Phần này - Các biểu tượng Chỉ hiển thị trên máy tính để bàn không hiện thị di động */}
             <Col lg={2} className="d-none d-lg-block">
               <Nav className="justify-content-end align-items-end">
+                {/* nút phân cần ghi login theo phân quyên tren pc */}
                 <Nav.Link
-                  onClick={() => handleLinkClick("/login")}
-                  className="pb-2 me-3 icon_user"
+                  className="pb-2 me-2 icon_user"
                   style={{ cursor: "pointer" }}
                 >
-                  <FaUser size={20} />
+                  {localStorage.getItem("token") ? (
+                    <Dropdown>
+                      <Dropdown.Toggle as={CustomToggle}>
+                        <FaUser size={20} className="user-icon logged-in" />
+                      </Dropdown.Toggle>
+                      <LoginMenu />
+                    </Dropdown>
+                  ) : (
+                    <div onClick={() => navigate("/login")}>
+                      <FaUser size={20} className="user-icon" />
+                    </div>
+                  )}
                 </Nav.Link>
+
                 <Nav.Link
                   onClick={() => handleLinkClick("/dang-xuat")}
                   className=" me-3 position-relative"
@@ -308,17 +351,21 @@ const MyNavbar = () => {
                 ))}
               </NavDropdown>
             ) : (
-              <Nav.Link
-                key={index}
-                onClick={() => handleLinkClick(link.path)}
-                className="text-white me-4 nav-link"
-                style={{ cursor: "pointer" }}
-              >
-                {link.label}
-              </Nav.Link>
+              // Kiểm tra điều kiện hiển thị
+              (!isLargeScreen ||
+                (link.path !== "hệ thông cửa hàng" &&
+                  link.path !== "Hotline")) && (
+                <Nav.Link
+                  key={index}
+                  onClick={() => handleLinkClick(link.path)}
+                  className="text-white me-4 nav-link"
+                  style={{ cursor: "pointer" }}
+                >
+                  {link.label}
+                </Nav.Link>
+              )
             )
           )}
-
           {/* Chương trình khuyến mãi - Viết riêng ngoài mảng */}
           <div className="d-flex align-items-center Nav__sale">
             <NavDropdown

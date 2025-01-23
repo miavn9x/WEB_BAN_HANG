@@ -61,6 +61,7 @@ const ForgotPassword = () => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             required
+            style={{padding: "10px 12px"}}
           />
         </Form.Group>
 

@@ -10,10 +10,10 @@
     padding: 2px 5px;
     border-radius: 50%;
     transition: all 0.3s ease;
-    /* Hover mượt mà */
 }
 
 .search-container {
+    padding: 0!important;
     position: relative;
     display: flex;
 }
@@ -27,7 +27,6 @@
     background-color: #FFB6C1 !important;
     border: 0px solid !important;
     transition: all 0.3s ease;
-    /* Hover mượt mà */
 }
 
 .search-button:hover {
@@ -39,20 +38,17 @@
     color: white !important;
     border-radius: 7px;
     transition: all 0.3s ease;
-    /* Hover mượt mà */
 }
 
 .nav-link {
     font-weight: bold !important;
     transition: color 0.3s ease;
-    /* Hover mượt mà */
 }
 
 .nav-link:hover {
     color: #FF6F91 !important;
 }
 
-/* Đặt khoảng cách cho NavDropdown */
 .promotion-dropdown {
     position: relative !important;
 }
@@ -64,7 +60,6 @@
     padding: 0 !important;
     border-radius: 7px !important;
     transition: all 0.3s ease;
-    /* Hover mượt mà */
 }
 
 @media (max-width: 1159px) {
@@ -73,31 +68,56 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         width: 240px !important;
         transition: all 0.3s ease;
-        /* Hover mượt mà */
+
     }
 }
+
+@media (max-width: 1107px) {
+    .promotion-dropdown .dropdown-menu {
+        margin-top: 19px !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 240px !important;
+        transition: all 0.3s ease;
+
+    }
+}
+
+@media (max-width: 2400px) {
+    .promotion-dropdown .dropdown-menu {
+        margin-top: 13px !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 240px !important;
+        transition: all 0.3s ease;
+
+    }
+}
+@media (max-width: 1502px) {
+    .promotion-dropdown .dropdown-menu {
+        margin-top: 16px !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 240px !important;
+        transition: all 0.3s ease;
+
+    }
+}
+
 
 .promotion-dropdown-item {
     padding: 10px 15px !important;
     margin: 0 !important;
     transition: all 0.3s ease;
-    /* Hover mượt mà */
 }
 
 .promotion-dropdown-item:hover {
     background-color: #FFB6C1 !important;
     color: white !important;
     transform: translateY(-2px);
-    /* Hiệu ứng đẩy nhẹ */
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    /* Đổ bóng khi hover */
 }
 
-/* Đặt kiểu cho Dropdown Toggle */
 .dropdown-toggle {
     border-radius: 7px !important;
     transition: background-color 0.3s ease, color 0.3s ease;
-    /* Hover mượt mà */
 }
 
 .dropdown-toggle:hover {
@@ -111,14 +131,12 @@
     padding: 0 !important;
     border-radius: 1px !important;
     transition: all 0.3s ease;
-    /* Hover mượt mà */
 }
 
 .dropdown-item {
     padding: 10px 15px !important;
     margin: 0 !important;
     transition: all 0.3s ease;
-    /* Hover mượt mà */
 }
 .icon_user{
 margin-bottom: 2px!important;}
@@ -128,5 +146,66 @@ margin-bottom: 2px!important;}
     border-radius: 1px !important;
     transition: all 0.3s ease;
     color: #000000 !important;
-    /* Hover mût mà */
+}
+
+.icon_user {
+    position: relative;
+}
+
+.icon_user .user-icon {
+    color: #575757;
+    transition: color 0.3s ease;
+}
+
+.icon_user .user-icon.logged-in {
+    color: #ff69b4;
+}
+
+.icon_user .dropdown-toggle {
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.icon_user .dropdown-toggle::after {
+    display: none;
+}
+
+.icon_user .dropdown-toggle:focus {
+    box-shadow: none;
+}
+
+.icon_user .dropdown-menu {
+    margin-top: 8px;
+}
+
+
+@media (max-width: 992px) {
+    .icon_user {
+                top: 3px !important;
+        }
+}
+
+@media (max-width: 350px) {
+    .logo-text{
+        opacity: 0 !important;
+
+    }
+}
+
+@media (max-width: 200px) {
+    .Logo_image {
+        opacity: 0 !important;
+
+    }
+}
+
+@media screen and (min-width: 991px) {
+    .desktop-hidden {
+        display: none !important;
+    }
+}
+
+html body .nav-link {
+    font-size: clamp(14px, calc(14px + (18 - 14) * ((85vw - 992px) / (1400 - 992))), 20px);
 }
