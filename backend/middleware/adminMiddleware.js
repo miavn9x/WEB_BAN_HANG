@@ -1,31 +1,34 @@
-// middleware/adminMiddleware.js
-const jwt = require("jsonwebtoken");
+// adminMiddleware.js
+const jwt = require("jsonwebtoken"); // Thêm dòng này nếu chưa có
 
 const adminMiddleware = (req, res, next) => {
-  const token =
-    req.headers.authorization && req.headers.authorization.split(" ")[1];
-
-  if (!token) {
-    return res.status(403).json({
-      message: "Token is required for access",
-    });
-  }
-
   try {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({
+        message: "Không tìm thấy token xác thực",
+      });
+    }
+
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET || "your-secret-key"
     );
-    req.user = decoded;
-    if (req.user.role !== "admin") {
+    console.log("Decoded token:", decoded); // Thêm logging
+
+    if (!decoded || decoded.role !== "admin") {
       return res.status(403).json({
-        message: "Bạn không có quyền truy cập vào route này.",
+        message: "Bạn không có quyền truy cập",
       });
     }
-    next(); // Cho phép tiếp tục nếu người dùng là admin
+
+    req.user = decoded;
+    next();
   } catch (error) {
-    res.status(401).json({
-      message: "Token không hợp lệ hoặc đã hết hạn.",
+    console.error("Token verification error:", error); // Thêm logging
+    return res.status(401).json({
+      message: "Token không hợp lệ hoặc đã hết hạn",
     });
   }
 };

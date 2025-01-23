@@ -37,7 +37,7 @@ const LoginMenu = ({ onClose }) => {
             <div className="d-lg-block d-lg-none">
               <Dropdown.Item>&nbsp;&nbsp;</Dropdown.Item>
             </div>
-            <Dropdown.Item onClick={() => navigate("/thong-tin-ca-nhan")}>
+            <Dropdown.Item onClick={() => navigate("/admin/user-management")}>
               Thông tin tài khoản
             </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/danh-sach-yeu-thich")}>

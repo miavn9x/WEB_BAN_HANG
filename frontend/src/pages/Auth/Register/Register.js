@@ -88,6 +88,7 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Họ"
             required
+            style={{ padding: "10px" }}
           />
         </Form.Group>
 
@@ -102,6 +103,7 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Tên"
             required
+            style={{ padding: "10px" }}
           />
         </Form.Group>
 
@@ -116,6 +118,7 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Số điện thoại"
             required
+            style={{ padding: "10px" }}
           />
         </Form.Group>
 
@@ -130,6 +133,7 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Email"
             required
+            style={{ padding: "10px" }}
           />
         </Form.Group>
 
@@ -144,6 +148,7 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Mật khẩu"
             required
+            style={{ padding: "10px" }}
           />
         </Form.Group>
 

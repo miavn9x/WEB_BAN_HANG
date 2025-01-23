@@ -4,7 +4,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const authRoutes = require("./routes/routesauth");
-
+const User = require("./models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -23,6 +25,12 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
+
+
+const userRoutes = require("./routes/userRoutes"); // Import routes
+
+app.use("/api", userRoutes);
+
 
 
 // Chạy server

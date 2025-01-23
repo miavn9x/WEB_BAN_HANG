@@ -17,6 +17,7 @@ import { jwtDecode } from "jwt-decode";
 import React from "react";
 import QuantityBox from "./components/Product/QuantityBox";
 import LoginMenu from "./pages/Auth/Login/LoginMenu";
+import AccountList from "./pages/Auth/AccountList/AccountList";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
@@ -74,7 +75,7 @@ function App() {
               requiredRole="admin"
             >
               <Routes>
-                <Route path="user-management" element={<QuantityBox />} />
+                <Route path="user-management" element={<AccountList />} />
                 <Route path="add-product" element={<AddProduct />} />
                 {/* Các route khác dành cho admin */}
               </Routes>
