@@ -1,0 +1,55 @@
+.login-container {
+    max-width: 400px;
+    margin: 48px auto;
+    padding: 0 16px;
+}
+
+.login-title {
+    font-size: 24px;
+    margin-bottom: 16px;
+}
+
+.register-text {
+    margin-bottom: 24px;
+}
+
+.login-form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.login-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #ffc0cb !important;
+    border: none !important;
+    border-radius: 25px !important;
+    font-weight: 500;
+}
+
+.login-button:hover {
+    background-color: #ffb6c1 !important;
+}
+
+.forgot-password a {
+    color: #333;
+    text-decoration: none;
+}
+
+.forgot-password a:hover {
+    text-decoration: underline;
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+.form-control {
+    padding: 10px;
+}
+
+.form-control:focus {
+    border-color: #ffc0cb;
+    box-shadow: 0 0 0 0.2rem rgba(255, 192, 203, 0.25);
+}

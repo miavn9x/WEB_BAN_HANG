@@ -118,7 +118,7 @@ const MyNavbar = () => {
                 <div className="d-flex align-items-center ms-auto">
                   {/* Biểu tượng tài khoản người dùng */}
                   <Nav.Link
-                    onClick={() => handleLinkClick("/tai-khoan")}
+                    onClick={() => handleLinkClick("/login")}
                     className="p-1 pb-2 ms-2 icon-wrapper"
                     style={{ cursor: "pointer" }}
                   >
@@ -126,7 +126,7 @@ const MyNavbar = () => {
                   </Nav.Link>
                   {/* Biểu tượng thông báo */}
                   <Nav.Link
-                    onClick={() => handleLinkClick("Thông Báo")}
+                    onClick={() => handleLinkClick("/dang-xuat")}
                     className="p-1 ms-2 position-relative icon-wrapper"
                     style={{ cursor: "pointer" }}
                   >
@@ -254,14 +254,14 @@ const MyNavbar = () => {
             <Col lg={2} className="d-none d-lg-block">
               <Nav className="justify-content-end align-items-end">
                 <Nav.Link
-                  onClick={() => handleLinkClick("Tài Khoản")}
+                  onClick={() => handleLinkClick("/login")}
                   className="pb-2 me-3 icon_user"
-                  style={{ cursor: "pointer", }}
+                  style={{ cursor: "pointer" }}
                 >
                   <FaUser size={20} />
                 </Nav.Link>
                 <Nav.Link
-                  onClick={() => handleLinkClick("Thông Báo")}
+                  onClick={() => handleLinkClick("/dang-xuat")}
                   className=" me-3 position-relative"
                   style={{ cursor: "pointer" }}
                 >
@@ -320,25 +320,26 @@ const MyNavbar = () => {
           )}
 
           {/* Chương trình khuyến mãi - Viết riêng ngoài mảng */}
-          <NavDropdown
-            title="Chương trình khuyến mãi"
-            id="navbarDropdown-promotion"
-            className="promotion-dropdown text-white me-5"
-          >
-            <NavDropdown.Item
-              onClick={() => handleLinkClick("Khuyến Mãi 1")}
-              className="promotion-dropdown-item"
+          <div className="d-flex align-items-center Nav__sale">
+            <NavDropdown
+              title="KHUYẾN MÃI"
+              id="navbarDropdown-promotion"
+              className="promotion-dropdown text-white"
             >
-              Khuyến mãi 1
-            </NavDropdown.Item>
-            <NavDropdown.Item
-              onClick={() => handleLinkClick("Khuyến Mãi 2")}
-              className="promotion-dropdown-item"
-            >
-              Khuyến mãi 2
-            </NavDropdown.Item>
-          </NavDropdown>
-
+              <NavDropdown.Item
+                onClick={() => handleLinkClick("Khuyến Mãi 1")}
+                className="promotion-dropdown-item"
+              >
+                Khuyến mãi 1
+              </NavDropdown.Item>
+              <NavDropdown.Item
+                onClick={() => handleLinkClick("Khuyến Mãi 2")}
+                className="promotion-dropdown-item"
+              >
+                Khuyến mãi 2
+              </NavDropdown.Item>
+            </NavDropdown>
+          </div>
           <Navbar.Collapse id="navbarNav">
             <Nav className="me-auto mb-2 mb-lg-0">
               {/* Các mục điều hướng khác */}

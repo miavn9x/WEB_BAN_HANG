@@ -122,3 +122,11 @@
 }
 .icon_user{
 margin-bottom: 2px!important;}
+.Nav__sale{
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 1px !important;
+    transition: all 0.3s ease;
+    color: #000000 !important;
+    /* Hover mût mà */
+}
