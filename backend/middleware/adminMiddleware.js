@@ -1,36 +1,35 @@
-// adminMiddleware.js
-const jwt = require("jsonwebtoken"); // Thêm dòng này nếu chưa có
+const jwt = require("jsonwebtoken");
 
-const adminMiddleware = (req, res, next) => {
+// Lấy secret từ file .env
+const { JWT_SECRET } = process.env;
+
+// Kiểm tra nếu JWT_SECRET không tồn tại
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET không được cấu hình trong môi trường.");
+}
+
+// Middleware kiểm tra token
+const authMiddleware = (req, res, next) => {
+  const token = req.header("Authorization")?.split(" ")[1];
+
+  if (!token) {
+    return res
+      .status(401)
+      .json({ message: "Không tìm thấy token. Vui lòng đăng nhập." });
+  }
+
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-
-    if (!token) {
-      return res.status(401).json({
-        message: "Không tìm thấy token xác thực",
-      });
-    }
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "your-secret-key"
-    );
-    console.log("Decoded token:", decoded); // Thêm logging
-
-    if (!decoded || decoded.role !== "admin") {
-      return res.status(403).json({
-        message: "Bạn không có quyền truy cập",
-      });
-    }
+    const decoded = jwt.verify(token, JWT_SECRET);
 
     req.user = decoded;
+
     next();
-  } catch (error) {
-    console.error("Token verification error:", error); // Thêm logging
-    return res.status(401).json({
-      message: "Token không hợp lệ hoặc đã hết hạn",
+  } catch (err) {
+    // console.error("Lỗi xác thực token:", err);
+    res.status(401).json({
+      message: "Token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.",
     });
   }
 };
 
-module.exports = adminMiddleware;
+module.exports = authMiddleware;

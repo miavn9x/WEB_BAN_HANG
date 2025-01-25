@@ -209,3 +209,4 @@ margin-bottom: 2px!important;}
 html body .nav-link {
     font-size: clamp(14px, calc(14px + (18 - 14) * ((85vw - 992px) / (1400 - 992))), 20px);
 }
+

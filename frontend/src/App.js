@@ -1,72 +1,94 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"; // Không dùng alias ở đây.
 import Header from "./components/header/header";
-import ProductPage from "./components/Product/ProductPage";
-import Home from "./pages/Home";
 import Listing from "./components/Product/listing";
-import ProductItem from "./components/Product/ProductItem";
 import Login from "./pages/Auth/Login/Login";
 import Register from "./pages/Auth/Register/Register";
-import ForgotPassword from "./pages/Auth/ForgotPassword/ForgotPassword";
-import ResetPassword from "./pages/Auth/ForgotPassword/ResetPassword";
-import Logout from "./pages/Auth/Login/Logout";
+import PrivateRoute from "./components/PrivateRoute";
 import Error403 from "./components/Error403/Error403";
-import PrivateRoute from "./components/PrivateRoute"; // Import PrivateRoute
 import "./styles/App.css";
 import AddProduct from "./components/Product/AddProduct";
 import { jwtDecode } from "jwt-decode";
-import React from "react";
-import QuantityBox from "./components/Product/QuantityBox";
-import LoginMenu from "./pages/Auth/Login/LoginMenu";
+import React, { useEffect, useState } from "react";
 import AccountList from "./pages/Auth/AccountList/AccountList";
+import Footer from "./components/Footer/Footer";
+import UserPage from "./pages/Auth/AccountList/UserPage";
+import Home from "./pages/Home";
+import ForgotPassword from "./pages/Auth/ForgotPassword/ForgotPassword";
+import ResetPassword from "./pages/Auth/ForgotPassword/ResetPassword";
+import ProductPage from "./components/Product/ProductPage";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const [userRole, setUserRole] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  React.useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        // Giải mã token nhưng không lưu thông tin vào biến decoded nếu không cần thiết
-        jwtDecode(token);
-        setIsAuthenticated(true);
-      } catch (error) {
-        localStorage.removeItem("token");
-        setIsAuthenticated(false);
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const decoded = jwtDecode(token);
+          setUserRole(decoded.role);
+          setIsAuthenticated(true);
+        } catch (error) {
+          localStorage.removeItem("token");
+          setUserRole(null);
+          setIsAuthenticated(false);
+        }
       }
-    }
+    };
+
+    checkAuth();
   }, []);
 
   return (
-    <Router>
-      <Header />
+    <BrowserRouter>
+      <Header userRole={userRole} isAuthenticated={isAuthenticated} />
       <Routes>
-        {/* Các Route công khai */}
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/products" element={<ProductPage />} />
-        <Route path="/t" element={<ProductItem />} />
         <Route path="/danh-sach-san-pham" element={<Listing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/ForgotPassword" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/dang-xuat" element={<Logout />} />
-        <Route path="/menu-login" element={<LoginMenu />} />
-
-        {/* Các Route bảo vệ cho cả user và admin */}
+        <Route path="/products" element={<ProductPage/>} />
+        <Route path="/danh-sach-san-pham" element={<Listing />} />
+        {/* Protected Routes - User & admin */}
         <Route
-          path="/user-or-admin/*"
+          path="/thong-tin-ca-nhan"
           element={
-            <PrivateRoute isAuthenticated={isAuthenticated} requiredRole="user">
-              <Routes>
-                <Route path="user-dashboard" element={<QuantityBox />} />
-                <Route path="user-products" element={<ProductPage />} />
-                {/* Các route khác dành cho user */}
-              </Routes>
+            <PrivateRoute isAuthenticated={isAuthenticated}>
+              <UserPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/danh-sach-yeu-thich"
+          element={
+            <PrivateRoute isAuthenticated={isAuthenticated}>
+              {/* <Favorites /> */}
             </PrivateRoute>
           }
         />
 
-        {/* Các Route bảo vệ dành cho admin */}
+        <Route
+          path="/gio-hang"
+          element={
+            <PrivateRoute isAuthenticated={isAuthenticated}>
+              {/* <Cart /> */}
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/thanh-toan"
+          element={
+            <PrivateRoute isAuthenticated={isAuthenticated}>
+              {/* <Checkout /> */}
+            </PrivateRoute>
+          }
+        />
+
+        {/* Protected Routes - Admin */}
         <Route
           path="/admin/*"
           element={
@@ -77,16 +99,19 @@ function App() {
               <Routes>
                 <Route path="user-management" element={<AccountList />} />
                 <Route path="add-product" element={<AddProduct />} />
-                {/* Các route khác dành cho admin */}
+                {/* <Route path="edit-product" element={<ProductTable />} /> */}
               </Routes>
             </PrivateRoute>
           }
         />
 
-        {/* Route lỗi khi không có quyền truy cập */}
+        {/* Error Routes */}
         <Route path="/Error403" element={<Error403 />} />
+        <Route path="*" element={<Navigate to="/Error403" replace />} />
       </Routes>
-    </Router>
+
+      <Footer />
+    </BrowserRouter>
   );
 }
 

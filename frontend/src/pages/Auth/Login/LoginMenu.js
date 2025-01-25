@@ -37,13 +37,15 @@ const LoginMenu = ({ onClose }) => {
             <div className="d-lg-block d-lg-none">
               <Dropdown.Item>&nbsp;&nbsp;</Dropdown.Item>
             </div>
-            <Dropdown.Item onClick={() => navigate("/admin/user-management")}>
+            <Dropdown.Item onClick={() => navigate("/thong-tin-ca-nhan")}>
               Thông tin tài khoản
             </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/danh-sach-yeu-thich")}>
+            <Dropdown.Item
+              onClick={() => navigate("danh-sach-yeu-thich")}
+            >
               Sản phẩm yêu thích
             </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/")}>
+            <Dropdown.Item onClick={() => navigate("/san-pham-da-mua")}>
               Các sản phẩm đã mua
             </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/gio-hang")}>
@@ -65,10 +67,12 @@ const LoginMenu = ({ onClose }) => {
             <Dropdown.Item onClick={() => navigate("/thong-tin-ca-nhan")}>
               Thông tin tài khoản
             </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/danh-sach-yeu-thich")}>
+            <Dropdown.Item
+              onClick={() => navigate("/user/danh-sach-yeu-thich")}
+            >
               Sản phẩm yêu thích
             </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/")}>
+            <Dropdown.Item onClick={() => navigate("/user/san-pham-da-mua")}>
               Các sản phẩm đã mua
             </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/gio-hang")}>

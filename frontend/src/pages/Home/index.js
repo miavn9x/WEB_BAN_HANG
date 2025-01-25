@@ -1,5 +1,4 @@
 import CarouselAndMenu from "../../components/Carousel/Carouselandmenu";
-import Footer from "../../components/Footer/Footer";
 
 
 
@@ -9,7 +8,7 @@ const Home = () => {
       <CarouselAndMenu />
       {/* <ProductPage /> */}
       {/* <Product/> */}
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

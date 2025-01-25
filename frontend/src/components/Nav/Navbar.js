@@ -1,26 +1,65 @@
 import React, { useEffect, useState } from "react";
 import {
-  Navbar,Nav,Button,Form,FormControl,Container,Row,Col,Dropdown,NavDropdown,
+  Navbar,
+  Nav,
+  Button,
+  Form,
+  FormControl,
+  Container,
+  Row,
+  Col,
+  Dropdown,
+  NavDropdown,
 } from "react-bootstrap";
-import {FaUser,FaBell,FaSearch,FaShoppingCart,FaStore,FaPhone,FaBabyCarriage,FaGlassWhiskey,FaTags,FaPuzzlePiece,FaHome,FaTshirt,FaCapsules,FaUtensils,FaBaby,
+import {
+  FaUser,
+  FaBell,
+  FaSearch,
+  FaShoppingCart,
+  FaStore,
+  FaPhone,
+  FaBabyCarriage,
+  FaGlassWhiskey,
+  FaTags,
+  FaPuzzlePiece,
+  FaHome,
+  FaTshirt,
+  FaCapsules,
+  FaUtensils,
+  FaBaby,
 } from "react-icons/fa";
 import "../../styles/Navbar.css";
 import { useNavigate } from "react-router-dom";
 import LoginMenu from "../../pages/Auth/Login/LoginMenu";
 const categories = [
-  {path: "sua-bot-cao-cap",label: "Sữa bột cao cấp",icon: <FaBabyCarriage />,
+  {
+    path: "sua-bot-cao-cap",
+    label: "Sữa bột cao cấp",
+    icon: <FaBabyCarriage />,
   },
   { path: "sua-tuoi", label: "Sữa tươi dinh dưỡng", icon: <FaGlassWhiskey /> },
   { path: "bim-ta", label: "Bỉm & tã em bé", icon: <FaTags /> },
-  {path: "do-choi-phat-trien",label: "Đồ chơi phát triển",icon: <FaPuzzlePiece />,
+  {
+    path: "do-choi-phat-trien",
+    label: "Đồ chơi phát triển",
+    icon: <FaPuzzlePiece />,
   },
   { path: "cham-soc-me-be", label: "Chăm sóc mẹ và bé", icon: <FaHome /> },
-  {path: "thoi-trang-me-be",label: "Thời trang mẹ và bé",icon: <FaTshirt />,
+  {
+    path: "thoi-trang-me-be",
+    label: "Thời trang mẹ và bé",
+    icon: <FaTshirt />,
   },
-  {path: "dinh-duong-ba-bau",label: "Dinh dưỡng bà bầu",icon: <FaCapsules />,
+  {
+    path: "dinh-duong-ba-bau",
+    label: "Dinh dưỡng bà bầu",
+    icon: <FaCapsules />,
   },
   { path: "an-dam-cho-be", label: "Ăn dặm cho bé", icon: <FaUtensils /> },
-  {path: "dinh-duong-cho-be",label: "Dinh dưỡng cho bé",icon: <FaCapsules />,
+  {
+    path: "dinh-duong-cho-be",
+    label: "Dinh dưỡng cho bé",
+    icon: <FaCapsules />,
   },
   { path: "do-dung-thiet-yeu", label: "Đồ dùng thiết yếu", icon: <FaBaby /> },
 ];
@@ -30,8 +69,8 @@ const NavMenu = [
   { path: "/products", label: "TẤT CẢ SẢN PHẨM" },
   { path: "Giới Thiệu", label: "GIỚI THIỆU" },
   { path: "Bài Viết", label: "BÀI VIẾT" },
-  { path: "hệ thông cửa hàng", label: "Hệ thống cửa hàng"   },
-  { path: "Hotline", label: "Hotline: 099999998"   },
+  { path: "hệ thông cửa hàng", label: "Hệ thống cửa hàng" },
+  { path: "Hotline", label: "Hotline: 099999998" },
 ];
 
 const systemInfo = [
@@ -57,36 +96,31 @@ const MyNavbar = () => {
     </div>
   ));
 
- const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
 
-//  const handleOpenMenu = () => {
-//    setIsMenuVisible(true);
-//  };
+  //  const handleOpenMenu = () => {
+  //    setIsMenuVisible(true);
+  //  };
 
- const handleCloseMenu = () => {
-   setIsMenuVisible(false);
- };
-
- const isLoggedIn = !!localStorage.getItem("token");
-
-
-
-const [isLargeScreen, setIsLargeScreen] = useState(false);
-
-// Cập nhật trạng thái màn hình
-useEffect(() => {
-  const handleResize = () => {
-    setIsLargeScreen(window.innerWidth >= 991); // Kiểm tra nếu kích thước >= 991px
+  const handleCloseMenu = () => {
+    setIsMenuVisible(false);
   };
 
-  handleResize(); // Gọi ngay khi component được render
-  window.addEventListener("resize", handleResize); // Lắng nghe sự thay đổi kích thước
+  const isLoggedIn = !!localStorage.getItem("token");
 
-  return () => window.removeEventListener("resize", handleResize); // Cleanup khi component bị huỷ
-}, []);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
 
+  // Cập nhật trạng thái màn hình
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth >= 991); // Kiểm tra nếu kích thước >= 991px
+    };
 
+    handleResize(); // Gọi ngay khi component được render
+    window.addEventListener("resize", handleResize); // Lắng nghe sự thay đổi kích thước
 
+    return () => window.removeEventListener("resize", handleResize); // Cleanup khi component bị huỷ
+  }, []);
 
   return (
     <>
@@ -111,7 +145,7 @@ useEffect(() => {
                   className="me-2 Logo_image"
                   height="60"
                 />
-                <span className="logo-text">
+                <span className="logo-text fs-3">
                   <span className="text-danger fw-bold me-1">Baby</span>
                   <span className="text-primary fw-bold">Mart</span>
                 </span>
@@ -164,6 +198,7 @@ useEffect(() => {
                     <FaBell className="text-dark" size={20} />
                     <span className="notification-badge">0</span>
                   </Nav.Link>
+
                   {/* Biểu tượng giỏ hàng */}
                   <Nav.Link
                     onClick={() => handleLinkClick("Giỏ Hàng")}
@@ -189,12 +224,11 @@ useEffect(() => {
             <Col lg={7} xs={12} className="order-last order-lg-0">
               <Navbar.Collapse id="navbarSupportedContent">
                 {/* Danh mục cho di động */}
-
                 <div className="d-lg-none w-100 mb-3">
                   <Dropdown className="w-100">
                     <Dropdown.Toggle
                       variant="outline-secondary"
-                      className="w-100 text-start "
+                      className="w-100 text-start"
                     >
                       Danh mục sản phẩm
                     </Dropdown.Toggle>
@@ -249,7 +283,7 @@ useEffect(() => {
                   </div>
 
                   {/* Search Input */}
-                  <div className="search-container flex-grow-1   ">
+                  <div className="search-container flex-grow-1">
                     <FormControl
                       type="search"
                       placeholder="Tìm theo tên sản phẩm..."
@@ -305,7 +339,7 @@ useEffect(() => {
 
                 <Nav.Link
                   onClick={() => handleLinkClick("/dang-xuat")}
-                  className=" me-3 position-relative"
+                  className="me-3 position-relative"
                   style={{ cursor: "pointer" }}
                 >
                   <FaBell size={20} />
@@ -313,7 +347,7 @@ useEffect(() => {
                 </Nav.Link>
                 <Nav.Link
                   onClick={() => handleLinkClick("Giỏ Hàng")}
-                  className=" position-relative"
+                  className="position-relative"
                   style={{ cursor: "pointer" }}
                 >
                   <FaShoppingCart size={20} />
@@ -324,10 +358,11 @@ useEffect(() => {
           </Row>
         </Container>
       </Navbar>
+
       {/* Navbar bổ sung - Hiển thị trên màn hình lớn */}
       <Navbar
         expand="lg"
-        className=" text-white d-none d-lg-block"
+        className="text-white d-none d-lg-block"
         style={{ background: "#FFB6C1" }}
       >
         <Container>

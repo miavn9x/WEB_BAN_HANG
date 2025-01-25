@@ -1,33 +1,38 @@
-// middleware/authMiddleware.js
 const jwt = require("jsonwebtoken");
+const User = require("../models/User"); 
 
-const authMiddleware = (req, res, next) => {
-  // Kiểm tra nếu có header Authorization
-  const token =
-    req.headers.authorization && req.headers.authorization.split(" ")[1];
-
-  if (!token) {
-    return res.status(403).json({
-      message: "Token is required for access",
-    });
-  }
-
+const authMiddleware = async (req, res, next) => {
   try {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ message: "Không có token, quyền truy cập bị từ chối." });
+    }
+
     // Giải mã token
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET || "your-secret-key"
     );
 
-    // Lưu thông tin người dùng vào req.user
-    req.user = decoded;
+    const user = await User.findById(decoded.userId); 
+    if (!user) {
+      return res.status(404).json({ message: "Người dùng không tồn tại" });
+    }
 
-    // Cho phép truy cập tiếp
+    req.user = user;
+
     next();
   } catch (error) {
-    return res.status(401).json({
-      message: "Token không hợp lệ hoặc đã hết hạn.",
-    });
+    // console.error("Lỗi xác thực:", error);
+
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token đã hết hạn." });
+    }
+
+    return res.status(401).json({ message: "Token không hợp lệ hoặc bị lỗi." });
   }
 };
 

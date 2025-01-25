@@ -137,7 +137,7 @@ const Login = () => {
           <div className="text-dark text-decoration-none">
             Quên mật khẩu?&nbsp;
             <Link
-              to="/forgot-password"
+              to="/ForgotPassword"
               className="text-decoration-none"
               style={{ color: "#FF6F91" }}
             >

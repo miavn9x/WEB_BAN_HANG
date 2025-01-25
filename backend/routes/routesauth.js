@@ -1,25 +1,22 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken"); // Chỉ cần khai báo một lần ở đầu file
+const jwt = require("jsonwebtoken"); 
 const User = require("../models/User");
 const nodemailer = require("nodemailer");
 const { generateToken } = require("../middleware/auth");
-const adminMiddleware = require("../middleware/adminMiddleware"); // Import adminMiddleware
-
-// Đăng ký
+const adminMiddleware = require("../middleware/adminMiddleware"); 
+// Đăng ký neww
 router.post("/register", async (req, res) => {
   try {
     const { firstName, lastName, phone, email, password, role } = req.body;
-
-    // Kiểm tra dữ liệu đầu vào
     if (!firstName || !lastName || !phone || !email || !password) {
       return res.status(400).json({
         message: "Vui lòng điền đầy đủ thông tin",
       });
     }
 
-    // Kiểm tra email hoặc số điện thoại đã tồn tại chưa
+    // Kiểm tra email hoặc số điện thoại
     const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
     if (existingUser) {
       return res.status(400).json({
@@ -34,7 +31,7 @@ router.post("/register", async (req, res) => {
       phone,
       email,
       password,
-      role: role === "admin" ? "admin" : "user", // Phân quyền 'admin' hoặc 'user'
+      role: role === "admin" ? "admin" : "user",
     });
 
     const savedUser = await newUser.save();
@@ -88,7 +85,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Cấu hình nodemailer
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -97,57 +93,57 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Route quên mật khẩu
-router.post("/forgot-password", async (req, res) => {
-  try {
-    const { email } = req.body;
+// // Route quên mật khẩu
+// router.post("/forgot-password", async (req, res) => {
+//   try {
+//     const { email } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "Email không tồn tại!" });
-    }
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       return res.status(404).json({ message: "Email không tồn tại!" });
+//     }
 
-    const resetToken = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET || "your-secret-key",
-      { expiresIn: "1h" }
-    );
+//     const resetToken = jwt.sign(
+//       { userId: user._id },
+//       process.env.JWT_SECRET || "your-secret-key",
+//       { expiresIn: "1h" }
+//     );
 
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = Date.now() + 3600000;
-    await user.save();
+//     user.resetPasswordToken = resetToken;
+//     user.resetPasswordExpires = Date.now() + 3600000;
+//     await user.save();
 
-    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+//     const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: "Yêu cầu đặt lại mật khẩu",
-      html: `
-        <h1>Yêu cầu đặt lại mật khẩu</h1>
-        <p>Bạn nhận được email này vì bạn (hoặc ai đó) đã yêu cầu đặt lại mật khẩu.</p>
-        <p>Vui lòng click vào link dưới đây để đặt lại mật khẩu:</p>
-        <a href="${resetUrl}">${resetUrl}</a>
-        <p>Link này sẽ hết hạn sau 1 giờ.</p>
-        <p>Nếu bạn không yêu cầu việc này, vui lòng bỏ qua email này.</p>
-        <p>Xin cảm ơn.</p>
-      `,
-    };
+//     const mailOptions = {
+//       from: process.env.EMAIL_USER,
+//       to: user.email,
+//       subject: "Yêu cầu đặt lại mật khẩu",
+//       html: `
+//         <h1>Yêu cầu đặt lại mật khẩu</h1>
+//         <p>Bạn nhận được email này vì bạn (hoặc ai đó) đã yêu cầu đặt lại mật khẩu.</p>
+//         <p>Vui lòng click vào link dưới đây để đặt lại mật khẩu:</p>
+//         <a href="${resetUrl}">${resetUrl}</a>
+//         <p>Link này sẽ hết hạn sau 1 giờ.</p>
+//         <p>Nếu bạn không yêu cầu việc này, vui lòng bỏ qua email này.</p>
+//         <p>Xin cảm ơn.</p>
+//       `,
+//     };
 
-    await transporter.sendMail(mailOptions);
+//     await transporter.sendMail(mailOptions);
 
-    res.status(200).json({
-      success: true,
-      message:
-        "Chúng tôi đã gửi Email đặt lại mật khẩu cho bạn. Vui lòng kiểm tra email!",
-    });
-  } catch (error) {
-    console.error("Lỗi forgot password:", error);
-    res.status(500).json({
-      message: "Có lỗi xảy ra, vui lòng thử lại sau!",
-    });
-  }
-});
+//     res.status(200).json({
+//       success: true,
+//       message:
+//         "Chúng tôi đã gửi Email đặt lại mật khẩu cho bạn. Vui lòng kiểm tra email!",
+//     });
+//   } catch (error) {
+//     console.error("Lỗi forgot password:", error);
+//     res.status(500).json({
+//       message: "Có lỗi xảy ra, vui lòng thử lại sau!",
+//     });
+//   }
+// }); lỗi
 
 // Route reset password
 router.post("/reset-password/:token", async (req, res) => {
@@ -167,7 +163,7 @@ router.post("/reset-password/:token", async (req, res) => {
     }
 
     // Cập nhật mật khẩu
-    user.password = newPassword; // Schema sẽ tự động hash
+    user.password = newPassword; 
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
@@ -177,7 +173,7 @@ router.post("/reset-password/:token", async (req, res) => {
       message: "Đặt lại mật khẩu thành công",
     });
   } catch (error) {
-    console.error("Lỗi reset password:", error);
+    // console.error("Lỗi reset password:", error);
     res.status(500).json({ message: "Lỗi server" });
   }
 });

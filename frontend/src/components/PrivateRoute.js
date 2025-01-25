@@ -1,27 +1,26 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode"; 
+import { jwtDecode } from "jwt-decode";
 
-const PrivateRoute = ({ isAuthenticated, requiredRole, children }) => {
+const PrivateRoute = ({ children, requiredRole }) => {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" />;
   }
 
   try {
     const decodedToken = jwtDecode(token);
     const userRole = decodedToken.role;
 
-    if (isAuthenticated && userRole !== requiredRole) {
-      return <Navigate to="/Error403" replace />;
+    if (requiredRole && userRole !== requiredRole) {
+      return <Navigate to="/Error403" />;
     }
-  } catch (error) {
-    console.error("Token không hợp lệ:", error);
-    return <Navigate to="/login" replace />;
-  }
 
-  return children;
+    return children;
+  } catch (error) {
+    return <Navigate to="/login" />;
+  }
 };
 
 export default PrivateRoute;

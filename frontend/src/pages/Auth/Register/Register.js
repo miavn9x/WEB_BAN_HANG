@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Form, Button } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom"; // Thêm hook điều hướng
 import axios from "axios";
@@ -14,7 +14,7 @@ const Register = () => {
   });
 
   const [error, setError] = useState(""); // Lưu thông báo lỗi
-  const [success, setSuccess] = useState(""); // Lưu thông báo thành công
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false); // Quản lý trạng thái loading
 
   const navigate = useNavigate(); // Hook điều hướng
@@ -33,14 +33,11 @@ const Register = () => {
     e.preventDefault();
     setLoading(true); // Hiển thị trạng thái loading
     setError(""); // Xóa lỗi cũ
-    setSuccess(""); // Xóa thành công cũ
+    setMessage(""); // Xóa thành công cũ
 
     try {
-      const response = await axios.post(
-        `/api/auth/register/`,
-        formData
-      );
-      setSuccess("Đăng ký thành công! Vui lòng đăng nhập.");
+      const response = await axios.post(`/api/auth/register/`, formData);
+      setMessage("Đăng ký thành công! Vui lòng đăng nhập.");
       setError(""); // Xóa thông báo lỗi
       console.log("Đăng ký thành công:", response.data); // Log thông tin người dùng mới
 
@@ -48,13 +45,21 @@ const Register = () => {
     } catch (err) {
       console.error("Lỗi đăng ký:", err.response?.data); // In chi tiết lỗi trả về từ server
       setError(err.response?.data?.message || "Đăng ký thất bại!");
-      setSuccess(""); // Xóa thông báo thành công
+      setMessage(""); // Xóa thông báo thành công
     } finally {
       setLoading(false); // Tắt trạng thái loading
     }
-
   };
-
+  // thông báo tắt sau 2 giây
+  useEffect(() => {
+    if (message || error) {
+      const timer = setTimeout(() => {
+        setMessage("");
+        setError("");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [message, error]);
   return (
     <Container className="register-container">
       <h3 className="text-center mb-2">ĐĂNG KÝ TÀI KHOẢN</h3>
@@ -69,13 +74,12 @@ const Register = () => {
         </Link>
       </p>
 
-      {/* Hiển thị thông báo lỗi */}
-      {error && <div className="alert alert-danger">{error}</div>}
-      {/* Hiển thị thông báo thành công */}
-      {success && <div className="alert alert-success">{success}</div>}
-
       <h5 className="text-center mb-4">THÔNG TIN CÁ NHÂN</h5>
-
+      {/* Hiển thị thông báo lỗi */}
+      <div className="text-center pb-3">
+        {message && <div className="text-success">{message}</div>}
+        {error && <div className="text-danger">{error}</div>}
+      </div>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
           <Form.Label>
