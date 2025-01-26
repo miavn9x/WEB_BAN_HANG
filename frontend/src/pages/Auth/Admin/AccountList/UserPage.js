@@ -62,9 +62,9 @@ function UserPage() {
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => {
-        setSuccessMessage(null); 
+        setSuccessMessage(null);
       }, 2000);
-      return () => clearTimeout(timer); 
+      return () => clearTimeout(timer);
     }
   }, [successMessage]);
 
@@ -112,84 +112,82 @@ function UserPage() {
     setPasswordData({ ...passwordData, [name]: value });
   };
 
-const handleSubmitPasswordChange = (e) => {
-  e.preventDefault();
+  const handleSubmitPasswordChange = (e) => {
+    e.preventDefault();
 
-  if (!passwordData.currentPassword || !passwordData.newPassword) {
-    setError((prevError) => ({
-      ...prevError,
-      password: {
-        ...prevError.password,
-        newPassword: "Vui lòng nhập mật khẩu cũ và mật khẩu mới.",
-      },
-    }));
-    return;
-  }
+    if (!passwordData.currentPassword || !passwordData.newPassword) {
+      setError((prevError) => ({
+        ...prevError,
+        password: {
+          ...prevError.password,
+          newPassword: "Vui lòng nhập mật khẩu cũ và mật khẩu mới.",
+        },
+      }));
+      return;
+    }
 
-  if (passwordData.currentPassword === passwordData.newPassword) {
-    setError((prevError) => ({
-      ...prevError,
-      password: {
-        ...prevError.password,
-        newPassword: "Mật khẩu mới không thể giống mật khẩu cũ.",
-      },
-    }));
-    return;
-  }
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      setError((prevError) => ({
+        ...prevError,
+        password: {
+          ...prevError.password,
+          newPassword: "Mật khẩu mới không thể giống mật khẩu cũ.",
+        },
+      }));
+      return;
+    }
 
-  const token = localStorage.getItem("token");
-  if (!token) {
-    setError({
-      ...error,
-      general: "Token không tồn tại. Vui lòng đăng nhập lại.",
-    });
-    return;
-  }
-
-  const data = {
-    oldPassword: passwordData.currentPassword,
-    newPassword: passwordData.newPassword,
-  };
-
-  axios
-    .put(`/api/profile/password`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((response) => {
-      setSuccessMessage("Đổi mật khẩu thành công!");
-      setIsChangingPassword(false);
-      setPasswordData({ currentPassword: "", newPassword: "" });
+    const token = localStorage.getItem("token");
+    if (!token) {
       setError({
-        general: null,
-        password: { currentPassword: null, newPassword: null },
+        ...error,
+        general: "Token không tồn tại. Vui lòng đăng nhập lại.",
       });
+      return;
+    }
 
-      // Lưu lại token mới vào localStorage
-      localStorage.setItem("token", response.data.token);
-    })
-    .catch((err) => {
-      if (err.response && err.response.status === 401) {
-        setError({
-          ...error,
-          password: {
-            ...error.password,
-            currentPassword: "Mật khẩu cũ không đúng.",
-          },
-        });
-      } else {
-        setError({
-          ...error,
-          password: {
-            ...error.password,
-            newPassword: "Không thể thay đổi mật khẩu.",
-          },
-        });
-      }
-    });
-};
+    const data = {
+      oldPassword: passwordData.currentPassword,
+      newPassword: passwordData.newPassword,
+    };
 
+    axios
+      .put(`/api/profile/password`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        setSuccessMessage("Đổi mật khẩu thành công!");
+        setIsChangingPassword(false);
+        setPasswordData({ currentPassword: "", newPassword: "" });
+        setError({
+          general: null,
+          password: { currentPassword: null, newPassword: null },
+        });
+
+        localStorage.setItem("token", response.data.token);
+      })
+      .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          setError({
+            ...error,
+            password: {
+              ...error.password,
+              currentPassword: "Mật khẩu cũ không đúng.",
+            },
+          });
+        } else {
+          setError({
+            ...error,
+            password: {
+              ...error.password,
+              newPassword: "Không thể thay đổi mật khẩu.",
+            },
+          });
+        }
+      });
+  };
 
   if (error.general) {
     return <div className="text-danger">{error.general}</div>;
@@ -203,12 +201,8 @@ const handleSubmitPasswordChange = (e) => {
     <div className="user-page container mt-5 justify-content-center">
       <h2>Thông tin cá nhân</h2>
 
-      {/* Hiển thị thông báo thành công */}
-      {successMessage && (
-        <div className="text-success">{successMessage}</div>
-      )}
+      {successMessage && <div className="text-success">{successMessage}</div>}
 
-      {/* Chế độ chỉnh sửa thông tin */}
       {isEditing ? (
         <form onSubmit={handleSubmitEdit}>
           <div className="mb-3">
@@ -217,8 +211,15 @@ const handleSubmitPasswordChange = (e) => {
               type="text"
               className="form-control"
               name="fullName"
-              value={editData.fullName}
-              onChange={handleInputChange}
+              value={`${editData.firstName} ${editData.lastName}`}
+              onChange={(e) => {
+                const [firstName, ...lastNameParts] = e.target.value.split(" ");
+                setEditData({
+                  ...editData,
+                  firstName: firstName || "",
+                  lastName: lastNameParts.join(" ") || "",
+                });
+              }}
             />
           </div>
           <div className="mb-3">
@@ -258,7 +259,7 @@ const handleSubmitPasswordChange = (e) => {
       ) : (
         <div>
           <p>
-            <strong>Họ và tên:</strong> {user.fullName}
+            <strong>Họ và tên:</strong> {user.firstName} {user.lastName}
           </p>
           <p>
             <strong>Email:</strong> {user.email}

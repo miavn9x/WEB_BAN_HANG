@@ -6,16 +6,17 @@ import Register from "./pages/Auth/Register/Register";
 import PrivateRoute from "./components/PrivateRoute";
 import Error403 from "./components/Error403/Error403";
 import "./styles/App.css";
-import AddProduct from "./components/Product/AddProduct";
 import { jwtDecode } from "jwt-decode";
 import React, { useEffect, useState } from "react";
-import AccountList from "./pages/Auth/AccountList/AccountList";
 import Footer from "./components/Footer/Footer";
 import UserPage from "./pages/Auth/AccountList/UserPage";
 import Home from "./pages/Home";
 import ForgotPassword from "./pages/Auth/ForgotPassword/ForgotPassword";
 import ResetPassword from "./pages/Auth/ForgotPassword/ResetPassword";
 import ProductPage from "./components/Product/ProductPage";
+import AddProduct from "./pages/Auth/Admin/AddProduct/AddProduct";
+import ProductEdit from "./pages/Auth/Admin/AddProduct/ProductEdit";
+import AccountList from "./pages/Auth/Admin/AccountList/AccountList";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -51,7 +52,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/products" element={<ProductPage/>} />
+        <Route path="/products" element={<ProductPage />} />
         <Route path="/danh-sach-san-pham" element={<Listing />} />
         {/* Protected Routes - User & admin */}
         <Route
@@ -99,7 +100,7 @@ function App() {
               <Routes>
                 <Route path="user-management" element={<AccountList />} />
                 <Route path="add-product" element={<AddProduct />} />
-                {/* <Route path="edit-product" element={<ProductTable />} /> */}
+                <Route path="edit-product" element={<ProductEdit />} />
               </Routes>
             </PrivateRoute>
           }

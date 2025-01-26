@@ -31,6 +31,13 @@ const userRoutes = require("./routes/userRoutes"); // Import routes
 
 app.use("/api", userRoutes);
 
+//product routes
+const productRoutes = require("./routes/productRoutes");
+app.use("/api", productRoutes);
+//so luong san pham
+const orderRoutes = require("./routes/orderRoutes");
+app.use("/api", orderRoutes);
+
 
 // Chạy server
 app.listen(PORT, () => {

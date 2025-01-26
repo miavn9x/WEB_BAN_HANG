@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Spinner, Alert, Table } from "react-bootstrap";
-import "../../../styles/AccountList.css";
-
+import "../../../../styles/AccountList.css";
 const AccountList = () => {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -222,7 +221,7 @@ const AccountList = () => {
                       account.role
                     )}
                   </td>
-                  <td>
+                  <td className="text-center">
                     {editableAccount?._id === account._id ? (
                       <>
                         <Button
