@@ -10,7 +10,7 @@ const LoginMenu = ({ onClose }) => {
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
-    console.log("Vai trò người dùng:", role);
+    // console.log("Vai trò người dùng:", role);
     if (role) {
       setUserRole(role);
     } else {

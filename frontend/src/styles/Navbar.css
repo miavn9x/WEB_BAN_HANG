@@ -191,6 +191,17 @@ margin-bottom: 2px!important;}
         opacity: 0 !important;
 
     }
+        .logo-text {
+            display: inline-block;
+            white-space: nowrap;
+            /* Prevent text from wrapping */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            /* Add ellipsis when overflowing */
+            box-sizing: border-box;
+            max-width: 100%;
+         
+        }
 }
 
 @media (max-width: 200px) {
@@ -210,3 +221,4 @@ html body .nav-link {
     font-size: clamp(14px, calc(14px + (18 - 14) * ((85vw - 992px) / (1400 - 992))), 20px);
 }
 
+/* Base logo styling */

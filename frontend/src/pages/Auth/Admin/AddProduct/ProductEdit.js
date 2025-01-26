@@ -215,7 +215,7 @@ const handleUpdateProduct = async (e) => {
   return (
     <div>
       <div className="product-management-wrapper">
-        <h1 className="text-center">Quản lý sản phẩm</h1>
+        <h3 className="text-center p-2">Quản lý sản phẩm</h3>
         {errorMessage && (
           <div className="alert alert-danger">{errorMessage}</div>
         )}
@@ -441,7 +441,7 @@ const handleUpdateProduct = async (e) => {
                         </td>
                         <td className="text-center">
                           <button
-                            className="btn btn-warning btn-sm mr-2"
+                            className="btn btn-warning btn-sm mx-2"
                             onClick={() => handleEditProduct(product)}
                           >
                             sửa

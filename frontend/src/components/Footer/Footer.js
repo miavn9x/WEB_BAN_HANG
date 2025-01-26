@@ -81,7 +81,7 @@ const Footer = () => {
               <div className="footer__social ">
                 <h5><br/>Theo dõi chúng tôi</h5>
                 <ul></ul>
-                <ul className="footer__social-icons ">
+                <ul className="footer__social-icons d-flex list-unstyled">
              
                   <li>
                     <Link to="https://www.facebook.com/tungmia9x">

@@ -145,8 +145,8 @@ const MyNavbar = () => {
                   className="me-2 Logo_image"
                   height="60"
                 />
-                <span className="logo-text fs-3">
-                  <span className="text-danger fw-bold me-1">Baby</span>
+                <span className="logo-text fs-3 navbar-text">
+                  <span className="text-danger fw-bold me-1 ">Baby</span>
                   <span className="text-primary fw-bold">Mart</span>
                 </span>
               </Navbar.Brand>

@@ -38,7 +38,9 @@ app.use("/api", productRoutes);
 const orderRoutes = require("./routes/orderRoutes");
 app.use("/api", orderRoutes);
 
-
+// product display routes
+const productDisplayRoutes = require("./routes/productDisplayRoutes");
+app.use("/api/products", productDisplayRoutes);
 // Chạy server
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
