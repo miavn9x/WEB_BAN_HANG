@@ -93,20 +93,20 @@ router.post("/products", upload.array("images", 20), async (req, res) => {
   }
 });
 
-// Route lấy danh sách sản phẩm (có phân trang và bộ lọc)
-// Route lấy danh sách sản phẩm (có phân trang và bộ lọc)
+// API route: GET /products
 router.get("/products", async (req, res) => {
   try {
     const {
       page = 1,
-      limit = 9999,
+      limit = 9900,
       search = "",
-      category,
+      categoryName,
+      categoryGeneric,
       minPrice,
       maxPrice,
     } = req.query;
 
-    // Tạo điều kiện tìm kiếm và bộ lọc
+    // Construct the query
     const query = {
       ...(search && {
         $or: [
@@ -115,35 +115,36 @@ router.get("/products", async (req, res) => {
           { description: { $regex: search, $options: "i" } },
         ],
       }),
-      ...(category && {
-        "category.name": { $regex: category, $options: "i" }, // Lọc theo tên danh mục
+      ...(categoryName && {
+        "category.name": { $regex: categoryName, $options: "i" },
+      }),
+      ...(categoryGeneric && {
+        "category.generic": { $regex: categoryGeneric, $options: "i" },
       }),
       ...(minPrice &&
         !isNaN(minPrice) && {
-          priceAfterDiscount: { $gte: Number(minPrice) }, // Lọc theo giá từ
+          priceAfterDiscount: { $gte: Number(minPrice) },
         }),
       ...(maxPrice &&
         !isNaN(maxPrice) && {
-          priceAfterDiscount: { $lte: Number(maxPrice) }, // Lọc theo giá đến
+          priceAfterDiscount: { $lte: Number(maxPrice) },
         }),
     };
 
-    // Lấy danh sách sản phẩm theo phân trang và bộ lọc
     const products = await Product.find(query)
       .limit(Number(limit))
       .skip((Number(page) - 1) * Number(limit));
 
-    // Tính tổng số sản phẩm để tính số trang
     const totalProducts = await Product.countDocuments(query);
 
     res.status(200).json({
       products,
       totalPages: Math.ceil(totalProducts / limit),
-      currentPage: parseInt(page),
+      currentPage: parseInt(page, 10),
     });
-  } catch (err) {
-    console.error("Lỗi khi lấy danh sách sản phẩm:", err);
-    res.status(500).json({ message: "Lỗi khi lấy danh sách sản phẩm." });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ message: "Error fetching products." });
   }
 });
 
@@ -151,78 +152,93 @@ router.get("/products", async (req, res) => {
 router.put("/products/:id", upload.array("images", 20), async (req, res) => {
   const productId = req.params.id;
 
-  // Kiểm tra nếu ID không hợp lệ
+  // Validate product ID
   if (!productId.match(/^[0-9a-fA-F]{24}$/)) {
     return res.status(400).json({ message: "ID sản phẩm không hợp lệ." });
   }
 
   try {
-    const {
-      name,
-      category,
-      brand,
-      description,
-      originalPrice,
-      discountPercentage,
-      priceAfterDiscount,
-      discountCode,
-      remainingStock,
-      stock,
-    } = req.body;
-
-    const updatedProductData = {
-      name,
-      category,
-      brand,
-      description,
-      originalPrice,
-      discountPercentage,
-      priceAfterDiscount,
-      discountCode,
-      remainingStock,
-      stock,
-    };
-
-    // Nếu có tệp hình ảnh mới, upload lên Cloudinary
-    if (req.files && req.files.length > 0) {
-      const imageUploadPromises = req.files.map((file) => {
-        return new Promise((resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream({ folder: "products" }, (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            })
-            .end(file.buffer);
-        });
-      });
-
-      const uploadResults = await Promise.all(imageUploadPromises);
-      updatedProductData.images = uploadResults.map(
-        (result) => result.secure_url
-      );
+    // Fetch existing product data
+    const existingProduct = await Product.findById(productId);
+    if (!existingProduct) {
+      return res.status(404).json({ message: "Không tìm thấy sản phẩm." });
     }
 
-    // Cập nhật sản phẩm
+    // Extract category data from request body
+    const categoryName = req.body['category[name]'] || req.body.category?.name;
+    const categoryGeneric = req.body['category[generic]'] || req.body.category?.generic;
+
+    // Construct updated product data
+    const updatedProductData = {
+      name: req.body.name || existingProduct.name,
+      brand: req.body.brand || existingProduct.brand,
+      description: req.body.description || existingProduct.description,
+      originalPrice: req.body.originalPrice || existingProduct.originalPrice,
+      discountPercentage: req.body.discountPercentage || existingProduct.discountPercentage,
+      priceAfterDiscount: req.body.priceAfterDiscount || existingProduct.priceAfterDiscount,
+      discountCode: req.body.discountCode || existingProduct.discountCode,
+      remainingStock: req.body.remainingStock || existingProduct.remainingStock,
+      stock: req.body.stock || existingProduct.stock,
+      category: {
+        name: categoryName || existingProduct.category.name,
+        generic: categoryGeneric || existingProduct.category.generic
+      }
+    };
+
+    // Handle image upload
+    if (req.files && req.files.length > 0) {
+      try {
+        // Delete old images from Cloudinary
+        const deleteImagePromises = existingProduct.images.map((url) => {
+          const publicId = url.split("/").pop().split(".")[0];
+          return cloudinary.uploader.destroy(`products/${publicId}`);
+        });
+        await Promise.all(deleteImagePromises);
+
+        // Upload new images to Cloudinary
+        const imageUploadPromises = req.files.map((file) => {
+          return new Promise((resolve, reject) => {
+            cloudinary.uploader
+              .upload_stream({ folder: "products" }, (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              })
+              .end(file.buffer);
+          });
+        });
+
+        const uploadResults = await Promise.all(imageUploadPromises);
+        updatedProductData.images = uploadResults.map(
+          (result) => result.secure_url
+        );
+      } catch (error) {
+        console.error("Error handling images:", error);
+        return res.status(500).json({ message: "Lỗi khi xử lý hình ảnh." });
+      }
+    }
+
+    // Update the product with new data
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
       updatedProductData,
       { new: true }
     );
 
-    if (!updatedProduct) {
-      return res.status(404).json({ message: "Không tìm thấy sản phẩm." });
-    }
+    // Log successful update
+    // console.log("Updated product:", updatedProduct);
 
     res.status(200).json({
-      message: "Sản phẩm đã được cập nhật.",
+      message: "Sản phẩm đã được cập nhật thành công.",
       product: updatedProduct,
     });
   } catch (error) {
-    console.error("Lỗi khi cập nhật sản phẩm:", error);
-    res.status(500).json({ message: "Có lỗi xảy ra khi cập nhật sản phẩm." });
+    // console.error("Lỗi khi cập nhật sản phẩm:", error);
+    res.status(500).json({ 
+      message: "Có lỗi xảy ra khi cập nhật sản phẩm.",
+      error: error.message 
+    });
   }
 });
-
 // Route xóa sản phẩm
 router.delete("/products/:id", async (req, res) => {
   const productId = req.params.id;
@@ -247,8 +263,6 @@ router.delete("/products/:id", async (req, res) => {
     res.status(500).json({ message: "Có lỗi xảy ra khi xóa sản phẩm." });
   }
 });
-
-
 
 // Route cập nhật số lượng còn lại khi mua hàng (POST)
 router.post("/products/:id/purchase", async (req, res) => {

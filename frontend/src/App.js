@@ -9,7 +9,6 @@ import "./styles/App.css";
 import { jwtDecode } from "jwt-decode";
 import React, { useEffect, useState } from "react";
 import Footer from "./components/Footer/Footer";
-import UserPage from "./pages/Auth/AccountList/UserPage";
 import Home from "./pages/Home";
 import ForgotPassword from "./pages/Auth/ForgotPassword/ForgotPassword";
 import ResetPassword from "./pages/Auth/ForgotPassword/ResetPassword";
@@ -17,6 +16,7 @@ import ProductPage from "./components/Product/ProductPage";
 import AddProduct from "./pages/Auth/Admin/AddProduct/AddProduct";
 import ProductEdit from "./pages/Auth/Admin/AddProduct/ProductEdit";
 import AccountList from "./pages/Auth/Admin/AccountList/AccountList";
+import UserPage from "./pages/Auth/Admin/AccountList/UserPage";
 
 function App() {
   const [userRole, setUserRole] = useState(null);

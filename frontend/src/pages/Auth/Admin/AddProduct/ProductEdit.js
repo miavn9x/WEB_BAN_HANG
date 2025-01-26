@@ -32,23 +32,26 @@ const ProductEdit = () => {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`/api/products`, {
+      const response = await axios.get("/api/products", {
         params: {
           page: currentPage,
           search,
-          category: categoryFilter,
+          categoryName: categoryFilter,
+          categoryGeneric: selectedType,
           limit: 10,
         },
       });
+
       setProducts(response.data.products || []);
       setTotalPages(response.data.totalPages || 1);
       setErrorMessage(null);
     } catch (error) {
-      setErrorMessage("Lỗi khi lấy danh sách sản phẩm.");
+      setErrorMessage("Error fetching products.");
     } finally {
       setLoading(false);
     }
-  }, [currentPage, search, categoryFilter]);
+  }, [currentPage, search, categoryFilter, selectedType]);
+
 
   useEffect(() => {
     fetchProducts();
@@ -68,81 +71,120 @@ const ProductEdit = () => {
     }
   };
 
-  const handleEditProduct = (product) => {
-    setEditingProduct(product);
-    setEditFormData({ ...product });
-    setSelectedImages([]);
-    setErrorMessage(null);
-  };
+const handleEditProduct = (product) => {
+  setEditingProduct(product);
+  setEditFormData({
+    ...product,
+    category: {
+      name: product.category.name || "",
+      generic: product.category.generic || "",
+    },
+  });
+  setSelectedImages([]);
+  setErrorMessage(null);
+};
 
-  const handleEditFormChange = (e) => {
-    const { name, value } = e.target;
+const handleEditFormChange = (e) => {
+  const { name, value } = e.target;
 
-    setEditFormData((prev) => {
-      const updatedFormData = { ...prev };
+  setEditFormData((prev) => {
+    const newFormData = { ...prev };
 
-      if (name === "category.name") {
-        updatedFormData.category.generic = "";
+    if (name === "category.name") {
+      newFormData.category = {
+        ...newFormData.category,
+        name: value,
+        generic: "",
+      };
+    } else if (name === "category.generic") {
+      newFormData.category = {
+        ...newFormData.category,
+        generic: value,
+      };
+    } else if (name === "stock") {
+      // Xử lý khi thay đổi số lượng kho
+      const newStock = parseInt(value) || 0;
+      const oldStock = parseInt(prev.stock) || 0;
+      const oldRemainingStock = parseInt(prev.remainingStock) || 0;
+
+      // Tính toán sự chênh lệch
+      const difference = newStock - oldStock;
+
+      // Cập nhật số lượng kho và số lượng còn lại
+      newFormData.stock = newStock;
+      newFormData.remainingStock = Math.max(0, oldRemainingStock + difference);
+    } else if (name === "remainingStock") {
+      // Đảm bảo số lượng còn lại không vượt quá số lượng kho
+      const maxStock = parseInt(newFormData.stock) || 0;
+      newFormData.remainingStock = Math.min(parseInt(value) || 0, maxStock);
+    } else {
+      newFormData[name] = value;
+    }
+
+    // Tính toán giá sau giảm giá
+    if (name === "originalPrice" || name === "discountPercentage") {
+      const price = parseFloat(newFormData.originalPrice);
+      const discount = parseFloat(newFormData.discountPercentage);
+      if (!isNaN(price) && !isNaN(discount)) {
+        newFormData.priceAfterDiscount = (
+          price *
+          (1 - discount / 100)
+        ).toFixed();
       }
+    }
 
-      const numericValue = parseFloat(value);
-      if (name === "stock") {
-        const stockDifference = numericValue - parseFloat(prev.stock || 0);
-        updatedFormData.stock = numericValue;
-        updatedFormData.remainingStock =
-          parseFloat(prev.remainingStock || 0) + stockDifference;
-      } else if (name === "remainingStock") {
-        updatedFormData.remainingStock = Math.min(numericValue, prev.stock);
-      } else {
-        updatedFormData[name] = value;
-      }
-
-      if (name === "originalPrice" || name === "discountPercentage") {
-        const price = parseFloat(updatedFormData.originalPrice);
-        const discount = parseFloat(updatedFormData.discountPercentage);
-        if (!isNaN(price) && !isNaN(discount)) {
-          updatedFormData.priceAfterDiscount = (
-            price *
-            (1 - discount / 100)
-          ).toFixed();
-        }
-      }
-
-      return updatedFormData;
-    });
-  };
+    return newFormData;
+  });
+};
 
   const handleImageChange = (e) => {
     setSelectedImages(e.target.files);
   };
 
-  const handleUpdateProduct = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      for (const key in editFormData) {
-        if (key !== "images" && key !== "_id" && key !== "__v") {
-          formData.append(key, editFormData[key]);
-        }
-      }
-      if (selectedImages.length > 0) {
-        for (let i = 0; i < selectedImages.length; i++) {
-          formData.append("images", selectedImages[i]);
-        }
-      }
+const handleUpdateProduct = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-      await axios.put(`/api/products/${editingProduct._id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setEditingProduct(null);
-      fetchProducts();
-    } catch (error) {
-      setErrorMessage("Lỗi khi cập nhật sản phẩm.");
-    } finally {
-      setLoading(false);
+  try {
+    const formData = new FormData();
+
+    // Thêm các trường cơ bản
+    Object.keys(editFormData).forEach((key) => {
+      if (
+        key !== "images" &&
+        key !== "_id" &&
+        key !== "__v" &&
+        key !== "category"
+      ) {
+        formData.append(key, editFormData[key]);
+      }
+    });
+
+    // Thêm category như một object
+    formData.append("category[name]", editFormData.category.name);
+    formData.append("category[generic]", editFormData.category.generic);
+
+    // Thêm hình ảnh nếu có
+    if (selectedImages.length > 0) {
+      for (let i = 0; i < selectedImages.length; i++) {
+        formData.append("images", selectedImages[i]);
+      }
     }
-  };
+
+    await axios.put(`/api/products/${editingProduct._id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    setEditingProduct(null);
+    fetchProducts();
+  } catch (error) {
+    console.error("Error updating product:", error);
+    setErrorMessage("Lỗi khi cập nhật sản phẩm.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleCancelEdit = () => {
     setEditingProduct(null);

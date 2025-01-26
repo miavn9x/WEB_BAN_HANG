@@ -139,7 +139,7 @@ const AddProduct = () => {
   }, [message, error]);
 
   return (
-    <div className="container">
+    <div className="container add-product-container">
       <div className="row">
         <div className="col-sm-12">
           <h4 className="text-center mb-4 text-uppercase mt-5">

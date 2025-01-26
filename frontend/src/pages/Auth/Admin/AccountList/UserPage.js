@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "../../../styles/UserPage.css";
+import "../../../../styles/UserPage.css";
 
 function UserPage() {
   const [user, setUser] = useState(null);
