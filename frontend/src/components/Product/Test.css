@@ -1,0 +1,116 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import 'react-inner-image-zoom/lib/InnerImageZoom/styles.min.css';
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+.product__modal__zoom {
+    width: 100%;
+    height: auto;
+
+}
+
+
+.product__modal__zoom .badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+
+}
+.zoomSliderBig .item {
+    overflow: hidden;
+    /* Đảm bảo các hình ảnh không tràn ra ngoài */
+    border-radius: 15px;
+    /* Bo tròn góc */
+}
+
+/* Cấu hình cho hình ảnh khi zoom */
+.zoomSliderBig .item img {
+    transition: transform 0.3s ease;
+    /* Thêm hiệu ứng mượt khi zoom */
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+}
+
+.zoomSliderBig .item:hover img {
+    transform: scale(1.1);
+    border-radius: 15px;
+}
+
+
+.zoomSlider {
+    padding-top: 30px;
+
+}
+
+.zoomSlider .slick-slide {
+    padding-right: 30px !important;
+
+}
+
+.zoomSlider * {
+    outline: none !important;
+
+}
+
+.zoomSlider .item {
+    border: 2px solid transparent !important;
+    overflow: hidden;
+    border-radius: 10px;
+    cursor: pointer;
+
+}
+
+.zoomSlider .slick-current .item {
+    border: 2px solid rgba(0, 0, 0, 0.4) !important;
+
+}
+
+.zoomSlider .slick-arrow {
+    top: 55% !important;
+    zoom: 80% !important;
+}
+
+
+@media (max-width: 767px) {
+    .thumbnail-container {
+        justify-content: center !important;
+    }
+
+    .thumbnail-container img {
+        margin: 0 5px;
+    }
+}
+
+
+
+@media (max-width: 992px) {
+    .thumbnail-container {
+        justify-content: center !important;
+    }
+
+    .thumbnail-container img {
+        margin: 0 5px;
+    }
+
+    .product-title {
+        padding: 1rem 0;
+    }
+    
+.product__price{
+    justify-content: center !important;
+}
+}
+
+
+
+
+.purchase-info {
+    padding-top: 1rem;
+}
+
+.thumbnail-container img {
+
+    object-fit: cover;
+    margin-right: 0.5rem;
+}

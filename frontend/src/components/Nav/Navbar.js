@@ -68,7 +68,7 @@ const NavMenu = [
   { path: "/", label: "TRANG CHỦ" },
   { path: "/products", label: "TẤT CẢ SẢN PHẨM" },
   { path: "Giới Thiệu", label: "GIỚI THIỆU" },
-  { path: "Bài Viết", label: "BÀI VIẾT" },
+  { path: "/bai-viet", label: "BÀI VIẾT" },
   { path: "hệ thông cửa hàng", label: "Hệ thống cửa hàng" },
   { path: "Hotline", label: "Hotline: 099999998" },
 ];

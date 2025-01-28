@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Form, Button } from "react-bootstrap";
+import { Container, Form, Button, Spinner } from "react-bootstrap";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../../../styles/Login.css";
@@ -156,7 +156,18 @@ const Login = () => {
           }}
           disabled={loading}
         >
-          {loading ? "Đang xử lý..." : "Đăng nhập"}
+          {loading ? (
+            <div className="loading-container text-center">
+              <Spinner
+                animation="border"
+                variant="success" // Vòng xoay màu xanh
+                className="loading-spinner"
+              />
+              <div>Đang tải...</div>
+            </div>
+          ) : (
+            "Đăng nhập"
+          )}
         </Button>
       </Form>
     </Container>

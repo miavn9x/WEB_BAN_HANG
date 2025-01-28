@@ -3,77 +3,37 @@ const Product = require("../models/productModel");
 const router = express.Router();
 
 // GET tất cả sản phẩm
-router.get("/", async (req, res) => {
+// Lọc và sắp xếp sản phẩm
+router.get('/api/products', async (req, res) => {
   try {
-    const products = await Product.find({});
-    res.status(200).json({
-      success: true,
-      count: products.length,
-      products,
-    });
-  } catch (error) {
-    console.error("Lỗi khi lấy danh sách sản phẩm:", error);
-    res.status(500).json({
-      success: false,
-      message: "Không thể tải danh sách sản phẩm",
-    });
-  }
-});
+    const { price, categories, sortBy, limit } = req.query;
 
-// 2. Lấy danh sách sản phẩm theo chủng loại (category) - Tìm kiếm không phân biệt chữ hoa chữ thường
-router.get("/category/:category", async (req, res) => {
-  const { category } = req.params;
-  try {
-    const products = await Product.find({
-      category: { $regex: new RegExp(category, "i") },
-    });
-
-    if (!products.length) {
-      return res.status(200).json({
-        success: true,
-        message: `No products found for category: ${category}`,
-        products,
-      });
+    let filters = {};
+    if (price) {
+      filters.price = { $lte: price }; // Lọc sản phẩm có giá <= price
+    }
+    if (categories) {
+      filters.categories = { $in: categories.split(',') }; // Lọc theo các danh mục
     }
 
-    res.status(200).json({
-      success: true,
-      count: products.length,
-      products,
-    });
-  } catch (error) {
-    console.error(`Lỗi khi lấy sản phẩm theo chủng loại ${category}:`, error);
-    res.status(500).json({
-      success: false,
-      message: `Lấy sản phẩm theo chủng loại ${category} thất bại`,
-    });
-  }
-});
-
-// 3. Lấy danh sách sản phẩm đang giảm giá
-router.get("/discounted", async (req, res) => {
-  try {
-    const products = await Product.find({ discountPercentage: { $gt: 0 } });
-    if (!products.length) {
-      return res.status(200).json({
-        success: true,
-        message: "No discounted products found",
-        products,
-      });
+    let sort = {};
+    if (sortBy === 'priceAsc') {
+      sort.price = 1; // Giá tăng dần
+    } else if (sortBy === 'priceDesc') {
+      sort.price = -1; // Giá giảm dần
+    } else if (sortBy === 'discountPercentage') {
+      sort.discountPercentage = -1; // Sắp xếp giảm dần theo tỷ lệ giảm giá
     }
 
-    res.status(200).json({
-      success: true,
-      count: products.length,
-      products,
-    });
+    // Lấy danh sách sản phẩm từ MongoDB với các điều kiện lọc và sắp xếp
+    const products = await Product.find(filters)
+      .sort(sort)
+      .limit(parseInt(limit));
+
+    res.json({ products });
   } catch (error) {
-    console.error("Lỗi khi lấy sản phẩm giảm giá:", error);
-    res.status(500).json({
-      success: false,
-      message: "Lấy sản phẩm giảm giá thất bại",
-    });
+    console.error('Error fetching products:', error);
+    res.status(500).send('Server error');
   }
 });
-
 module.exports = router;

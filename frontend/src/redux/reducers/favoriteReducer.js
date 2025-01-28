@@ -1,4 +1,4 @@
-//src/ redux1/reducers/favoriteReducer.js
+//src/ redux/reducers/favoriteReducer.js
 import { FAVORITE_ACTIONS } from "../constants/actionTypes";
 
 const initialState = {

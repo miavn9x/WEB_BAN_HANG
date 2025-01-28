@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../../../../styles/UserPage.css";
+import { Spinner } from "react-bootstrap"; // Import Spinner từ react-bootstrap
 
 function UserPage() {
   const [user, setUser] = useState(null);
@@ -24,6 +25,7 @@ function UserPage() {
     },
   });
   const [successMessage, setSuccessMessage] = useState(null);
+  const [loading, setLoading] = useState(true); // Thêm state loading
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -32,6 +34,7 @@ function UserPage() {
         ...prevError,
         general: "Token không tồn tại. Vui lòng đăng nhập lại.",
       }));
+      setLoading(false); // Dừng loading khi có lỗi
       return;
     }
 
@@ -50,12 +53,14 @@ function UserPage() {
           phone: userData.phone,
           email: userData.email,
         });
+        setLoading(false); // Dừng loading khi dữ liệu được tải xong
       })
       .catch((err) => {
         setError((prevError) => ({
           ...prevError,
           general: "Không thể lấy thông tin người dùng. Vui lòng thử lại sau.",
         }));
+        setLoading(false); // Dừng loading khi có lỗi
       });
   }, []);
 
@@ -84,6 +89,8 @@ function UserPage() {
       return;
     }
 
+    setLoading(true); // Bật loading khi gửi yêu cầu cập nhật
+
     axios
       .put(`/api/profile`, editData, {
         headers: {
@@ -98,12 +105,14 @@ function UserPage() {
           general: null,
           password: { currentPassword: null, newPassword: null },
         });
+        setLoading(false); // Dừng loading khi thành công
       })
       .catch((err) => {
         setError({
           ...error,
           general: "Không thể cập nhật thông tin người dùng.",
         });
+        setLoading(false); // Dừng loading khi có lỗi
       });
   };
 
@@ -151,6 +160,8 @@ function UserPage() {
       newPassword: passwordData.newPassword,
     };
 
+    setLoading(true); // Bật loading khi gửi yêu cầu đổi mật khẩu
+
     axios
       .put(`/api/profile/password`, data, {
         headers: {
@@ -165,8 +176,8 @@ function UserPage() {
           general: null,
           password: { currentPassword: null, newPassword: null },
         });
-
         localStorage.setItem("token", response.data.token);
+        setLoading(false); // Dừng loading khi thành công
       })
       .catch((err) => {
         if (err.response && err.response.status === 401) {
@@ -186,11 +197,25 @@ function UserPage() {
             },
           });
         }
+        setLoading(false); // Dừng loading khi có lỗi
       });
   };
 
   if (error.general) {
     return <div className="text-danger">{error.general}</div>;
+  }
+
+  if (loading) {
+    return (
+      <div className="loading-container text-center">
+        <Spinner
+          animation="border"
+          variant="success" // Vòng xoay màu xanh
+          className="loading-spinner"
+        />
+        <div>Đang tải thông tin...</div>
+      </div>
+    );
   }
 
   if (!user) {

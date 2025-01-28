@@ -1,16 +1,35 @@
-import { Button, Dialog } from "@mui/material";
+import React, { useRef, useState, useEffect } from "react";
+import { Button, Dialog, Snackbar } from "@mui/material";
 import { IoCloseCircleSharp } from "react-icons/io5";
 import Rating from "@mui/material/Rating";
-import { useRef } from "react";
 import InnerImageZoom from "react-inner-image-zoom";
 import Slider from "react-slick";
-import "../../styles/ProductModals.css";
+import { FaRegHeart } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/actions/cartActions";
 import QuantityBox from "./QuantityBox";
 import { formatter } from "../../utils/fomater";
-import { FaRegHeart } from "react-icons/fa6";
+import axios from "axios";
+import { useNavigate, useLocation } from "react-router-dom"; 
+import "../../styles/ProductModals.css";
+
 const ProductModal = (props) => {
+  const { product } = props;
   const zoomSliderBig = useRef();
-  var settings = {
+  const zoomSlider = useRef();
+
+  const [quantity, setQuantity] = useState(1);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [notification, setNotification] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false); // Thêm state cho Snackbar
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate(); // Hook điều hướng
+  const location = useLocation(); // Hook để lấy đường dẫn hiện tại
+
+  const displayImages = product.images.slice(0, 3);
+
+  const settings = {
     dots: false,
     infinite: false,
     speed: 700,
@@ -18,14 +37,12 @@ const ProductModal = (props) => {
     slidesToScroll: 1,
   };
 
-  const zoomSlider = useRef();
-  var settings1 = {
+  const settings1 = {
     dots: false,
     infinite: false,
     speed: 500,
     slidesToShow: 4,
     slidesToScroll: 1,
-    false: false,
     arrows: true,
   };
 
@@ -33,142 +50,219 @@ const ProductModal = (props) => {
     zoomSlider.current.slickGoTo(index);
     zoomSliderBig.current.slickGoTo(index);
   };
-  return (
-    <>
-      <Dialog
-        open={true}
-        className="product__modal"
-        onClose={() => props.CloseProductModal()}
-      >
-        <Button className="close__" onClick={() => props.CloseProductModal()}>
-          <IoCloseCircleSharp />
-        </Button>
-        <h4 className="mb-2 font-weight-bold text-uppercase">ten san pham</h4>
-        <div className="d-flex align-items-center ">
-          <div className="d-flex align-items-center mr-4 ">
-            <span>Thương hiệu: </span>
-            <span className="ml-2">
-              <b>&nbsp; Tên thương hiệu</b>
-            </span>
-          </div>
-          <div> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
-          <Rating
-            name="read-only"
-            value={2.5}
-            size="small"
-            readOnly
-            precision={0.5}
-          />
-        </div>
-        <hr />
 
-        <div className="row mt-2 product__modal__content">
-          <div className="col-md-5">
-            <div className="product__modal__zoom position-relative">
-              <div className="badge badge-primary bg-primary">20%</div>
-              <Slider
-                {...settings}
-                className="zoomSliderBig"
-                ref={zoomSliderBig}
-              >
-                <div className="item">
-                  <InnerImageZoom
-                    zoomType="hover"
-                    zoomScale={1}
-                    src={`https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/3357/332549/bhx/bs9a9244-1_202412100924093485.jpg`}
-                  />
-                </div>
-                <div className="item">
-                  <InnerImageZoom
-                    zoomType="hover"
-                    zoomScale={1}
-                    src={`https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/3357/332549/bhx/bs9a9251-1_202412100924084560.jpg`}
-                  />
-                </div>
-                <div className="item">
-                  <InnerImageZoom
-                    zoomType="hover"
-                    zoomScale={1}
-                    src={`https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/3357/332549/bhx/bs9a9247-1_202412100924089042.jpg`}
-                  />
-                </div>
-              </Slider>
+  const handleAddToCart = () => {
+    const token = localStorage.getItem("token"); 
+
+    if (!token) {
+      localStorage.setItem("redirectUrl", location.pathname); // Lưu URL hiện tại
+      navigate("/login"); // Chuyển hướng đến trang đăng nhập
+      return;
+    }
+
+    console.log("Sản phẩm truyền vào handleAddToCart:", product);
+    console.log("Token:", token); // Kiểm tra token có hợp lệ không
+
+    // Gọi action Redux để thêm sản phẩm vào giỏ hàng
+    dispatch(addToCart(product, quantity));
+
+    // Hiển thị thông báo sản phẩm đã được thêm vào giỏ hàng
+    setNotification("Sản phẩm đã được thêm vào giỏ hàng");
+    setSnackbarOpen(true); // Mở thông báo
+    setTimeout(() => setSnackbarOpen(false), 3000); // Tự động tắt thông báo sau 3 giây
+  };
+
+  const handleAddToFavorites = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      // Lưu URL hiện tại vào localStorage trước khi chuyển hướng đến trang đăng nhập
+      localStorage.setItem("redirectUrl", location.pathname);
+      navigate("/login"); // Chuyển hướng đến trang đăng nhập
+      return;
+    }
+
+    if (isFavorited) {
+      setNotification("Sản phẩm đã có trong yêu thích.");
+      setSnackbarOpen(true); // Mở Snackbar
+      setTimeout(() => setSnackbarOpen(false), 5000); // Ẩn thông báo sau 5 giây
+      return;
+    }
+
+    axios
+      .post(
+        `/api/favorites`,
+        { productId: product._id },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((response) => {
+        setIsFavorited(true);
+        setNotification("Sản phẩm đã được thêm vào mục yêu thích.");
+        setSnackbarOpen(true); // Mở Snackbar
+        setTimeout(() => setSnackbarOpen(false), 5000); // Ẩn thông báo sau 5 giây
+      })
+      .catch((err) => {
+        setNotification("Đã xảy ra lỗi khi thêm sản phẩm vào yêu thích.");
+        setSnackbarOpen(true); // Mở Snackbar
+        setTimeout(() => setSnackbarOpen(false), 5000); // Ẩn thông báo sau 5 giây
+      });
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      axios
+        .get(`/api/favorites`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          const isProductInFavorites = response.data.favorites.some(
+            (favProduct) => favProduct._id === product._id
+          );
+          setIsFavorited(isProductInFavorites);
+        })
+        .catch((err) => {
+          console.error("Lỗi khi kiểm tra yêu thích", err);
+        });
+    }
+  }, [product._id]);
+
+  const handleBuyNow = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      localStorage.setItem("redirectUrl", location.pathname);
+      navigate("/login");
+      return;
+    }
+
+    setNotification("Mua ngay!");
+    setSnackbarOpen(true); // Mở Snackbar
+    setTimeout(() => setSnackbarOpen(false), 5000); // Ẩn thông báo sau 5 giây
+  };
+
+  return (
+    <Dialog
+      open={true}
+      className="product__modal"
+      onClose={props.closeProductModal} 
+    >
+      {/* Nút đóng modal */}
+      <Button className="close__" onClick={() => props.closeProductModal()}>
+        <IoCloseCircleSharp />
+      </Button>
+
+      <h4 className="mb-2 font-weight-bold text-uppercase">{product.name}</h4>
+
+      <div className="d-flex align-items-center">
+        <div className="d-flex align-items-center mr-4">
+          <span>Thương hiệu: </span>
+          <span className="ml-2">
+            <b>&nbsp; {product.brand}</b>
+          </span>
+        </div>
+        <Rating
+          name="read-only"
+          value={product.rating || 0}
+          size="small"
+          readOnly
+          precision={0.5}
+        />
+      </div>
+
+      {/* Thông báo lỗi */}
+      <div className="notification-message justify-content-center text-center text-danger">
+        {notification && <span>{notification}</span>}
+      </div>
+      <hr />
+
+      <div className="row mt-2 product__modal__content">
+        <div className="col-md-5">
+          <div className="product__modal__zoom position-relative">
+            <div className="badge badge-primary bg-primary">
+              -{product.discountPercentage}%
             </div>
-            <Slider {...settings1} className="zoomSlider" ref={zoomSlider}>
-              <div className="item">
-                <img
-                  src={`https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/3357/332549/bhx/bs9a9244-1_202412100924093485.jpg`}
-                  className="w-100"
-                  alt="zoom"
-                  onClick={() => goTo(0)}
-                />
-              </div>
-              <div className="item">
-                <img
-                  src={`https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/3357/332549/bhx/bs9a9251-1_202412100924084560.jpg`}
-                  className="w-100"
-                  onClick={() => goTo(1)}
-                  alt="zoom"
-                />
-              </div>
-              <div className="item">
-                <img
-                  src={`https://cdnv2.tgdd.vn/bhx-static/bhx/Products/Images/3357/332549/bhx/bs9a9247-1_202412100924089042.jpg`}
-                  className="w-100"
-                  alt="zoom"
-                  onClick={() => goTo(2)}
-                />
-              </div>
+            <Slider {...settings} className="zoomSliderBig" ref={zoomSliderBig}>
+              {displayImages.map((image, index) => (
+                <div className="item" key={index}>
+                  <InnerImageZoom zoomType="hover" zoomScale={1} src={image} />
+                </div>
+              ))}
             </Slider>
           </div>
-          <div className="col-md-7">
-            <p className="mt-3">
-              Siêu phẩm sữa bắp non cửa thương hiệu sữa từ hạt LOF được tách
-              hoàn toàn 100% từ trái bắp non mới hái, giàu vitamin và chất xơ,
-              tốt cho làn da, cho hệ tiêu hoá. Thùng 24 hộp sữa bắp non LOF
-              180ml hương vị bắp thơm ngon, cùng dạng thùng tiện lợi và tiết
-              kiệm, phù hợp sử dụng dài lâu cho gia đình.
-            </p>
-            <div className="d-flex align-items-center ">
-              <span className="badge__badge bg-success">oop</span>
+
+          <Slider {...settings1} className="zoomSlider" ref={zoomSlider}>
+            {displayImages.map((image, index) => (
+              <div className="item" key={index}>
+                <img
+                  src={image}
+                  className="w-100"
+                  alt={`zoom-${index}`}
+                  onClick={() => goTo(index)}
+                />
+              </div>
+            ))}
+          </Slider>
+        </div>
+
+        <div className="col-md-7">
+          <p className="mt-3" style={{maxHeight: "300px", overflow: "hidden", height: "200px"}}>{product.description}</p>
+
+          <div className="product__modal__box">
+            <div className="d-flex align-items-center">
+              <span className="badge__badge bg-success">
+                {product.category.name} - {product.category.generic}
+              </span>
 
               <Button
                 className="btn-round text-uppercase add_to_favorites"
                 variant="outlined"
+                onClick={handleAddToFavorites}
+                color={isFavorited ? "red" : "gray"}
               >
-                <FaRegHeart /> &nbsp; Thêm vào yêu thích
+                <FaRegHeart size={20} />
               </Button>
             </div>
 
-            <div className="d-flex info__product align-items-center mb-4">
+            <div className="d-flex info__product justify-content-center align-items-center mb-4">
               <span className="product__price text-decoration-line-through opacity-50">
-                15.000.000đ
+                {formatter(product.originalPrice)}
               </span>
               <span className="product__price__old text-danger fs-5 fw-bold">
-                {formatter(5000000)}
+                {formatter(product.priceAfterDiscount)}
               </span>
             </div>
-            <div className="d-flex align-items-center">
-              <QuantityBox />
 
-              <button className="btn__add__cart custom-btn">
+            <div className="d-flex align-items-center">
+              <QuantityBox quantity={quantity} setQuantity={setQuantity} />
+
+              <button
+                className="btn__add__cart custom-btn"
+                onClick={handleAddToCart} // Không cần truyền tham số
+              >
                 Thêm vào giỏ hàng
               </button>
 
-              <button className="btn__buy ">Mua ngay</button>
+              <button className="btn__buy" onClick={handleBuyNow}>
+                Mua ngay
+              </button>
             </div>
-            {/* <div className="d-flex align-items-center ">
-              <Button
-                className="btn-round text-uppercase add_to_favorites"
-                variant="outlined"
-              >
-                <FaRegHeart /> &nbsp; Thêm vào yêu thích
-              </Button>
-            </div> */}
           </div>
         </div>
-      </Dialog>
-    </>
+      </div>
+
+      {/* Snackbar để hiển thị thông báo */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        message={notification}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
+    </Dialog>
   );
 };
+
 export default ProductModal;

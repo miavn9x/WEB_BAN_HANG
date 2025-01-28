@@ -281,3 +281,13 @@ button:active {
     font-weight: 400;
 
 }
+
+
+
+
+
+.d-flex.align-items-center:last-child {
+    margin-top: auto;
+    /* Pushes this last group of buttons down */
+}
+

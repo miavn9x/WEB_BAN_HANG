@@ -41,6 +41,14 @@ app.use("/api", orderRoutes);
 // product display routes
 const productDisplayRoutes = require("./routes/productDisplayRoutes");
 app.use("/api/products", productDisplayRoutes);
+// import thêm mục yêu thích
+const favoritesRoutes = require("./routes/favoritesRoutes"); 
+app.use("/api", favoritesRoutes); 
+
+// cart
+const cartRoutes = require("./routes/cartRoutes"); // Import cart.js
+// Sử dụng router cho giỏ hàng
+app.use("/api", cartRoutes);
 // Chạy server
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);

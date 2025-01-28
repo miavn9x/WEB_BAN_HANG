@@ -91,7 +91,7 @@ export const fetchCart = () => async (dispatch) => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("Token không hợp lệ");
 
-    const response = await axios.get("http://localhost:5000/api/cart", {
+    const response = await axios.get(`/api/cart`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

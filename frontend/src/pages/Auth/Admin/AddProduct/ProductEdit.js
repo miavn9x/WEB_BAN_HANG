@@ -15,19 +15,61 @@ const ProductEdit = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [selectedType, setSelectedType] = useState("");
 
-  const categoryOptions = {
-    thịt: ["Bò", "Gà", "Lợn"],
-    cá: ["Cá Basa", "Cá Hồi", "Cá Tầm"],
-    rau: ["Cải Bó Xôi", "Cải Thảo", "Cà Chua"],
-    giaVị: ["Muối", "Tiêu", "Ớt"],
-    đồUống: ["Nước ngọt", "Nước ép", "Sữa"],
-    gạo: ["Gạo ST25", "Gạo Japonica", "Gạo Bắc Hương"],
-    mìĂnLiền: ["Mì tôm", "Mì Hảo Hảo", "Mì Omachi"],
-    đồKhô: ["Cá khô", "Mực khô", "Thịt khô"],
-    trứng: ["Trứng gà", "Trứng vịt", "Trứng cút"],
-    đồĂnĐóngHộp: ["Cá hộp", "Thịt hộp", "Sữa hộp"],
-    sữa: ["Sữa đặc", "Sữa tươi", "Sữa bột"],
-  };
+const categoryOptions = {
+  "Sữa bột cao cấp": [
+    "Từ 0-6 tháng",
+    "Từ 6-12 tháng",
+    "Từ 1-3 tuổi",
+    "Từ 3-5 tuổi",
+    "Sữa bột organic",
+    "Tăng đề kháng",
+  ],
+  "Sữa dinh dưỡng": [
+    "Cho mẹ bầu",
+    "Tăng canxi cho bà bầu",
+    "Cho mẹ sau sinh",
+    "Cho bé từ 1 tuổi",
+    "Tăng chiều cao cho bé 3-5 tuổi",
+  ],
+  "Bỉm & Tã em bé": [
+    "NB < 5 Kg",
+    "S 4-8 Kg",
+    "M 5-11 Kg",
+    "L 9-14 Kg",
+    "XL 12-18 Kg",
+    "XXL 13-25 Kg",
+  ],
+  "Đồ chơi em bé": [
+    "Đồ chơi bé gái",
+    "Đồ chơi bé trai",
+    "Sách, học tập",
+    "Đồ chơi sơ sinh",
+    "Scooter, vận động",
+  ],
+  "Chăm sóc gia đình": [
+    "Chăm sóc da bầu (chống rạn)",
+    "Dầu massage bầu",
+    "Kem dưỡng da cho bé",
+    "Dầu tắm gội cho bé",
+    "Phấn rôm chống hăm",
+    "Nhiệt kế & Máy hút mũi",
+  ],
+  "Thời trang mẹ và bé": [
+    "Đồ bầu theo tháng (1-8 tháng)",
+    "Váy bầu công sở",
+    "Đồ sau sinh",
+    "Quần áo sơ sinh (0-12 tháng)",
+    "Quần áo bé 1-3 tuổi",
+    "Quần áo bé 3-5 tuổi",
+  ],
+  "Dinh dưỡng bà bầu": [
+    "Vitamin tổng hợp cho bà bầu",
+    "Sắt và axit folic",
+    "Canxi và Vitamin D3",
+    "Omega 3 và DHA",
+    "Sữa bầu công thức đặc biệt",
+  ],
+};
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);

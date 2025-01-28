@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"; // Không dùng alias ở đây.
 import Header from "./components/header/header";
-import Listing from "./components/Product/listing";
+// import Listing from "./components/Product/listing";
 import Login from "./pages/Auth/Login/Login";
 import Register from "./pages/Auth/Register/Register";
 import PrivateRoute from "./components/PrivateRoute";
@@ -17,6 +17,12 @@ import AddProduct from "./pages/Auth/Admin/AddProduct/AddProduct";
 import ProductEdit from "./pages/Auth/Admin/AddProduct/ProductEdit";
 import AccountList from "./pages/Auth/Admin/AccountList/AccountList";
 import UserPage from "./pages/Auth/Admin/AccountList/UserPage";
+// import ProductList from "./components/Product/Productlist";
+import Favorites from "./components/Product/Favorites";
+import Cart from "./components/Product/Cart";
+import Checkout from "./components/Product/Checkout";
+import ProductModal from "./components/Product/ProductModals";
+import P from "./components/Product/Test";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -47,13 +53,15 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/danh-sach-san-pham" element={<Listing />} />
+        {/* <Route path="/danh-sach-san-pham" element={<Listing />} /> */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/products" element={<ProductPage />} />
-        <Route path="/danh-sach-san-pham" element={<Listing />} />
+        <Route path="/test" element={<P/>} />
+        <Route path="/b" element={<ProductModal />} />
+
         {/* Protected Routes - User & admin */}
         <Route
           path="/thong-tin-ca-nhan"
@@ -67,7 +75,7 @@ function App() {
           path="/danh-sach-yeu-thich"
           element={
             <PrivateRoute isAuthenticated={isAuthenticated}>
-              {/* <Favorites /> */}
+              <Favorites />
             </PrivateRoute>
           }
         />
@@ -76,7 +84,7 @@ function App() {
           path="/gio-hang"
           element={
             <PrivateRoute isAuthenticated={isAuthenticated}>
-              {/* <Cart /> */}
+              <Cart />
             </PrivateRoute>
           }
         />
@@ -84,7 +92,7 @@ function App() {
           path="/thanh-toan"
           element={
             <PrivateRoute isAuthenticated={isAuthenticated}>
-              {/* <Checkout /> */}
+              <Checkout />
             </PrivateRoute>
           }
         />

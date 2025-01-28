@@ -126,148 +126,155 @@ const AccountList = () => {
     }
   };
 
-  return (
-    <div className="container my-5">
-      <h1 className="text-center mb-4">Quản lý tài khoản</h1>
-      {error && <Alert variant="danger">{error}</Alert>}
+return (
+  <div className="container my-5">
+    <h1 className="text-center mb-4">Quản lý tài khoản</h1>
+    {error && <Alert variant="danger">{error}</Alert>}
 
-      {loading ? (
-        <div className="text-center">
-          <Spinner animation="border" variant="primary" />
-          <p>Đang tải...</p>
-        </div>
-      ) : (
-        <div className="table-responsive">
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>Họ và tên</th>
-                <th>Số điện thoại</th>
-                <th>Vai trò</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {accounts.map((account) => (
-                <tr key={account._id}>
-                  <td>
-                    {editableAccount?._id === account._id ? (
-                      <input
-                        type="email"
-                        className="form-control"
-                        value={editableAccount.email}
-                        onChange={(e) =>
-                          handleInputChange("email", e.target.value)
-                        }
-                      />
-                    ) : (
-                      account.email
-                    )}
-                  </td>
-                  <td>
-                    {editableAccount?._id === account._id ? (
-                      <div className="d-flex gap-2">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Họ"
-                          value={editableAccount.firstName}
-                          onChange={(e) =>
-                            handleInputChange("firstName", e.target.value)
-                          }
-                        />
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Tên"
-                          value={editableAccount.lastName}
-                          onChange={(e) =>
-                            handleInputChange("lastName", e.target.value)
-                          }
-                        />
-                      </div>
-                    ) : (
-                      `${account.firstName} ${account.lastName}`
-                    )}
-                  </td>
-                  <td>
-                    {editableAccount?._id === account._id ? (
+    {loading && (
+      <div className="loading-container text-center">
+        <Spinner
+          animation="border"
+          variant="success" // This is the green spinner
+          className="loading-spinner"
+        />
+        <div>Đang tải Thông tin ...</div>
+      </div>
+    )}
+
+    {!loading && (
+      <div className="table-responsive">
+        <Table striped bordered hover>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Họ và tên</th>
+              <th>Số điện thoại</th>
+              <th>Vai trò</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {accounts.map((account) => (
+              <tr key={account._id}>
+                <td>
+                  {editableAccount?._id === account._id ? (
+                    <input
+                      type="email"
+                      className="form-control"
+                      value={editableAccount.email}
+                      onChange={(e) =>
+                        handleInputChange("email", e.target.value)
+                      }
+                    />
+                  ) : (
+                    account.email
+                  )}
+                </td>
+                <td>
+                  {editableAccount?._id === account._id ? (
+                    <div className="d-flex gap-2">
                       <input
                         type="text"
                         className="form-control"
-                        value={editableAccount.phone}
+                        placeholder="Họ"
+                        value={editableAccount.firstName}
                         onChange={(e) =>
-                          handleInputChange("phone", e.target.value)
+                          handleInputChange("firstName", e.target.value)
                         }
                       />
-                    ) : (
-                      account.phone
-                    )}
-                  </td>
-                  <td>
-                    {editableAccount?._id === account._id ? (
-                      <select
+                      <input
+                        type="text"
                         className="form-control"
-                        value={editableAccount.role}
+                        placeholder="Tên"
+                        value={editableAccount.lastName}
                         onChange={(e) =>
-                          handleInputChange("role", e.target.value)
+                          handleInputChange("lastName", e.target.value)
                         }
+                      />
+                    </div>
+                  ) : (
+                    `${account.firstName} ${account.lastName}`
+                  )}
+                </td>
+                <td>
+                  {editableAccount?._id === account._id ? (
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={editableAccount.phone}
+                      onChange={(e) =>
+                        handleInputChange("phone", e.target.value)
+                      }
+                    />
+                  ) : (
+                    account.phone
+                  )}
+                </td>
+                <td>
+                  {editableAccount?._id === account._id ? (
+                    <select
+                      className="form-control"
+                      value={editableAccount.role}
+                      onChange={(e) =>
+                        handleInputChange("role", e.target.value)
+                      }
+                    >
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  ) : (
+                    account.role
+                  )}
+                </td>
+                <td className="text-center">
+                  {editableAccount?._id === account._id ? (
+                    <>
+                      <Button
+                        variant="success"
+                        size="sm"
+                        onClick={handleUpdate}
+                        className="me-2"
                       >
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                    ) : (
-                      account.role
-                    )}
-                  </td>
-                  <td className="text-center">
-                    {editableAccount?._id === account._id ? (
-                      <>
-                        <Button
-                          variant="success"
-                          size="sm"
-                          onClick={handleUpdate}
-                          className="me-2"
-                        >
-                          Lưu
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => setEditableAccount(null)}
-                        >
-                          Hủy
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          variant="warning"
-                          size="sm"
-                          onClick={() => handleEdit(account)}
-                          className="me-2"
-                        >
-                          Sửa
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleDelete(account._id)}
-                        >
-                          Xóa
-                        </Button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
-      )}
-    </div>
-  );
+                        Lưu
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setEditableAccount(null)}
+                      >
+                        Hủy
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="warning"
+                        size="sm"
+                        onClick={() => handleEdit(account)}
+                        className="me-2"
+                      >
+                        Sửa
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDelete(account._id)}
+                      >
+                        Xóa
+                      </Button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+    )}
+  </div>
+);
+
 };
 
 export default AccountList;
