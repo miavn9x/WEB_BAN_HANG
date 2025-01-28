@@ -1,6 +1,3 @@
-// Desc: Actions for placing an order
-//Path: frontend/src/redux/actions/placeOrder.js
-
 export const placeOrder = (orderData) => async (dispatch) => {
   try {
     const response = await fetch("/api/orders", {

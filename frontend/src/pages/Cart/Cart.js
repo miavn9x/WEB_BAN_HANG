@@ -9,6 +9,7 @@ import {
   clearCartFromAPI, // Lấy giỏ hàng từ server
 } from "../../redux/actions/cartActions";
 import { formatter } from "../../../utils/fomater";
+import QuantityBox from "../../components/Product/QuantityBox";
 ;
 
 // Selector để lấy danh sách sản phẩm trong giỏ
@@ -55,18 +56,9 @@ const Cart = () => {
     }
   };
 
-  // Xử lý khi thay đổi số lượng sản phẩm
-  const handleQuantityChange = (productId, action) => {
-    const item = cartItems.find((item) => item?.product?._id === productId);
-    if (!item) return;
+//   // Xử lý khi thay đổi số lượng sản phẩm
 
-    const currentQuantity = Number(item.quantity) || 0;
-    if (action === "increase") {
-      dispatch(updateCartQuantity(productId, currentQuantity + 1));
-    } else if (action === "decrease" && currentQuantity > 1) {
-      dispatch(updateCartQuantity(productId, currentQuantity - 1));
-    }
-  };
+
 
   // Cập nhật thông tin người dùng khi chỉnh sửa
   const handleInputChange = (e) => {
@@ -179,34 +171,27 @@ const Cart = () => {
                         )}
                       </p>
                     </div>
+                    <div className="col-2 d-flex flex-column align-items-center justify-content-between">
+                      {/* Phần số lượng */}
+                      <div className="quantity-controls mb-2 w-100">
+                        <QuantityBox
+                          maxQuantity={item.product.remainingStock}
+                          quantity={Number(item.quantity)}
+                          setQuantity={(newQuantity) =>
+                            dispatch(
+                              updateCartQuantity(item.product._id, newQuantity)
+                            )
+                          }
+                        />
+                      </div>
 
-                    <div className="col-2 d-flex justify-content-between align-items-center">
-                      <Button
-                        variant="outlined"
-                        color="secondary"
-                        onClick={() =>
-                          handleQuantityChange(item.product._id, "decrease")
-                        }
-                      >
-                        -
-                      </Button>
-                      <span>{Number(item.quantity) || 0}</span>
-                      <Button
-                        variant="outlined"
-                        color="secondary"
-                        onClick={() =>
-                          handleQuantityChange(item.product._id, "increase")
-                        }
-                      >
-                        +
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        color="error"
+                      {/* Nút xóa */}
+                      <button
+                        className="btn btn-outline-danger btn-sm w-100 mt-2"
                         onClick={() => handleRemoveFromCart(item.product._id)}
                       >
-                        Xóa
-                      </Button>
+                        <i className="fas fa-trash"></i>
+                      </button>
                     </div>
                   </li>
                 ) : null

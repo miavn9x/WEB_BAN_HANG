@@ -86,6 +86,7 @@ function App() {
           path="/gio-hang"
           element={
             <PrivateRoute isAuthenticated={isAuthenticated}>
+              {/* <Cart /> */}
               <Cart />
             </PrivateRoute>
           }

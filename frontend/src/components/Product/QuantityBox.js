@@ -1,31 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PiMinusBold } from "react-icons/pi";
 import { TfiPlus } from "react-icons/tfi";
 
-const QuantityBox = ({ maxQuantity }) => {
-  const [inputVal, setInputVal] = useState(1);
+const QuantityBox = ({ maxQuantity, quantity, setQuantity }) => {
+  const [inputVal, setInputVal] = useState(quantity || 1); // Giữ giá trị ban đầu từ props
+
+  useEffect(() => {
+    setInputVal(quantity); // Đồng bộ hóa với state từ cha
+  }, [quantity]);
 
   const minus = () => {
     if (inputVal > 1) {
-      // Đảm bảo số lượng không nhỏ hơn 1
-      setInputVal(inputVal - 1);
+      setInputVal(inputVal - 1); // Cập nhật giá trị state nội bộ
+      setQuantity(inputVal - 1); // Cập nhật giá trị cho cha
     }
   };
 
   const plus = () => {
     if (inputVal < maxQuantity) {
-      // Giới hạn theo maxQuantity (số lượng tồn kho)
-      setInputVal(inputVal + 1);
+      setInputVal(inputVal + 1); // Cập nhật giá trị state nội bộ
+      setQuantity(inputVal + 1); // Cập nhật giá trị cho cha
     }
   };
 
   const numberprocessing = (e) => {
     const value = e.target.value;
 
-    // Kiểm tra xem giá trị có hợp lệ và không vượt quá maxQuantity
     if (value === "" || /^[0-9\b]+$/.test(value)) {
-      const newVal = Math.max(1, Math.min(maxQuantity, value)); // Giới hạn giá trị trong khoảng 1 đến maxQuantity
-      setInputVal(newVal);
+      const newVal = Math.max(1, Math.min(maxQuantity, value)); // Giới hạn giá trị
+      setInputVal(newVal); // Cập nhật giá trị state nội bộ
+      setQuantity(newVal); // Cập nhật giá trị cho cha
     }
   };
 

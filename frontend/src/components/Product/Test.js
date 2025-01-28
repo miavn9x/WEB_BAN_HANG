@@ -104,21 +104,23 @@ const Test = () => {
   }
 
   // Handle Add to Cart
-  const handleAddToCart = async () => {
-    try {
-      if (quantity > product.remainingStock) {
-        alert("Số lượng vượt quá hàng còn trong kho!");
-        return;
-      }
-
-      await dispatch(addToCart(product, quantity));
-      // Thông báo thành công
-      alert("Đã thêm sản phẩm vào giỏ hàng!");
-    } catch (error) {
-      console.error("Lỗi khi thêm vào giỏ hàng:", error);
-      alert("Có lỗi xảy ra khi thêm vào giỏ hàng!");
+const handleAddToCart = async () => {
+  try {
+    // Kiểm tra số lượng có vượt quá số lượng tồn kho hay không
+    if (quantity > product.remainingStock) {
+      alert("Số lượng vượt quá hàng còn trong kho!");
+      return;
     }
-  };
+
+    console.log(`Số lượng thêm vào giỏ hàng: ${quantity}`); // Kiểm tra số lượng trong console
+    await dispatch(addToCart(product, Number(quantity))); // Gửi số lượng đúng vào giỏ hàng
+    alert("Đã thêm sản phẩm vào giỏ hàng!");
+  } catch (error) {
+    console.error("Lỗi khi thêm vào giỏ hàng:", error);
+    alert("Có lỗi xảy ra khi thêm vào giỏ hàng!");
+  }
+};
+
 
   return (
     <div className="container mt-4">
@@ -213,9 +215,10 @@ const Test = () => {
                           Số lượng:
                         </label>
                         <QuantityBox
-                          quantity={quantity}
-                          setQuantity={setQuantity}
-                          maxQuantity={product.remainingStock} // Giới hạn số lượng theo tồn kho
+                          maxQuantity={product?.remainingStock} // Truyền maxQuantity từ sản phẩm
+                          quantity={quantity} // Truyền quantity từ state cha
+                          setQuantity={setQuantity} // Cập nhật state của cha
+                      
                         />
                         {/* Set quantity handler */}
                       </div>
