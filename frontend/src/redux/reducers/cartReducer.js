@@ -1,3 +1,5 @@
+// Hồ sơ: 9.2. Xây dựng reducer cho giỏ hàng
+// Bây giờ chúng ta sẽ xây dựng reducer cho giỏ hàng. Mở file frontend/src/redux/reducers/cartReducer.js và thêm nội dung sau:
 import { CART_ACTIONS } from "../constants/actionTypes";
 
 const initialState = {
@@ -21,8 +23,18 @@ export const cartReducer = (state = initialState, action) => {
       );
 
       if (existingItemIndex !== -1) {
-        const updatedItems = [...state.items];
-        updatedItems[existingItemIndex].quantity += action.payload.quantity;
+        // Cập nhật số lượng cho sản phẩm đã tồn tại
+        const updatedItems = state.items.map((item, index) => {
+          if (index === existingItemIndex) {
+            return {
+              ...item,
+              quantity:
+                parseInt(item.quantity) + parseInt(action.payload.quantity),
+            };
+          }
+          return item;
+        });
+
         return {
           ...state,
           items: updatedItems,
@@ -30,20 +42,21 @@ export const cartReducer = (state = initialState, action) => {
         };
       }
 
+      // Thêm sản phẩm mới
       return {
         ...state,
         items: [
           ...state.items,
           {
             product: action.payload.product,
-            quantity: action.payload.quantity,
+            quantity: parseInt(action.payload.quantity),
           },
         ],
         total: calculateTotal([
           ...state.items,
           {
             product: action.payload.product,
-            quantity: action.payload.quantity,
+            quantity: parseInt(action.payload.quantity),
           },
         ]),
       };

@@ -18,11 +18,11 @@ import ProductEdit from "./pages/Auth/Admin/AddProduct/ProductEdit";
 import AccountList from "./pages/Auth/Admin/AccountList/AccountList";
 import UserPage from "./pages/Auth/Admin/AccountList/UserPage";
 // import ProductList from "./components/Product/Productlist";
-import Favorites from "./components/Product/Favorites";
 import Cart from "./components/Product/Cart";
 import Checkout from "./components/Product/Checkout";
-import ProductModal from "./components/Product/ProductModals";
-import P from "./components/Product/Test";
+import ProductModal from "./components/Nav/ProductModals";
+import Test from "./components/Product/Test";
+import ProductItem from "./components/Product/ProductItem";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -59,8 +59,10 @@ function App() {
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/products" element={<ProductPage />} />
-        <Route path="/test" element={<P/>} />
+        <Route path="/product/:id" element={<Test />} />
         <Route path="/b" element={<ProductModal />} />
+        <Route path="/product/:productId" element={<ProductItem />} />
+        {/* <Route path="/product/:id" element={<ProductDetail />} /> */}
 
         {/* Protected Routes - User & admin */}
         <Route
@@ -71,14 +73,14 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/danh-sach-yeu-thich"
           element={
             <PrivateRoute isAuthenticated={isAuthenticated}>
               <Favorites />
             </PrivateRoute>
           }
-        />
+        /> */}
 
         <Route
           path="/gio-hang"

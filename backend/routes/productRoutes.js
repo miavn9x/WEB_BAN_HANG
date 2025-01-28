@@ -179,7 +179,27 @@ router.get("/products", async (req, res) => {
   }
 });
 
+// Route lấy chi tiết sản phẩm theo ID
+router.get("/products/:id", async (req, res) => {
+  const productId = req.params.id;
 
+  // Validate product ID
+  if (!productId.match(/^[0-9a-fA-F]{24}$/)) {
+    return res.status(400).json({ message: "ID sản phẩm không hợp lệ." });
+  }
+
+  try {
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Không tìm thấy sản phẩm." });
+    }
+
+    res.status(200).json({ product });
+  } catch (error) {
+    console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
+    res.status(500).json({ message: "Có lỗi xảy ra khi lấy thông tin sản phẩm." });
+  }
+});
 
 
 // Route sửa sản phẩm (PUT)

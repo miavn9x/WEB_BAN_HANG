@@ -1,3 +1,5 @@
+// Các hàm action liên quan đến giỏ hàng
+// redux1/actions/cartActions.js
 import { CART_ACTIONS } from "../constants/actionTypes";
 import axios from "axios";
 
@@ -5,11 +7,14 @@ import axios from "axios";
 export const addToCart = (product, quantity) => async (dispatch) => {
   try {
     const token = localStorage.getItem("token");
-    if (!token) throw new Error("Token không hợp lệ");
+    if (!token) throw new Error("Vui lòng đăng nhập để thêm vào giỏ hàng");
 
     const response = await axios.post(
       `/api/cart`,
-      { productId: product._id, quantity },
+      {
+        productId: product._id,
+        quantity: parseInt(quantity) // Đảm bảo quantity là số
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -20,17 +25,20 @@ export const addToCart = (product, quantity) => async (dispatch) => {
 
     dispatch({
       type: CART_ACTIONS.ADD_TO_CART,
-      payload: { product, quantity },
+      payload: {
+        product,
+        quantity: parseInt(quantity)
+      },
     });
-    console.log("Thêm vào giỏ hàng thành công:", response.data);
+
+    return response.data;
   } catch (error) {
-    console.error(
-      "Lỗi khi thêm sản phẩm vào giỏ hàng:",
-      error.response ? error.response.data : error.message
-    );
+    console.error("Lỗi khi thêm vào giỏ hàng:", error);
     throw error;
   }
 };
+
+
 
 // Xóa sản phẩm khỏi giỏ hàng
 export const removeFromCart = (productId) => async (dispatch) => {

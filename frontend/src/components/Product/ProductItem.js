@@ -5,23 +5,17 @@ import { FaRegHeart, FaCartPlus } from "react-icons/fa"; // Gộp import từ re
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../styles/ProductItem.css";
-import ProductModal from "./ProductModals";
 import { formatter } from "../../utils/fomater";
 
 const ProductItem = ({ product }) => {
-  const [isOpenProductModal, setIsOpenProductModal] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [notification, setNotification] = useState(""); // Dùng cho thông báo
   const navigate = useNavigate();
 
-  // Mở modal chi tiết sản phẩm
-  const viewProductDetail = () => {
-    setIsOpenProductModal(true);
-  };
 
-  // Đóng modal chi tiết sản phẩm
-  const closeProductModal = () => {
-    setIsOpenProductModal(false);
+
+  const viewProductDetail = () => {
+    navigate(`/product/${product._id}`);
   };
 
   // Thêm sản phẩm vào danh sách yêu thích
@@ -75,17 +69,28 @@ const ProductItem = ({ product }) => {
 
         {/* Các nút hành động */}
         <div className="action">
-          <button className="action__btn" title="Xem chi tiết">
+          <button
+            className="action__btn"
+            title="Xem chi tiết"
+            onClick={viewProductDetail}
+          >
             <MdOutlineZoomOutMap />
           </button>
           <button
             className="action__btn"
             title="Thêm vào yêu thích"
-            onClick={handleAddToFavorites}
+            onClick={(e) => {
+              e.stopPropagation(); // Ngăn chặn sự kiện click của cha
+              handleAddToFavorites();
+            }}
           >
             <FaRegHeart color={isFavorited ? "red" : "gray"} />
           </button>
-          <button className="action__btn" title="Thêm vào giỏ">
+          <button
+            className="action__btn"
+            title="Thêm vào giỏ"
+            onClick={(e) => e.stopPropagation()} // Ngăn chặn sự kiện click của cha
+          >
             <FaCartPlus />
           </button>
         </div>
@@ -132,11 +137,6 @@ const ProductItem = ({ product }) => {
       {/* Hiển thị thông báo */}
       {notification && (
         <div className="notification-message">{notification}</div>
-      )}
-
-      {/* Modal chi tiết sản phẩm */}
-      {isOpenProductModal && (
-        <ProductModal closeProductModal={closeProductModal} product={product} />
       )}
     </div>
   );

@@ -201,7 +201,7 @@ const MyNavbar = () => {
 
                   {/* Biểu tượng giỏ hàng */}
                   <Nav.Link
-                    onClick={() => handleLinkClick("Giỏ Hàng")}
+                    onClick={() => handleLinkClick("/gio-hang")}
                     className="p-1 ms-2 position-relative icon-wrapper"
                     style={{ cursor: "pointer" }}
                   >
@@ -346,7 +346,7 @@ const MyNavbar = () => {
                   <span className="notification-badge">0</span>
                 </Nav.Link>
                 <Nav.Link
-                  onClick={() => handleLinkClick("Giỏ Hàng")}
+                  onClick={() => handleLinkClick("/gio-hang")}
                   className="position-relative"
                   style={{ cursor: "pointer" }}
                 >

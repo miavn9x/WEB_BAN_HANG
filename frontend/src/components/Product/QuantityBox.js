@@ -2,17 +2,19 @@ import React, { useState } from "react";
 import { PiMinusBold } from "react-icons/pi";
 import { TfiPlus } from "react-icons/tfi";
 
-const QuantityBox = () => {
+const QuantityBox = ({ maxQuantity }) => {
   const [inputVal, setInputVal] = useState(1);
 
   const minus = () => {
-    if (inputVal > 0) {
+    if (inputVal > 1) {
+      // Đảm bảo số lượng không nhỏ hơn 1
       setInputVal(inputVal - 1);
     }
   };
 
   const plus = () => {
-    if (inputVal < 99) {
+    if (inputVal < maxQuantity) {
+      // Giới hạn theo maxQuantity (số lượng tồn kho)
       setInputVal(inputVal + 1);
     }
   };
@@ -20,8 +22,10 @@ const QuantityBox = () => {
   const numberprocessing = (e) => {
     const value = e.target.value;
 
+    // Kiểm tra xem giá trị có hợp lệ và không vượt quá maxQuantity
     if (value === "" || /^[0-9\b]+$/.test(value)) {
-      setInputVal(Math.max(0, Math.min(99, value)));
+      const newVal = Math.max(1, Math.min(maxQuantity, value)); // Giới hạn giá trị trong khoảng 1 đến maxQuantity
+      setInputVal(newVal);
     }
   };
 

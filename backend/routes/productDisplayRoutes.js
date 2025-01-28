@@ -36,4 +36,17 @@ router.get('/api/products', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+// GET tất cả sản phẩm giảm giá
+router.get('/api/products/discounts', async (req, res) => {
+  try {
+    // Lọc sản phẩm có discountPercentage > 0 (giảm giá)
+    const discountedProducts = await Product.find({ discountPercentage: { $gt: 0 } });
+
+    res.json({ products: discountedProducts });
+  } catch (error) {
+    console.error('Error fetching discounted products:', error);
+    res.status(500).send('Server error');
+  }
+});
 module.exports = router;
