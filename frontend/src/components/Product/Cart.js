@@ -6,8 +6,11 @@ import {
   removeFromCart,
   updateCartQuantity,
   fetchCart,
+  placeOrder, // Thêm action placeOrder để gửi thông tin đặt hàng
 } from "../../redux/actions/cartActions";
+
 import { formatter } from "../../utils/fomater";
+import { fetchUserProfile } from "../../redux/actions/userActions";
 // Selector để lấy danh sách sản phẩm trong giỏ
 const selectCartItems = createSelector(
   (state) => state.cart.items,
@@ -17,16 +20,32 @@ const selectCartItems = createSelector(
 const Cart = () => {
   const cartItems = useSelector(selectCartItems);
   const dispatch = useDispatch();
+const userProfile = useSelector((state) => state.user.info);
 
-  // Lấy thông tin tài khoản người dùng từ Redux, với giá trị mặc định là {} nếu chưa có
-  const accountInfo = useSelector((state) => state.user.info) || {};
+// State cho form
+const [editableUserInfo, setEditableUserInfo] = useState({
+  fullName: "",
+  email: "",
+  phone: "",
+  address: "",
+});
 
-  const [editableUserInfo, setEditableUserInfo] = useState({
-    fullName: accountInfo.fullName || "",
-    email: accountInfo.email || "",
-    phone: accountInfo.phone || "",
-    address: accountInfo.address || "",
-  });
+// Lấy thông tin người dùng khi component mount
+useEffect(() => {
+  dispatch(fetchUserProfile());
+}, [dispatch]);
+
+// Cập nhật form khi có dữ liệu từ API
+useEffect(() => {
+  if (userProfile) {
+    setEditableUserInfo({
+      fullName: `${userProfile.firstName} ${userProfile.lastName}` || "",
+      email: userProfile.email || "",
+      phone: userProfile.phone || "",
+      address: userProfile.address || "",
+    });
+  }
+}, [userProfile]);
 
   const [selectedItems, setSelectedItems] = useState([]);
 
@@ -34,7 +53,6 @@ const Cart = () => {
     dispatch(fetchCart()); // Lấy giỏ hàng từ server khi component mount
   }, [dispatch]);
 
-  // Tính tổng tiền của giỏ hàng (chỉ tính sản phẩm được chọn)
   const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => {
       if (
@@ -50,20 +68,17 @@ const Cart = () => {
     }, 0);
   };
 
-  // Xử lý khi xóa sản phẩm khỏi giỏ
   const handleRemoveFromCart = (productId) => {
     if (productId) {
       dispatch(removeFromCart(productId)); // Gửi action xóa sản phẩm
     }
   };
 
-  // Xử lý khi thay đổi số lượng sản phẩm trực tiếp
   const handleQuantityInputChange = (productId, newQuantity) => {
     const quantity = Math.max(Number(newQuantity), 1); // Đảm bảo số lượng >= 1
     dispatch(updateCartQuantity(productId, quantity));
   };
 
-  // Xử lý khi tăng hoặc giảm số lượng sản phẩm
   const handleQuantityChange = (productId, action) => {
     const item = cartItems.find((item) => item?.product?._id === productId);
     if (!item) return;
@@ -76,7 +91,6 @@ const Cart = () => {
     }
   };
 
-  // Cập nhật thông tin người dùng khi chỉnh sửa
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditableUserInfo((prevState) => ({
@@ -93,6 +107,20 @@ const Cart = () => {
         return prevSelectedItems.filter((id) => id !== productId);
       }
     });
+  };
+
+  // Xử lý đặt hàng, gửi thông tin người dùng và giỏ hàng
+  const handlePlaceOrder = () => {
+    const orderData = {
+      userInfo: editableUserInfo, // Thông tin người dùng chỉnh sửa
+      items: cartItems.filter((item) =>
+        selectedItems.includes(item.product._id)
+      ),
+      totalAmount: calculateSubtotal(),
+    };
+
+    // Gửi thông tin đặt hàng tới server
+    dispatch(placeOrder(orderData));
   };
 
   return (
@@ -243,6 +271,7 @@ const Cart = () => {
             </div>
             <button
               className="btn btn-secondary btn-purchase w-100 mt-3"
+              onClick={handlePlaceOrder} // Gửi yêu cầu đặt hàng
               disabled={!selectedItems.length}
             >
               MUA HÀNG

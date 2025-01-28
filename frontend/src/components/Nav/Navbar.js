@@ -31,6 +31,7 @@ import {
 import "../../styles/Navbar.css";
 import { useNavigate } from "react-router-dom";
 import LoginMenu from "../../pages/Auth/Login/LoginMenu";
+import { useSelector } from "react-redux";
 const categories = [
   {
     path: "sua-bot-cao-cap",
@@ -78,6 +79,10 @@ const systemInfo = [
   { icon: <FaPhone />, text: "Hotline: 099999998" },
 ];
 
+
+
+
+
 const MyNavbar = () => {
   const navigate = useNavigate(); // Sử dụng hook useNavigate
 
@@ -106,7 +111,6 @@ const MyNavbar = () => {
     setIsMenuVisible(false);
   };
 
-  const isLoggedIn = !!localStorage.getItem("token");
 
   const [isLargeScreen, setIsLargeScreen] = useState(false);
 
@@ -121,7 +125,16 @@ const MyNavbar = () => {
 
     return () => window.removeEventListener("resize", handleResize); // Cleanup khi component bị huỷ
   }, []);
+  // Get cart items from Redux store
+  const cartItems = useSelector((state) => state.cart.items);
 
+  // Calculate the total number of items in the cart
+  const totalItemsInCart = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
+
+  const isLoggedIn = !!localStorage.getItem("token");
   return (
     <>
       {/* Navbar chính */}
@@ -206,7 +219,8 @@ const MyNavbar = () => {
                     style={{ cursor: "pointer" }}
                   >
                     <FaShoppingCart className="text-dark" size={20} />
-                    <span className="cart-badge">2</span>
+                    {/* Dynamically show the number of items in the cart */}
+                    <span className="cart-badge">{totalItemsInCart}</span>
                   </Nav.Link>
                 </div>
               </Nav>
@@ -351,7 +365,7 @@ const MyNavbar = () => {
                   style={{ cursor: "pointer" }}
                 >
                   <FaShoppingCart size={20} />
-                  <span className="cart-badge">2</span>
+                  <span className="cart-badge">{totalItemsInCart}</span>
                 </Nav.Link>
               </Nav>
             </Col>

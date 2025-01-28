@@ -171,3 +171,52 @@ export const clearCartFromAPI = (selectedItemIds) => {
     }
   };
 };
+
+
+export const placeOrder = (orderData) => async (dispatch) => {
+  try {
+    const response = await fetch("/api/orders", {
+      method: "POST",
+      body: JSON.stringify(orderData),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json(); // Đọc dữ liệu từ phản hồi
+
+    if (response.ok) {
+      // Thành công, dispatch action và trả về kết quả thành công
+      dispatch({
+        type: "PLACE_ORDER_SUCCESS",
+        payload: data, // Dữ liệu trả về từ API
+      });
+      return { success: true };
+    } else {
+      // Nếu có lỗi từ server, dispatch action thất bại và trả thông báo lỗi
+      dispatch({
+        type: "PLACE_ORDER_FAILURE",
+        payload: data, // Dữ liệu lỗi từ API
+      });
+      return { success: false, message: data.message || "Đặt hàng thất bại" };
+    }
+  } catch (error) {
+    // Xử lý lỗi nếu có vấn đề khi gửi yêu cầu hoặc khi gặp lỗi mạng
+    console.error(error);
+    return { success: false, message: "Đặt hàng thất bại. Vui lòng thử lại." };
+  }
+};
+export const fetchUserProfile = () => async (dispatch) => {
+  try {
+    const response = await axios.get("/api/profile"); // Gửi yêu cầu GET đến API
+    dispatch({
+      type: "FETCH_USER_PROFILE_SUCCESS",
+      payload: response.data.user, // Lưu thông tin người dùng vào Redux
+    });
+  } catch (error) {
+    dispatch({
+      type: "FETCH_USER_PROFILE_FAILURE",
+      payload: error.message, // Lỗi nếu có
+    });
+  }
+};
