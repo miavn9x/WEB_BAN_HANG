@@ -52,6 +52,7 @@ const OrderHistory = () => {
     setShowModal(true);
   };
 
+  // Các hàm helper cho badges
   const getOrderStatusBadge = (status) => {
     const statusConfig = {
       "Đang xử lý": { color: "warning", text: "Đang xử lý" },
@@ -68,7 +69,7 @@ const OrderHistory = () => {
   const getPaymentStatusBadge = (status) => {
     const statusConfig = {
       "Chưa thanh toán": { color: "danger", text: "Chưa thanh toán" },
-      "Chờ thanh toán": { color: "warning", text: "Chờ thanh toán" },
+      "Đợi xác nhận": { color: "warning", text: "Đợi xác nhận" },
       "Đã thanh toán": { color: "success", text: "Đã thanh toán" },
     };
 
@@ -86,6 +87,51 @@ const OrderHistory = () => {
 
   if (loading) return <div>Đang tải...</div>;
 
+const handleCancelOrder = async (orderId) => {
+  if (window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Vui lòng đăng nhập!");
+      }
+
+      console.log("Attempting to cancel order:", orderId); // Debug log
+
+      const response = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Không thể hủy đơn hàng");
+      }
+
+      if (data.success) {
+        alert("Đơn hàng đã được hủy thành công!");
+
+        // Cập nhật trạng thái local
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.orderId === orderId
+              ? { ...order, orderStatus: "Đã hủy" }
+              : order
+          )
+        );
+
+        setShowModal(false); // Đóng modal
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert(error.message || "Có lỗi xảy ra khi hủy đơn hàng");
+    }
+  }
+};
+
   return (
     <Container>
       <h2 className="my-4">Lịch sử đơn hàng</h2>
@@ -95,20 +141,16 @@ const OrderHistory = () => {
             <th>Mã đơn hàng</th>
             <th>Ngày đặt</th>
             <th>Tổng tiền</th>
-            <th>Trạng thái đơn hàng</th>
-            <th>Trạng thái thanh toán</th>
             <th>Phương thức thanh toán</th>
             <th>Chi tiết</th>
           </tr>
         </thead>
         <tbody>
           {orders.map((order) => (
-            <tr key={order._id}>
+            <tr key={order.orderId}>
               <td>{order.orderId}</td>
-              <td>{new Date(order.orderDate).toLocaleDateString()}</td>
+              <td>{order.formattedOrderDate}</td>
               <td>{formatter(order.totalAmount)}</td>
-              <td>{getOrderStatusBadge(order.orderStatus)}</td>
-              <td>{getPaymentStatusBadge(order.paymentStatus)}</td>
               <td>{getPaymentMethodLabel(order.paymentMethod)}</td>
               <td>
                 <Button
@@ -135,10 +177,7 @@ const OrderHistory = () => {
               <Row className="mb-3">
                 <Col md={6}>
                   <h5>Thông tin đơn hàng</h5>
-                  <p>
-                    Ngày đặt:{" "}
-                    {new Date(selectedOrder.orderDate).toLocaleString()}
-                  </p>
+                  <p>Ngày đặt: {selectedOrder.formattedOrderDate}</p>
                   <p>
                     Trạng thái đơn hàng:{" "}
                     {getOrderStatusBadge(selectedOrder.orderStatus)}
@@ -229,9 +268,21 @@ const OrderHistory = () => {
                   </tr>
                 </tfoot>
               </Table>
+
+              {/* Thêm nút Hủy đơn hàng */}
+              {selectedOrder && selectedOrder.orderStatus === "Đang xử lý" && (
+                <Button
+                  variant="danger"
+                  onClick={() => handleCancelOrder(selectedOrder.orderId)}
+                  className="mt-3"
+                >
+                  Hủy đơn hàng
+                </Button>
+              )}
             </>
           )}
         </Modal.Body>
+
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             Đóng

@@ -45,6 +45,16 @@ const handleCompleteOrder = async (event) => {
       return;
     }
 
+    const currentDate = new Date();
+    const formattedDate = currentDate.toLocaleString("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
     // Chuẩn bị dữ liệu đơn hàng
     const orderDetails = {
       orderId,
@@ -60,17 +70,16 @@ const handleCompleteOrder = async (event) => {
       shippingFee: orderData.shippingFee,
       paymentMethod,
       paymentStatus:
-        paymentMethod === "cod" ? "Chưa thanh toán" : "Chờ thanh toán",
+        paymentMethod === "cod" ? "Chưa thanh toán" : "Đợi xác nhận",
       userInfo: {
         fullName: orderData.userInfo?.fullName,
         phone: orderData.userInfo?.phone,
         address: orderData.userInfo?.address,
+        email: orderData.userInfo?.email,
       },
       orderStatus: "Đang xử lý",
-      orderDate: new Date().toISOString(),
+      orderDate: currentDate,
     };
-
-    console.log("Sending order details:", orderDetails); // Để debug
 
     const response = await fetch("/api/orders", {
       method: "POST",
@@ -82,10 +91,8 @@ const handleCompleteOrder = async (event) => {
     });
 
     const data = await response.json();
-    console.log("Server response:", data); // Để debug
 
     if (data.success) {
-      // Lưu order details vào localStorage để có thể truy cập ở trang success
       localStorage.setItem(
         "lastOrderDetails",
         JSON.stringify({
@@ -93,11 +100,18 @@ const handleCompleteOrder = async (event) => {
           orderDetails: {
             ...orderDetails,
             order: data.order,
+            formattedOrderDate: formattedDate,
           },
         })
       );
 
-      alert(`Đặt hàng thành công! Mã đơn hàng của bạn là: ${orderId}`);
+      // Hiển thị thông báo theo phương thức thanh toán
+      const successMessage = `Đặt hàng thành công!
+Mã đơn hàng: ${orderId}
+Thời gian đặt: ${formattedDate}
+${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
+
+      alert(successMessage);
       localStorage.removeItem("cart");
 
       navigate("/order-success", {
@@ -106,6 +120,7 @@ const handleCompleteOrder = async (event) => {
           orderDetails: {
             ...orderDetails,
             order: data.order,
+            formattedOrderDate: formattedDate,
           },
         },
       });
