@@ -130,27 +130,41 @@ useEffect(() => {
 
   const navigate = useNavigate();
 
-  const handleProceedToCheckout = () => {
-    if (!selectedItems.length) {
-      alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
-      return;
-    }
+const handleProceedToCheckout = () => {
+  if (!selectedItems.length) {
+    alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
+    return;
+  }
 
-    if (!editableUserInfo.address.trim()) {
-      alert("Vui lòng nhập địa chỉ giao hàng để tiếp tục!");
-      return;
-    }
+  if (!editableUserInfo.address.trim()) {
+    alert("Vui lòng nhập địa chỉ giao hàng để tiếp tục!");
+    return;
+  }
 
-    const orderData = {
-      userInfo: editableUserInfo,
-      items: cartItems.filter((item) =>
-        selectedItems.includes(item.product._id)
-      ),
-      totalAmount: calculateSubtotal() + 25000,
-    };
+  // Lấy các sản phẩm đã chọn với đầy đủ thông tin
+  const selectedProducts = cartItems.filter((item) =>
+    selectedItems.includes(item.product._id)
+  );
 
-    navigate("/thanh-toan", { state: { orderData } });
+  const orderData = {
+    userInfo: editableUserInfo,
+    items: selectedProducts.map((item) => ({
+      product: {
+        _id: item.product._id,
+        name: item.product.name,
+        price: item.product.price,
+        priceAfterDiscount: item.product.priceAfterDiscount,
+        images: item.product.images,
+      },
+      quantity: item.quantity,
+    })),
+    shippingFee: 25000,
+    subtotal: calculateSubtotal(),
+    totalAmount: calculateSubtotal() + 25000,
   };
+
+  navigate("/thanh-toan", { state: { orderData } });
+};
 
   return (
     <div className="container">

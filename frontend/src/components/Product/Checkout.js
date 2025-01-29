@@ -28,24 +28,62 @@ const Checkout = () => {
     setPaymentMethod(event.target.value);
   };
 
-  const handleCompleteOrder = (event) => {
+  // Checkout.js
+  const handleCompleteOrder = async (event) => {
     event.preventDefault();
 
-    // Kiểm tra nếu chưa chọn phương thức thanh toán
     if (!paymentMethod) {
       alert("Vui lòng chọn phương thức thanh toán!");
       return;
     }
 
-    if (!orderData.items || orderData.items.length === 0) {
-      alert("Không có sản phẩm để thanh toán!");
-      return;
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Vui lòng đăng nhập để đặt hàng!");
+        navigate("/login");
+        return;
+      }
+
+      const orderDetails = {
+        orderId,
+        items: orderData.items.map((item) => ({
+          product: item.product._id,
+          quantity: item.quantity,
+        })),
+        totalAmount: orderData.totalAmount,
+        paymentMethod,
+        userInfo: {
+          fullName: orderData.userInfo?.fullName,
+          phone: orderData.userInfo?.phone,
+          address: orderData.userInfo?.address,
+        },
+      };
+
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(orderDetails),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert(`Đặt hàng thành công! Mã đơn hàng của bạn là: ${orderId}`);
+        // Xóa giỏ hàng sau khi đặt hàng thành công
+        localStorage.removeItem("cart");
+        navigate("/order-history");
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.");
     }
-
-    alert(`Đặt hàng thành công! Mã đơn hàng của bạn là: ${orderId}`);
-    navigate("/"); // Chuyển về trang chủ hoặc trang nào bạn muốn
   };
-
   return (
     <Container style={{ maxWidth: "500px" }}>
       <Row>
@@ -65,17 +103,43 @@ const Checkout = () => {
             <p> Địa Chỉ: {orderData.userInfo?.address}</p>
             <h6 className="text-center">Chi tiết đơn hàng</h6>
             {orderData.items?.map((item) => (
-              <div key={item.product._id}>
-                <p>Tên sản phẩm: {item.product.name}</p>
-                <p> Số lượng sản phẩm: {item.quantity}</p>
+              <div key={item.product._id} className="product-item mb-3">
+                <div className="d-flex align-items-center">
+                  <img
+                    src={item.product.images?.[0]}
+                    alt={item.product.name}
+                    style={{ width: "50px", marginRight: "10px" }}
+                  />
+                  <div>
+                    <p className="mb-1">{item.product.name}</p>
+                    <p className="mb-1">Số lượng: {item.quantity}</p>
+                    <p className="mb-0">
+                      Đơn giá: {formatter(item.product.priceAfterDiscount)}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
-            <h5 className="text-end">
-              Tổng tiền: {formatter(orderData.totalAmount)}{" "}
-            </h5>
-            {/* Hiển thị mã đơn hàng */}
+            <div className="order-summary-totals mt-3">
+              <div className="d-flex justify-content-between">
+                <span>Tạm tính:</span>
+                <span>{formatter(orderData.subtotal)}</span>
+              </div>
+              <div className="d-flex justify-content-between">
+                <span>Phí vận chuyển:</span>
+                <span>{formatter(orderData.shippingFee)}</span>
+              </div>
+              <div className="d-flex justify-content-between mt-2">
+                <strong>Tổng cộng:</strong>
+                <strong className="text-danger">
+                  {formatter(orderData.totalAmount)}
+                </strong>
+              </div>
+            </div>
+
             <p className="text-star mt-3">
-              Mã đơn hàng của bạn: <strong style={{color:"red"}}>{orderId}</strong>
+              Mã đơn hàng của bạn:{" "}
+              <strong style={{ color: "red" }}>{orderId}</strong>
             </p>
           </div>
         </Col>
@@ -107,7 +171,6 @@ const Checkout = () => {
                         marginRight: "10px",
                         width: "30px",
                         height: "auto",
-                        
                       }}
                     />
                     Thanh toán khi giao hàng (COD)
@@ -149,7 +212,7 @@ const Checkout = () => {
                   <p>Số tài khoản: 79575566778899</p>
                   <p>Chủ tài khoản: Nguyễn Thanh Tùng</p>
                   <p>Nội dung: Thanh toán đơn hàng mã số:</p>
-                  <h6 style={{color: "red"}}>{orderId}</h6>
+                  <h6 style={{ color: "red" }}>{orderId}</h6>
                   <div>
                     <img
                       alt="QR Code"
@@ -162,7 +225,7 @@ const Checkout = () => {
               )}
               <hr />
               <div>Quý khách quyển khoản với nỗi dung mã đơn hàng</div>
-              <hr/>
+              <hr />
               <div className="d-flex justify-content-between mt-4">
                 <Button variant="link" href="#" className="btn btn-link">
                   Giỏ hàng

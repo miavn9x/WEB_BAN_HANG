@@ -35,8 +35,8 @@ app.use("/api", userRoutes);
 const productRoutes = require("./routes/productRoutes");
 app.use("/api", productRoutes);
 //so luong san pham
-const orderRoutes = require("./routes/orderRoutes");
-app.use("/api", orderRoutes);
+const ordersRoute = require("./routes/ordersRoutes");
+app.use("/api", ordersRoute);
 
 // product display routes
 const productDisplayRoutes = require("./routes/productDisplayRoutes");

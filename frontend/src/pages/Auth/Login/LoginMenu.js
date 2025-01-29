@@ -40,10 +40,8 @@ const LoginMenu = ({ onClose }) => {
             <Dropdown.Item onClick={() => navigate("/thong-tin-ca-nhan")}>
               Thông tin tài khoản
             </Dropdown.Item>
-            <Dropdown.Item
-              onClick={() => navigate("danh-sach-yeu-thich")}
-            >
-              Sản phẩm yêu thích
+            <Dropdown.Item onClick={() => navigate("/OrderHistory")}>
+              Lịch sử mua hàng
             </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/san-pham-da-mua")}>
               Các sản phẩm đã mua
@@ -67,14 +65,12 @@ const LoginMenu = ({ onClose }) => {
             <Dropdown.Item onClick={() => navigate("/thong-tin-ca-nhan")}>
               Thông tin tài khoản
             </Dropdown.Item>
-            <Dropdown.Item
-              onClick={() => navigate("/user/danh-sach-yeu-thich")}
-            >
-              Sản phẩm yêu thích
+            <Dropdown.Item onClick={() => navigate("/OrderHistory")}>
+              lịch sử mua hàng
             </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/user/san-pham-da-mua")}>
+            {/* <Dropdown.Item onClick={() => navigate("/user/san-pham-da-mua")}>
               Các sản phẩm đã mua
-            </Dropdown.Item>
+            </Dropdown.Item> */}
             <Dropdown.Item onClick={() => navigate("/gio-hang")}>
               Giỏ hàng
             </Dropdown.Item>
