@@ -29,61 +29,94 @@ const Checkout = () => {
   };
 
   // Checkout.js
-  const handleCompleteOrder = async (event) => {
-    event.preventDefault();
+const handleCompleteOrder = async (event) => {
+  event.preventDefault();
 
-    if (!paymentMethod) {
-      alert("Vui lòng chọn phương thức thanh toán!");
+  if (!paymentMethod) {
+    alert("Vui lòng chọn phương thức thanh toán!");
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Vui lòng đăng nhập để đặt hàng!");
+      navigate("/login");
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Vui lòng đăng nhập để đặt hàng!");
-        navigate("/login");
-        return;
-      }
+    // Chuẩn bị dữ liệu đơn hàng
+    const orderDetails = {
+      orderId,
+      items: orderData.items.map((item) => ({
+        product: item.product._id,
+        quantity: item.quantity,
+        price: item.product.priceAfterDiscount,
+        name: item.product.name,
+        image: item.product.images[0],
+      })),
+      totalAmount: orderData.totalAmount,
+      subtotal: orderData.subtotal,
+      shippingFee: orderData.shippingFee,
+      paymentMethod,
+      paymentStatus:
+        paymentMethod === "cod" ? "Chưa thanh toán" : "Chờ thanh toán",
+      userInfo: {
+        fullName: orderData.userInfo?.fullName,
+        phone: orderData.userInfo?.phone,
+        address: orderData.userInfo?.address,
+      },
+      orderStatus: "Đang xử lý",
+      orderDate: new Date().toISOString(),
+    };
 
-      const orderDetails = {
-        orderId,
-        items: orderData.items.map((item) => ({
-          product: item.product._id,
-          quantity: item.quantity,
-        })),
-        totalAmount: orderData.totalAmount,
-        paymentMethod,
-        userInfo: {
-          fullName: orderData.userInfo?.fullName,
-          phone: orderData.userInfo?.phone,
-          address: orderData.userInfo?.address,
-        },
-      };
+    console.log("Sending order details:", orderDetails); // Để debug
 
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+    const response = await fetch("/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(orderDetails),
+    });
+
+    const data = await response.json();
+    console.log("Server response:", data); // Để debug
+
+    if (data.success) {
+      // Lưu order details vào localStorage để có thể truy cập ở trang success
+      localStorage.setItem(
+        "lastOrderDetails",
+        JSON.stringify({
+          orderId,
+          orderDetails: {
+            ...orderDetails,
+            order: data.order,
+          },
+        })
+      );
+
+      alert(`Đặt hàng thành công! Mã đơn hàng của bạn là: ${orderId}`);
+      localStorage.removeItem("cart");
+
+      navigate("/order-success", {
+        state: {
+          orderId: orderId,
+          orderDetails: {
+            ...orderDetails,
+            order: data.order,
+          },
         },
-        body: JSON.stringify(orderDetails),
       });
-
-      const data = await response.json();
-
-      if (data.success) {
-        alert(`Đặt hàng thành công! Mã đơn hàng của bạn là: ${orderId}`);
-        // Xóa giỏ hàng sau khi đặt hàng thành công
-        localStorage.removeItem("cart");
-        navigate("/order-history");
-      } else {
-        throw new Error(data.message);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.");
+    } else {
+      throw new Error(data.message || "Có lỗi xảy ra");
     }
-  };
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.");
+  }
+};
   return (
     <Container style={{ maxWidth: "500px" }}>
       <Row>

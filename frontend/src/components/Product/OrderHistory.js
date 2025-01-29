@@ -1,4 +1,3 @@
-// components/OrderHistory.js
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -53,15 +52,36 @@ const OrderHistory = () => {
     setShowModal(true);
   };
 
-  const getStatusBadge = (status) => {
-    const statusColors = {
-      Pending: "warning",
-      Processing: "info",
-      Shipped: "primary",
-      Delivered: "success",
-      Cancelled: "danger",
+  const getOrderStatusBadge = (status) => {
+    const statusConfig = {
+      "Đang xử lý": { color: "warning", text: "Đang xử lý" },
+      "Đã xác nhận": { color: "info", text: "Đã xác nhận" },
+      "Đang giao hàng": { color: "primary", text: "Đang giao hàng" },
+      "Đã giao hàng": { color: "success", text: "Đã giao hàng" },
+      "Đã hủy": { color: "danger", text: "Đã hủy" },
     };
-    return <Badge bg={statusColors[status] || "secondary"}>{status}</Badge>;
+
+    const config = statusConfig[status] || { color: "secondary", text: status };
+    return <Badge bg={config.color}>{config.text}</Badge>;
+  };
+
+  const getPaymentStatusBadge = (status) => {
+    const statusConfig = {
+      "Chưa thanh toán": { color: "danger", text: "Chưa thanh toán" },
+      "Chờ thanh toán": { color: "warning", text: "Chờ thanh toán" },
+      "Đã thanh toán": { color: "success", text: "Đã thanh toán" },
+    };
+
+    const config = statusConfig[status] || { color: "secondary", text: status };
+    return <Badge bg={config.color}>{config.text}</Badge>;
+  };
+
+  const getPaymentMethodLabel = (method) => {
+    const methods = {
+      cod: "Thanh toán khi nhận hàng",
+      bank: "Chuyển khoản ngân hàng",
+    };
+    return methods[method] || method;
   };
 
   if (loading) return <div>Đang tải...</div>;
@@ -75,8 +95,9 @@ const OrderHistory = () => {
             <th>Mã đơn hàng</th>
             <th>Ngày đặt</th>
             <th>Tổng tiền</th>
-            <th>Trạng thái</th>
-            <th>Thanh toán</th>
+            <th>Trạng thái đơn hàng</th>
+            <th>Trạng thái thanh toán</th>
+            <th>Phương thức thanh toán</th>
             <th>Chi tiết</th>
           </tr>
         </thead>
@@ -84,10 +105,11 @@ const OrderHistory = () => {
           {orders.map((order) => (
             <tr key={order._id}>
               <td>{order.orderId}</td>
-              <td>{new Date(order.dateOrdered).toLocaleDateString()}</td>
+              <td>{new Date(order.orderDate).toLocaleDateString()}</td>
               <td>{formatter(order.totalAmount)}</td>
-              <td>{getStatusBadge(order.status)}</td>
-              <td>{order.paymentMethod}</td>
+              <td>{getOrderStatusBadge(order.orderStatus)}</td>
+              <td>{getPaymentStatusBadge(order.paymentStatus)}</td>
+              <td>{getPaymentMethodLabel(order.paymentMethod)}</td>
               <td>
                 <Button
                   variant="info"
@@ -115,17 +137,41 @@ const OrderHistory = () => {
                   <h5>Thông tin đơn hàng</h5>
                   <p>
                     Ngày đặt:{" "}
-                    {new Date(selectedOrder.dateOrdered).toLocaleString()}
+                    {new Date(selectedOrder.orderDate).toLocaleString()}
                   </p>
-                  <p>Trạng thái: {getStatusBadge(selectedOrder.status)}</p>
-                  <p>Phương thức thanh toán: {selectedOrder.paymentMethod}</p>
-                  <p>Tổng tiền: {formatter(selectedOrder.totalAmount)}</p>
+                  <p>
+                    Trạng thái đơn hàng:{" "}
+                    {getOrderStatusBadge(selectedOrder.orderStatus)}
+                  </p>
+                  <p>
+                    Trạng thái thanh toán:{" "}
+                    {getPaymentStatusBadge(selectedOrder.paymentStatus)}
+                  </p>
+                  <p>
+                    Phương thức thanh toán:{" "}
+                    {getPaymentMethodLabel(selectedOrder.paymentMethod)}
+                  </p>
                 </Col>
                 <Col md={6}>
                   <h5>Thông tin khách hàng</h5>
                   <p>Họ tên: {selectedOrder.userInfo.fullName}</p>
                   <p>Số điện thoại: {selectedOrder.userInfo.phone}</p>
                   <p>Địa chỉ: {selectedOrder.userInfo.address}</p>
+                </Col>
+              </Row>
+
+              <Row>
+                <Col>
+                  <h5>Chi tiết thanh toán</h5>
+                  <div className="payment-details">
+                    <p>Tạm tính: {formatter(selectedOrder.subtotal)}</p>
+                    <p>
+                      Phí vận chuyển: {formatter(selectedOrder.shippingFee)}
+                    </p>
+                    <p className="fw-bold">
+                      Tổng cộng: {formatter(selectedOrder.totalAmount)}
+                    </p>
+                  </div>
                 </Col>
               </Row>
 
@@ -145,27 +191,43 @@ const OrderHistory = () => {
                       <td>
                         <div className="d-flex align-items-center">
                           <img
-                            src={item.product.image}
-                            alt={item.product.name}
+                            src={item.image}
+                            alt={item.name}
                             style={{ width: "50px", marginRight: "10px" }}
                           />
-                          {item.product.name}
+                          {item.name}
                         </div>
                       </td>
-                      <td>{formatter(item.product.price)}</td>
+                      <td>{formatter(item.price)}</td>
                       <td>{item.quantity}</td>
-                      <td>{formatter(item.product.price * item.quantity)}</td>
+                      <td>{formatter(item.price * item.quantity)}</td>
                     </tr>
                   ))}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colSpan="3" className="text-end">
+                      <strong>Tạm tính:</strong>
+                    </td>
+                    <td>{formatter(selectedOrder.subtotal)}</td>
+                  </tr>
+                  <tr>
+                    <td colSpan="3" className="text-end">
+                      <strong>Phí vận chuyển:</strong>
+                    </td>
+                    <td>{formatter(selectedOrder.shippingFee)}</td>
+                  </tr>
                   <tr>
                     <td colSpan="3" className="text-end">
                       <strong>Tổng cộng:</strong>
                     </td>
                     <td>
-                      <strong>{formatter(selectedOrder.totalAmount)}</strong>
+                      <strong className="text-danger">
+                        {formatter(selectedOrder.totalAmount)}
+                      </strong>
                     </td>
                   </tr>
-                </tbody>
+                </tfoot>
               </Table>
             </>
           )}

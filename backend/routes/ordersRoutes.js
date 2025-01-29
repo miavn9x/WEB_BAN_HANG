@@ -7,39 +7,57 @@ const authMiddleware = require("../middleware/authMiddleware");
 // Route tạo đơn hàng mới (yêu cầu đăng nhập)
 router.post("/orders", authMiddleware, async (req, res) => {
   try {
-    const { orderId, items, totalAmount, paymentMethod, userInfo } = req.body;
-    const userId = req.user._id; // Lấy userId từ token xác thực
+    const {
+      orderId,
+      items,
+      totalAmount,
+      subtotal,
+      shippingFee,
+      paymentMethod,
+      paymentStatus,
+      userInfo,
+      orderStatus
+    } = req.body;
+    
+    const userId = req.user._id;
 
-    // Kiểm tra dữ liệu đầu vào
+    // Validate input
     if (!orderId || !items || !totalAmount || !paymentMethod || !userInfo) {
       return res.status(400).json({ message: "Thiếu thông tin đơn hàng!" });
     }
 
-    // Tạo đơn hàng mới với userId
     const newOrder = new Order({
       orderId,
-      userId, // Thêm userId vào đơn hàng
+      userId,
       items,
       totalAmount,
+      subtotal,
+      shippingFee,
       paymentMethod,
+      paymentStatus,
       userInfo,
+      orderStatus,
+      orderDate: new Date()
     });
 
-    // Lưu đơn hàng vào database
     const savedOrder = await newOrder.save();
 
-    // Trả về kết quả
+    // Populate product details
+    const populatedOrder = await Order.findById(savedOrder._id)
+      .populate('items.product');
+
     res.status(201).json({
       success: true,
       message: "Đặt hàng thành công!",
-      order: savedOrder,
+      order: populatedOrder
     });
+
   } catch (error) {
     console.error("Lỗi server:", error);
     res.status(500).json({
       success: false,
       message: "Lỗi khi tạo đơn hàng!",
-      error: error.message,
+      error: error.message
     });
   }
 });
@@ -49,22 +67,36 @@ router.get("/ordershistory", authMiddleware, async (req, res) => {
   try {
     const userId = req.user._id;
     const orders = await Order.find({ userId })
-      .populate({
-        path: "items.product",
-        select: "name price image description category", // Lấy thêm các trường của sản phẩm
-      })
-      .sort({ dateOrdered: -1 });
+      .populate('items.product')
+      .sort({ orderDate: -1 });
+
+    // Transform data before sending
+    const formattedOrders = orders.map(order => ({
+      ...order._doc,
+      orderStatus: order.orderStatus,
+      paymentStatus: order.paymentStatus,
+      orderDate: order.orderDate.toLocaleDateString('vi-VN'),
+      items: order.items.map(item => ({
+        ...item._doc,
+        product: {
+          ...item.product._doc,
+          price: item.price,
+          name: item.name,
+          image: item.image
+        }
+      }))
+    }));
 
     res.status(200).json({
       success: true,
-      orders,
+      orders: formattedOrders
     });
   } catch (error) {
     console.error("Lỗi server:", error);
     res.status(500).json({
       success: false,
       message: "Lỗi khi lấy lịch sử đơn hàng!",
-      error: error.message,
+      error: error.message
     });
   }
 });
