@@ -19,10 +19,11 @@ import AccountList from "./pages/Auth/Admin/AccountList/AccountList";
 import UserPage from "./pages/Auth/Admin/AccountList/UserPage";
 // import ProductList from "./components/Product/Productlist";
 import Cart from "./components/Product/Cart";
-import Checkout from "./components/Product/Checkout";
+// import Checkout from "./components/Product/Checkout";
 import ProductModal from "./components/Nav/ProductModals";
 import Test from "./components/Product/Test";
 import ProductItem from "./components/Product/ProductItem";
+import Checkout from "./components/Product/Checkout";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -62,8 +63,8 @@ function App() {
         <Route path="/product/:id" element={<Test />} />
         <Route path="/b" element={<ProductModal />} />
         <Route path="/product/:productId" element={<ProductItem />} />
-        {/* <Route path="/product/:id" element={<ProductDetail />} /> */}
-
+        <Route path="/gio-hang" element={<Cart />} />{" "}
+        <Route path="/thanh-toan" element={<Checkout />} />
         {/* Protected Routes - User & admin */}
         <Route
           path="/thong-tin-ca-nhan"
@@ -81,25 +82,22 @@ function App() {
             </PrivateRoute>
           }
         /> */}
-
-        <Route
+        {/* <Route
           path="/gio-hang"
           element={
             <PrivateRoute isAuthenticated={isAuthenticated}>
-              {/* <Cart /> */}
               <Cart />
             </PrivateRoute>
           }
-        />
-        <Route
+        /> */}
+        {/* <Route
           path="/thanh-toan"
           element={
             <PrivateRoute isAuthenticated={isAuthenticated}>
               <Checkout />
             </PrivateRoute>
           }
-        />
-
+        /> */}
         {/* Protected Routes - Admin */}
         <Route
           path="/admin/*"
@@ -116,7 +114,6 @@ function App() {
             </PrivateRoute>
           }
         />
-
         {/* Error Routes */}
         <Route path="/Error403" element={<Error403 />} />
         <Route path="*" element={<Navigate to="/Error403" replace />} />

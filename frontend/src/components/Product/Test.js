@@ -9,7 +9,7 @@ import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { Spinner } from "react-bootstrap";
 import { formatter } from "../../utils/fomater";
-import { useDispatch } from "react-redux"; // Import useDispatch
+import { useDispatch, useSelector } from "react-redux"; // Import useDispatch
 import { addToCart } from "../../redux/actions/cartActions"; // Import addToCart action
 import "../../styles/ProductModals.css";
 
@@ -21,13 +21,20 @@ const Test = () => {
   const [showMore, setShowMore] = useState(false);
   const [discountedProducts, setDiscountedProducts] = useState([]);
   const [quantity, setQuantity] = useState(1); // State for quantity
+  const [cartMessage, setCartMessage] = useState(""); // Di chuyển lên đây
 
   const dispatch = useDispatch(); // Use dispatch to update the Redux store
 
   const zoomSliderBig = useRef();
   const zoomSlider = useRef();
 
-  // Fetch dữ liệu sản phẩm khi component mount
+  const cartItems = useSelector((state) => state.cart.items);
+
+  // Kiểm tra sản phẩm trong giỏ hàng
+  const isProductInCart = product
+    ? cartItems.some((item) => item.product._id === product._id)
+    : false;
+
   useEffect(() => {
     const fetchProductDetails = async () => {
       try {
@@ -46,7 +53,7 @@ const Test = () => {
     const fetchDiscountedProducts = async () => {
       try {
         const response = await axios.get(
-          `/api/products?randomDiscount=true&limit=6`
+          "/api/products?randomDiscount=true&limit=6"
         );
         setDiscountedProducts(response.data.products);
       } catch (err) {
@@ -56,8 +63,8 @@ const Test = () => {
 
     if (id) {
       fetchProductDetails();
+      fetchDiscountedProducts();
     }
-    fetchDiscountedProducts();
   }, [id]);
 
   // Settings cho slider
@@ -104,23 +111,46 @@ const Test = () => {
   }
 
   // Handle Add to Cart
-const handleAddToCart = async () => {
-  try {
-    // Kiểm tra số lượng có vượt quá số lượng tồn kho hay không
-    if (quantity > product.remainingStock) {
-      alert("Số lượng vượt quá hàng còn trong kho!");
-      return;
+  const handleAddToCart = async () => {
+    try {
+      if (isProductInCart) {
+        setCartMessage("Sản phẩm đã có trong giỏ hàng!");
+        setTimeout(() => setCartMessage(""), 3000);
+        return;
+      }
+
+      if (quantity > product.remainingStock) {
+        setCartMessage("Số lượng vượt quá hàng còn trong kho!");
+        setTimeout(() => setCartMessage(""), 3000);
+        return;
+      }
+
+      await dispatch(addToCart(product, Number(quantity)));
+      setCartMessage("Đã thêm sản phẩm vào giỏ hàng!");
+      setTimeout(() => setCartMessage(""), 3000);
+    } catch (error) {
+      console.error("Lỗi khi thêm vào giỏ hàng:", error);
+      setCartMessage("Có lỗi xảy ra khi thêm vào giỏ hàng!");
+      setTimeout(() => setCartMessage(""), 3000);
     }
+  };
 
-    console.log(`Số lượng thêm vào giỏ hàng: ${quantity}`); // Kiểm tra số lượng trong console
-    await dispatch(addToCart(product, Number(quantity))); // Gửi số lượng đúng vào giỏ hàng
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
-  } catch (error) {
-    console.error("Lỗi khi thêm vào giỏ hàng:", error);
-    alert("Có lỗi xảy ra khi thêm vào giỏ hàng!");
+  if (loading) {
+    return (
+      <div className="loading-container text-center">
+        <Spinner animation="border" variant="primary" />
+        <div>Đang tải thông tin sản phẩm...</div>
+      </div>
+    );
   }
-};
 
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
+
+  if (!product) {
+    return <div>Không tìm thấy sản phẩm</div>;
+  }
 
   return (
     <div className="container mt-4">
@@ -209,6 +239,18 @@ const handleAddToCart = async () => {
                   </div>
 
                   <div className="product__price w-100">
+                    {cartMessage && (
+                      <div
+                        className={`alert ${
+                          cartMessage.includes("đã có") ||
+                          cartMessage.includes("lỗi")
+                            ? "alert-warning"
+                            : "alert-success"
+                        } mb-3`}
+                      >
+                        {cartMessage}
+                      </div>
+                    )}
                     <div className="quantity-wrapper mb-2">
                       <div className="d-flex align-items-center">
                         <label htmlFor="quantity" className="me-2">
@@ -218,7 +260,6 @@ const handleAddToCart = async () => {
                           maxQuantity={product?.remainingStock} // Truyền maxQuantity từ sản phẩm
                           quantity={quantity} // Truyền quantity từ state cha
                           setQuantity={setQuantity} // Cập nhật state của cha
-                      
                         />
                         {/* Set quantity handler */}
                       </div>
@@ -239,13 +280,18 @@ const handleAddToCart = async () => {
                     </div>
                   </div>
                   <button
-                    className="btn btn-outline-secondary btn-lg  mb-3 w-100"
-                    onClick={handleAddToCart} // Add to Cart click handler
+                    className={`btn btn-lg mb-3 w-50 ${
+                      isProductInCart
+                        ? "btn-secondary disabled"
+                        : "btn-outline-danger"
+                    }`}
+                    onClick={handleAddToCart}
+                    disabled={isProductInCart}
                   >
-                    Thêm vào giỏ
+                    {isProductInCart ? "Đã có trong giỏ" : "Thêm vào giỏ"}
                   </button>
                   <button
-                    className="btn  btn-lg mt-auto w-100"
+                    className="btn  btn-lg mt-auto w-50"
                     style={{ backgroundColor: "#FF6F91", color: "white" }}
                     // onClick={handleBuyNow}
                   >

@@ -1,73 +1,72 @@
 import React, { useState } from "react";
 import { Rating } from "@mui/material";
 import { MdOutlineZoomOutMap } from "react-icons/md";
-import { FaRegHeart, FaCartPlus } from "react-icons/fa"; // Gộp import từ react-icons/fa
+import { FaCartPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux"; // Thêm useDispatch và useSelector
+import { addToCart } from "../../redux/actions/cartActions";
 import "../../styles/ProductItem.css";
 import { formatter } from "../../utils/fomater";
 
 const ProductItem = ({ product }) => {
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [notification, setNotification] = useState(""); // Dùng cho thông báo
+  const [notification, setNotification] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  // Lấy danh sách giỏ hàng từ Redux store
+  const cartItems = useSelector((state) => state.cart.items);
 
+  // Kiểm tra sản phẩm đã có trong giỏ hàng chưa
+  const isProductInCart = cartItems.some(
+    (item) => item.product._id === product._id
+  );
 
   const viewProductDetail = () => {
     navigate(`/product/${product._id}`);
   };
 
-  // Thêm sản phẩm vào danh sách yêu thích
-  const handleAddToFavorites = async () => {
-    const token = localStorage.getItem("token");
-
-    // Kiểm tra nếu người dùng chưa đăng nhập
-    if (!token) {
-      navigate("/login");
-      return;
-    }
+  // Xử lý thêm vào giỏ hàng
+  const handleAddToCart = async (e) => {
+    e.stopPropagation(); // Ngăn chặn sự kiện click lan tỏa
 
     try {
-      await axios.post(
-        "/api/favorites",
-        { productId: product._id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setIsFavorited(true); // Đánh dấu sản phẩm đã được yêu thích
-      setNotification("Sản phẩm đã được thêm vào mục yêu thích.");
-      setTimeout(() => setNotification(""), 5000); // Xóa thông báo sau 5 giây
+      // Kiểm tra sản phẩm đã có trong giỏ hàng
+      if (isProductInCart) {
+        setNotification("Sản phẩm đã có trong giỏ hàng!");
+        setTimeout(() => setNotification(""), 3000);
+        return;
+      }
+
+      // Kiểm tra còn hàng không
+      if (product.remainingStock <= 0) {
+        setNotification("Sản phẩm đã hết hàng!");
+        setTimeout(() => setNotification(""), 3000);
+        return;
+      }
+
+      // Thêm vào giỏ hàng với số lượng mặc định là 1
+      await dispatch(addToCart(product, 1));
+      setNotification("Đã thêm sản phẩm vào giỏ hàng!");
+      setTimeout(() => setNotification(""), 3000);
     } catch (error) {
-      console.error("Lỗi khi thêm sản phẩm vào yêu thích:", error);
-      setNotification(
-        "Không thể thêm sản phẩm vào yêu thích. Vui lòng thử lại."
-      );
+      console.error("Lỗi khi thêm vào giỏ hàng:", error);
+      setNotification("Có lỗi xảy ra khi thêm vào giỏ hàng!");
+      setTimeout(() => setNotification(""), 3000);
     }
   };
 
-  // Kiểm tra nếu dữ liệu sản phẩm không tồn tại
   if (!product) {
     return <div>Không có dữ liệu sản phẩm.</div>;
   }
 
   return (
     <div className="product__item">
-      {/* Hình ảnh sản phẩm */}
       <div className="product__img" onClick={viewProductDetail}>
-        {product.images && product.images.length > 0 ? (
-          <img src={product.images[0]} alt={product.name} />
-        ) : (
-          <img
-            src="https://via.placeholder.com/150"
-            alt="Hình ảnh không khả dụng"
-          />
-        )}
+        <img
+          src={product.images?.[0] || "https://via.placeholder.com/150"}
+          alt={product.name}
+        />
 
-        {/* Các nút hành động */}
         <div className="action">
           <button
             className="action__btn"
@@ -77,25 +76,15 @@ const ProductItem = ({ product }) => {
             <MdOutlineZoomOutMap />
           </button>
           <button
-            className="action__btn"
-            title="Thêm vào yêu thích"
-            onClick={(e) => {
-              e.stopPropagation(); // Ngăn chặn sự kiện click của cha
-              handleAddToFavorites();
-            }}
-          >
-            <FaRegHeart color={isFavorited ? "red" : "gray"} />
-          </button>
-          <button
-            className="action__btn"
-            title="Thêm vào giỏ"
-            onClick={(e) => e.stopPropagation()} // Ngăn chặn sự kiện click của cha
+            className={`action__btn ${isProductInCart ? "disabled" : ""}`}
+            title={isProductInCart ? "Đã có trong giỏ" : "Thêm vào giỏ"}
+            onClick={handleAddToCart}
+            disabled={isProductInCart}
           >
             <FaCartPlus />
           </button>
         </div>
 
-        {/* Biểu tượng giảm giá */}
         {product.discountPercentage > 0 && (
           <span className="product__discount">
             -{product.discountPercentage}%
@@ -103,7 +92,6 @@ const ProductItem = ({ product }) => {
         )}
       </div>
 
-      {/* Thông tin sản phẩm */}
       <div className="product__details px-2">
         <h6 className="product__name" onClick={viewProductDetail}>
           {product.name}
@@ -118,7 +106,7 @@ const ProductItem = ({ product }) => {
               precision={0.5}
             />
             <span className="stock-status">
-              {product.stock > 0 ? "Còn hàng" : "Hết hàng"}
+              {product.remainingStock > 0 ? "Còn hàng" : "Hết hàng"}
             </span>
           </div>
           <div className="product__price">
@@ -134,9 +122,16 @@ const ProductItem = ({ product }) => {
         </div>
       </div>
 
-      {/* Hiển thị thông báo */}
       {notification && (
-        <div className="notification-message">{notification}</div>
+        <div
+          className={`notification-message ${
+            notification.includes("lỗi") || notification.includes("đã có")
+              ? "error"
+              : "success"
+          }`}
+        >
+          {notification}
+        </div>
       )}
     </div>
   );

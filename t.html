@@ -1,143 +1,146 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Giỏ Hàng</title>
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-    crossorigin="anonymous"
-  />
-  <link
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-    rel="stylesheet"
-  />
+<html>
+ <head>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-
-    .cart-title {
-      font-size: 24px;
-      font-weight: bold;
-      text-align: center;
-      margin-top: 20px;
-      margin-bottom: 20px;
-    }
-
-    .cart-item {
-      border: 1px solid #ddd;
-      padding: 10px;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .cart-item img {
-      max-width: 100px;
-    }
-
-    .item-details {
-      flex: 1; /* Đảm bảo chiếm không gian còn lại */
-      padding-left: 10px;
-    }
-
-    .item-actions {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px; /* Khoảng cách giữa các nút */
-    }
-
-    .total-info {
-      text-align: right;
-    }
-
-    .btn-purchase {
-      width: 100%;
-      background-color: #ddd;
-      border: none;
-      padding: 10px;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-
-    @media (max-width: 768px) {
-      .cart-item {
-        flex-direction: column; /* Chuyển sang bố cục cột trên màn hình nhỏ */
-        align-items: stretch;
-      }
-
-      .item-actions {
-        justify-content: space-between;
-        width: 100%;
-      }
-
-      .cart-item img {
-        margin-bottom: 10px;
-      }
-
-      .total-info {
-        text-align: left;
-      }
-    }
+   .payment-method {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .payment-method img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        .payment-method label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .btn-complete {
+            background-color: #007bff;
+            color: white;
+        }
+        .order-summary {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .order-summary h5 {
+            margin-bottom: 20px;
+        }
+        .order-summary .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 576px) {
+            .payment-method label {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .payment-method img {
+                margin-bottom: 10px;
+            }
+            .order-summary .summary-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .order-summary .summary-item span,
+            .order-summary .summary-item strong {
+                margin-bottom: 5px;
+            }
+        }
   </style>
-</head>
-<body>
+ </head>
+ <body>
   <div class="container">
-    <div class="cart-title">Giỏ Hàng</div>
-    <div class="row">
-      <!-- Cột giỏ hàng -->
-      <div class="col-md-8">
-        <div class="cart-item">
-          <div class="d-flex align-items-center mb-3 mb-md-0">
-            <input class="form-check-input me-2" type="checkbox" />
-            <img src="https://placehold.co/100x100" alt="Product" />
-          </div>
-          <div class="item-details">
-            <div>Tên sản phẩm</div>
-            <div>90.000 ₫</div>
-          </div>
-          <div class="item-actions">
-            <button class="btn btn-outline-secondary">-</button>
-            <span>5</span>
-            <button class="btn btn-outline-secondary">+</button>
-            <button class="btn btn-outline-danger">XÓA</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Cột thông tin người dùng -->
-      <div class="col-md-4">
-        <div class="user-info">
-          <div class="mb-3">
-            <label class="form-label" for="name">Họ và tên:</label>
-            <input class="form-control" id="name" type="text" />
-          </div>
-          <div class="mb-3">
-            <label class="form-label" for="email">Email:</label>
-            <input class="form-control" id="email" type="email" />
-          </div>
-          <div class="mb-3">
-            <label class="form-label" for="phone">Số điện thoại:</label>
-            <input class="form-control" id="phone" type="text" />
-          </div>
-          <div class="mb-3">
-            <label class="form-label" for="address">Địa chỉ:</label>
-            <input class="form-control" id="address" type="text" />
-          </div>
-        </div>
-        <div class="total-info mt-4">
-          <div>Subtotal: 450.000 ₫</div>
-          <div>Phí vận chuyển: Miễn phí</div>
-          <div class="total-price">Thành tiền: 450.000 ₫</div>
-          <button class="btn-purchase">MUA HÀNG</button>
-        </div>
-      </div>
+   <div class="order-summary">
+    <h5>
+     Thông tin đơn hàng
+    </h5>
+    <div class="summary-item">
+     <span>
+      Tổng giá trị sản phẩm:
+     </span>
+     <span>
+      1,000,000 VND
+     </span>
     </div>
+    <div class="summary-item">
+     <span>
+      Phí ship:
+     </span>
+     <span>
+      25,000 VND
+     </span>
+    </div>
+    <div class="summary-item">
+     <strong>
+      Tổng giá tiền:
+     </strong>
+     <strong>
+      1,025,000 VND
+     </strong>
+    </div>
+   </div>
+   <div class="payment-method">
+    <h5>
+     Phương thức thanh toán
+    </h5>
+    <form>
+     <div class="form-check">
+      <label class="form-check-label">
+       <input class="form-check-input" name="paymentMethod" type="radio" value="cod"/>
+       <img alt="COD icon" src="https://placehold.co/30x30"/>
+       Thanh toán khi giao hàng (COD)
+      </label>
+     </div>
+     <div class="form-check">
+      <label class="form-check-label">
+       <input class="form-check-input" name="paymentMethod" type="radio" value="atm"/>
+       <img alt="ZaloPay icon" src="https://placehold.co/30x30"/>
+       <img alt="ATM icon" src="https://placehold.co/30x30"/>
+       Thanh toán bằng thẻ ATM nội địa qua ZaloPay
+      </label>
+     </div>
+     <div class="form-check">
+      <label class="form-check-label">
+       <input class="form-check-input" name="paymentMethod" type="radio" value="zalopay"/>
+       <img alt="ZaloPay icon" src="https://placehold.co/30x30"/>
+       Thanh toán bằng ZaloPay
+      </label>
+     </div>
+     <div class="form-check">
+      <label class="form-check-label">
+       <input class="form-check-input" name="paymentMethod" type="radio" value="visa"/>
+       <img alt="ZaloPay icon" src="https://placehold.co/30x30"/>
+       <img alt="Visa icon" src="https://placehold.co/30x30"/>
+       <img alt="MasterCard icon" src="https://placehold.co/30x30"/>
+       <img alt="JCB icon" src="https://placehold.co/30x30"/>
+       Thanh toán bằng thẻ Visa/Master/JCB qua ZaloPay
+      </label>
+     </div>
+     <div class="form-check">
+      <label class="form-check-label">
+       <input class="form-check-input" name="paymentMethod" type="radio" value="bank"/>
+       <img alt="Bank icon" src="https://placehold.co/30x30"/>
+       Chuyển khoản qua ngân hàng
+      </label>
+     </div>
+     <div class="d-flex justify-content-between mt-4">
+      <a class="btn btn-link" href="#">
+       Giỏ hàng
+      </a>
+      <button class="btn btn-complete ms-auto" type="submit">
+       Hoàn tất đơn hàng
+      </button>
+     </div>
+    </form>
+   </div>
   </div>
-</body>
+ </body>
 </html>

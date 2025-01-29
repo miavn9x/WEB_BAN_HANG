@@ -1,9 +1,133 @@
-.btn-outline-secondary:hover {
-    background-color: #f0f0f0;
-    border-color: #007bff;
+
+
+/* Cart Title */
+.cart-title h2 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 30px;
 }
 
-.form-control:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+/* Cart Item */
+.cart-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.cart-item img {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+    margin-right: 15px;
+}
+
+.item-details {
+    flex-grow: 1;
+    padding-left: 15px;
+}
+
+.item-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.item-actions button {
+    border-radius: 5px;
+}
+
+.item-actions .btn-outline-danger {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.item-actions .btn-outline-secondary {
+    background-color: #f0f0f0;
+}
+
+/* User Info Form */
+.user-info {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 25px;
+}
+
+.user-info .form-label {
+    font-weight: bold;
+    color: #555;
+}
+
+.user-info .form-control {
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+}
+
+/* Total Info */
+.total-info {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #ddd;
+}
+
+.total-info .fw-bold {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.total-info .text-danger {
+    color: #e74c3c;
+}
+
+/* Purchase Button */
+.btn-purchase {
+    background-color: #3498db;
+    color: white;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    border: none;
+}
+
+.btn-purchase:disabled {
+    background-color: #ddd;
+}
+
+.btn-purchase:hover:enabled {
+    background-color: #2980b9;
+}
+
+/* Responsiveness */
+@media screen and (max-width: 768px) {
+    .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .item-actions {
+        margin-top: 10px;
+    }
+
+    .col-md-8,
+    .col-md-4 {
+        width: 100%;
+    }
+
+    .total-info {
+        margin-top: 20px;
+    }
+}
+
+.item-details_name{
+    max-width: auto!important;
 }

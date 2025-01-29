@@ -145,13 +145,12 @@
     font-size: 18px;
     border: none;
     outline: none;
-    background: transparent;
     color: #333;
 }
 
 button {
     background-color: #ffffff;
-    border: 1px solid #ccc;
+    border: 0px solid #ccc;
     padding: 5px;
     font-size: 20px;
     cursor: pointer;
@@ -161,22 +160,9 @@ button {
     transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-button:hover {
-    background-color: #f0f0f0;
-    border-color: #888;
-}
 
-button:active {
-    background-color: #e0e0e0;
-}
 
-.btn-minus {
-    border-radius: 50% 0 0 50%;
-}
 
-.btn-plus {
-    border-radius: 0 50% 50% 0;
-}
 
 .btn__add__cart {
     background-color: #28a745;

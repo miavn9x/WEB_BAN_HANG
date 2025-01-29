@@ -281,14 +281,17 @@ const MyNavbar = () => {
                             onClick={() => handleLinkClick(category.path)}
                           >
                             {category.icon && (
-                              <span className="me-2">{category.icon}</span>
+                              <span className="me-3">{category.icon}</span>
                             )}
                             {category.label}
                           </Dropdown.Item>
                         ))}
-                        <Dropdown.Divider />
+                        <Dropdown.Divider style={{margin:"0", padding: "0"}}/>
                         <Dropdown.Item
-                          onClick={() => handleLinkClick("tat-ca-san-pham")}
+                      
+                          onClick={() =>
+                            handleLinkClick("/products")
+                          }
                         >
                           Xem tất cả sản phẩm
                         </Dropdown.Item>

@@ -6,11 +6,11 @@ import {
   removeFromCart,
   updateCartQuantity,
   fetchCart,
-  placeOrder, // Thêm action placeOrder để gửi thông tin đặt hàng
 } from "../../redux/actions/cartActions";
-
+import "./Cart.css"
 import { formatter } from "../../utils/fomater";
 import { fetchUserProfile } from "../../redux/actions/userActions";
+import { useNavigate } from "react-router-dom";
 // Selector để lấy danh sách sản phẩm trong giỏ
 const selectCartItems = createSelector(
   (state) => state.cart.items,
@@ -54,7 +54,7 @@ useEffect(() => {
   }, [dispatch]);
 
   const calculateSubtotal = () => {
-    return cartItems.reduce((total, item) => {
+    const subtotal = cartItems.reduce((total, item) => {
       if (
         selectedItems.includes(item.product._id) &&
         item?.product?.priceAfterDiscount
@@ -66,7 +66,12 @@ useEffect(() => {
       }
       return total;
     }, 0);
+
+    return subtotal;
   };
+
+  
+
 
   const handleRemoveFromCart = (productId) => {
     if (productId) {
@@ -110,17 +115,41 @@ useEffect(() => {
   };
 
   // Xử lý đặt hàng, gửi thông tin người dùng và giỏ hàng
-  const handlePlaceOrder = () => {
+  // const handlePlaceOrder = () => {
+  //   const orderData = {
+  //     userInfo: editableUserInfo, // Thông tin người dùng chỉnh sửa
+  //     items: cartItems.filter((item) =>
+  //       selectedItems.includes(item.product._id)
+  //     ),
+  //     totalAmount: calculateSubtotal(),
+  //   };
+
+  //   // Gửi thông tin đặt hàng tới server
+  //   dispatch(placeOrder(orderData));
+  // };
+
+  const navigate = useNavigate();
+
+  const handleProceedToCheckout = () => {
+    if (!selectedItems.length) {
+      alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
+      return;
+    }
+
+    if (!editableUserInfo.address.trim()) {
+      alert("Vui lòng nhập địa chỉ giao hàng để tiếp tục!");
+      return;
+    }
+
     const orderData = {
-      userInfo: editableUserInfo, // Thông tin người dùng chỉnh sửa
+      userInfo: editableUserInfo,
       items: cartItems.filter((item) =>
         selectedItems.includes(item.product._id)
       ),
-      totalAmount: calculateSubtotal(),
+      totalAmount: calculateSubtotal() + 25000,
     };
 
-    // Gửi thông tin đặt hàng tới server
-    dispatch(placeOrder(orderData));
+    navigate("/thanh-toan", { state: { orderData } });
   };
 
   return (
@@ -156,16 +185,21 @@ useEffect(() => {
                       }
                       alt={item.product.name || "Sản phẩm"}
                       className="img-fluid"
-                      style={{ maxHeight: "100px", objectFit: "cover" }}
+                      // style={{ maxHeight: "100px", objectFit: "cover" }}
                     />
                   </div>
                   <div className="item-details flex-grow-1 px-3">
-                    <div>{item.product.name || "Sản phẩm không tên"}</div>
-                    <div>
+                    <div
+                      className="item-details_name mx-auto"
+                      // style={{ maxWidth: "350px" }}
+                    >
+                      {item.product.name || "Sản phẩm không tên"}
+                    </div>
+                    <div style={{ color: "red" }}>
                       {formatter(Number(item.product.priceAfterDiscount) || 0)}
                     </div>
                   </div>
-                  <div className="item-actions d-flex align-items-center gap-2">
+                  <div className="item-actions d-flex gap-2 ms-auto">
                     <button
                       className="btn btn-outline-secondary"
                       onClick={() =>
@@ -177,7 +211,7 @@ useEffect(() => {
                     <input
                       type="number"
                       className="form-control"
-                      style={{ width: "70px" }}
+                      style={{ width: "50px" }}
                       value={item.quantity}
                       onChange={(e) =>
                         handleQuantityInputChange(
@@ -220,6 +254,7 @@ useEffect(() => {
                 name="fullName"
                 value={editableUserInfo.fullName}
                 onChange={handleInputChange}
+                placeholder="Nhập họ và tên"
               />
             </div>
             <div className="mb-3">
@@ -233,6 +268,7 @@ useEffect(() => {
                 name="email"
                 value={editableUserInfo.email}
                 onChange={handleInputChange}
+                placeholder="Nhập email"
               />
             </div>
             <div className="mb-3">
@@ -246,6 +282,7 @@ useEffect(() => {
                 name="phone"
                 value={editableUserInfo.phone}
                 onChange={handleInputChange}
+                placeholder="Nhập số điện thoại"
               />
             </div>
             <div className="mb-3">
@@ -259,22 +296,29 @@ useEffect(() => {
                 name="address"
                 value={editableUserInfo.address}
                 onChange={handleInputChange}
+                placeholder="Nhập địa chỉ giao hàng"
               />
             </div>
           </div>
 
           <div className="total-info text-end mt-4">
-            <div>Subtotal: {formatter(calculateSubtotal())}</div>
-            <div>Phí vận chuyển: Miễn phí</div>
-            <div className="total-price fw-bold">
-              Thành tiền: {formatter(calculateSubtotal())}
+            <div>Tổng cộng: {formatter(calculateSubtotal())}</div>
+            <div>
+              Phí vận chuyển:
+              <span style={{ color: "blue" }}> {formatter(25000)}</span>
+            </div>
+            <div className="total-price fw-bold ">
+              Thành tiền:{" "}
+              <span className="text-danger">
+                {formatter(calculateSubtotal() + 25000)}
+              </span>
+              {/* Tổng cộng + phí ship */}
             </div>
             <button
-              className="btn btn-secondary btn-purchase w-100 mt-3"
-              onClick={handlePlaceOrder} // Gửi yêu cầu đặt hàng
-              disabled={!selectedItems.length}
+              className="btn btn-secondary w-100 mt-3"
+              onClick={handleProceedToCheckout}
             >
-              MUA HÀNG
+              THANH TOÁN
             </button>
           </div>
         </div>
