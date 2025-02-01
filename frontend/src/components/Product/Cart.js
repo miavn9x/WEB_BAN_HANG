@@ -7,10 +7,11 @@ import {
   updateCartQuantity,
   fetchCart,
 } from "../../redux/actions/cartActions";
-import "./Cart.css"
+import "./Cart.css";
 import { formatter } from "../../utils/fomater";
 import { fetchUserProfile } from "../../redux/actions/userActions";
 import { useNavigate } from "react-router-dom";
+
 // Selector để lấy danh sách sản phẩm trong giỏ
 const selectCartItems = createSelector(
   (state) => state.cart.items,
@@ -20,41 +21,50 @@ const selectCartItems = createSelector(
 const Cart = () => {
   const cartItems = useSelector(selectCartItems);
   const dispatch = useDispatch();
-const userProfile = useSelector((state) => state.user.info);
+  const userProfile = useSelector((state) => state.user.info);
+  const navigate = useNavigate();
 
-// State cho form
-const [editableUserInfo, setEditableUserInfo] = useState({
-  fullName: "",
-  email: "",
-  phone: "",
-  address: "",
-});
+  const [editableUserInfo, setEditableUserInfo] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
 
-// Lấy thông tin người dùng khi component mount
-useEffect(() => {
-  dispatch(fetchUserProfile());
-}, [dispatch]);
+  const [isLoading, setIsLoading] = useState(true); // Thêm state để kiểm tra trạng thái loading
 
-// Cập nhật form khi có dữ liệu từ API
-useEffect(() => {
-  if (userProfile) {
-    setEditableUserInfo({
-      fullName: `${userProfile.firstName} ${userProfile.lastName}` || "",
-      email: userProfile.email || "",
-      phone: userProfile.phone || "",
-      address: userProfile.address || "",
-    });
-  }
-}, [userProfile]);
-
-  const [selectedItems, setSelectedItems] = useState([]);
-
+  // Lấy thông tin người dùng từ API
   useEffect(() => {
-    dispatch(fetchCart()); // Lấy giỏ hàng từ server khi component mount
+    dispatch(fetchUserProfile());
   }, [dispatch]);
 
+  useEffect(() => {
+    if (userProfile) {
+      setEditableUserInfo({
+        fullName: `${userProfile.firstName} ${userProfile.lastName}` || "",
+        email: userProfile.email || "",
+        phone: userProfile.phone || "",
+        address: userProfile.address || "",
+      });
+    }
+  }, [userProfile]);
+
+  // Mảng lưu các product _id của sản phẩm được chọn thanh toán
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  // Lấy giỏ hàng khi component mount
+  useEffect(() => {
+    const fetchCartData = async () => {
+      await dispatch(fetchCart());
+      setIsLoading(false); // Đặt loading thành false sau khi dữ liệu được tải xong
+    };
+
+    fetchCartData();
+  }, [dispatch]);
+
+  // Tính tổng tạm (chỉ tính cho các sản phẩm được chọn)
   const calculateSubtotal = () => {
-    const subtotal = cartItems.reduce((total, item) => {
+    return cartItems.reduce((total, item) => {
       if (
         selectedItems.includes(item.product._id) &&
         item?.product?.priceAfterDiscount
@@ -66,28 +76,22 @@ useEffect(() => {
       }
       return total;
     }, 0);
-
-    return subtotal;
   };
-
-  
-
 
   const handleRemoveFromCart = (productId) => {
     if (productId) {
-      dispatch(removeFromCart(productId)); // Gửi action xóa sản phẩm
+      dispatch(removeFromCart(productId));
     }
   };
 
   const handleQuantityInputChange = (productId, newQuantity) => {
-    const quantity = Math.max(Number(newQuantity), 1); // Đảm bảo số lượng >= 1
+    const quantity = Math.max(Number(newQuantity), 1);
     dispatch(updateCartQuantity(productId, quantity));
   };
 
   const handleQuantityChange = (productId, action) => {
     const item = cartItems.find((item) => item?.product?._id === productId);
     if (!item) return;
-
     const currentQuantity = Number(item.quantity) || 0;
     if (action === "increase") {
       dispatch(updateCartQuantity(productId, currentQuantity + 1));
@@ -104,6 +108,7 @@ useEffect(() => {
     }));
   };
 
+  // Khi người dùng tích checkbox, cập nhật mảng selectedItems
   const handleSelectItem = (productId, isSelected) => {
     setSelectedItems((prevSelectedItems) => {
       if (isSelected) {
@@ -114,68 +119,72 @@ useEffect(() => {
     });
   };
 
-  // Xử lý đặt hàng, gửi thông tin người dùng và giỏ hàng
-  // const handlePlaceOrder = () => {
-  //   const orderData = {
-  //     userInfo: editableUserInfo, // Thông tin người dùng chỉnh sửa
-  //     items: cartItems.filter((item) =>
-  //       selectedItems.includes(item.product._id)
-  //     ),
-  //     totalAmount: calculateSubtotal(),
-  //   };
+  // Khi bấm nút THANH TOÁN, kiểm tra và chuyển sang trang thanh toán
+  const handleProceedToCheckout = () => {
+    if (!selectedItems.length) {
+      alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
+      return;
+    }
 
-  //   // Gửi thông tin đặt hàng tới server
-  //   dispatch(placeOrder(orderData));
-  // };
+    if (!editableUserInfo.address.trim()) {
+      alert("Vui lòng nhập địa chỉ giao hàng để tiếp tục!");
+      return;
+    }
 
-  const navigate = useNavigate();
+    // Lọc ra các sản phẩm được chọn
+    const selectedProducts = cartItems.filter((item) =>
+      selectedItems.includes(item.product._id)
+    );
 
-const handleProceedToCheckout = () => {
-  if (!selectedItems.length) {
-    alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
-    return;
-  }
+    // Tạo đối tượng orderData để truyền sang trang Checkout
+    const orderData = {
+      userInfo: editableUserInfo,
+      items: selectedProducts.map((item) => ({
+        product: {
+          _id: item.product._id,
+          name: item.product.name,
+          price: item.product.price,
+          priceAfterDiscount: item.product.priceAfterDiscount,
+          images: item.product.images,
+        },
+        quantity: item.quantity,
+      })),
+      shippingFee: 25000,
+      subtotal: calculateSubtotal(),
+      totalAmount: calculateSubtotal() + 25000,
+    };
 
-  if (!editableUserInfo.address.trim()) {
-    alert("Vui lòng nhập địa chỉ giao hàng để tiếp tục!");
-    return;
-  }
-
-  // Lấy các sản phẩm đã chọn với đầy đủ thông tin
-  const selectedProducts = cartItems.filter((item) =>
-    selectedItems.includes(item.product._id)
-  );
-
-  const orderData = {
-    userInfo: editableUserInfo,
-    items: selectedProducts.map((item) => ({
-      product: {
-        _id: item.product._id,
-        name: item.product.name,
-        price: item.product.price,
-        priceAfterDiscount: item.product.priceAfterDiscount,
-        images: item.product.images,
-      },
-      quantity: item.quantity,
-    })),
-    shippingFee: 25000,
-    subtotal: calculateSubtotal(),
-    totalAmount: calculateSubtotal() + 25000,
+    navigate("/thanh-toan", { state: { orderData } });
   };
-
-  navigate("/thanh-toan", { state: { orderData } });
-};
 
   return (
     <div className="container">
       <div className="cart-title text-center my-4">
-        <h2>Giỏ Hàng</h2>
+        {/* <h2>Giỏ Hàng</h2> */}
       </div>
+
+      {/* Loading Spinner - Centered on Screen */}
+      {isLoading && (
+        <div className="loading-overlay d-flex justify-content-center align-items-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
+        </div>
+      )}
 
       <div className="row">
         <div className="col-md-8">
-          {!cartItems.length ? (
-            <p className="text-center">Giỏ hàng của bạn đang trống.</p>
+          {!isLoading && !cartItems.length ? (
+            <p className="text-center">
+              <div className="cart-empty-container">
+                <img
+                  className="cart-empty-image"
+                  src="https://theme.hstatic.net/200000381339/1001207774/14/cart_empty_background.png?v=164"
+                  alt="Giỏ hàng trống"
+                />
+                <i className="cart-empty-text my-4 mx-auto">Giỏ hàng trống</i>
+              </div>
+            </p>
           ) : (
             cartItems.map((item) =>
               item?.product ? (
@@ -199,14 +208,10 @@ const handleProceedToCheckout = () => {
                       }
                       alt={item.product.name || "Sản phẩm"}
                       className="img-fluid"
-                      // style={{ maxHeight: "100px", objectFit: "cover" }}
                     />
                   </div>
                   <div className="item-details flex-grow-1 px-3">
-                    <div
-                      className="item-details_name mx-auto"
-                      // style={{ maxWidth: "350px" }}
-                    >
+                    <div className="item-details_name mx-auto">
                       {item.product.name || "Sản phẩm không tên"}
                     </div>
                     <div style={{ color: "red" }}>
@@ -321,12 +326,11 @@ const handleProceedToCheckout = () => {
               Phí vận chuyển:
               <span style={{ color: "blue" }}> {formatter(25000)}</span>
             </div>
-            <div className="total-price fw-bold ">
+            <div className="total-price fw-bold">
               Thành tiền:{" "}
               <span className="text-danger">
                 {formatter(calculateSubtotal() + 25000)}
               </span>
-              {/* Tổng cộng + phí ship */}
             </div>
             <button
               className="btn btn-secondary w-100 mt-3"

@@ -3,148 +3,148 @@ import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { formatter } from "../../utils/fomater";
-import axios from "axios"; // Đảm bảo đã import axios
+import axios from "axios";
 
 const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [orderId, setOrderId] = useState(""); // Mã đơn hàng
+  const [orderId, setOrderId] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
   const orderData = location.state?.orderData || {};
 
   // Hàm tạo mã đơn hàng duy nhất
   const generateOrderId = () => {
-    const timestamp = new Date().getTime(); // Lấy thời gian hiện tại
-    const randomString = Math.random().toString(36).substring(2, 10); // Tạo chuỗi ngẫu nhiên
-    return `ORD-${timestamp}-${randomString}`; // Kết hợp cả hai để tạo mã duy nhất
+    const timestamp = new Date().getTime();
+    const randomString = Math.random().toString(36).substring(2, 10);
+    return `ORD-${timestamp}-${randomString}`;
   };
 
-  // Tạo mã đơn hàng ngay khi component được render
   useEffect(() => {
     const newOrderId = generateOrderId();
-    setOrderId(newOrderId); // Cập nhật mã đơn hàng vào state
+    setOrderId(newOrderId);
   }, []);
 
   const handlePaymentMethodChange = (event) => {
     setPaymentMethod(event.target.value);
   };
 
+  const handleCompleteOrder = async (event) => {
+    event.preventDefault();
 
-const handleCompleteOrder = async (event) => {
-  event.preventDefault();
-
-  if (!paymentMethod) {
-    alert("Vui lòng chọn phương thức thanh toán!");
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Vui lòng đăng nhập để đặt hàng!");
-      navigate("/login");
+    if (!paymentMethod) {
+      alert("Vui lòng chọn phương thức thanh toán!");
       return;
     }
 
-    const currentDate = new Date();
-    const formattedDate = currentDate.toLocaleString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    });
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Vui lòng đăng nhập để đặt hàng!");
+        navigate("/login");
+        return;
+      }
 
-    // Chuẩn bị dữ liệu đơn hàng
-    const orderDetails = {
-      orderId,
-      items: orderData.items.map((item) => ({
-        product: item.product?._id || "Không xác định",
-        quantity: item.quantity || 1,
-        price: item.product?.priceAfterDiscount || 0,
-        name: item.product?.name || "Sản phẩm không có tên",
-        image: item.product?.images?.[0] || "",
-      })),
-      totalAmount: orderData.totalAmount || 0,
-      subtotal: orderData.subtotal || 0,
-      shippingFee: orderData.shippingFee || 0,
-      paymentMethod: paymentMethod || "cod",
-      paymentStatus:
-        paymentMethod === "cod" ? "Chưa thanh toán" : "Chờ xác nhận",
-      userInfo: {
-        fullName: orderData.userInfo?.fullName || "Không có tên",
-        phone: orderData.userInfo?.phone || "Không có số điện thoại",
-        address: orderData.userInfo?.address || "Không có địa chỉ",
-        email: orderData.userInfo?.email || "Không có email",
-      },
-      orderStatus: "Đang xử lý",
-      orderDate: new Date(),
-    };
-
-    // Gửi dữ liệu đơn hàng lên server
-    const response = await fetch("/api/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(orderDetails),
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      // Sau khi đặt hàng thành công, gọi API xóa các sản phẩm đã đặt khỏi giỏ hàng
-      await axios.delete(`/api/cart`, {
-        data: { productIds: orderData.items.map((item) => item.product._id) },
-        headers: { Authorization: `Bearer ${token}` },
+      const currentDate = new Date();
+      const formattedDate = currentDate.toLocaleString("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
       });
 
-      // Nếu bạn đang sử dụng Redux, bạn cũng có thể dispatch clearCartFromAPI:
-      // dispatch(clearCartFromAPI(orderData.items.map((item) => item.product._id)));
+      const orderDetails = {
+        orderId,
+        items: orderData.items.map((item) => ({
+          product: item.product?._id || "Không xác định",
+          quantity: item.quantity || 1,
+          price: item.product?.priceAfterDiscount || 0,
+          name: item.product?.name || "Sản phẩm không có tên",
+          image: item.product?.images?.[0] || "",
+        })),
+        totalAmount: orderData.totalAmount || 0,
+        subtotal: orderData.subtotal || 0,
+        shippingFee: orderData.shippingFee || 0,
+        paymentMethod: paymentMethod || "cod",
+        paymentStatus:
+          paymentMethod === "cod" ? "Chưa thanh toán" : "Chờ xác nhận",
+        userInfo: {
+          fullName: orderData.userInfo?.fullName || "Không có tên",
+          phone: orderData.userInfo?.phone || "Không có số điện thoại",
+          address: orderData.userInfo?.address || "Không có địa chỉ",
+          email: orderData.userInfo?.email || "Không có email",
+        },
+        orderStatus: "Đang xử lý",
+        orderDate: new Date(),
+      };
 
-      localStorage.setItem(
-        "lastOrderDetails",
-        JSON.stringify({
-          orderId,
-          orderDetails: {
-            ...orderDetails,
-            order: data.order,
-            formattedOrderDate: formattedDate,
-          },
-        })
-      );
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(orderDetails),
+      });
 
-      const successMessage = `Đặt hàng thành công!
+      const data = await response.json();
+
+      if (data.success) {
+        // Xóa trên server chỉ những sản phẩm được chọn thanh toán
+        const selectedProductIds = orderData.items.map(
+          (item) => item.product._id
+        );
+        await axios.delete(`/api/cart`, {
+          data: { productIds: selectedProductIds },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        // Cập nhật localStorage: chỉ giữ lại những sản phẩm không được chọn thanh toán
+        const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+        const updatedCart = storedCart.filter(
+          (item) => !selectedProductIds.includes(item.product._id)
+        );
+        localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+        localStorage.setItem(
+          "lastOrderDetails",
+          JSON.stringify({
+            orderId,
+            orderDetails: {
+              ...orderDetails,
+              order: data.order,
+              formattedOrderDate: formattedDate,
+            },
+          })
+        );
+
+        const successMessage = `Đặt hàng thành công!
 Mã đơn hàng: ${orderId}
 Thời gian đặt: ${formattedDate}
 ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
 
-      alert(successMessage);
+        alert(successMessage);
 
-      // Nếu muốn, bạn có thể xóa luôn localStorage cho cart (nếu được lưu tạm ở đó)
-      localStorage.removeItem("cart");
-
-      navigate("/products", {
-        state: {
-          orderId: orderId,
-          orderDetails: {
-            ...orderDetails,
-            order: data.order,
-            formattedOrderDate: formattedDate,
+        navigate("/products", {
+          state: {
+            orderId: orderId,
+            orderDetails: {
+              ...orderDetails,
+              order: data.order,
+              formattedOrderDate: formattedDate,
+            },
           },
-        },
-      });
-    } else {
-      throw new Error(data.message || "Có lỗi xảy ra");
+        });
+      } else {
+        throw new Error(data.message || "Có lỗi xảy ra");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.");
     }
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.");
-  }
-};
+  };
 
   return (
     <Container style={{ maxWidth: "500px" }}>
@@ -160,9 +160,9 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
             }}
           >
             <h5>Thông tin khách hàng</h5>
-            <p> Họ và Tên: {orderData.userInfo?.fullName}</p>
-            <p> Số điện thoại: {orderData.userInfo?.phone}</p>
-            <p> Địa Chỉ: {orderData.userInfo?.address}</p>
+            <p>Họ và Tên: {orderData.userInfo?.fullName}</p>
+            <p>Số điện thoại: {orderData.userInfo?.phone}</p>
+            <p>Địa Chỉ: {orderData.userInfo?.address}</p>
             <h6 className="text-center">Chi tiết đơn hàng</h6>
             {orderData.items?.map((item) => (
               <div key={item.product._id} className="product-item mb-3">
@@ -198,7 +198,6 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                 </strong>
               </div>
             </div>
-
             <p className="text-star mt-3">
               Mã đơn hàng của bạn:{" "}
               <strong style={{ color: "red" }}>{orderId}</strong>
@@ -286,7 +285,7 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                 </div>
               )}
               <hr />
-              <div>Quý khách quyển khoản với nỗi dung mã đơn hàng</div>
+              <div>Quý khách quyên khoản với nỗi dung mã đơn hàng</div>
               <hr />
               <div className="d-flex justify-content-between mt-4">
                 <Button
@@ -296,7 +295,6 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                 >
                   Giỏ hàng
                 </Button>
-
                 <Button
                   variant="primary"
                   className="ms-auto btn-complete"

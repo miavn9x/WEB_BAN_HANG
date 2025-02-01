@@ -21,8 +21,12 @@ export const cartReducer = (state = initialState, action) => {
       );
 
       if (existingItemIndex !== -1) {
+        // Cập nhật số lượng nếu sản phẩm đã có trong giỏ hàng
         const updatedItems = [...state.items];
-        updatedItems[existingItemIndex].quantity += action.payload.quantity;
+        updatedItems[existingItemIndex].quantity = Math.min(
+          updatedItems[existingItemIndex].quantity + action.payload.quantity,
+          updatedItems[existingItemIndex].product.remainingStock
+        );
         return {
           ...state,
           items: updatedItems,
@@ -30,11 +34,15 @@ export const cartReducer = (state = initialState, action) => {
         };
       }
 
+      // Thêm sản phẩm mới vào giỏ hàng
       const newItems = [
         ...state.items,
         {
           product: action.payload.product,
-          quantity: action.payload.quantity,
+          quantity: Math.min(
+            action.payload.quantity,
+            action.payload.product.remainingStock
+          ),
         },
       ];
 
@@ -57,11 +65,17 @@ export const cartReducer = (state = initialState, action) => {
     }
 
     case CART_ACTIONS.UPDATE_CART_QUANTITY: {
-      const updatedCart = state.items.map((item) =>
-        item.product._id === action.payload.productId
-          ? { ...item, quantity: action.payload.quantity }
-          : item
-      );
+      const updatedCart = state.items.map((item) => {
+        if (item.product._id === action.payload.productId) {
+          const newQuantity = Math.max(
+            1,
+            Math.min(action.payload.quantity, item.product.remainingStock)
+          );
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      });
+
       return {
         ...state,
         items: updatedCart,
@@ -74,21 +88,17 @@ export const cartReducer = (state = initialState, action) => {
         ...state,
         items: action.payload.map((item) => ({
           product: item.product,
-          quantity: item.quantity,
+          quantity: Math.min(item.quantity, item.product.remainingStock),
         })),
         total: calculateTotal(action.payload),
       };
     }
 
     case CART_ACTIONS.CLEAR_CART: {
-      // Xóa các sản phẩm đã chọn khỏi giỏ hàng
-      const remainingItems = state.items.filter(
-        (item) => !action.payload.includes(item.product._id)
-      );
       return {
         ...state,
-        items: remainingItems,
-        total: calculateTotal(remainingItems),
+        items: [],
+        total: 0,
       };
     }
 

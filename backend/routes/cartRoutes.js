@@ -14,13 +14,17 @@ router.post("/cart", authMiddleware, async (req, res) => {
   }
 
   try {
-    // Kiểm tra sản phẩm có tồn tại không
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ message: "Sản phẩm không tồn tại" });
     }
 
-    // Kiểm tra giỏ hàng của người dùng
+    if (quantity > product.remainingStock) {
+      return res
+        .status(400)
+        .json({ message: "Số lượng vượt quá hàng tồn kho" });
+    }
+
     let cart = await Cart.findOne({ user: userId });
 
     if (!cart) {
@@ -30,16 +34,17 @@ router.post("/cart", authMiddleware, async (req, res) => {
       });
       await cart.save();
     } else {
-      // Kiểm tra nếu sản phẩm đã có trong giỏ
       const existingItemIndex = cart.items.findIndex(
         (item) => item.product.toString() === productId
       );
 
       if (existingItemIndex !== -1) {
-        // Cập nhật số lượng nếu sản phẩm đã có trong giỏ
-        cart.items[existingItemIndex].quantity += quantity;
+        const newQuantity = cart.items[existingItemIndex].quantity + quantity;
+        if (newQuantity > product.remainingStock) {
+          return res.status(400).json({ message: "Vượt quá tồn kho" });
+        }
+        cart.items[existingItemIndex].quantity = newQuantity;
       } else {
-        // Thêm sản phẩm mới vào giỏ
         cart.items.push({ product: productId, quantity });
       }
       await cart.save();
@@ -60,34 +65,20 @@ router.delete("/cart/:productId", authMiddleware, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    // Tìm giỏ hàng của người dùng
     const cart = await Cart.findOne({ user: userId });
-
     if (!cart) {
       return res.status(404).json({ message: "Không tìm thấy giỏ hàng" });
     }
 
-    // Tìm chỉ số sản phẩm trong giỏ hàng
-    const itemIndex = cart.items.findIndex(
-      (item) => item.product.toString() === productId
+    cart.items = cart.items.filter(
+      (item) => item.product.toString() !== productId
     );
 
-    if (itemIndex === -1) {
-      return res
-        .status(404)
-        .json({ message: "Không tìm thấy sản phẩm trong giỏ hàng" });
-    }
-
-    // Xóa sản phẩm khỏi giỏ
-    cart.items.splice(itemIndex, 1);
-
     if (cart.items.length === 0) {
-      // Nếu giỏ hàng trống, xóa luôn giỏ hàng
       await Cart.deleteOne({ user: userId });
       return res.status(200).json({ message: "Giỏ hàng đã được xóa." });
     }
 
-    // Lưu giỏ hàng sau khi xóa sản phẩm
     await cart.save();
     res.status(200).json({ message: "Sản phẩm đã được xóa khỏi giỏ hàng." });
   } catch (err) {
@@ -98,7 +89,6 @@ router.delete("/cart/:productId", authMiddleware, async (req, res) => {
   }
 });
 
-
 // Route lấy danh sách sản phẩm trong giỏ hàng
 router.get("/cart", authMiddleware, async (req, res) => {
   const userId = req.user.id;
@@ -106,13 +96,11 @@ router.get("/cart", authMiddleware, async (req, res) => {
   try {
     const cart = await Cart.findOne({ user: userId }).populate("items.product");
 
-    if (!cart) {
-      return res.status(404).json({ message: "Giỏ hàng rỗng" });
+    if (!cart || cart.items.length === 0) {
+      return res.status(200).json({ message: "Giỏ hàng rỗng", items: [] });
     }
 
-    res.status(200).json({
-      items: cart.items,
-    });
+    res.status(200).json({ items: cart.items });
   } catch (err) {
     console.error("Lỗi khi lấy giỏ hàng:", err);
     res.status(500).json({ message: "Có lỗi xảy ra khi lấy giỏ hàng." });
@@ -130,8 +118,12 @@ router.put("/cart/:productId", authMiddleware, async (req, res) => {
   }
 
   try {
-    const cart = await Cart.findOne({ user: userId });
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Sản phẩm không tồn tại" });
+    }
 
+    const cart = await Cart.findOne({ user: userId });
     if (!cart) {
       return res.status(404).json({ message: "Không tìm thấy giỏ hàng" });
     }
@@ -146,7 +138,12 @@ router.put("/cart/:productId", authMiddleware, async (req, res) => {
         .json({ message: "Không tìm thấy sản phẩm trong giỏ hàng" });
     }
 
-    // Cập nhật số lượng của sản phẩm
+    if (quantity > product.remainingStock) {
+      return res
+        .status(400)
+        .json({ message: "Số lượng vượt quá hàng tồn kho" });
+    }
+
     cart.items[itemIndex].quantity = quantity;
     await cart.save();
 
@@ -159,10 +156,9 @@ router.put("/cart/:productId", authMiddleware, async (req, res) => {
   }
 });
 
-
-// Thêm route xóa nhiều sản phẩm khỏi giỏ hàng
+// Xóa nhiều sản phẩm khỏi giỏ hàng
 router.delete("/cart", authMiddleware, async (req, res) => {
-  const { productIds } = req.body; // Mảng các productId cần xóa
+  const { productIds } = req.body;
   const userId = req.user.id;
 
   try {
@@ -171,13 +167,11 @@ router.delete("/cart", authMiddleware, async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy giỏ hàng" });
     }
 
-    // Lọc bỏ các sản phẩm có _id nằm trong productIds
     cart.items = cart.items.filter(
       (item) => !productIds.includes(item.product.toString())
     );
 
     if (cart.items.length === 0) {
-      // Nếu giỏ hàng trống, xóa luôn giỏ hàng
       await Cart.deleteOne({ user: userId });
       return res.status(200).json({ message: "Giỏ hàng đã được xóa." });
     }
@@ -185,13 +179,16 @@ router.delete("/cart", authMiddleware, async (req, res) => {
     await cart.save();
     res
       .status(200)
-      .json({ message: "Các sản phẩm đã được xóa khỏi giỏ hàng.", items: cart.items });
+      .json({
+        message: "Các sản phẩm đã được xóa khỏi giỏ hàng.",
+        items: cart.items,
+      });
   } catch (err) {
     console.error("Lỗi khi xóa sản phẩm khỏi giỏ hàng:", err);
-    res.status(500).json({ message: "Có lỗi xảy ra khi xóa sản phẩm khỏi giỏ hàng." });
+    res
+      .status(500)
+      .json({ message: "Có lỗi xảy ra khi xóa sản phẩm khỏi giỏ hàng." });
   }
 });
-
-
 
 module.exports = router;
