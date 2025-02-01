@@ -3,6 +3,7 @@ import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { formatter } from "../../utils/fomater";
+import axios from "axios"; // Đảm bảo đã import axios
 
 const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -57,30 +58,30 @@ const handleCompleteOrder = async (event) => {
     });
 
     // Chuẩn bị dữ liệu đơn hàng
-const orderDetails = {
-  orderId,
-  items: orderData.items.map((item) => ({
-    product: item.product?._id || "Không xác định",
-    quantity: item.quantity || 1,
-    price: item.product?.priceAfterDiscount || 0,
-    name: item.product?.name || "Sản phẩm không có tên",
-    image: item.product?.images?.[0] || "",
-  })),
-  totalAmount: orderData.totalAmount || 0,
-  subtotal: orderData.subtotal || 0,
-  shippingFee: orderData.shippingFee || 0,
-  paymentMethod: paymentMethod || "cod",
-  paymentStatus: paymentMethod === "cod" ? "Chưa thanh toán" : "Chờ xác nhận",
-  userInfo: {
-    fullName: orderData.userInfo?.fullName || "Không có tên",
-    phone: orderData.userInfo?.phone || "Không có số điện thoại",
-    address: orderData.userInfo?.address || "Không có địa chỉ",
-    email: orderData.userInfo?.email || "Không có email",
-  },
-  orderStatus: "Đang xử lý",
-  orderDate: new Date(),
-};
-
+    const orderDetails = {
+      orderId,
+      items: orderData.items.map((item) => ({
+        product: item.product?._id || "Không xác định",
+        quantity: item.quantity || 1,
+        price: item.product?.priceAfterDiscount || 0,
+        name: item.product?.name || "Sản phẩm không có tên",
+        image: item.product?.images?.[0] || "",
+      })),
+      totalAmount: orderData.totalAmount || 0,
+      subtotal: orderData.subtotal || 0,
+      shippingFee: orderData.shippingFee || 0,
+      paymentMethod: paymentMethod || "cod",
+      paymentStatus:
+        paymentMethod === "cod" ? "Chưa thanh toán" : "Chờ xác nhận",
+      userInfo: {
+        fullName: orderData.userInfo?.fullName || "Không có tên",
+        phone: orderData.userInfo?.phone || "Không có số điện thoại",
+        address: orderData.userInfo?.address || "Không có địa chỉ",
+        email: orderData.userInfo?.email || "Không có email",
+      },
+      orderStatus: "Đang xử lý",
+      orderDate: new Date(),
+    };
 
     // Gửi dữ liệu đơn hàng lên server
     const response = await fetch("/api/orders", {
@@ -95,6 +96,15 @@ const orderDetails = {
     const data = await response.json();
 
     if (data.success) {
+      // Sau khi đặt hàng thành công, gọi API xóa các sản phẩm đã đặt khỏi giỏ hàng
+      await axios.delete(`/api/cart`, {
+        data: { productIds: orderData.items.map((item) => item.product._id) },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Nếu bạn đang sử dụng Redux, bạn cũng có thể dispatch clearCartFromAPI:
+      // dispatch(clearCartFromAPI(orderData.items.map((item) => item.product._id)));
+
       localStorage.setItem(
         "lastOrderDetails",
         JSON.stringify({
@@ -113,9 +123,11 @@ Thời gian đặt: ${formattedDate}
 ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
 
       alert(successMessage);
+
+      // Nếu muốn, bạn có thể xóa luôn localStorage cho cart (nếu được lưu tạm ở đó)
       localStorage.removeItem("cart");
 
-      navigate("/order-success", {
+      navigate("/products", {
         state: {
           orderId: orderId,
           orderDetails: {
@@ -277,9 +289,14 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
               <div>Quý khách quyển khoản với nỗi dung mã đơn hàng</div>
               <hr />
               <div className="d-flex justify-content-between mt-4">
-                <Button variant="link" href="#" className="btn btn-link">
+                <Button
+                  variant="link"
+                  onClick={() => navigate("/gio-hang")}
+                  className="btn btn-link"
+                >
                   Giỏ hàng
                 </Button>
+
                 <Button
                   variant="primary"
                   className="ms-auto btn-complete"

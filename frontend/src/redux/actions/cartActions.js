@@ -145,21 +145,20 @@ export const fetchCart = () => async (dispatch) => {
 
 
 // Tạo một đối tượng API để thực hiện các yêu cầu HTTP
-const api = axios.create({
-  baseURL: "https://your-api-url.com", // Đổi thành URL của API bạn sử dụng
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+
 
 export const clearCartFromAPI = (selectedItemIds) => {
   return async (dispatch) => {
     try {
       // Gọi API xóa sản phẩm khỏi giỏ hàng
-      await api.delete("/cart", { data: { productIds: selectedItemIds } });
+      await axios.delete("/api/cart", {
+        data: { productIds: selectedItemIds },
+      });
 
-      // Fetch lại giỏ hàng mới sau khi xóa
-      const response = await api.get("/cart");
+      // Fetch lại giỏ hàng sau khi xóa (nếu cần cập nhật giao diện)
+      const response = await axios.get("/api/cart", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
 
       dispatch({
         type: CART_ACTIONS.SET_CART,

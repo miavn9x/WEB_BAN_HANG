@@ -160,26 +160,37 @@ router.put("/cart/:productId", authMiddleware, async (req, res) => {
 });
 
 
-// // Server API route example (Node.js/Express)
-// app.post('/api/orders', async (req, res) => {
-//   const { items, totalAmount } = req.body;
-  
-//   try {
-//     const order = new Order({
-//       items,
-//       totalAmount,
-//       user: req.user.id, // Giả sử bạn có thông tin người dùng từ auth middleware
-//       date: new Date(),
-//     });
+// Thêm route xóa nhiều sản phẩm khỏi giỏ hàng
+router.delete("/cart", authMiddleware, async (req, res) => {
+  const { productIds } = req.body; // Mảng các productId cần xóa
+  const userId = req.user.id;
 
-//     await order.save();
-//     res.status(201).json({ success: true, order });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ success: false, message: 'Không thể lưu đơn hàng.' });
-//   }
-// });
+  try {
+    const cart = await Cart.findOne({ user: userId });
+    if (!cart) {
+      return res.status(404).json({ message: "Không tìm thấy giỏ hàng" });
+    }
 
+    // Lọc bỏ các sản phẩm có _id nằm trong productIds
+    cart.items = cart.items.filter(
+      (item) => !productIds.includes(item.product.toString())
+    );
+
+    if (cart.items.length === 0) {
+      // Nếu giỏ hàng trống, xóa luôn giỏ hàng
+      await Cart.deleteOne({ user: userId });
+      return res.status(200).json({ message: "Giỏ hàng đã được xóa." });
+    }
+
+    await cart.save();
+    res
+      .status(200)
+      .json({ message: "Các sản phẩm đã được xóa khỏi giỏ hàng.", items: cart.items });
+  } catch (err) {
+    console.error("Lỗi khi xóa sản phẩm khỏi giỏ hàng:", err);
+    res.status(500).json({ message: "Có lỗi xảy ra khi xóa sản phẩm khỏi giỏ hàng." });
+  }
+});
 
 
 
