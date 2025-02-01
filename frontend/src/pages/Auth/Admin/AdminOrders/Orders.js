@@ -10,6 +10,7 @@ import {
 } from "react-bootstrap";
 import axios from "axios";
 import { formatter } from "../../../../utils/fomater";
+import "../../../../styles/Orders.css"; // Import file CSS
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -17,7 +18,7 @@ const Orders = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [updating, setUpdating] = useState(false);
-  const [newStatus] = useState({
+  const [newStatus, setNewStatus] = useState({
     orderStatus: "",
     paymentStatus: "",
   });
@@ -44,35 +45,56 @@ const Orders = () => {
 
   const handleShowDetails = (order) => {
     setSelectedOrder(order);
+    setNewStatus({
+      orderStatus: order.orderStatus, // Set default order status
+      paymentStatus: order.paymentStatus, // Set default payment status
+    });
     setShowModal(true);
   };
-const handleUpdateStatus = async (orderId) => {
-  setUpdating(true);
-  try {
-    const response = await axios.put(
-      `/api/order/${orderId}`,
-      {
-        orderStatus: newStatus.orderStatus,
-        paymentStatus: newStatus.paymentStatus,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+
+  const handleUpdateStatus = async () => {
+    setUpdating(true);
+
+    // Kiểm tra các trạng thái trước khi gửi
+    if (!newStatus.orderStatus || !newStatus.paymentStatus) {
+      alert("Vui lòng chọn trạng thái hợp lệ.");
+      setUpdating(false);
+      return;
+    }
+
+    try {
+      const response = await axios.put(
+        `/api/order/${selectedOrder._id}`,
+        {
+          orderStatus: newStatus.orderStatus,
+          paymentStatus: newStatus.paymentStatus,
         },
-      }
-    );
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order._id === orderId ? response.data.order : order
-      )
-    );
-    setUpdating(false);
-    alert("Cập nhật trạng thái thành công!");
-  } catch (err) {
-    setUpdating(false);
-    alert("Lỗi khi cập nhật trạng thái.");
-  }
-};
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      // Cập nhật lại danh sách đơn hàng
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order._id === selectedOrder._id ? response.data.order : order
+        )
+      );
+      setUpdating(false);
+      alert("Cập nhật trạng thái thành công!");
+      setShowModal(false);
+    } catch (err) {
+      setUpdating(false);
+      console.error("Lỗi khi cập nhật trạng thái:", err);
+      alert(
+        `Lỗi khi cập nhật trạng thái: ${
+          err.response.data.message || err.message
+        }`
+      );
+    }
+  };
 
   const getOrderStatusBadge = (status) => {
     const statusConfig = {
@@ -101,9 +123,9 @@ const handleUpdateStatus = async (orderId) => {
   if (loading) return <div>Đang tải...</div>;
 
   return (
-    <Container>
-      <h2 className="my-4">Lịch sử đơn hàng</h2>
-      <Table responsive striped bordered hover>
+    <Container className="orders-container">
+      <h2 className="my-4 orders-title">Lịch sử đơn hàng</h2>
+      <Table responsive striped bordered hover className="orders-table">
         <thead>
           <tr>
             <th>Mã đơn hàng</th>
@@ -137,7 +159,12 @@ const handleUpdateStatus = async (orderId) => {
       </Table>
 
       {/* Modal Chi tiết đơn hàng */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        size="lg"
+        dialogClassName="order-modal" // Thêm class cho modal
+      >
         <Modal.Header closeButton>
           <Modal.Title>Chi tiết đơn hàng: {selectedOrder?.orderId}</Modal.Title>
         </Modal.Header>
@@ -152,7 +179,12 @@ const handleUpdateStatus = async (orderId) => {
                     Trạng thái đơn hàng:{" "}
                     <select
                       value={newStatus.orderStatus}
-                      onChange={(e) => (newStatus.orderStatus = e.target.value)}
+                      onChange={(e) =>
+                        setNewStatus((prevStatus) => ({
+                          ...prevStatus,
+                          orderStatus: e.target.value,
+                        }))
+                      }
                     >
                       <option value="Đang xử lý">Đang xử lý</option>
                       <option value="Đã xác nhận">Đã xác nhận</option>
@@ -166,7 +198,10 @@ const handleUpdateStatus = async (orderId) => {
                     <select
                       value={newStatus.paymentStatus}
                       onChange={(e) =>
-                        (newStatus.paymentStatus = e.target.value)
+                        setNewStatus((prevStatus) => ({
+                          ...prevStatus,
+                          paymentStatus: e.target.value,
+                        }))
                       }
                     >
                       <option value="Chưa thanh toán">Chưa thanh toán</option>
@@ -182,7 +217,41 @@ const handleUpdateStatus = async (orderId) => {
                   <p>Địa chỉ: {selectedOrder.userInfo.address}</p>
                 </Col>
               </Row>
-              {/* Tiếp tục các phần còn lại của modal */}
+
+              {/* Danh sách sản phẩm */}
+              <Row>
+                <Col>
+                  <h5>Danh sách sản phẩm</h5>
+                  <Table responsive bordered className="orders-table">
+                    <thead>
+                      <tr>
+                        <th>Ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Tổng tiền</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedOrder.items.map((item) => (
+                        <tr key={item._id}>
+                          <td>
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              style={{ width: "50px", height: "50px" }}
+                            />
+                          </td>
+                          <td>{item.name}</td>
+                          <td>{formatter(item.price)}</td>
+                          <td>{item.quantity}</td>
+                          <td>{formatter(item.price * item.quantity)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </Col>
+              </Row>
             </>
           )}
         </Modal.Body>
@@ -194,7 +263,7 @@ const handleUpdateStatus = async (orderId) => {
           {selectedOrder && (
             <Button
               variant="primary"
-              onClick={() => handleUpdateStatus(selectedOrder._id)}
+              onClick={handleUpdateStatus}
               disabled={updating}
             >
               {updating ? "Đang cập nhật..." : "Cập nhật trạng thái"}

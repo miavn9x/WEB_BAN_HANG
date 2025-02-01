@@ -1,0 +1,111 @@
+/* Orders.css */
+
+/* Container chính */
+.orders-container {
+    padding: 20px;
+    /* background-color: #FFF4E6; */
+    /* Màu nền chính: Trắng kem */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Tiêu đề chính */
+.orders-title {
+    color: #FF6F91;
+    /* Màu tiêu đề chính: Hồng đậm */
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Bảng đơn hàng */
+.orders-table {
+    margin-top: 20px;
+    border: 1px solid #FFF8DC;
+    /* Viền hoặc đường chia: Vàng nhạt */
+}
+
+.orders-table th,
+.orders-table td {
+    vertical-align: middle !important;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #FFF8DC;
+    /* Viền cho từng ô */
+}
+
+.orders-table thead {
+    background-color: #FFB6C1;
+    /* Màu chính: Hồng nhạt */
+    color: #fff;
+}
+
+.orders-table tbody tr:hover {
+    background-color: #E6E6FA;
+    /* Chi tiết nhỏ hoặc icon: Tím lavender */
+    cursor: pointer;
+}
+
+/* Hình ảnh sản phẩm */
+.orders-table img {
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+/* Modal đơn hàng */
+.order-modal .modal-header {
+    background-color: #FFB6C1;
+    /* Màu chính: Hồng nhạt */
+    color: #fff;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom: 1px solid #FFF8DC;
+    /* Đường chia: Vàng nhạt */
+}
+
+.order-modal .modal-title {
+    font-weight: bold;
+}
+
+.order-modal .modal-body {
+    background-color: #FFF4E6;
+    /* Màu nền chính: Trắng kem */
+}
+
+.order-modal .modal-footer {
+    background-color: #FFF4E6;
+    border-top: 1px solid #FFF8DC;
+    /* Đường chia: Vàng nhạt */
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Style cho các select trong modal */
+.order-modal select {
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid #FFF8DC;
+    /* Viền: Vàng nhạt */
+    margin-top: 5px;
+    background-color: #FFB6C1;
+    /* Màu chính: Hồng nhạt */
+    color: #fff;
+}
+
+/* Nút CTA chính */
+.btn-primary {
+    background-color: #ffd5db !important;
+    /* Nút CTA chính: Hồng nhạt */
+    border-color: #FFF8DC !important;
+    /* Viền: Vàng nhạt */
+    color: #333;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: #FFB6C1 !important;
+    /* Khi hover: Hồng nhạt chuyển sang sắc hơn */
+    border-color: #FFF8DC !important;
+    color: #fff;
+}

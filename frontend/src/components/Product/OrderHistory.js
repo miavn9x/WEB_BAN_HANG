@@ -9,6 +9,7 @@ import {
   Badge,
 } from "react-bootstrap";
 import { formatter } from "../../utils/fomater";
+import "../../../src/styles/OrderHistory.css"; // Import file CSS
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
@@ -48,7 +49,7 @@ const OrderHistory = () => {
   };
 
   const handleShowDetails = (order) => {
-    setSelectedOrder(order); // Đảm bảo rằng selectedOrder được cập nhật đúng
+    setSelectedOrder(order);
     setShowModal(true);
   };
 
@@ -56,7 +57,6 @@ const OrderHistory = () => {
     if (!window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) return;
 
     try {
-      console.log("Attempting to cancel order:", orderId);
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Vui lòng đăng nhập!");
 
@@ -133,9 +133,9 @@ const OrderHistory = () => {
   if (loading) return <div>Đang tải...</div>;
 
   return (
-    <Container>
-      <h2 className="my-4">Lịch sử đơn hàng</h2>
-      <Table responsive striped bordered hover>
+    <Container className="order-history-container">
+      <h2 className="my-4 order-history-title">Lịch sử đơn hàng</h2>
+      <Table responsive striped bordered hover className="order-history-table">
         <thead>
           <tr>
             <th>Mã đơn hàng</th>
@@ -167,7 +167,12 @@ const OrderHistory = () => {
       </Table>
 
       {/* Modal Chi tiết đơn hàng */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        size="lg"
+        dialogClassName="order-modal"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Chi tiết đơn hàng: {selectedOrder?.orderId}</Modal.Title>
         </Modal.Header>
@@ -266,7 +271,7 @@ const OrderHistory = () => {
                   </tr>
                 </tfoot>
               </Table>
-              {/* Thêm nút Hủy đơn hàng */}
+              {/* Nút Hủy đơn hàng */}
               {canCancelOrder(selectedOrder.orderStatus) ? (
                 <Button
                   variant="danger"

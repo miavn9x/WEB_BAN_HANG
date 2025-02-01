@@ -3,8 +3,11 @@ const express = require("express");
 const router = express.Router();
 const Order = require("../models/orderModel");
 const authMiddleware = require("../middleware/authMiddleware");
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
 const { sendOrderConfirmationEmail } = require('../utils/ordermail'); // Import module gửi email
+const { ORDER_STATUS, PAYMENT_STATUS } = require("../constants/orderConstants");
+const Product = require("../models/productModel");
+
 
 // Route tạo đơn hàng theo tưng user
 router.post("/orders", authMiddleware, async (req, res) => {
@@ -326,16 +329,70 @@ router.get("/orders", authMiddleware, async (req, res) => {
   }
 });
 
-const { ORDER_STATUS, PAYMENT_STATUS } = require("../constants/orderConstants");
 
-// Route thay đổi trạng thái đơn hang
+// // Route thay đổi trạng thái đơn hàng
+// router.put("/order/:id", authMiddleware, async (req, res) => {
+//   const { id: orderId } = req.params;
+//   const { orderStatus, paymentStatus } = req.body;
+
+//   try {
+//     const order = await Order.findById(orderId);
+//     if (!order) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Không tìm thấy đơn hàng.",
+//       });
+//     }
+
+//     // Kiểm tra trạng thái đơn hàng
+//     if (orderStatus) {
+//       if (Object.values(ORDER_STATUS).includes(orderStatus)) {
+//         order.orderStatus = orderStatus;
+//       } else {
+//         return res.status(400).json({
+//           success: false,
+//           message: "Trạng thái đơn hàng không hợp lệ.",
+//         });
+//       }
+//     }
+
+//     // Kiểm tra trạng thái thanh toán
+//     if (paymentStatus) {
+//       if (Object.values(PAYMENT_STATUS).includes(paymentStatus)) {
+//         order.paymentStatus = paymentStatus;
+//       } else {
+//         return res.status(400).json({
+//           success: false,
+//           message: "Trạng thái thanh toán không hợp lệ.",
+//         });
+//       }
+//     }
+
+//     await order.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Cập nhật trạng thái đơn hàng thành công.",
+//       order,
+//     });
+//   } catch (error) {
+//     console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Lỗi khi cập nhật trạng thái đơn hàng.",
+//       error: error.message,
+//     });
+//   }
+// });
+
+// Route thay đổi trạng thái đơn hàng
 router.put("/order/:id", authMiddleware, async (req, res) => {
-  const { id: orderId } = req.params; // Lấy orderId từ tham số trong URL
-  const { orderStatus, paymentStatus } = req.body; // Nhận các trạng thái từ request body
+  const { id: orderId } = req.params;
+  const { orderStatus, paymentStatus } = req.body;
 
   try {
-    // Tìm đơn hàng theo orderId
-    const order = await Order.findById(orderId);
+    // Populate items.product để có thông tin sản phẩm cần cập nhật kho
+    const order = await Order.findById(orderId).populate("items.product");
     if (!order) {
       return res.status(404).json({
         success: false,
@@ -343,10 +400,13 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
       });
     }
 
-    // Cập nhật trạng thái đơn hàng
+    // Lưu lại trạng thái cũ trước khi cập nhật
+    const oldOrderStatus = order.orderStatus;
+
+    // Cập nhật trạng thái đơn hàng nếu hợp lệ
     if (orderStatus) {
       if (Object.values(ORDER_STATUS).includes(orderStatus)) {
-        order.orderStatus = orderStatus; // Chỉ cập nhật nếu trạng thái hợp lệ
+        order.orderStatus = orderStatus;
       } else {
         return res.status(400).json({
           success: false,
@@ -355,10 +415,10 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
       }
     }
 
-    // Cập nhật trạng thái thanh toán
+    // Cập nhật trạng thái thanh toán nếu hợp lệ
     if (paymentStatus) {
       if (Object.values(PAYMENT_STATUS).includes(paymentStatus)) {
-        order.paymentStatus = paymentStatus; // Chỉ cập nhật nếu trạng thái hợp lệ
+        order.paymentStatus = paymentStatus;
       } else {
         return res.status(400).json({
           success: false,
@@ -367,8 +427,38 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
       }
     }
 
-    // Lưu thay đổi vào cơ sở dữ liệu
+    // Lưu đơn hàng với trạng thái mới
     await order.save();
+
+    // Nhóm trạng thái mà chúng ta cần trừ số lượng sản phẩm khỏi kho
+    const confirmedStatus = ["Đã xác nhận", "Đang giao hàng", "Đã giao hàng"];
+
+    // Nếu đơn hàng chuyển sang trạng thái trong nhóm xác nhận/giao hàng/đã giao
+    // và trạng thái cũ không thuộc nhóm này thì trừ số lượng sản phẩm khỏi kho.
+    if (confirmedStatus.includes(order.orderStatus) && !confirmedStatus.includes(oldOrderStatus)) {
+      for (const item of order.items) {
+        // Giả sử item.quantity là số lượng sản phẩm trong đơn hàng
+        await Product.findByIdAndUpdate(
+          item.product._id,
+          { $inc: { remainingStock: -item.quantity } },
+          { new: true }
+        );
+      }
+    }
+
+    // Nếu đơn hàng chuyển từ trạng thái đã xác nhận/đang giao/đã giao sang "Đã hủy"
+    // thì hoàn trả lại số lượng sản phẩm vào kho.
+    if (oldOrderStatus !== "Đã hủy" &&
+        confirmedStatus.includes(oldOrderStatus) &&
+        order.orderStatus === "Đã hủy") {
+      for (const item of order.items) {
+        await Product.findByIdAndUpdate(
+          item.product._id,
+          { $inc: { remainingStock: item.quantity } },
+          { new: true }
+        );
+      }
+    }
 
     res.status(200).json({
       success: true,
