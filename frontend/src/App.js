@@ -25,7 +25,7 @@ import Test from "./components/Product/Test";
 import ProductItem from "./components/Product/ProductItem";
 import Checkout from "./components/Product/Checkout";
 import OrderHistory from "./components/Product/OrderHistory";
-import AdminOrders from "./pages/Auth/Admin/AdminOrders/AdminOrders";
+import Orders from "./pages/Auth/Admin/AdminOrders/Orders";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -77,27 +77,11 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/quan-ly-don-hang"
           element={
             <PrivateRoute isAuthenticated={isAuthenticated}>
               <AdminOrders />
-            </PrivateRoute>
-          }
-        />
-        {/* <Route
-          path="/gio-hang"
-          element={
-            <PrivateRoute isAuthenticated={isAuthenticated}>
-              <Cart />
-            </PrivateRoute>
-          }
-        /> */}
-        {/* <Route
-          path="/thanh-toan"
-          element={
-            <PrivateRoute isAuthenticated={isAuthenticated}>
-              <Checkout />
             </PrivateRoute>
           }
         /> */}
@@ -113,6 +97,7 @@ function App() {
                 <Route path="user-management" element={<AccountList />} />
                 <Route path="add-product" element={<AddProduct />} />
                 <Route path="edit-product" element={<ProductEdit />} />
+                <Route path="/quan-ly-don-hang" element={<Orders />} />
               </Routes>
             </PrivateRoute>
           }

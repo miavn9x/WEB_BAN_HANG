@@ -1,4 +1,4 @@
-// constants/orderConstants.js
+//backend constants/orderConstants.js
 exports.ORDER_STATUS = {
   PROCESSING: "Đang xử lý",
   CONFIRMED: "Đã xác nhận",

@@ -6,7 +6,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 const nodemailer = require("nodemailer");
 const { sendOrderConfirmationEmail } = require('../utils/ordermail'); // Import module gửi email
 
-
+// Route tạo đơn hàng theo tưng user
 router.post("/orders", authMiddleware, async (req, res) => {
   try {
     const {
@@ -207,7 +207,6 @@ router.get("/order/:orderId", authMiddleware, async (req, res) => {
 });
 
 
-const { ORDER_STATUS } = require("../constants/orderConstants");
 
 // huy don hang
 router.post("/orders/:orderId/cancel", authMiddleware, async (req, res) => {
@@ -284,98 +283,103 @@ router.post("/orders/:orderId/cancel", authMiddleware, async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-// Route lấy tất cả đơn hàng cho admin
-router.get("/admin/orders", authMiddleware, async (req, res) => {
+// Route lấy tất cả đơn hàng của mọi người
+router.get("/orders", authMiddleware, async (req, res) => {
   try {
-    // Kiểm tra quyền admin
-    if (!req.user.isAdmin) {
-      return res.status(403).json({
-        success: false,
-        message: "Bạn không có quyền truy cập!",
-      });
-    }
+    const orders = await Order.find() // Lấy tất cả đơn hàng
+      .populate("items.product") // Populate thông tin sản phẩm trong từng đơn hàng
+      .sort({ orderDate: -1 }); // Sắp xếp theo ngày đặt đơn hàng (mới nhất lên đầu)
 
-    const orders = await Order.find().populate('items.product').sort({ orderDate: -1 });
-
-    const formattedOrders = orders.map(order => ({
+    // Định dạng lại dữ liệu đơn hàng
+    const formattedOrders = orders.map((order) => ({
       ...order._doc,
-      formattedOrderDate: new Date(order.orderDate).toLocaleString('vi-VN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
+      formattedOrderDate: new Date(order.orderDate).toLocaleString("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
       }),
-      items: order.items.map(item => ({
+      items: order.items.map((item) => ({
         _id: item._id,
         name: item.name,
         price: item.price,
         quantity: item.quantity,
         image: item.image,
-        product: item.product
-      }))
+        product: item.product, // Thông tin sản phẩm
+      })),
     }));
 
     res.status(200).json({
       success: true,
-      orders: formattedOrders
+      orders: formattedOrders,
     });
   } catch (error) {
     console.error("Lỗi server:", error);
     res.status(500).json({
       success: false,
-      message: "Lỗi khi lấy danh sách đơn hàng!",
-      error: error.message
+      message: "Lỗi khi lấy thông tin đơn hàng!",
+      error: error.message,
     });
   }
 });
 
-// Route cập nhật trạng thái đơn hàng
-router.put("/:orderId/status", authMiddleware, async (req, res) => {
+const { ORDER_STATUS, PAYMENT_STATUS } = require("../constants/orderConstants");
+
+// Route thay đổi trạng thái đơn hang
+router.put("/order/:id", authMiddleware, async (req, res) => {
+  const { id: orderId } = req.params; // Lấy orderId từ tham số trong URL
+  const { orderStatus, paymentStatus } = req.body; // Nhận các trạng thái từ request body
+
   try {
-    // Kiểm tra quyền admin
-    if (!req.user.isAdmin) {
-      return res.status(403).json({
-        success: false,
-        message: "Bạn không có quyền truy cập!",
-      });
-    }
-
-    const { orderId } = req.params;
-    const { status } = req.body;
-
-    const order = await Order.findOne({ orderId });
-
+    // Tìm đơn hàng theo orderId
+    const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: "Không tìm thấy đơn hàng!",
+        message: "Không tìm thấy đơn hàng.",
       });
     }
 
     // Cập nhật trạng thái đơn hàng
-    order.orderStatus = status;
+    if (orderStatus) {
+      if (Object.values(ORDER_STATUS).includes(orderStatus)) {
+        order.orderStatus = orderStatus; // Chỉ cập nhật nếu trạng thái hợp lệ
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Trạng thái đơn hàng không hợp lệ.",
+        });
+      }
+    }
+
+    // Cập nhật trạng thái thanh toán
+    if (paymentStatus) {
+      if (Object.values(PAYMENT_STATUS).includes(paymentStatus)) {
+        order.paymentStatus = paymentStatus; // Chỉ cập nhật nếu trạng thái hợp lệ
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Trạng thái thanh toán không hợp lệ.",
+        });
+      }
+    }
+
+    // Lưu thay đổi vào cơ sở dữ liệu
     await order.save();
 
     res.status(200).json({
       success: true,
-      message: "Cập nhật trạng thái đơn hàng thành công!",
+      message: "Cập nhật trạng thái đơn hàng thành công.",
       order,
     });
   } catch (error) {
-    console.error("Server error:", error);
+    console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
     res.status(500).json({
       success: false,
-      message: "Lỗi khi cập nhật trạng thái đơn hàng!",
+      message: "Lỗi khi cập nhật trạng thái đơn hàng.",
       error: error.message,
     });
   }
