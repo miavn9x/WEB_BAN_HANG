@@ -1,4 +1,3 @@
-// models/orderModel.js
 const mongoose = require("mongoose");
 const {
   ORDER_STATUS,
@@ -37,16 +36,16 @@ const orderSchema = new mongoose.Schema(
     paymentMethod: {
       type: String,
       required: true,
-      enum: Object.values(PAYMENT_METHODS),
+      enum: Object.values(PAYMENT_METHODS), // ["cod", "bank"]
     },
     paymentStatus: {
       type: String,
-      enum: Object.values(PAYMENT_STATUS),
+      enum: Object.values(PAYMENT_STATUS), // ["Chưa thanh toán", "Đã xác nhận", "Đã thanh toán"]
       default: PAYMENT_STATUS.PENDING,
     },
     orderStatus: {
       type: String,
-      enum: Object.values(ORDER_STATUS),
+      enum: Object.values(ORDER_STATUS), // ["Đang xử lý", "Đã xác nhận", "Đang giao hàng", "Đã giao hàng", "Đã hủy"]
       default: ORDER_STATUS.PROCESSING,
     },
     userInfo: {
@@ -78,10 +77,12 @@ const orderSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
 orderSchema.post("save", function (error, doc, next) {
   if (error.name === "ValidationError") {
     console.log("Validation Error:", error);
   }
   next(error);
 });
+
 module.exports = mongoose.model("Order", orderSchema);

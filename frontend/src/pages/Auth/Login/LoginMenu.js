@@ -56,6 +56,9 @@ const LoginMenu = ({ onClose }) => {
             <Dropdown.Item onClick={() => navigate("/admin/edit-product")}>
               Quản lý sản phẩm
             </Dropdown.Item>
+            <Dropdown.Item onClick={() => navigate("/admin/quan-ly-don-hang")}>
+              Quản lý đơn hàng
+            </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/admin/add-product")}>
               Đăng sản phẩm
             </Dropdown.Item>

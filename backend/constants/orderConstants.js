@@ -9,11 +9,16 @@ exports.ORDER_STATUS = {
 
 exports.PAYMENT_STATUS = {
   PENDING: "Chưa thanh toán",
-  CONFIRMING: "Đã xác nhận", // Sửa lại để khớp với dữ liệu
+  CONFIRMING: "Chờ xác nhận", // Đổi từ "Đã xác nhận" thành "Chờ xác nhận"
   COMPLETED: "Đã thanh toán",
 };
 
 exports.PAYMENT_METHODS = {
   COD: "cod",
   BANK: "bank",
+};
+
+exports.PAYMENT_METHOD_LABELS = {
+  cod: "Thanh toán khi nhận hàng",
+  bank: "Chuyển khoản ngân hàng",
 };

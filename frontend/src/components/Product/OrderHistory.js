@@ -48,55 +48,55 @@ const OrderHistory = () => {
   };
 
   const handleShowDetails = (order) => {
-    setSelectedOrder(order);
+    setSelectedOrder(order); // Đảm bảo rằng selectedOrder được cập nhật đúng
     setShowModal(true);
   };
 
-const handleCancelOrder = async (orderId) => {
-  if (!window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) return;
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) return;
 
-  try {
-    console.log("Attempting to cancel order:", orderId);
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("Vui lòng đăng nhập!");
+    try {
+      console.log("Attempting to cancel order:", orderId);
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Vui lòng đăng nhập!");
 
-    const response = await fetch(`/api/orders/${orderId}/cancel`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+      const response = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.message || "Không thể hủy đơn hàng");
+      if (!response.ok) {
+        throw new Error(data.message || "Không thể hủy đơn hàng");
+      }
+
+      if (data.success) {
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.orderId === orderId
+              ? { ...order, orderStatus: "Đã hủy" }
+              : order
+          )
+        );
+
+        alert("Hủy đơn hàng thành công!");
+        setShowModal(false);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert(error.message || "Có lỗi xảy ra khi hủy đơn hàng!");
     }
+  };
 
-    if (data.success) {
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.orderId === orderId
-            ? { ...order, orderStatus: "Đã hủy" }
-            : order
-        )
-      );
+  const canCancelOrder = (orderStatus) => {
+    const cancellableStatuses = ["Đang xử lý", "Đã xác nhận"];
+    return cancellableStatuses.includes(orderStatus);
+  };
 
-      alert("Hủy đơn hàng thành công!");
-      setShowModal(false);
-    }
-  } catch (error) {
-    console.error("Error:", error);
-    alert(error.message || "Có lỗi xảy ra khi hủy đơn hàng!");
-  }
-};
-
-
-const canCancelOrder = (orderStatus) => {
-  const cancellableStatuses = ["Đang xử lý", "Đã xác nhận"];
-  return cancellableStatuses.includes(orderStatus);
-};
   // Các hàm helper cho badges
   const getOrderStatusBadge = (status) => {
     const statusConfig = {
@@ -131,8 +131,6 @@ const canCancelOrder = (orderStatus) => {
   };
 
   if (loading) return <div>Đang tải...</div>;
-
-  // Trong component OrderHistory
 
   return (
     <Container>

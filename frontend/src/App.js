@@ -25,6 +25,7 @@ import Test from "./components/Product/Test";
 import ProductItem from "./components/Product/ProductItem";
 import Checkout from "./components/Product/Checkout";
 import OrderHistory from "./components/Product/OrderHistory";
+import AdminOrders from "./pages/Auth/Admin/AdminOrders/AdminOrders";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -66,7 +67,7 @@ function App() {
         <Route path="/product/:productId" element={<ProductItem />} />
         <Route path="/gio-hang" element={<Cart />} />{" "}
         <Route path="/thanh-toan" element={<Checkout />} />
-        <Route path="/OrderHistory" element={<OrderHistory/>} />
+        <Route path="/OrderHistory" element={<OrderHistory />} />
         {/* Protected Routes - User & admin */}
         <Route
           path="/thong-tin-ca-nhan"
@@ -76,14 +77,14 @@ function App() {
             </PrivateRoute>
           }
         />
-        {/* <Route
-          path="/danh-sach-yeu-thich"
+        <Route
+          path="/quan-ly-don-hang"
           element={
             <PrivateRoute isAuthenticated={isAuthenticated}>
-              <Favorites />
+              <AdminOrders />
             </PrivateRoute>
           }
-        /> */}
+        />
         {/* <Route
           path="/gio-hang"
           element={
