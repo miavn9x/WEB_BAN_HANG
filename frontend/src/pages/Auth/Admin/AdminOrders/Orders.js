@@ -10,7 +10,7 @@ import {
 } from "react-bootstrap";
 import axios from "axios";
 import { formatter } from "../../../../utils/fomater";
-import "../../../../styles/Orders.css"; // Import file CSS
+import "../../../../styles/Orders.css";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -46,16 +46,16 @@ const Orders = () => {
   const handleShowDetails = (order) => {
     setSelectedOrder(order);
     setNewStatus({
-      orderStatus: order.orderStatus, // Set default order status
-      paymentStatus: order.paymentStatus, // Set default payment status
+      orderStatus: order.orderStatus,
+      paymentStatus: order.paymentStatus,
     });
     setShowModal(true);
   };
 
+  // frontend/Orders.js
   const handleUpdateStatus = async () => {
     setUpdating(true);
 
-    // Kiểm tra các trạng thái trước khi gửi
     if (!newStatus.orderStatus || !newStatus.paymentStatus) {
       alert("Vui lòng chọn trạng thái hợp lệ.");
       setUpdating(false);
@@ -63,11 +63,47 @@ const Orders = () => {
     }
 
     try {
+      // Refund logic if the payment status is changing to "Hoàn tiền"
+      if (
+        newStatus.paymentStatus === "Hoàn tiền" &&
+        selectedOrder.paymentStatus !== "Hoàn tiền"
+      ) {
+        if (
+          window.confirm(
+            "Bạn có chắc chắn muốn hoàn tiền cho đơn hàng này không?"
+          )
+        ) {
+          // Call backend to perform the refund
+          const refundResponse = await axios.post(
+            `/api/payment/refund`,
+            {
+              orderId: selectedOrder._id,
+              amount: selectedOrder.totalAmount,
+              paymentMethod: "Banking", // or determine based on the order
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+
+          if (!refundResponse.data.success) {
+            alert("Lỗi khi hoàn tiền. Vui lòng thử lại.");
+            setUpdating(false);
+            return;
+          } else {
+            alert("Hoàn tiền thành công!");
+          }
+        }
+      }
+
+      // Update order status (orderStatus and paymentStatus)
       const response = await axios.put(
         `/api/order/${selectedOrder._id}`,
         {
           orderStatus: newStatus.orderStatus,
-          paymentStatus: newStatus.paymentStatus,
+          paymentStatus: newStatus.paymentStatus, // Ensure it's "Hoàn tiền" here
         },
         {
           headers: {
@@ -76,23 +112,23 @@ const Orders = () => {
         }
       );
 
-      // Cập nhật lại danh sách đơn hàng
+      // Update orders in the frontend state
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order._id === selectedOrder._id ? response.data.order : order
         )
       );
-      setUpdating(false);
       alert("Cập nhật trạng thái thành công!");
       setShowModal(false);
     } catch (err) {
-      setUpdating(false);
       console.error("Lỗi khi cập nhật trạng thái:", err);
       alert(
         `Lỗi khi cập nhật trạng thái: ${
-          err.response.data.message || err.message
+          err.response?.data.message || err.message
         }`
       );
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -114,6 +150,7 @@ const Orders = () => {
       "Chưa thanh toán": { color: "danger", text: "Chưa thanh toán" },
       "Đợi xác nhận": { color: "warning", text: "Đợi xác nhận" },
       "Đã thanh toán": { color: "success", text: "Đã thanh toán" },
+      "Hoàn tiền": { color: "info", text: "Hoàn tiền" },
     };
 
     const config = statusConfig[status] || { color: "secondary", text: status };
@@ -157,102 +194,59 @@ const Orders = () => {
           ))}
         </tbody>
       </Table>
-
-      {/* Modal Chi tiết đơn hàng */}
+      {/* Modal */}
       <Modal
         show={showModal}
         onHide={() => setShowModal(false)}
         size="lg"
-        dialogClassName="order-modal" // Thêm class cho modal
+        dialogClassName="order-modal"
       >
         <Modal.Header closeButton>
           <Modal.Title>Chi tiết đơn hàng: {selectedOrder?.orderId}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedOrder && (
-            <>
-              <Row className="mb-3">
-                <Col md={6}>
-                  <h5>Thông tin đơn hàng</h5>
-                  <p>Ngày đặt: {selectedOrder.formattedOrderDate}</p>
-                  <p>
-                    Trạng thái đơn hàng:{" "}
-                    <select
-                      value={newStatus.orderStatus}
-                      onChange={(e) =>
-                        setNewStatus((prevStatus) => ({
-                          ...prevStatus,
-                          orderStatus: e.target.value,
-                        }))
-                      }
-                    >
-                      <option value="Đang xử lý">Đang xử lý</option>
-                      <option value="Đã xác nhận">Đã xác nhận</option>
-                      <option value="Đang giao hàng">Đang giao hàng</option>
-                      <option value="Đã giao hàng">Đã giao hàng</option>
-                      <option value="Đã hủy">Đã hủy</option>
-                    </select>
-                  </p>
-                  <p>
-                    Trạng thái thanh toán:{" "}
-                    <select
-                      value={newStatus.paymentStatus}
-                      onChange={(e) =>
-                        setNewStatus((prevStatus) => ({
-                          ...prevStatus,
-                          paymentStatus: e.target.value,
-                        }))
-                      }
-                    >
-                      <option value="Chưa thanh toán">Chưa thanh toán</option>
-                      <option value="Đợi xác nhận">Đợi xác nhận</option>
-                      <option value="Đã thanh toán">Đã thanh toán</option>
-                    </select>
-                  </p>
-                </Col>
-                <Col md={6}>
-                  <h5>Thông tin khách hàng</h5>
-                  <p>Họ tên: {selectedOrder.userInfo.fullName}</p>
-                  <p>Số điện thoại: {selectedOrder.userInfo.phone}</p>
-                  <p>Địa chỉ: {selectedOrder.userInfo.address}</p>
-                </Col>
-              </Row>
-
-              {/* Danh sách sản phẩm */}
-              <Row>
-                <Col>
-                  <h5>Danh sách sản phẩm</h5>
-                  <Table responsive bordered className="orders-table">
-                    <thead>
-                      <tr>
-                        <th>Ảnh</th>
-                        <th>Tên sản phẩm</th>
-                        <th>Giá</th>
-                        <th>Số lượng</th>
-                        <th>Tổng tiền</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedOrder.items.map((item) => (
-                        <tr key={item._id}>
-                          <td>
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              style={{ width: "50px", height: "50px" }}
-                            />
-                          </td>
-                          <td>{item.name}</td>
-                          <td>{formatter(item.price)}</td>
-                          <td>{item.quantity}</td>
-                          <td>{formatter(item.price * item.quantity)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </Col>
-              </Row>
-            </>
+            <Row>
+              <Col md={6}>
+                <h5>Thông tin đơn hàng</h5>
+                <p>Ngày đặt: {selectedOrder.formattedOrderDate}</p>
+                <p>
+                  Trạng thái đơn hàng:
+                  <select
+                    value={newStatus.orderStatus}
+                    onChange={(e) =>
+                      setNewStatus((prev) => ({
+                        ...prev,
+                        orderStatus: e.target.value,
+                      }))
+                    }
+                  >
+                    <option value="Đang xử lý">Đang xử lý</option>
+                    <option value="Đã xác nhận">Đã xác nhận</option>
+                    <option value="Đang giao hàng">Đang giao hàng</option>
+                    <option value="Đã giao hàng">Đã giao hàng</option>
+                    <option value="Đã hủy">Đã hủy</option>
+                  </select>
+                </p>
+                <p>
+                  Trạng thái thanh toán:
+                  <select
+                    value={newStatus.paymentStatus}
+                    onChange={(e) =>
+                      setNewStatus((prev) => ({
+                        ...prev,
+                        paymentStatus: e.target.value,
+                      }))
+                    }
+                  >
+                    <option value="Chưa thanh toán">Chưa thanh toán</option>
+                    <option value="Đợi xác nhận">Đợi xác nhận</option>
+                    <option value="Đã thanh toán">Đã thanh toán</option>
+                    <option value="Hoàn tiền">Hoàn tiền</option>
+                  </select>
+                </p>
+              </Col>
+            </Row>
           )}
         </Modal.Body>
 

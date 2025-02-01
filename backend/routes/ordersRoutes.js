@@ -5,7 +5,6 @@ const Order = require("../models/orderModel");
 const authMiddleware = require("../middleware/authMiddleware");
 // const nodemailer = require("nodemailer");
 const { sendOrderConfirmationEmail } = require('../utils/ordermail'); // Import module gửi email
-const { ORDER_STATUS, PAYMENT_STATUS } = require("../constants/orderConstants");
 const Product = require("../models/productModel");
 
 
@@ -330,61 +329,6 @@ router.get("/orders", authMiddleware, async (req, res) => {
 });
 
 
-// // Route thay đổi trạng thái đơn hàng
-// router.put("/order/:id", authMiddleware, async (req, res) => {
-//   const { id: orderId } = req.params;
-//   const { orderStatus, paymentStatus } = req.body;
-
-//   try {
-//     const order = await Order.findById(orderId);
-//     if (!order) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Không tìm thấy đơn hàng.",
-//       });
-//     }
-
-//     // Kiểm tra trạng thái đơn hàng
-//     if (orderStatus) {
-//       if (Object.values(ORDER_STATUS).includes(orderStatus)) {
-//         order.orderStatus = orderStatus;
-//       } else {
-//         return res.status(400).json({
-//           success: false,
-//           message: "Trạng thái đơn hàng không hợp lệ.",
-//         });
-//       }
-//     }
-
-//     // Kiểm tra trạng thái thanh toán
-//     if (paymentStatus) {
-//       if (Object.values(PAYMENT_STATUS).includes(paymentStatus)) {
-//         order.paymentStatus = paymentStatus;
-//       } else {
-//         return res.status(400).json({
-//           success: false,
-//           message: "Trạng thái thanh toán không hợp lệ.",
-//         });
-//       }
-//     }
-
-//     await order.save();
-
-//     res.status(200).json({
-//       success: true,
-//       message: "Cập nhật trạng thái đơn hàng thành công.",
-//       order,
-//     });
-//   } catch (error) {
-//     console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Lỗi khi cập nhật trạng thái đơn hàng.",
-//       error: error.message,
-//     });
-//   }
-// });
-
 // Route thay đổi trạng thái đơn hàng
 router.put("/order/:id", authMiddleware, async (req, res) => {
   const { id: orderId } = req.params;
@@ -474,6 +418,50 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
     });
   }
 });
+
+
+const { ORDER_STATUS, PAYMENT_STATUS } = require("../constants/orderConstants");
+
+// backend/routes/ordersRoutes.js
+router.post("/payment/refund", authMiddleware, async (req, res) => {
+  const { orderId, amount, paymentMethod } = req.body;
+
+  try {
+    const refundSuccess = true; // Simulate successful refund for demonstration
+
+    if (refundSuccess) {
+      const order = await Order.findById(orderId);
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: "Order not found.",
+        });
+      }
+
+      // Change the paymentStatus to "Hoàn tiền" (Refunded)
+      order.paymentStatus = "Hoàn tiền"; // Corrected value
+      await order.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Refund successful.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "Refund failed. Please try again.",
+      });
+    }
+  } catch (error) {
+    console.error("Error while processing refund:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error processing refund.",
+      error: error.message,
+    });
+  }
+});
+
 
 
 module.exports = router;

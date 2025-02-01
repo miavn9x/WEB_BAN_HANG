@@ -111,16 +111,18 @@ const OrderHistory = () => {
     return <Badge bg={config.color}>{config.text}</Badge>;
   };
 
-  const getPaymentStatusBadge = (status) => {
-    const statusConfig = {
-      "Chưa thanh toán": { color: "danger", text: "Chưa thanh toán" },
-      "Đợi xác nhận": { color: "warning", text: "Đợi xác nhận" },
-      "Đã thanh toán": { color: "success", text: "Đã thanh toán" },
-    };
-
-    const config = statusConfig[status] || { color: "secondary", text: status };
-    return <Badge bg={config.color}>{config.text}</Badge>;
+const getPaymentStatusBadge = (status) => {
+  const statusConfig = {
+    "Chưa thanh toán": { color: "danger", text: "Chưa thanh toán" },
+    "Đợi xác nhận": { color: "warning", text: "Đợi xác nhận" },
+    "Đã thanh toán": { color: "success", text: "Đã thanh toán" },
+    "Hoàn tiền": { color: "secondary", text: "Hoàn tiền" }, // Added Hoàn tiền status
   };
+
+  const config = statusConfig[status] || { color: "secondary", text: status };
+  return <Badge bg={config.color}>{config.text}</Badge>;
+};
+
 
   const getPaymentMethodLabel = (method) => {
     const methods = {
@@ -189,7 +191,8 @@ const OrderHistory = () => {
                   </p>
                   <p>
                     Trạng thái thanh toán:{" "}
-                    {getPaymentStatusBadge(selectedOrder.paymentStatus)}
+                    {getPaymentStatusBadge(selectedOrder.paymentStatus)}{" "}
+                    {/* Updated here */}
                   </p>
                   <p>
                     Phương thức thanh toán:{" "}
