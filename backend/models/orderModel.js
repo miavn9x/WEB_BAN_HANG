@@ -1,5 +1,10 @@
-// orderModel.js
+// models/orderModel.js
 const mongoose = require("mongoose");
+const {
+  ORDER_STATUS,
+  PAYMENT_STATUS,
+  PAYMENT_METHODS,
+} = require("../constants/orderConstants");
 
 const orderSchema = new mongoose.Schema(
   {
@@ -32,13 +37,17 @@ const orderSchema = new mongoose.Schema(
     paymentMethod: {
       type: String,
       required: true,
-      enum: ["cod", "bank"],
+      enum: Object.values(PAYMENT_METHODS),
     },
     paymentStatus: {
       type: String,
-      required: true,
-      enum: ["Chưa thanh toán", "Đợi xác nhận", "Đã thanh toán"],
-      default: "Chưa thanh toán",
+      enum: Object.values(PAYMENT_STATUS),
+      default: PAYMENT_STATUS.PENDING,
+    },
+    orderStatus: {
+      type: String,
+      enum: Object.values(ORDER_STATUS),
+      default: ORDER_STATUS.PROCESSING,
     },
     userInfo: {
       fullName: { type: String, required: true },
@@ -46,34 +55,9 @@ const orderSchema = new mongoose.Schema(
       address: { type: String, required: true },
       email: { type: String, required: true },
     },
-    orderStatus: {
-      type: String,
-      required: true,
-      enum: [
-        "Đang xử lý",
-        "Đã xác nhận",
-        "Đang giao hàng",
-        "Đã giao hàng",
-        "Đã hủy",
-      ],
-      default: "Đang xử lý",
-    },
     orderDate: {
       type: Date,
       default: Date.now,
-      get: function (date) {
-        return date
-          ? date.toLocaleString("vi-VN", {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-              hour12: false,
-            })
-          : null;
-      },
     },
     formattedOrderDate: {
       type: String,
@@ -92,9 +76,12 @@ const orderSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    toJSON: { getters: true },
-    toObject: { getters: true },
   }
 );
-
+orderSchema.post("save", function (error, doc, next) {
+  if (error.name === "ValidationError") {
+    console.log("Validation Error:", error);
+  }
+  next(error);
+});
 module.exports = mongoose.model("Order", orderSchema);

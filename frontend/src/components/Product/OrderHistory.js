@@ -52,6 +52,51 @@ const OrderHistory = () => {
     setShowModal(true);
   };
 
+const handleCancelOrder = async (orderId) => {
+  if (!window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) return;
+
+  try {
+    console.log("Attempting to cancel order:", orderId);
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Vui lòng đăng nhập!");
+
+    const response = await fetch(`/api/orders/${orderId}/cancel`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Không thể hủy đơn hàng");
+    }
+
+    if (data.success) {
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.orderId === orderId
+            ? { ...order, orderStatus: "Đã hủy" }
+            : order
+        )
+      );
+
+      alert("Hủy đơn hàng thành công!");
+      setShowModal(false);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert(error.message || "Có lỗi xảy ra khi hủy đơn hàng!");
+  }
+};
+
+
+const canCancelOrder = (orderStatus) => {
+  const cancellableStatuses = ["Đang xử lý", "Đã xác nhận"];
+  return cancellableStatuses.includes(orderStatus);
+};
   // Các hàm helper cho badges
   const getOrderStatusBadge = (status) => {
     const statusConfig = {
@@ -87,50 +132,7 @@ const OrderHistory = () => {
 
   if (loading) return <div>Đang tải...</div>;
 
-const handleCancelOrder = async (orderId) => {
-  if (window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Vui lòng đăng nhập!");
-      }
-
-      console.log("Attempting to cancel order:", orderId); // Debug log
-
-      const response = await fetch(`/api/orders/${orderId}/cancel`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Không thể hủy đơn hàng");
-      }
-
-      if (data.success) {
-        alert("Đơn hàng đã được hủy thành công!");
-
-        // Cập nhật trạng thái local
-        setOrders((prevOrders) =>
-          prevOrders.map((order) =>
-            order.orderId === orderId
-              ? { ...order, orderStatus: "Đã hủy" }
-              : order
-          )
-        );
-
-        setShowModal(false); // Đóng modal
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert(error.message || "Có lỗi xảy ra khi hủy đơn hàng");
-    }
-  }
-};
+  // Trong component OrderHistory
 
   return (
     <Container>
@@ -198,7 +200,6 @@ const handleCancelOrder = async (orderId) => {
                   <p>Địa chỉ: {selectedOrder.userInfo.address}</p>
                 </Col>
               </Row>
-
               <Row>
                 <Col>
                   <h5>Chi tiết thanh toán</h5>
@@ -213,7 +214,6 @@ const handleCancelOrder = async (orderId) => {
                   </div>
                 </Col>
               </Row>
-
               <h5>Chi tiết sản phẩm</h5>
               <Table responsive striped bordered>
                 <thead>
@@ -268,16 +268,22 @@ const handleCancelOrder = async (orderId) => {
                   </tr>
                 </tfoot>
               </Table>
-
               {/* Thêm nút Hủy đơn hàng */}
-              {selectedOrder && selectedOrder.orderStatus === "Đang xử lý" && (
+              {canCancelOrder(selectedOrder.orderStatus) ? (
                 <Button
                   variant="danger"
                   onClick={() => handleCancelOrder(selectedOrder.orderId)}
-                  className="mt-3"
                 >
                   Hủy đơn hàng
                 </Button>
+              ) : (
+                <div className="text-danger">
+                  <small>
+                    {selectedOrder.orderStatus === "Đã hủy"
+                      ? "Đơn hàng đã được hủy"
+                      : `* Không thể hủy đơn hàng ở trạng thái "${selectedOrder.orderStatus}"`}
+                  </small>
+                </div>
               )}
             </>
           )}

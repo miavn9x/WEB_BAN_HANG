@@ -6,6 +6,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 const nodemailer = require("nodemailer");
 const { sendOrderConfirmationEmail } = require('../utils/ordermail'); // Import module gửi email
 
+
 // Route tạo đơn hàng
 router.post("/orders", authMiddleware, async (req, res) => {
   try {
@@ -107,12 +108,11 @@ router.get("/ordershistory", authMiddleware, async (req, res) => {
       .populate('items.product')
       .sort({ orderDate: -1 });
 
-    // Transform data before sending
     const formattedOrders = orders.map(order => ({
       ...order._doc,
       orderStatus: order.orderStatus,
       paymentStatus: order.paymentStatus,
-      orderDate: new Date(order.orderDate).toLocaleString('vi-VN', {
+      formattedOrderDate: new Date(order.orderDate).toLocaleString('vi-VN', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
@@ -121,15 +121,13 @@ router.get("/ordershistory", authMiddleware, async (req, res) => {
         second: '2-digit',
         hour12: false
       }),
-      formattedOrderDate: order.formattedOrderDate,
       items: order.items.map(item => ({
-        ...item._doc,
-        product: {
-          ...item.product._doc,
-          price: item.price,
-          name: item.name,
-          image: item.image
-        }
+        _id: item._id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+        product: item.product
       }))
     }));
 
@@ -203,58 +201,81 @@ router.get("/order/:orderId", authMiddleware, async (req, res) => {
   }
 });
 
-// Route hủy đơn hàng
+
+const { ORDER_STATUS } = require("../constants/orderConstants");
+
+// huy don hang
 router.post("/orders/:orderId/cancel", authMiddleware, async (req, res) => {
   try {
     const { orderId } = req.params;
     const userId = req.user._id;
 
-    console.log("Cancel request:", { orderId, userId });
+    console.log("Attempting to cancel order:", orderId);
 
-    // Tìm đơn hàng sử dụng orderId string
     const order = await Order.findOne({
-      orderId: orderId, // Tìm theo orderId string
-      userId: userId
+      orderId: orderId,
+      userId: userId,
     });
 
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: "Không tìm thấy đơn hàng để hủy!",
+        message: "Không tìm thấy đơn hàng!",
       });
     }
 
-    // Kiểm tra trạng thái
-    if (order.orderStatus !== "Đang xử lý") {
+    console.log("Order found:", order);
+
+    // Kiểm tra trạng thái có thể hủy
+    const cancelableStatuses = [ORDER_STATUS.PROCESSING, ORDER_STATUS.CONFIRMED];
+    if (!cancelableStatuses.includes(order.orderStatus)) {
+      let message;
+      switch (order.orderStatus) {
+        case ORDER_STATUS.SHIPPING:
+          message = "Không thể hủy đơn hàng đang trong quá trình giao hàng!";
+          break;
+        case ORDER_STATUS.DELIVERED:
+          message = "Không thể hủy đơn hàng đã giao thành công!";
+          break;
+        case ORDER_STATUS.CANCELLED:
+          message = "Đơn hàng này đã được hủy trước đó!";
+          break;
+        default:
+          message = "Không thể hủy đơn hàng ở trạng thái hiện tại!";
+      }
+
       return res.status(400).json({
         success: false,
-        message: "Chỉ đơn hàng 'Đang xử lý' mới có thể hủy!",
+        message: message,
       });
     }
 
-    // Cập nhật trạng thái
-    order.orderStatus = "Đã hủy";
-    await order.save();
+    // Cập nhật chỉ trạng thái đơn hàng, giữ nguyên trạng thái thanh toán
+    const updatedOrder = await Order.findOneAndUpdate(
+      { orderId: orderId },
+      { orderStatus: ORDER_STATUS.CANCELLED },
+      { new: true, runValidators: false }
+    );
+
+    if (!updatedOrder) {
+      throw new Error("Không thể cập nhật trạng thái đơn hàng");
+    }
 
     res.status(200).json({
       success: true,
-      message: "Đơn hàng đã được hủy thành công!",
+      message: "Hủy đơn hàng thành công!",
       order: {
-        orderId: order.orderId,
-        orderStatus: order.orderStatus,
-        paymentStatus: order.paymentStatus,
-        formattedOrderDate: order.formattedOrderDate
-      }
+        orderId: updatedOrder.orderId,
+        orderStatus: updatedOrder.orderStatus,
+      },
     });
-
   } catch (error) {
-    console.error("Lỗi server:", error);
+    console.error("Server error:", error);
     res.status(500).json({
       success: false,
-      message: "Lỗi khi hủy đơn hàng!",
-      error: error.message
+      message: "Lỗi server khi hủy đơn hàng",
+      error: error.message,
     });
   }
 });
-
 module.exports = router;

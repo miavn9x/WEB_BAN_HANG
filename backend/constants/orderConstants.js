@@ -4,15 +4,16 @@ exports.ORDER_STATUS = {
   CONFIRMED: "Đã xác nhận",
   SHIPPING: "Đang giao hàng",
   DELIVERED: "Đã giao hàng",
-  CANCELLED: "Đã hủy", // Thêm trạng thái "Đã hủy"
+  CANCELLED: "Đã hủy",
+};
+
+exports.PAYMENT_STATUS = {
+  PENDING: "Chưa thanh toán",
+  CONFIRMING: "Đã xác nhận", // Sửa lại để khớp với dữ liệu
+  COMPLETED: "Đã thanh toán",
 };
 
 exports.PAYMENT_METHODS = {
   COD: "cod",
   BANK: "bank",
-};
-
-exports.PAYMENT_METHOD_LABELS = {
-  cod: "Thanh toán khi nhận hàng",
-  bank: "Thanh toán ngân hàng",
 };
