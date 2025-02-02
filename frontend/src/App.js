@@ -26,6 +26,7 @@ import ProductItem from "./components/Product/ProductItem";
 import Checkout from "./components/Product/Checkout";
 import OrderHistory from "./components/Product/OrderHistory";
 import Orders from "./pages/Auth/Admin/AdminOrders/Orders";
+import StoreLocator from "./components/map/StoreLocator";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -68,6 +69,7 @@ function App() {
         <Route path="/gio-hang" element={<Cart />} />{" "}
         <Route path="/thanh-toan" element={<Checkout />} />
         <Route path="/OrderHistory" element={<OrderHistory />} />
+        <Route path="/shop-map" element={<StoreLocator />} />
         {/* Protected Routes - User & admin */}
         <Route
           path="/thong-tin-ca-nhan"
