@@ -43,9 +43,6 @@ const LoginMenu = ({ onClose }) => {
             <Dropdown.Item onClick={() => navigate("/OrderHistory")}>
               Lịch sử mua hàng
             </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/san-pham-da-mua")}>
-              Các sản phẩm đã mua
-            </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/gio-hang")}>
               Giỏ hàng
             </Dropdown.Item>
@@ -61,6 +58,11 @@ const LoginMenu = ({ onClose }) => {
             </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/admin/add-product")}>
               Đăng sản phẩm
+            </Dropdown.Item>
+            <Dropdown.Item
+              onClick={() => navigate("/admin/add-bai-viet")}
+            >
+              Tạo bài viết
             </Dropdown.Item>
           </>
         ) : (

@@ -108,11 +108,11 @@
 }
 
 /* Nút khác (ví dụ nút Đóng, Xem chi tiết) */
-.btn-info {
+/* .btn-info {
     background-color: #ffd5db !important;
     border-color: #FFF8DC !important;
     color: #333;
-}
+} */
 
 .btn-info:hover,
 .btn-info:focus,

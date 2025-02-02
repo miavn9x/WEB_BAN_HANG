@@ -3,8 +3,7 @@
 /* Container chính */
 .orders-container {
     padding: 20px;
-    /* background-color: #FFF4E6; */
-    /* Màu nền chính: Trắng kem */
+
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -12,7 +11,6 @@
 /* Tiêu đề chính */
 .orders-title {
     color: #FF6F91;
-    /* Màu tiêu đề chính: Hồng đậm */
     margin-bottom: 20px;
     text-align: center;
     font-weight: bold;
@@ -22,7 +20,6 @@
 .orders-table {
     margin-top: 20px;
     border: 1px solid #FFF8DC;
-    /* Viền hoặc đường chia: Vàng nhạt */
 }
 
 .orders-table th,
@@ -90,13 +87,11 @@
 }
 
 /* Nút CTA chính */
-.btn-primary {
+/* .btn-primary {
     background-color: #ffd5db !important;
-    /* Nút CTA chính: Hồng nhạt */
     border-color: #FFF8DC !important;
-    /* Viền: Vàng nhạt */
     color: #333;
-}
+} */
 
 .btn-primary:hover,
 .btn-primary:focus,

@@ -70,12 +70,12 @@ const NavMenu = [
   { path: "/products", label: "TẤT CẢ SẢN PHẨM" },
   { path: "Giới Thiệu", label: "GIỚI THIỆU" },
   { path: "/bai-viet", label: "BÀI VIẾT" },
-  { path: "hệ thông cửa hàng", label: "Hệ thống cửa hàng" },
+  { path: "/shop-map", label: "Hệ thống cửa hàng" },
   { path: "Hotline", label: "Hotline: 099999998" },
 ];
 
 const systemInfo = [
-  { icon: <FaStore />, text: "Hệ thống cửa hàng" },
+  { icon: <FaStore />, text: "Hệ thống cửa hàng", path: "/shop-map" },
   { icon: <FaPhone />, text: "Hotline: 099999998" },
 ];
 
@@ -286,12 +286,11 @@ const MyNavbar = () => {
                             {category.label}
                           </Dropdown.Item>
                         ))}
-                        <Dropdown.Divider style={{margin:"0", padding: "0"}}/>
+                        <Dropdown.Divider
+                          style={{ margin: "0", padding: "0" }}
+                        />
                         <Dropdown.Item
-                      
-                          onClick={() =>
-                            handleLinkClick("/products")
-                          }
+                          onClick={() => handleLinkClick("/products")}
                         >
                           Xem tất cả sản phẩm
                         </Dropdown.Item>
@@ -405,8 +404,7 @@ const MyNavbar = () => {
             ) : (
               // Kiểm tra điều kiện hiển thị
               (!isLargeScreen ||
-                (link.path !== "hệ thông cửa hàng" &&
-                  link.path !== "Hotline")) && (
+                (link.path !== "/shop-map" && link.path !== "Hotline")) && (
                 <Nav.Link
                   key={index}
                   onClick={() => handleLinkClick(link.path)}
@@ -443,10 +441,23 @@ const MyNavbar = () => {
             <Nav className="me-auto mb-2 mb-lg-0">
               {/* Các mục điều hướng khác */}
             </Nav>
-            <Navbar.Text className="text-white ms-auto text-end">
+            <Navbar.Text className="text-white ms-auto text-end navbar-text-custom">
               {systemInfo.map((info, idx) => (
-                <span key={idx}>
-                  {info.icon} {info.text} &nbsp; | &nbsp;
+                <span key={idx} className="nav-item">
+                  {/* Kiểm tra nếu có đường dẫn thì cho phép chuyển hướng */}
+                  {info.path ? (
+                    <Button
+                      onClick={() => navigate(info.path)}
+                      className="navbar-btn"
+                    >
+                      {info.icon} {info.text}
+                    </Button>
+                  ) : (
+                    <span className="nav-item-text">
+                      {info.icon} {info.text}
+                    </span>
+                  )}
+                  &nbsp; | &nbsp;
                 </span>
               ))}
             </Navbar.Text>

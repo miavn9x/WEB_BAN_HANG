@@ -27,6 +27,7 @@ import Checkout from "./components/Product/Checkout";
 import OrderHistory from "./components/Product/OrderHistory";
 import Orders from "./pages/Auth/Admin/AdminOrders/Orders";
 import StoreLocator from "./components/map/StoreLocator";
+import MyEditor from "./pages/Auth/Admin/MyEditor/MyEditor";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -100,6 +101,7 @@ function App() {
                 <Route path="add-product" element={<AddProduct />} />
                 <Route path="edit-product" element={<ProductEdit />} />
                 <Route path="/quan-ly-don-hang" element={<Orders />} />
+                <Route path="/add-bai-viet" element={<MyEditor />} />
               </Routes>
             </PrivateRoute>
           }

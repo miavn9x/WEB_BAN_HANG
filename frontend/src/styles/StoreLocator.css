@@ -3,7 +3,7 @@
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    max-width: 300px;
+    /* max-width: 300px; */
     width: 100%;
 }
 
@@ -24,7 +24,7 @@
 
 .store-locator .map-container {
     width: 100%;
-    height: 400px;
+    height: 430px;
     /* Điều chỉnh kích thước bản đồ */
     background-color: #ccc;
     border-radius: 10px;

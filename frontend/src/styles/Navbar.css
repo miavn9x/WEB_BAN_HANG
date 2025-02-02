@@ -221,4 +221,42 @@ html body .nav-link {
     font-size: clamp(14px, calc(14px + (18 - 14) * ((85vw - 992px) / (1400 - 992))), 20px);
 }
 
-/* Base logo styling */
+.navbar-text-custom {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.navbar-text-custom .nav-item {
+    margin-right: 10px;
+}
+
+.navbar-text-custom .navbar-btn {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    color: #fff;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.navbar-text-custom .navbar-btn:hover {
+    color: #ffffff;
+}
+
+.navbar-text-custom .nav-item-text {
+    display: inline-flex;
+    align-items: center;
+    color: #fff;
+}
+
+.navbar-text-custom .nav-item-text+.nav-item-text {
+    margin-left: 10px;
+}
+
+.navbar-text-custom .nav-item-text,
+.navbar-text-custom .navbar-btn {
+    margin-right: 10px;
+}

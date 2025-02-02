@@ -106,7 +106,7 @@ const StoreLocator = () => {
       <div className="container">
         <div className="row">
           {/* Cột tìm kiếm cửa hàng */}
-          <div className="col-lg-3 col-md-4 col-12 mb-4">
+          <div className="col-lg-4 col-md-4 col-12 mb-4">
             <div className="card">
               <h5 className="card-title">Tìm cửa hàng</h5>
               <div className="mb-3">
@@ -157,7 +157,7 @@ const StoreLocator = () => {
           </div>
 
           {/* Cột bản đồ (9 cột) */}
-          <div className="col-lg-9 col-md-8 col-12 mb-4">
+          <div className="col-lg-8 col-md-8 col-12 mb-4">
             <div className="map-container">
               <iframe
                 width="100%"
