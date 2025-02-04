@@ -47,26 +47,35 @@ router.post("/upload", (req, res) => {
 // API tạo bài viết (POST)
 router.post("/posts", async (req, res) => {
   const { title, content, tags, productId, imageUrl } = req.body;
-  if (!title || !content || !productId) {
-    return res
-      .status(400)
-      .json({ error: "Title, content, and product are required." });
+
+  // Kiểm tra bắt buộc title và content
+  if (!title || !content) {
+    return res.status(400).json({ error: "Title and content are required." });
   }
+
   try {
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ error: "Product not found." });
+    // Nếu có productId, kiểm tra sản phẩm tồn tại
+    if (productId) {
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({ error: "Product not found." });
+      }
     }
+    
+    // Parse tags nếu có (tags được truyền dưới dạng mảng object { id, text })
     const parsedTags = Array.isArray(tags)
       ? tags.map((tag) => tag.text || tag)
       : [];
+
     const newPost = new Post({
       title,
       content,
       tags: parsedTags,
-      productId,
+      // Nếu không có productId, lưu null
+      productId: productId || null,
       imageUrl,
     });
+
     await newPost.save();
     res.status(201).json(newPost);
   } catch (err) {
@@ -75,28 +84,47 @@ router.post("/posts", async (req, res) => {
   }
 });
 
+
 // API cập nhật bài viết (PUT)
 router.put("/posts/:id", async (req, res) => {
   const { id } = req.params;
   const { title, content, tags, productId, imageUrl } = req.body;
-  if (!title || !content || !productId) {
+
+  // Chỉ bắt buộc title và content
+  if (!title || !content) {
     return res
       .status(400)
-      .json({ error: "Title, content, and product are required." });
+      .json({ error: "Title and content are required." });
   }
+
   try {
+    // Nếu có productId, kiểm tra xem sản phẩm có tồn tại không
+    let validProductId = null;
+    if (productId) {
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({ error: "Product not found." });
+      }
+      validProductId = productId;
+    }
+
+    // Parse tags: nếu tags được gửi dưới dạng mảng object { id, text }
+    const parsedTags = Array.isArray(tags)
+      ? tags.map((tag) => tag.text || tag)
+      : [];
+
+    // Cập nhật bài viết
     const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ error: "Post not found." });
     }
-    const parsedTags = Array.isArray(tags)
-      ? tags.map((tag) => tag.text || tag)
-      : [];
+
     post.title = title;
     post.content = content;
     post.tags = parsedTags;
-    post.productId = productId;
+    post.productId = validProductId; // Nếu không có productId, trường này sẽ được lưu là null
     post.imageUrl = imageUrl;
+
     await post.save();
     res.status(200).json(post);
   } catch (err) {
@@ -145,5 +173,7 @@ router.get("/posts/:id", async (req, res) => {
     res.status(500).json({ error: "Error fetching post" });
   }
 });
+
+
 
 module.exports = router;

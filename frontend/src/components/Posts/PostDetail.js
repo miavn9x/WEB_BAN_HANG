@@ -9,6 +9,7 @@ const PostDetail = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loadingRelated, setLoadingRelated] = useState(true);
 
+  // Fetch bài viết theo id
   useEffect(() => {
     fetch(`/api/posts/${id}`)
       .then((res) => res.json())
@@ -23,20 +24,55 @@ const PostDetail = () => {
       });
   }, [id]);
 
+  // Fetch sản phẩm liên quan: nếu bài viết có productId thì dựa vào trường category.generic của sản phẩm đó,
+  // nếu không có (hoặc có lỗi) thì lấy 6 sản phẩm ngẫu nhiên.
   useEffect(() => {
-    if (post && post.productId) {
-      fetch(`/api/products/related?productId=${post.productId}`)
+    if (!post) return;
+
+    // Hàm hỗ trợ lấy danh sách sản phẩm (6 sản phẩm) dựa trên filter categoryGeneric hoặc random
+    const fetchProducts = (url) => {
+      fetch(url)
         .then((res) => res.json())
         .then((data) => {
           setRelatedProducts(data.products || []);
           setLoadingRelated(false);
         })
         .catch((err) => {
-          console.error("Error fetching related products:", err);
+          console.error("Error fetching products:", err);
           setLoadingRelated(false);
         });
+    };
+
+    if (post.productId) {
+      // Lấy chi tiết sản phẩm để truy xuất trường category.generic
+      fetch(`/api/products/${post.productId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (
+            data &&
+            data.product &&
+            data.product.category &&
+            data.product.category.generic
+          ) {
+            // Lấy 6 sản phẩm cùng loại theo category.generic
+            const generic = data.product.category.generic;
+            const url = `/api/products?categoryGeneric=${encodeURIComponent(
+              generic
+            )}&limit=6&sortBy=random`;
+            fetchProducts(url);
+          } else {
+            // Nếu không có thông tin generic, fallback lấy ngẫu nhiên 6 sản phẩm
+            fetchProducts(`/api/products?sortBy=random&limit=6`);
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching product details:", err);
+          // Fallback lấy ngẫu nhiên 6 sản phẩm khi có lỗi
+          fetchProducts(`/api/products?sortBy=random&limit=6`);
+        });
     } else {
-      setLoadingRelated(false);
+      // Nếu bài viết không có productId, lấy ngẫu nhiên 6 sản phẩm
+      fetchProducts(`/api/products?sortBy=random&limit=6`);
     }
   }, [post]);
 
@@ -51,19 +87,14 @@ const PostDetail = () => {
       <div className="row">
         <div className="col-12 col-md-9">
           <h1 className="mb-4">{post.title}</h1>
-
-          
-   
-
           <div
             className="post-content"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
-
           {post.tags && Array.isArray(post.tags) && post.tags.length > 0 && (
             <div className="mt-4">
               <h5>Thẻ:</h5>
-              <ul className="list-inline ">
+              <ul className="list-inline">
                 {post.tags.map((tag, index) => (
                   <li
                     key={index}
@@ -75,7 +106,6 @@ const PostDetail = () => {
               </ul>
             </div>
           )}
-
           <p className="mt-3 text-muted">
             Ngày đăng: {new Date(post.date).toLocaleString()}
           </p>
@@ -90,7 +120,7 @@ const PostDetail = () => {
               {relatedProducts.map((product) => (
                 <Link
                   key={product._id}
-                  to={`/products/${product._id}`}
+                  to={`/product/${product._id}`}
                   className="list-group-item list-group-item-action d-flex align-items-center"
                 >
                   {product.images?.[0] && (

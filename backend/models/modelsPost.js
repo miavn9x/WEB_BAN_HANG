@@ -8,7 +8,7 @@ const postSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product",
-    required: true,
+    required: false, // Sửa required: false để không bắt buộc phải có sản phẩm
   },
   // Lưu URL của ảnh chính cho bài viết
   imageUrl: { type: String },

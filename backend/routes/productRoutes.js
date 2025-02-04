@@ -352,4 +352,28 @@ router.post("/products/:id/purchase", async (req, res) => {
   }
 });
 
+// Route lấy sản phẩm liên quan theo generic
+router.get("/products/related", async (req, res) => {
+  const { generic, limit } = req.query;
+
+  if (!generic) {
+    return res.status(400).json({ message: "Thiếu tham số 'generic'" });
+  }
+
+  // Chuyển limit về dạng số, nếu không có thì mặc định 6
+  const numLimit = Number(limit) || 6;
+
+  try {
+    // Giả sử bạn muốn tìm các sản phẩm có category.generic khớp (không phân biệt chữ hoa chữ thường)
+    const products = await Product.find({
+      "category.generic": { $regex: generic, $options: "i" },
+    }).limit(numLimit);
+
+    return res.status(200).json({ products });
+  } catch (error) {
+    console.error("Error fetching related products:", error);
+    return res.status(500).json({ message: "Lỗi server khi lấy sản phẩm liên quan" });
+  }
+});
+
 module.exports = router;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Editor } from "@tinymce/tinymce-react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Helmet } from "react-helmet";
@@ -33,7 +33,7 @@ const MyEditor = () => {
   const [searchParams] = useSearchParams();
   const postId = searchParams.get("id");
   const navigate = useNavigate();
-
+const fileInputRef = useRef(null);
   // Gợi ý cho thẻ tags
   const tagSuggestions = [
     { id: "#noibat", text: "#noibat" },
@@ -267,11 +267,17 @@ useEffect(() => {
     ),
   }));
 
+  
+
   // Xử lý submit bài viết (tạo mới hoặc cập nhật nếu đang chỉnh sửa)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Upload ảnh nếu có chọn ảnh mới; nếu không, dùng ảnh cũ (hoặc ảnh mặc định)
+    if (!title || !content) {
+      alert("Vui lòng nhập đầy đủ: Tiêu đề và Nội dung.");
+      return;
+    }
+
     let finalImageUrl = "";
     if (selectedImage) {
       const formData = new FormData();
@@ -302,8 +308,8 @@ useEffect(() => {
       title,
       content,
       tags, // mảng các object { id, text }
-      productId: selectedProduct,
       imageUrl: finalImageUrl,
+      ...(selectedProduct && { productId: selectedProduct }),
     };
 
     setLoading(true);
@@ -319,10 +325,8 @@ useEffect(() => {
       if (response.ok) {
         console.log(postId ? "Post updated:" : "Post created:", data);
         if (postId) {
-          // Chế độ chỉnh sửa: chỉ chuyển hướng về trang quản lý bài viết
           navigate("/admin/posts-management");
         } else {
-          // Chế độ tạo mới: xóa bản nháp và reset form
           localStorage.removeItem("draftPost");
           setTitle("");
           setContent("");
@@ -334,6 +338,10 @@ useEffect(() => {
           setSelectedProduct("");
           setProducts([]);
           setEditorKey((prev) => prev + 1);
+          // Reset file input
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
         }
       } else {
         console.error("Error creating/updating post:", data);
@@ -417,6 +425,7 @@ useEffect(() => {
                 type="file"
                 className="form-control"
                 id="image"
+                ref={fileInputRef}
                 onChange={(e) => setSelectedImage(e.target.files[0])}
               />
               {!selectedImage && existingImageUrl && (
