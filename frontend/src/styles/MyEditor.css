@@ -1,26 +1,21 @@
-/* Đặt một class bao bọc duy nhất cho component của bạn */
-.my-editor-container .custom-tags {
-    padding: 0;
-    margin: 0;
-    list-style: none;
+/* Ghi đè style cho nút “x” (dấu x) của thẻ tags */
+.ReactTags__remove {
+  color: #333 !important;       /* Đổi màu chữ thành màu xám đậm */
+  background-color: transparent !important;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 5px;
 }
 
-.my-editor-container .custom-tag-remove {
-    display: inline-block;
-    margin-left: 5px;
-    color: #f1356d !important;
-    cursor: pointer;
-    font-weight: bold;
-    background: transparent;
-    border: none;
-}
-
-.my-editor-container .custom-tag-remove svg {
-    fill: #000000 !important;
-}
-
-.my-editor-container .custom-tag-remove:hover,
-.my-editor-container .custom-tag-remove:hover svg {
-    color: rgb(255, 0, 0) !important;
-    fill: rgb(255, 0, 0) !important;
+/* Ghi đè style cho thẻ tag */
+.ReactTags__tag {
+  background: #9b9b9b !important; /* Màu nền của thẻ tag */
+  color: #fff !important;          /* Màu chữ của thẻ tag */
+  border: none !important;
+  padding: 5px 5px !important;
+  border-radius: 3px !important;
+  margin-right: 5px;
+  display: inline-flex;
+  align-items: center;
 }

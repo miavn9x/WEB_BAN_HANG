@@ -1,28 +1,60 @@
-// PostsManagement.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
+import "../../styles/PostsManagement.css"; // Import file CSS cách ly cho component
 
 const PostsManagement = () => {
   const [posts, setPosts] = useState([]);
+  // State mapping từ productId sang tên sản phẩm
+  const [productNames, setProductNames] = useState({});
 
-  const fetchPosts = async () => {
+  // Hàm fetch thông tin sản phẩm dựa trên danh sách productIds
+  const fetchProductNames = async (productIds) => {
+    const mapping = {};
+    await Promise.all(
+      productIds.map(async (id) => {
+        try {
+          const res = await fetch(`/api/products/${id}`);
+          if (res.ok) {
+            const productData = await res.json();
+            // Giả sử API trả về { product: { _id, name, ... } }
+            if (productData.product) {
+              mapping[id] = productData.product.name;
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching product ${id}:`, error);
+        }
+      })
+    );
+    setProductNames(mapping);
+  };
+
+  // Sử dụng useCallback để định nghĩa hàm fetchPosts có giá trị ổn định
+  const fetchPosts = useCallback(async () => {
     try {
       const response = await fetch("/api/posts");
       if (response.ok) {
         const data = await response.json();
         setPosts(data.posts);
+        // Lấy danh sách productId duy nhất từ các bài viết
+        const productIds = [
+          ...new Set(data.posts.map((post) => post.productId)),
+        ];
+        await fetchProductNames(productIds);
       } else {
         console.error("Error fetching posts");
       }
     } catch (err) {
       console.error("Error:", err);
     }
-  };
+  }, []); // Mảng dependency rỗng vì không phụ thuộc biến nào
 
+  // Gọi fetchPosts khi component mount
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [fetchPosts]);
 
+  // Hàm xử lý xóa bài viết
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa bài viết này không?")) {
       try {
@@ -39,43 +71,64 @@ const PostsManagement = () => {
   };
 
   return (
-    <div className="container">
-      <h3 className="my-3">Quản Lý Bài Viết</h3>
-      <table className="table table-bordered">
-        <thead>
-          <tr>
-            <th>Tiêu Đề</th>
-            <th>Tags</th>
-            <th>Sản Phẩm</th>
-            <th>Ngày</th>
-            <th>Hành Động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {posts.map((post) => (
-            <tr key={post._id}>
-              <td>{post.title}</td>
-              <td>{post.tags.join(", ")}</td>
-              <td>{post.productId}</td>
-              <td>{new Date(post.date).toLocaleString()}</td>
-              <td>
-                <Link
-                  className="btn btn-sm btn-primary me-2"
-                  to={`/admin/add-bai-viet?id=${post._id}`}
-                >
-                  Sửa
-                </Link>
-                <button
-                  className="btn btn-sm btn-danger"
-                  onClick={() => handleDelete(post._id)}
-                >
-                  Xóa
-                </button>
-              </td>
+    <div className="posts-management container">
+      <h4 className="my-3">Quản Lý Bài Viết</h4>
+      {/* Bọc bảng trong div.table-responsive để bảng hiển thị tốt trên thiết bị nhỏ */}
+      <div className="table-responsive">
+        <table className="table table-bordered">
+          <thead>
+            <tr>
+              <th>Tiêu Đề</th>
+              <th>Tags</th>
+              <th>Sản Phẩm</th>
+              <th>Ngày</th>
+              <th>Hành Động</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {posts.map((post) => (
+              <tr key={post._id}>
+                <td
+                  style={{
+                    maxWidth: "100px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {post.title}
+                </td>
+                <td>{post.tags.join(", ")}</td>
+                <td
+                  style={{
+                    maxWidth: "200px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {productNames[post.productId] || post.productId}
+                </td>
+                <td>{new Date(post.date).toLocaleString()}</td>
+                <td>
+                  <Link
+                    className="btn btn-sm btn-primary me-2"
+                    to={`/admin/add-bai-viet?id=${post._id}`}
+                  >
+                    Sửa
+                  </Link>
+                  <button
+                    className="btn btn-sm btn-danger"
+                    onClick={() => handleDelete(post._id)}
+                  >
+                    Xóa
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

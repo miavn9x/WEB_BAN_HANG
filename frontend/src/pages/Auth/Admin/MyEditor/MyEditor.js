@@ -62,8 +62,15 @@ const MyEditor = () => {
   }, [postId]);
 
   // Nếu đang chỉnh sửa bài viết, load dữ liệu bài viết từ API
+useEffect(() => {
+  if (!postId) {
+    setExistingImageUrl("");
+  }
+}, [postId]);
+
   useEffect(() => {
     if (postId) {
+      
       const fetchPost = async () => {
         try {
           const response = await fetch(`/api/posts/${postId}`);
@@ -311,20 +318,22 @@ const MyEditor = () => {
       const data = await response.json();
       if (response.ok) {
         console.log(postId ? "Post updated:" : "Post created:", data);
-        // Nếu tạo/chỉnh sửa bài viết thành công, xóa bản nháp và reset state
-        localStorage.removeItem("draftPost");
-        setTitle("");
-        setContent("");
-        setTags([]);
-        setSelectedImage(null);
-        setExistingImageUrl("");
-        setSelectedCategory("");
-        setSelectedGeneric("");
-        setSelectedProduct("");
-        setProducts([]);
-        setEditorKey((prev) => prev + 1);
         if (postId) {
+          // Chế độ chỉnh sửa: chỉ chuyển hướng về trang quản lý bài viết
           navigate("/admin/posts-management");
+        } else {
+          // Chế độ tạo mới: xóa bản nháp và reset form
+          localStorage.removeItem("draftPost");
+          setTitle("");
+          setContent("");
+          setTags([]);
+          setSelectedImage(null);
+          setExistingImageUrl("");
+          setSelectedCategory("");
+          setSelectedGeneric("");
+          setSelectedProduct("");
+          setProducts([]);
+          setEditorKey((prev) => prev + 1);
         }
       } else {
         console.error("Error creating/updating post:", data);
@@ -352,6 +361,16 @@ const MyEditor = () => {
         <h3 className="text-center my-3 py-4">
           {postId ? "Chỉnh Sửa Bài Viết" : "Tạo Bài Viết Mới"}
         </h3>
+        {/* Nút "Quay lại" */}
+        <div className="mb-3">
+          <span
+            type="button"
+            className="btn"
+            onClick={() => navigate("/admin/posts-management")}
+          >
+            <u className="fs-5"> Quay lại</u>
+          </span>
+        </div>
 
         {/* Phần nhập nội dung bài viết */}
         <div className="col-md-9">
@@ -413,8 +432,8 @@ const MyEditor = () => {
             </div>
 
             {/* Phần nhập thẻ tags với giao diện đã được cải tiến */}
-            <div className="custom-tag-container mb-3">
-              <label htmlFor="tags" className="custom-tag-label form-label">
+            <div className="col-md-12 mb-3">
+              <label htmlFor="tags" className="form-label">
                 Thẻ (Tags)
               </label>
               <ReactTags
@@ -423,13 +442,6 @@ const MyEditor = () => {
                 handleDelete={handleTagsDelete}
                 handleAddition={handleTagsAddition}
                 placeholder="Nhập các thẻ phân loại (press Enter để thêm)"
-                classNames={{
-                  tags: "custom-tags", // Bao bọc toàn bộ danh sách thẻ
-                  tagInput: "custom-tag-input", // Phần input nhập thẻ
-                  tag: "custom-tag", // Mỗi thẻ
-                  remove: "custom-tag-remove", // Nút xóa của thẻ
-                  // Bạn có thể tùy chỉnh thêm các lớp khác nếu cần
-                }}
               />
             </div>
 
