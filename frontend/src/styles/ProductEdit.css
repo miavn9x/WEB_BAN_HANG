@@ -2,7 +2,7 @@
 .product-management-wrapper {
     width: 100%;
     max-width: 1400px;
-    
+
     margin: 0 auto;
     padding: 0 15px;
     box-sizing: border-box;
@@ -61,11 +61,16 @@
 
 /* Các nút bấm */
 .btn {
-    padding: 6px 12px;
+    padding: 7px 12px;
     font-size: 14px;
     cursor: pointer;
     border-radius: 4px;
 }
+/* 
+.btn:hover {
+    border: 1px solid #ffb6c1;
+        background-color: #ffb6c1;
+} */
 
 .btn-sm {
     font-size: 12px;

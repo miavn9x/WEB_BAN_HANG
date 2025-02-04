@@ -28,6 +28,10 @@ import OrderHistory from "./components/Product/OrderHistory";
 import Orders from "./pages/Auth/Admin/AdminOrders/Orders";
 import StoreLocator from "./components/map/StoreLocator";
 import MyEditor from "./pages/Auth/Admin/MyEditor/MyEditor";
+import Info from "./components/Nav/Info";
+import PostDetail from "./components/Posts/PostDetail";
+import PostsList from "./components/Posts/PostsList";
+import EventsPage from "./components/EventsPage";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -71,6 +75,10 @@ function App() {
         <Route path="/thanh-toan" element={<Checkout />} />
         <Route path="/OrderHistory" element={<OrderHistory />} />
         <Route path="/shop-map" element={<StoreLocator />} />
+        <Route path="/gioi-thieu" element={<Info />} />
+        <Route path="/PostsList" element={<PostsList />} />
+        <Route path="/posts/:id" element={<PostDetail />} />
+        <Route path="/test" element={<EventsPage />} />
         {/* Protected Routes - User & admin */}
         <Route
           path="/thong-tin-ca-nhan"

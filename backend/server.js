@@ -47,6 +47,11 @@ const cartRoutes = require("./routes/cartRoutes"); // Import cart.js
 // Sử dụng router cho giỏ hàng
 app.use("/api", cartRoutes);
 
+const postRoutes = require("./routes/routesposts");
+app.use("/api", postRoutes);
+
+
+
 // Chạy server
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);

@@ -1,0 +1,121 @@
+/* Wrapper duy nhất cho trang PostsList */
+.posts-list-page {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+/* Tiêu đề trang */
+.posts-list-title {
+    text-align: center;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Style cho link bọc Card */
+.posts-list-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Style cho Card bài viết */
+.posts-list-card {
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.posts-list-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Ảnh trong Card */
+.posts-list-card-img {
+    object-fit: cover;
+    height: 200px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+/* Tiêu đề trong Card */
+.posts-list-card-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #555;
+}
+
+/* Sidebar tiêu đề */
+.posts-list-sidebar-title {
+    margin-bottom: 15px;
+    color: #222;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+}
+
+/* Style cho item trong sidebar */
+.posts-list-sidebar-item {
+    background-color: #fff;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    transition: box-shadow 0.2s ease;
+}
+
+.posts-list-sidebar-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Ảnh trong sidebar */
+.posts-list-sidebar-item img {
+    width: 100%;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+/* Text của sidebar */
+.sidebar-text {
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) and (min-width: 431px) {
+    .posts-list-col {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
+
+    .sidebar-col {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
+}
+
+/* Cho màn hình ≤430px: hiển thị 1 bài/tin trên 1 hàng */
+@media (max-width: 430px) {
+
+    .posts-list-col,
+    .sidebar-col {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+}
+.posts-list-card-title {
+    white-space: nowrap;
+    /* Ngăn tiêu đề xuống dòng */
+    overflow: hidden;
+    /* Ẩn phần tiêu đề vượt ra ngoài khung */
+    text-overflow: ellipsis;
+    /* Hiển thị dấu "..." nếu tiêu đề quá dài */
+}
+
+.posts-list-card-img {
+    width: 100%;
+    height: 200px;
+    /* Chiều cao cố định cho hình ảnh, bạn có thể điều chỉnh */
+    object-fit: cover;
+    /* Cắt bỏ phần dư thừa của hình ảnh mà không làm biến dạng */
+}

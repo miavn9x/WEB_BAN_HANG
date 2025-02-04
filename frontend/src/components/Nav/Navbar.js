@@ -68,8 +68,8 @@ const categories = [
 const NavMenu = [
   { path: "/", label: "TRANG CHỦ" },
   { path: "/products", label: "TẤT CẢ SẢN PHẨM" },
-  { path: "Giới Thiệu", label: "GIỚI THIỆU" },
-  { path: "/bai-viet", label: "BÀI VIẾT" },
+  { path: "/gioi-thieu", label: "GIỚI THIỆU" },
+  { path: "/PostsList", label: "BÀI VIẾT" },
   { path: "/shop-map", label: "Hệ thống cửa hàng" },
   { path: "Hotline", label: "Hotline: 099999998" },
 ];
@@ -379,7 +379,7 @@ const MyNavbar = () => {
       <Navbar
         expand="lg"
         className="text-white d-none d-lg-block"
-        style={{ background: "#FFB6C1" }}
+        style={{ background: "#FFB6C1", padding: "1px" }}
       >
         <Container>
           {NavMenu.map((link, index) =>
@@ -441,20 +441,26 @@ const MyNavbar = () => {
             <Nav className="me-auto mb-2 mb-lg-0">
               {/* Các mục điều hướng khác */}
             </Nav>
-            <Navbar.Text className="text-white ms-auto text-end navbar-text-custom">
+            <Navbar.Text className="text-white ms-auto text-end">
               {systemInfo.map((info, idx) => (
-                <span key={idx} className="nav-item">
+                <span key={idx}>
                   {/* Kiểm tra nếu có đường dẫn thì cho phép chuyển hướng */}
                   {info.path ? (
-                    <Button
+                    <span
                       onClick={() => navigate(info.path)}
-                      className="navbar-btn"
+                      style={{
+                        cursor: "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                      }}
                     >
-                      {info.icon} {info.text}
-                    </Button>
+                      {info.icon} &nbsp; {info.text}
+                    </span>
                   ) : (
-                    <span className="nav-item-text">
-                      {info.icon} {info.text}
+                    <span
+                      style={{ display: "inline-flex", alignItems: "center" }}
+                    >
+                      {info.icon} &nbsp; {info.text}
                     </span>
                   )}
                   &nbsp; | &nbsp;

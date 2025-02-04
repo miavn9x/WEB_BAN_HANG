@@ -1,0 +1,70 @@
+.baby-mart-container {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.baby-mart-header h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.baby-mart-header p {
+    font-size: 1.2rem;
+    color: #6c757d;
+}
+
+.baby-mart-about,
+.baby-mart-reasons,
+.baby-mart-products,
+.baby-mart-contact {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.baby-mart-header,
+.baby-mart-about h2,
+.baby-mart-reasons h2,
+.baby-mart-products h2,
+.baby-mart-contact h2 {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.baby-mart-header p {
+    margin-bottom: 20px;
+}
+
+.baby-mart-reasons li,
+.baby-mart-products li,
+.baby-mart-contact li {
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.baby-mart-footer {
+    background-color: #f1f1f1;
+    padding: 20px 0;
+    margin-top: 50px;
+}
+
+.baby-mart-footer p {
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .baby-mart-header h1 {
+        font-size: 2rem;
+    }
+
+    .baby-mart-header p {
+        font-size: 1rem;
+    }
+
+    .baby-mart-reasons,
+    .baby-mart-products {
+        margin-top: 20px;
+    }
+}
