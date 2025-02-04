@@ -49,7 +49,7 @@ UserSchema.methods.generateAuthToken = function () {
   return jwt.sign(
     { userId: this._id, role: this.role }, 
     process.env.JWT_SECRET || "your-secret-key",
-    { expiresIn: "6h" } 
+    { expiresIn: "1h" } 
   );
 };
 

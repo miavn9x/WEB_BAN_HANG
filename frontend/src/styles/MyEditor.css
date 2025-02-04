@@ -1,0 +1,26 @@
+/* Đặt một class bao bọc duy nhất cho component của bạn */
+.my-editor-container .custom-tags {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.my-editor-container .custom-tag-remove {
+    display: inline-block;
+    margin-left: 5px;
+    color: #f1356d !important;
+    cursor: pointer;
+    font-weight: bold;
+    background: transparent;
+    border: none;
+}
+
+.my-editor-container .custom-tag-remove svg {
+    fill: #000000 !important;
+}
+
+.my-editor-container .custom-tag-remove:hover,
+.my-editor-container .custom-tag-remove:hover svg {
+    color: rgb(255, 0, 0) !important;
+    fill: rgb(255, 0, 0) !important;
+}

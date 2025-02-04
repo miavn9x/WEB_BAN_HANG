@@ -31,7 +31,8 @@ import MyEditor from "./pages/Auth/Admin/MyEditor/MyEditor";
 import Info from "./components/Nav/Info";
 import PostDetail from "./components/Posts/PostDetail";
 import PostsList from "./components/Posts/PostsList";
-import EventsPage from "./components/EventsPage";
+import AutoLogout from "./pages/Auth/Login/AutoLogout";
+import PostsManagement from "./components/Posts/PostsManagement";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -58,6 +59,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <AutoLogout />
       <Header userRole={userRole} isAuthenticated={isAuthenticated} />
       <Routes>
         {/* Public Routes */}
@@ -78,7 +80,6 @@ function App() {
         <Route path="/gioi-thieu" element={<Info />} />
         <Route path="/PostsList" element={<PostsList />} />
         <Route path="/posts/:id" element={<PostDetail />} />
-        <Route path="/test" element={<EventsPage />} />
         {/* Protected Routes - User & admin */}
         <Route
           path="/thong-tin-ca-nhan"
@@ -88,15 +89,6 @@ function App() {
             </PrivateRoute>
           }
         />
-        {/* <Route
-          path="/quan-ly-don-hang"
-          element={
-            <PrivateRoute isAuthenticated={isAuthenticated}>
-              <AdminOrders />
-            </PrivateRoute>
-          }
-        /> */}
-        {/* Protected Routes - Admin */}
         <Route
           path="/admin/*"
           element={
@@ -110,6 +102,7 @@ function App() {
                 <Route path="edit-product" element={<ProductEdit />} />
                 <Route path="/quan-ly-don-hang" element={<Orders />} />
                 <Route path="/add-bai-viet" element={<MyEditor />} />
+                <Route path="posts-management" element={<PostsManagement />} />
               </Routes>
             </PrivateRoute>
           }

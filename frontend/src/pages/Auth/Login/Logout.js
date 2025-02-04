@@ -1,13 +1,17 @@
+// Logout.js
 import { useNavigate, useLocation } from "react-router-dom";
 
 const Logout = () => {
   const navigate = useNavigate();
-  const location = useLocation();   const handleLogout = () => {
+  const location = useLocation();
+
+  const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("userRole");
 
-    const previousPage = location.state?.from || "/";
-    navigate(previousPage); 
+    const previousPage = location.state?.from || "/login";
+    navigate(previousPage);
   };
 
   return (

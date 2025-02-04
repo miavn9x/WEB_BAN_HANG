@@ -3,16 +3,20 @@ import { Editor } from "@tinymce/tinymce-react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Helmet } from "react-helmet";
 import { WithContext as ReactTags } from "react-tag-input";
-import Select from "react-select"; // Sử dụng react-select
+import Select from "react-select";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import "../../../../styles/MyEditor.css"; // Import file CSS tùy chỉnh
 
 const MyEditor = () => {
   // Các state quản lý dữ liệu bài viết
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  // Sử dụng mảng các object cho tags, mỗi tag có id và text
+  // tags được lưu dưới dạng mảng các object { id, text }
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const [selectedImage, setSelectedImage] = useState(null);
+  const [existingImageUrl, setExistingImageUrl] = useState("");
 
   // Các state liên quan đến sản phẩm và danh mục
   const [categories, setCategories] = useState([]);
@@ -25,6 +29,11 @@ const MyEditor = () => {
   // State để reset lại Editor (thay đổi key thì Editor được re-mount)
   const [editorKey, setEditorKey] = useState(0);
 
+  // Lấy query param (nếu có id => đang chỉnh sửa)
+  const [searchParams] = useSearchParams();
+  const postId = searchParams.get("id");
+  const navigate = useNavigate();
+
   // Gợi ý cho thẻ tags
   const tagSuggestions = [
     { id: "#noibat", text: "#noibat" },
@@ -36,31 +45,70 @@ const MyEditor = () => {
     { id: "#moinhat", text: "#moinhat" },
   ];
 
-  // Khi component load, kiểm tra xem có bản nháp (draft) lưu ở localStorage hay không
+  // Nếu tạo bài viết mới, load bản nháp từ localStorage
   useEffect(() => {
-    const draft = localStorage.getItem("draftPost");
-    if (draft) {
-      const data = JSON.parse(draft);
-      setTitle(data.title || "");
-      setContent(data.content || "");
-      setTags(data.tags || []);
-      setSelectedCategory(data.selectedCategory || "");
-      setSelectedGeneric(data.selectedGeneric || "");
-      setSelectedProduct(data.selectedProduct || "");
+    if (!postId) {
+      const draft = localStorage.getItem("draftPost");
+      if (draft) {
+        const data = JSON.parse(draft);
+        setTitle(data.title || "");
+        setContent(data.content || "");
+        setTags(data.tags || []);
+        setSelectedCategory(data.selectedCategory || "");
+        setSelectedGeneric(data.selectedGeneric || "");
+        setSelectedProduct(data.selectedProduct || "");
+      }
     }
-  }, []);
+  }, [postId]);
 
-  // Mỗi khi thay đổi các trường quan trọng, lưu bản nháp vào localStorage
+  // Nếu đang chỉnh sửa bài viết, load dữ liệu bài viết từ API
   useEffect(() => {
-    const draft = {
-      title,
-      content,
-      tags,
-      selectedCategory,
-      selectedGeneric,
-      selectedProduct,
-    };
-    localStorage.setItem("draftPost", JSON.stringify(draft));
+    if (postId) {
+      const fetchPost = async () => {
+        try {
+          const response = await fetch(`/api/posts/${postId}`);
+          if (response.ok) {
+            const data = await response.json();
+            setTitle(data.title);
+            setContent(data.content); // Cập nhật nội dung cho Editor
+            setTags(data.tags.map((tag) => ({ id: tag, text: tag })));
+            setSelectedProduct(data.productId);
+            setExistingImageUrl(data.imageUrl);
+            // Lấy thông tin chi tiết của sản phẩm để lấy danh mục & loại
+            const prodResponse = await fetch(`/api/products/${data.productId}`);
+            if (prodResponse.ok) {
+              const productData = await prodResponse.json();
+              if (productData.product && productData.product.category) {
+                setSelectedCategory(productData.product.category.name);
+                setSelectedGeneric(productData.product.category.generic);
+              }
+            } else {
+              console.error("Error fetching product details");
+            }
+          } else {
+            console.error("Error fetching post for edit");
+          }
+        } catch (err) {
+          console.error("Error:", err);
+        }
+      };
+      fetchPost();
+    }
+  }, [postId]);
+
+  // Lưu bản nháp vào localStorage (chỉ khi tạo bài viết mới)
+  useEffect(() => {
+    if (!postId) {
+      const draft = {
+        title,
+        content,
+        tags,
+        selectedCategory,
+        selectedGeneric,
+        selectedProduct,
+      };
+      localStorage.setItem("draftPost", JSON.stringify(draft));
+    }
   }, [
     title,
     content,
@@ -68,6 +116,7 @@ const MyEditor = () => {
     selectedCategory,
     selectedGeneric,
     selectedProduct,
+    postId,
   ]);
 
   // Lấy danh sách danh mục từ backend
@@ -77,7 +126,6 @@ const MyEditor = () => {
         const response = await fetch("/api/products");
         if (response.ok) {
           const data = await response.json();
-          // Giả sử mỗi sản phẩm có trường category với thuộc tính name
           const categorySet = new Set();
           data.products.forEach((product) => {
             if (product.category && product.category.name) {
@@ -92,7 +140,6 @@ const MyEditor = () => {
         console.error("Error fetching categories:", error);
       }
     };
-
     fetchCategories();
   }, []);
 
@@ -120,7 +167,6 @@ const MyEditor = () => {
         console.error("Error fetching generics:", error);
       }
     };
-
     fetchGenerics();
   }, [selectedCategory]);
 
@@ -134,7 +180,37 @@ const MyEditor = () => {
         );
         if (response.ok) {
           const data = await response.json();
-          setProducts(data.products);
+          let fetchedProducts = data.products;
+          // Nếu đang chỉnh sửa và đã có sản phẩm được chọn, kiểm tra và bổ sung nếu cần
+          if (postId && selectedProduct) {
+            const exists = fetchedProducts.find(
+              (product) => product._id === selectedProduct
+            );
+            if (!exists) {
+              try {
+                const prodResponse = await fetch(
+                  `/api/products/${selectedProduct}`
+                );
+                if (prodResponse.ok) {
+                  const prodData = await prodResponse.json();
+                  if (prodData.product) {
+                    fetchedProducts.unshift(prodData.product);
+                  }
+                } else {
+                  console.error(
+                    "Error fetching selected product details:",
+                    prodResponse.statusText
+                  );
+                }
+              } catch (error) {
+                console.error(
+                  "Error fetching selected product details:",
+                  error
+                );
+              }
+            }
+          }
+          setProducts(fetchedProducts);
         } else {
           console.error("Error fetching products:", response.statusText);
         }
@@ -142,9 +218,8 @@ const MyEditor = () => {
         console.error("Error fetching products:", error);
       }
     };
-
     fetchProducts();
-  }, [selectedCategory, selectedGeneric]);
+  }, [selectedCategory, selectedGeneric, postId, selectedProduct]);
 
   // Xử lý thay đổi nội dung Editor
   const handleEditorChange = (newContent) => {
@@ -160,13 +235,12 @@ const MyEditor = () => {
   const handleTagsDelete = (i) => {
     setTags(tags.filter((tag, index) => index !== i));
   };
-  // Xử lý thêm thẻ mới
+
   const handleTagsAddition = (tag) => {
-    // Nếu người dùng nhập thẻ mà không bắt đầu bằng dấu "#", tự động thêm vào
     let newTag = { ...tag };
     if (!newTag.text.startsWith("#")) {
       newTag.text = "#" + newTag.text;
-      newTag.id = newTag.text; // Cập nhật id nếu cần
+      newTag.id = newTag.text;
     }
     setTags([...tags, newTag]);
   };
@@ -186,12 +260,12 @@ const MyEditor = () => {
     ),
   }));
 
-  // Xử lý submit bài viết
+  // Xử lý submit bài viết (tạo mới hoặc cập nhật nếu đang chỉnh sửa)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Upload ảnh (ảnh chính của bài viết)
-    let imageUrl = "";
+    // Upload ảnh nếu có chọn ảnh mới; nếu không, dùng ảnh cũ (hoặc ảnh mặc định)
+    let finalImageUrl = "";
     if (selectedImage) {
       const formData = new FormData();
       formData.append("image", selectedImage);
@@ -202,7 +276,7 @@ const MyEditor = () => {
         });
         if (uploadResponse.ok) {
           const uploadData = await uploadResponse.json();
-          imageUrl = uploadData.imageUrl;
+          finalImageUrl = uploadData.imageUrl;
         } else {
           console.error("Image upload failed:", uploadResponse.statusText);
           return;
@@ -211,51 +285,49 @@ const MyEditor = () => {
         console.error("Error uploading image:", error);
         return;
       }
-    }
-
-    // Nếu không có ảnh được chọn hoặc upload không thành công,
-    // sử dụng ảnh mặc định
-    if (!imageUrl) {
-      imageUrl =
+    } else {
+      finalImageUrl =
+        existingImageUrl ||
         "https://res.cloudinary.com/div27nz1j/image/upload/v1737451253/1_vmcjnj.png";
     }
 
-    // Dữ liệu bài viết cần lưu lên backend
     const postData = {
       title,
       content,
-      tags, // tags là mảng các object có id và text
-      productId: selectedProduct, // Lưu ID sản phẩm được chọn
-      imageUrl, // Ảnh chính của bài viết (hoặc ảnh mặc định nếu không có ảnh)
+      tags, // mảng các object { id, text }
+      productId: selectedProduct,
+      imageUrl: finalImageUrl,
     };
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/posts`, {
-        method: "POST",
+      const method = postId ? "PUT" : "POST";
+      const url = postId ? `/api/posts/${postId}` : "/api/posts";
+      const response = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(postData),
       });
       const data = await response.json();
       if (response.ok) {
-        console.log("Post created:", data);
-        // Sau khi đăng bài thành công, xóa bản nháp
+        console.log(postId ? "Post updated:" : "Post created:", data);
+        // Nếu tạo/chỉnh sửa bài viết thành công, xóa bản nháp và reset state
         localStorage.removeItem("draftPost");
-
-        // Reset lại các state về giá trị ban đầu
         setTitle("");
         setContent("");
         setTags([]);
         setSelectedImage(null);
+        setExistingImageUrl("");
         setSelectedCategory("");
         setSelectedGeneric("");
         setSelectedProduct("");
         setProducts([]);
-
-        // Reset Editor bằng cách thay đổi key
         setEditorKey((prev) => prev + 1);
+        if (postId) {
+          navigate("/admin/posts-management");
+        }
       } else {
-        console.error("Error creating post:", data);
+        console.error("Error creating/updating post:", data);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -265,7 +337,7 @@ const MyEditor = () => {
   };
 
   return (
-    <div className="container">
+    <div className="container my-editor-container">
       <Helmet>
         <meta charSet="utf-8" />
         <title>{title ? `${title} - My Blog` : "Create New Post"}</title>
@@ -277,7 +349,9 @@ const MyEditor = () => {
       </Helmet>
 
       <div className="row">
-        <h3 className="text-center my-3 py-4">Tạo Bài Viết Mới</h3>
+        <h3 className="text-center my-3 py-4">
+          {postId ? "Chỉnh Sửa Bài Viết" : "Tạo Bài Viết Mới"}
+        </h3>
 
         {/* Phần nhập nội dung bài viết */}
         <div className="col-md-9">
@@ -303,7 +377,7 @@ const MyEditor = () => {
               <Editor
                 key={editorKey}
                 apiKey="8t813kgqzmwjgis1zt15s0ez32c6qagtx9ikfwwfusk0nj9j"
-                initialValue="<p>Viết nội dung của bạn ở đây</p>"
+                value={content}
                 init={{
                   height: 600,
                   menubar: false,
@@ -326,10 +400,21 @@ const MyEditor = () => {
                 id="image"
                 onChange={(e) => setSelectedImage(e.target.files[0])}
               />
+              {!selectedImage && existingImageUrl && (
+                <div className="mt-2">
+                  <p>Ảnh đã đăng:</p>
+                  <img
+                    src={existingImageUrl}
+                    alt="Existing"
+                    style={{ width: "150px", height: "auto" }}
+                  />
+                </div>
+              )}
             </div>
 
-            <div className="col-md-12 mb-3">
-              <label htmlFor="tags" className="form-label">
+            {/* Phần nhập thẻ tags với giao diện đã được cải tiến */}
+            <div className="custom-tag-container mb-3">
+              <label htmlFor="tags" className="custom-tag-label form-label">
                 Thẻ (Tags)
               </label>
               <ReactTags
@@ -338,6 +423,13 @@ const MyEditor = () => {
                 handleDelete={handleTagsDelete}
                 handleAddition={handleTagsAddition}
                 placeholder="Nhập các thẻ phân loại (press Enter để thêm)"
+                classNames={{
+                  tags: "custom-tags", // Bao bọc toàn bộ danh sách thẻ
+                  tagInput: "custom-tag-input", // Phần input nhập thẻ
+                  tag: "custom-tag", // Mỗi thẻ
+                  remove: "custom-tag-remove", // Nút xóa của thẻ
+                  // Bạn có thể tùy chỉnh thêm các lớp khác nếu cần
+                }}
               />
             </div>
 
@@ -347,7 +439,13 @@ const MyEditor = () => {
               disabled={loading}
               style={{ backgroundColor: "#f1356d", color: "white" }}
             >
-              {loading ? "Đang tải..." : "Đăng Bài"}
+              {loading
+                ? postId
+                  ? "Đang cập nhật..."
+                  : "Đang tải..."
+                : postId
+                ? "Cập nhật"
+                : "Đăng Bài"}
             </button>
           </form>
         </div>
@@ -355,7 +453,6 @@ const MyEditor = () => {
         {/* Phần lựa chọn sản phẩm */}
         <div className="col-md-3">
           <div className="row">
-            {/* Chọn danh mục */}
             <div className="col-md-12 mb-3">
               <label htmlFor="category" className="form-label">
                 Chọn Danh Mục
@@ -366,7 +463,6 @@ const MyEditor = () => {
                 value={selectedCategory}
                 onChange={(e) => {
                   setSelectedCategory(e.target.value);
-                  // Reset lại các lựa chọn liên quan khi danh mục thay đổi
                   setSelectedGeneric("");
                   setSelectedProduct("");
                   setProducts([]);
@@ -382,7 +478,6 @@ const MyEditor = () => {
               </select>
             </div>
 
-            {/* Chọn loại sản phẩm (generic) */}
             <div className="col-md-12 mb-3">
               <label htmlFor="generic" className="form-label">
                 Chọn Loại Sản Phẩm
@@ -393,7 +488,6 @@ const MyEditor = () => {
                 value={selectedGeneric}
                 onChange={(e) => {
                   setSelectedGeneric(e.target.value);
-                  // Reset sản phẩm khi loại sản phẩm thay đổi
                   setSelectedProduct("");
                 }}
                 required
@@ -407,7 +501,6 @@ const MyEditor = () => {
               </select>
             </div>
 
-            {/* Chọn sản phẩm */}
             <div className="col-md-12 mb-3">
               <label htmlFor="product" className="form-label">
                 Chọn Sản Phẩm

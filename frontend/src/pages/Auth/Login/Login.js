@@ -1,9 +1,10 @@
+// Login.js
 import React, { useEffect, useState } from "react";
 import { Container, Form, Button, Spinner } from "react-bootstrap";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../../../styles/Login.css";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // Sử dụng thư viện jwt-decode (lưu ý: tên hàm là jwtDecode, không phải jwtDecode từ "jwt-decode")
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -23,7 +24,8 @@ const Login = () => {
       try {
         const decodedToken = jwtDecode(token);
         if (decodedToken.exp * 1000 > Date.now()) {
-          navigate("/Error403");
+          // Nếu token chưa hết hạn, có thể chuyển hướng đến trang mặc định (hoặc trang đã login)
+          navigate("/");
         } else {
           localStorage.removeItem("token");
           navigate("/login");
@@ -84,11 +86,6 @@ const Login = () => {
       return () => clearTimeout(timer);
     }
   }, [error]);
-
-
-
-
-  
 
   return (
     <Container className="login-container">
@@ -165,7 +162,7 @@ const Login = () => {
             <div className="loading-container text-center">
               <Spinner
                 animation="border"
-                variant="success" // Vòng xoay màu xanh
+                variant="success"
                 className="loading-spinner"
               />
               <div>Đang tải...</div>
