@@ -177,20 +177,17 @@ const MyNavbar = () => {
                     {isLoggedIn ? (
                       <Dropdown
                         show={isMenuVisible}
-                        onToggle={(isOpen) => setIsMenuVisible(isOpen)} // Sync the dropdown state
+                        onToggle={(isOpen) => setIsMenuVisible(isOpen)}
                       >
                         <Dropdown.Toggle
-                          as={CustomToggle} // Custom toggle without default styles
+                          as={CustomToggle}
                           id="dropdown-custom-components"
                         >
                           <FaUser size={20} className="user-icon logged-in" />
                         </Dropdown.Toggle>
                         <Dropdown.Menu
                           className="custom-dropdown-menu"
-                          style={{
-                            position: "absolute",
-                            zIndex: 1050, // Ensure it stays above other elements
-                          }}
+                          style={{ position: "absolute", zIndex: 1050 }}
                         >
                           <LoginMenu onClose={handleCloseMenu} />
                         </Dropdown.Menu>

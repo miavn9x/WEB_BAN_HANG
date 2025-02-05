@@ -8,98 +8,175 @@ import "../../styles/Footer.css";
 
 const Footer = () => {
   return (
-    <footer className="footer">
-      <div style={{ background: "#FFB6C1", color: "#323d42", width: "100%" }}>
+    <footer className="footer" role="contentinfo">
+      <div
+        className="footer-container"
+        style={{ background: "#FFB6C1", color: "#323d42", width: "100%" }}
+      >
         <div className="container py-4">
           <div className="row">
+            {/* Thông tin công ty */}
             <div className="col-lg-3 col-md-6 col-sm-12 mb-4">
-              <div className="logo">
+              <div className="logo d-flex align-items-center">
                 <img
                   src="https://res.cloudinary.com/div27nz1j/image/upload/v1737451253/1_vmcjnj.png"
-                  alt="Baby Mart Logo"
+                  alt="Logo của Baby Mart"
                   width="60"
                   height="auto"
                 />
-                <span className="logo-text">
+                <span className="logo-text ms-2">
                   <span className="text-danger fw-bold">Baby</span>
                   <span className="text-primary fw-bold">Mart</span>
                 </span>
               </div>
               <p>
                 Siêu thị Baby Mart <br /> Thương hiệu mẹ và bé uy tín và chất
-                lượng, cam kết mang đến những trải nghiệm mua sắm tiện lợi, hiện
-                đại và phong phú
+                lượng, cam kết mang đến trải nghiệm mua sắm tiện lợi, hiện đại
+                và phong phú.
               </p>
               <p>Mã số thuế: 12345678999</p>
-              <div className="contact-info">
+              <address className="contact-info">
                 <p>
                   <i className="fas fa-map-marker-alt"></i> Địa chỉ: 12 Trịnh
-                  Đình Thảo, Q. Tân Phú, Ho Chi Minh City
+                  Đình Thảo, Q. Tân Phú, TP. Hồ Chí Minh
                 </p>
                 <p>
                   <i className="fas fa-phone"></i> Hotline:
-                  <button className="btn text-primary p-0">19006750</button>
+                  <a href="tel:19006750" className="text-primary ms-1">
+                    19006750
+                  </a>
                 </p>
                 <p>
                   <i className="fas fa-envelope"></i> Email:
-                  <button className="btn text-primary p-0">
+                  <a
+                    href="mailto:support@sapo.vn"
+                    className="text-primary ms-1"
+                  >
                     support@sapo.vn
-                  </button>
+                  </a>
                 </p>
-              </div>
+              </address>
             </div>
 
+            {/* Hỗ trợ khách hàng và Chính sách */}
             <div className="col-lg-3 col-md-6 col-sm-12 mb-4">
               <h5>Hỗ trợ khách hàng</h5>
-              <div className="list-unstyled">
-                <div className="section-item">Tra cứu hoá đơn</div>
-                <div className="section-item">Mua & Giao nhận Online</div>
-                <div className="section-item">Tin Khuyến Mãi</div>
-                <div className="section-item">
-                  Qui định & hình thức thanh toán
-                </div>
-                <div className="section-item">Bảo hành & Bảo trì</div>
-                <div className="section-item">Đổi trả & Hoàn tiền</div>
-              </div>
-              <h5>
-                <br />
-                Chính sách
-              </h5>
-              <div className="list-unstyled">
-                <div className="btn text-primary p-0">Chính sách đổi trả</div>
-                <br />
-                <div className="btn text-primary p-0">Chính sách bảo mật</div>
-                <br />
-                <div className="btn text-primary p-0">Điều khoản dịch vụ</div>
-              </div>
+              <nav className="footer-nav">
+                <ul className="list-unstyled">
+                  <li>
+                    <Link
+                      to="/tra-cuu-hoa-don"
+                      className="text-decoration-none"
+                    >
+                      Tra cứu hoá đơn
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/mua-giao-online"
+                      className="text-decoration-none"
+                    >
+                      Mua & Giao nhận Online
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/tin-khuyen-mai" className="text-decoration-none">
+                      Tin Khuyến Mãi
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/thanh-toan" className="text-decoration-none">
+                      Quy định & hình thức thanh toán
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/bao-hanh" className="text-decoration-none">
+                      Bảo hành & Bảo trì
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/doi-tra" className="text-decoration-none">
+                      Đổi trả & Hoàn tiền
+                    </Link>
+                  </li>
+                </ul>
+              </nav>
+              <h5 className="mt-3">Chính sách</h5>
+              <ul className="list-unstyled">
+                <li>
+                  <Link
+                    to="/doi-tra"
+                    className="text-primary text-decoration-none"
+                  >
+                    Chính sách đổi trả
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/bao-mat"
+                    className="text-primary text-decoration-none"
+                  >
+                    Chính sách bảo mật
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/dieu-khoan"
+                    className="text-primary text-decoration-none"
+                  >
+                    Điều khoản dịch vụ
+                  </Link>
+                </li>
+              </ul>
             </div>
 
+            {/* Tổng đài hỗ trợ và Mạng xã hội */}
             <div className="col-lg-3 col-md-6 col-sm-12 mb-4">
               <h5>Tổng đài hỗ trợ</h5>
-              <p>Gọi mua hàng: 19006750 (8h-20h)</p>
-              <p>Gọi bảo hành: 19006750 (8h-20h)</p>
-              <div className="footer__social ">
-                <h5><br/>Theo dõi chúng tôi</h5>
-                <ul></ul>
+              <p>
+                Gọi mua hàng:{" "}
+                <a href="tel:19006750" className="text-decoration-none">
+                  19006750
+                </a>{" "}
+                (8h-20h)
+              </p>
+              <p>
+                Gọi bảo hành:{" "}
+                <a href="tel:19006750" className="text-decoration-none">
+                  19006750
+                </a>{" "}
+                (8h-20h)
+              </p>
+              <div className="footer__social mt-3">
+                <h5>Theo dõi chúng tôi</h5>
                 <ul className="footer__social-icons d-flex list-unstyled">
-             
                   <li>
-                    <Link to="https://www.facebook.com/tungmia9x">
+                    <Link
+                      to="https://www.facebook.com/tungmia9x"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Facebook"
+                    >
                       <FaFacebookF />
                     </Link>
                   </li>
                   <li>
-                    <Link to="/">
+                    <Link to="/" aria-label="Instagram">
                       <FaInstagram />
                     </Link>
                   </li>
                   <li>
-                    <Link to="/">
+                    <Link to="/" aria-label="Twitter">
                       <FaTwitter />
                     </Link>
                   </li>
                   <li>
-                    <Link to="https://www.tiktok.com/@miavn9x?is_from_webapp=1&sender_device=pc">
+                    <Link
+                      to="https://www.tiktok.com/@miavn9x?is_from_webapp=1&sender_device=pc"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="TikTok"
+                    >
                       <IoLogoTiktok />
                     </Link>
                   </li>
@@ -107,39 +184,41 @@ const Footer = () => {
               </div>
             </div>
 
+            {/* Đăng ký nhận ưu đãi và Phương thức thanh toán */}
             <div className="col-lg-3 col-md-6 col-sm-12 mb-4">
               <h5>Đăng ký nhận ưu đãi</h5>
               <p>
                 Bạn muốn nhận khuyến mãi đặc biệt? Đăng kí tham gia ngay cộng
-                đồng hơn 68.000+ người theo dõi của chúng tôi để cập nhật khuyến
-                mãi ngay lập tức
+                đồng hơn 68.000+ người theo dõi để cập nhật khuyến mãi ngay lập
+                tức.
               </p>
-              <div className="input-group mb-3">
-                <input
-                  type="email"
-                  className="form-control"
-                  placeholder="Email của bạn..."
-                />
-                <button
-                  className="btn"
-                  style={{
-                    backgroundColor: "#FF6F91",
-                    borderColor: "#FFF",
-                    color: "#fff",
-                  }}
-                >
-                  Đăng ký
-                </button>
-              </div>
-
-              <h5>
-                <br />
-                PHƯƠNG THỨC THANH TOÁN
-              </h5>
+              <form className="mb-3" action="/subscribe" method="post">
+                <div className="input-group">
+                  <input
+                    type="email"
+                    className="form-control"
+                    placeholder="Email của bạn..."
+                    aria-label="Email của bạn"
+                    required
+                  />
+                  <button
+                    className="btn"
+                    type="submit"
+                    style={{
+                      backgroundColor: "#FF6F91",
+                      borderColor: "#FFF",
+                      color: "#fff",
+                    }}
+                  >
+                    Đăng ký
+                  </button>
+                </div>
+              </form>
+              <h5 className="mt-3">PHƯƠNG THỨC THANH TOÁN</h5>
               <div className="payment-methods">
                 <img
                   src="https://res.cloudinary.com/div27nz1j/image/upload/v1737449082/hinh-thuc-thanh-toan_uzsvsc.png"
-                  alt="Visa Icon"
+                  alt="Các phương thức thanh toán"
                   width="100%"
                   height="auto"
                 />
@@ -148,7 +227,7 @@ const Footer = () => {
           </div>
           <div className="row">
             <div className="col-12">
-              <p className="copyright text-center">
+              <p className="copyright text-center mb-0">
                 © Bản quyền thuộc về Mía VN | Bài thi Design web
               </p>
             </div>
