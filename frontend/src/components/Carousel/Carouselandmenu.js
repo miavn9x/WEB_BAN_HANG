@@ -1,3 +1,4 @@
+// components/CarouselAndMenu.jsx
 import React, { useState } from "react";
 import {
   Container,
@@ -22,17 +23,26 @@ import {
   FaUndo,
   FaUtensils,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import "../../styles/Carouselandmenu.css";
 
 // Component danh mục sản phẩm (có hỗ trợ menu con)
 const CategoryMenu = ({ categories }) => {
   const [activeCategory, setActiveCategory] = useState(null);
+  const navigate = useNavigate();
+
+  // Hàm xử lý chuyển hướng khi click vào danh mục
+  const handleCategoryClick = (categoryName) => {
+    // Chuyển hướng đến trang /products với query param categoryName
+    navigate(`/products?categoryName=${encodeURIComponent(categoryName)}`);
+  };
 
   return (
     <Card className="category-list">
       <Card.Header
-        className="text-center pb-1 "
-        style={{ backgroundColor: "#FFB6C1", color:"#fff" }}>
+        className="text-center pb-1"
+        style={{ backgroundColor: "#FFB6C1", color: "#fff" }}
+      >
         <h5 className="text-uppercase">Danh mục sản phẩm</h5>
       </Card.Header>
       <ListGroup variant="flush">
@@ -42,6 +52,8 @@ const CategoryMenu = ({ categories }) => {
             className="category-item position-relative"
             onMouseEnter={() => setActiveCategory(index)}
             onMouseLeave={() => setActiveCategory(null)}
+            onClick={() => handleCategoryClick(category.name)}
+            style={{ cursor: "pointer" }}
           >
             <ListGroup.Item className="d-flex align-items-center">
               {category.icon} <span className="ms-3">{category.name}</span>
@@ -65,7 +77,7 @@ const CategoryMenu = ({ categories }) => {
 
 // Component InfoCard tái sử dụng
 const InfoCard = ({ icon, title, description }) => (
-  <Card className="info-item  ">
+  <Card className="info-item">
     <Card.Body>
       {icon && React.cloneElement(icon, { className: "me-2" })}
       <span>
@@ -79,7 +91,7 @@ const InfoCard = ({ icon, title, description }) => (
 
 const CarouselAndMenu = () => {
   const categories = [
-    { 
+    {
       icon: <FaBabyCarriage />,
       name: "Sữa bột cao cấp",
       subcategories: [
@@ -201,11 +213,11 @@ const CarouselAndMenu = () => {
   ];
 
   return (
-    <Container className=" mt-1 mt-sm-1 mt-md-1 mt-lg-3 mt-xl-3  container_custom">
+    <Container className="mt-3 container_custom">
       <Row>
         {/* Sidebar */}
-        <Col xs={12} lg={3} className="d-none d-lg-block ">
-          <CategoryMenu categories={categories} className="" />
+        <Col xs={12} lg={3} className="d-none d-lg-block">
+          <CategoryMenu categories={categories} />
         </Col>
 
         {/* Main Content */}
@@ -236,7 +248,7 @@ const CarouselAndMenu = () => {
               <img
                 src="https://cdn1.concung.com/img/adds/2025/01/1736402117-banner-2400x906-1-.png"
                 className="d-block w-100"
-                alt="Banner 3"
+                alt="Banner 4"
               />
             </Carousel.Item>
           </Carousel>

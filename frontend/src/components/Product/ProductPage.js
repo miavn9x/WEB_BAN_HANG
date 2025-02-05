@@ -1,4 +1,4 @@
-// ProductPage.jsx
+// pages/ProductPage.jsx
 import React, { useEffect, useState } from "react";
 import {
   Container,
@@ -10,13 +10,18 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { CiFilter } from "react-icons/ci";
-import Filter from "../../components/Filter/Filter";
+import Filter from "../../components/Filter/Filter"; // Import Filter component
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../styles/ProductPage.css";
 import axios from "axios";
-import ProductItem from "./ProductItem";
+import ProductItem from "./ProductItem"; // Giả sử bạn có component ProductItem để hiển thị sản phẩm
+import { useLocation } from "react-router-dom";
 
-const ProductPage = ({ category, limit }) => {
+const ProductPage = () => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const categoryFromURL = queryParams.get("categoryName");
+
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({
     price: null, // Sẽ lưu đối tượng { filterId, maxPrice, minPrice } nếu được chọn
@@ -78,8 +83,9 @@ const ProductPage = ({ category, limit }) => {
         let url = `/api/products`;
         const params = [];
 
-        if (category) {
-          params.push(`categoryName=${encodeURIComponent(category)}`);
+        // Nếu có category truyền qua URL hoặc từ bộ lọc (trong ví dụ này, ưu tiên lấy từ URL)
+        if (categoryFromURL) {
+          params.push(`categoryName=${encodeURIComponent(categoryFromURL)}`);
         }
 
         // Xử lý bộ lọc giá
@@ -140,10 +146,6 @@ const ProductPage = ({ category, limit }) => {
           fetchedProducts = fetchedProducts.sort(() => Math.random() - 0.5);
         }
 
-        if (limit) {
-          fetchedProducts = fetchedProducts.slice(0, limit);
-        }
-
         setProducts(fetchedProducts);
         setLoading(false);
       } catch (error) {
@@ -154,7 +156,8 @@ const ProductPage = ({ category, limit }) => {
     };
 
     fetchProducts();
-  }, [category, sortBy, limit, filters]);
+    // Lưu ý: dependency bao gồm cả categoryFromURL, sortBy, filters
+  }, [categoryFromURL, sortBy, filters]);
 
   return (
     <Container>
@@ -184,7 +187,7 @@ const ProductPage = ({ category, limit }) => {
 
               <div className="filter-controls">
                 <div className="d-flex justify-content-between align-items-center">
-                  {/* Nút bộ lọc hiển thị cho màn hình dưới xl (bao gồm cả lg: 992px - 1199px và mobile) */}
+                  {/* Nút bộ lọc hiển thị cho màn hình dưới xl (bao gồm cả lg và mobile) */}
                   <div className="d-block d-xl-none">
                     <button
                       onClick={handleShowFilter}

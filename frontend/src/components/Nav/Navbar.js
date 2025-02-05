@@ -103,9 +103,6 @@ const MyNavbar = () => {
 
   const [isMenuVisible, setIsMenuVisible] = useState(false);
 
-  //  const handleOpenMenu = () => {
-  //    setIsMenuVisible(true);
-  //  };
 
   const handleCloseMenu = () => {
     setIsMenuVisible(false);

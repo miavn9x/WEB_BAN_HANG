@@ -1,4 +1,4 @@
-// Filter.jsx
+// components/Filter/Filter.jsx
 import React from "react";
 import { Form } from "react-bootstrap";
 import {
@@ -156,8 +156,6 @@ const Filter = ({ onFilterChange, filters }) => {
                     checked={isChecked}
                     aria-label={option}
                     onChange={(e) =>
-                      // Khi chọn, nếu checkbox đang được check thì gửi isChecked: true để set lựa chọn mới cho nhóm đó,
-                      // và nếu bỏ chọn thì gửi isChecked: false để xóa lựa chọn cho nhóm đó.
                       handleFilterChange({
                         filterType: "categoryExclusive",
                         categoryName,
