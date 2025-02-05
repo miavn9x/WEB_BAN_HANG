@@ -397,9 +397,22 @@ const MyNavbar = () => {
                             <div
                               key={product._id}
                               className="suggestion-item p-2"
-                              style={{ cursor: "pointer" }}
+                              style={{
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                              }}
                               onClick={() => handleSuggestionClick(product._id)}
                             >
+                              <img
+                                src={product.images[0]} 
+                                alt={product.name}
+                                style={{
+                                  width: "50px",
+                                  height: "50px",
+                                  marginRight: "10px",
+                                }}
+                              />
                               {product.name}
                             </div>
                           ))
