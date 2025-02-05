@@ -105,7 +105,6 @@ const systemInfo = [
 const MyNavbar = () => {
   const navigate = useNavigate();
   const [isMenuVisible, setIsMenuVisible] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(""); // state lưu từ khóa tìm kiếm
 
   // Hàm chuyển hướng cho các link chung
   const handleLinkClick = (path) => {
@@ -116,15 +115,6 @@ const MyNavbar = () => {
   // Dùng label của danh mục để khớp với tên danh mục ở ProductPage & Filter
   const handleCategoryClick = (categoryLabel) => {
     navigate(`/products?categoryName=${encodeURIComponent(categoryLabel)}`);
-  };
-
-  // Xử lý submit form tìm kiếm
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    // Nếu cần tìm kiếm cả bài viết, bạn có thể chuyển hướng đến trang /search?keyword=...
-    // Ở đây ví dụ chuyển hướng tìm kiếm sản phẩm
-    navigate(`/products?search=${encodeURIComponent(searchTerm)}`);
-    // Reset searchTerm nếu muốn: setSearchTerm("");
   };
 
   const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
@@ -286,10 +276,10 @@ const MyNavbar = () => {
                   </Dropdown>
                 </div>
 
-                {/* Form Tìm kiếm */}
+                {/* Form Tìm kiếm - giao diện được giữ lại, nhưng không có xử lý */}
                 <Form
                   className="d-flex w-100"
-                  onSubmit={handleSearchSubmit}
+                  onSubmit={(e) => e.preventDefault()}
                   role="search"
                 >
                   <div className="d-none d-lg-block me-2 p-0">
@@ -330,8 +320,6 @@ const MyNavbar = () => {
                       type="search"
                       placeholder="Tìm theo tên sản phẩm, tiêu đề bài viết..."
                       aria-label="Search"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <Button
                       variant="danger"
