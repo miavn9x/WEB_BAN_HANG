@@ -1,3 +1,4 @@
+// Filter.jsx
 import React from "react";
 import { Form } from "react-bootstrap";
 import {
@@ -10,6 +11,7 @@ import {
   FaTshirt,
 } from "react-icons/fa";
 
+// Định nghĩa các danh mục và các tùy chọn con
 const categoryOptions = {
   "Sữa bột cao cấp": [
     "Từ 0-6 tháng",
@@ -66,7 +68,7 @@ const categoryOptions = {
   ],
 };
 
-// Hàm để chọn biểu tượng cho từng danh mục
+// Hàm trả về icon tương ứng với danh mục
 const getCategoryIcon = (categoryName) => {
   switch (categoryName) {
     case "Sữa bột cao cấp":
@@ -88,49 +90,49 @@ const getCategoryIcon = (categoryName) => {
   }
 };
 
+// Định nghĩa các option giá
+const priceOptions = [
+  { label: "Dưới 500.000đ", filterId: "price-500000", maxPrice: 500000 },
+  { label: "Dưới 1.000.000đ", filterId: "price-1000000", maxPrice: 1000000 },
+  { label: "Trên 1.000.000đ", filterId: "price-gt-1000000", minPrice: 1000000 },
+];
+
 const Filter = ({ onFilterChange, filters }) => {
   const handleFilterChange = (filterData) => {
-    const filterInfo = {
-      filterId: filterData.filterId,
-      isChecked: filterData.isChecked,
-      filterType: filterData.filterType,
-      filterName: filterData.filterName,
-      categoryName: filterData.categoryName,
-      categoryGeneric: filterData.categoryGeneric,
-    };
-    onFilterChange(filterInfo);
+    // Gọi callback truyền dữ liệu filter lên component cha
+    onFilterChange(filterData);
   };
 
   return (
     <div className="filter-content">
-      {/* Bộ lọc giá */}
+      {/* Bộ lọc mức giá */}
       <div className="filter-section">
         <h6>Mức Giá</h6>
         <Form>
-          {["Dưới 500.000đ", "Dưới 1.000.000đ", "Trên 1.000.000đ"].map(
-            (label, index) => (
-              <Form.Check
-                key={`price-${index}`}
-                type="radio"
-                label={label}
-                id={`price-${index}`}
-                name="price"
-                aria-label={label}
-                onChange={() =>
-                  handleFilterChange({
-                    filterId: `price-${index}`,
-                    isChecked: true,
-                    filterType: "radio",
-                    filterName: "price",
-                  })
-                }
-              />
-            )
-          )}
+          {priceOptions.map((option) => (
+            <Form.Check
+              key={option.filterId}
+              type="radio"
+              label={option.label}
+              id={option.filterId}
+              name="price"
+              aria-label={option.label}
+              checked={filters.price?.filterId === option.filterId}
+              onChange={() =>
+                handleFilterChange({
+                  filterId: option.filterId,
+                  filterType: "radio",
+                  filterName: "price",
+                  maxPrice: option.maxPrice || null,
+                  minPrice: option.minPrice || null,
+                })
+              }
+            />
+          ))}
         </Form>
       </div>
 
-      {/* Bộ lọc danh mục */}
+      {/* Bộ lọc danh mục (chỉ cho phép chọn duy nhất 1 option cho mỗi danh mục) */}
       <div className="filter-section">
         <h6>Loại sản phẩm</h6>
         <Form>
@@ -140,26 +142,33 @@ const Filter = ({ onFilterChange, filters }) => {
                 {getCategoryIcon(categoryName)}
                 {categoryName}
               </Form.Label>
-              {categoryOptions[categoryName].map((option, index) => (
-                <Form.Check
-                  key={`${categoryName}-${index}`}
-                  type="checkbox"
-                  label={option}
-                  id={`${categoryName}-${index}`}
-                  checked={filters?.categories?.has(`${categoryName}-${index}`)} // Check if the category is selected
-                  aria-label={option}
-                  onChange={(e) =>
-                    handleFilterChange({
-                      filterId: `${categoryName}-${index}`,
-                      isChecked: e.target.checked,
-                      filterType: "checkbox",
-                      filterName: "categories",
-                      categoryName,
-                      categoryGeneric: option,
-                    })
-                  }
-                />
-              ))}
+              {categoryOptions[categoryName].map((option) => {
+                // Mã hóa thông tin filter: "Tên danh mục|Tùy chọn con"
+                const filterId = `${categoryName}|${option}`;
+                // Kiểm tra xem trong filters.categories (dạng object) đã có lựa chọn cho categoryName này chưa
+                const isChecked = filters.categories[categoryName] === filterId;
+                return (
+                  <Form.Check
+                    key={filterId}
+                    type="checkbox"
+                    label={option}
+                    id={filterId}
+                    checked={isChecked}
+                    aria-label={option}
+                    onChange={(e) =>
+                      // Khi chọn, nếu checkbox đang được check thì gửi isChecked: true để set lựa chọn mới cho nhóm đó,
+                      // và nếu bỏ chọn thì gửi isChecked: false để xóa lựa chọn cho nhóm đó.
+                      handleFilterChange({
+                        filterType: "categoryExclusive",
+                        categoryName,
+                        filterId,
+                        isChecked: e.target.checked,
+                        categoryGeneric: option,
+                      })
+                    }
+                  />
+                );
+              })}
             </div>
           ))}
         </Form>

@@ -1,3 +1,4 @@
+// ProductPage.jsx
 import React, { useEffect, useState } from "react";
 import {
   Container,
@@ -9,86 +10,112 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { CiFilter } from "react-icons/ci";
-import Filter from "../../components/Filter/Filter"; // Adjust import path if necessary
+import Filter from "../../components/Filter/Filter";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../styles/ProductPage.css";
 import axios from "axios";
 import ProductItem from "./ProductItem";
 
 const ProductPage = ({ category, limit }) => {
-  const [showFilter, setShowFilter] = useState(false); // Show/hide filter modal
+  const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({
-    price: null,
-    categories: new Set(),
+    price: null, // Sẽ lưu đối tượng { filterId, maxPrice, minPrice } nếu được chọn
+    categories: {}, // Lưu dạng object: { [categoryName]: filterId }
   });
-  const [sortBy, setSortBy] = useState("default"); // State for sorting
-  const [products, setProducts] = useState([]); // State to hold product list
-  const [loading, setLoading] = useState(true); // Loading indicator
-  const [error, setError] = useState(null); // Error handling state
+  const [sortBy, setSortBy] = useState("default");
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Open and close filter modal (mobile)
+  // Mở/đóng modal bộ lọc (cho mobile & màn hình nhỏ hơn xl)
   const handleCloseFilter = () => setShowFilter(false);
   const handleShowFilter = () => setShowFilter(true);
 
-  // Update filter state when user applies filters
+  // Cập nhật state filters khi có thay đổi từ Filter component
   const handleFilterChange = (filterData) => {
-    const { filterId, isChecked, filterType, filterName } = filterData;
-
+    const { filterId, isChecked, filterType, filterName, categoryName } =
+      filterData;
     setFilters((prevFilters) => {
       if (filterType === "radio") {
         return {
           ...prevFilters,
-          [filterName]: isChecked ? filterId : null,
+          [filterName]: filterData, // Lưu toàn bộ đối tượng giá
         };
       }
-
-      if (filterType === "checkbox") {
-        const newCategories = new Set(prevFilters.categories);
+      if (filterType === "categoryExclusive") {
+        // Với lựa chọn độc quyền cho 1 danh mục:
+        // Nếu được check thì gán mới, nếu bỏ check thì xóa key đó.
+        const newCategories = { ...prevFilters.categories };
         if (isChecked) {
-          newCategories.add(filterId);
+          newCategories[categoryName] = filterId;
         } else {
-          newCategories.delete(filterId);
+          delete newCategories[categoryName];
         }
         return {
           ...prevFilters,
           categories: newCategories,
         };
       }
-
       return prevFilters;
     });
   };
 
-  // Fetch product data with applied filters
+  // Hàm làm mới bộ lọc
+  const clearFilters = () => {
+    setFilters({
+      price: null,
+      categories: {},
+    });
+    setSortBy("default");
+  };
+
+  // Fetch sản phẩm theo các tham số lọc, sắp xếp và phân trang (nếu có)
   useEffect(() => {
     const fetchProducts = async () => {
-      setLoading(true); // Start loading products
-      setError(null); // Reset error state
+      setLoading(true);
+      setError(null);
       try {
-        let url = `/api/products`; // Base URL to fetch products
+        let url = `/api/products`;
         const params = [];
 
         if (category) {
-          params.push(`categoryName=${category}`); // Filter by category if provided
+          params.push(`categoryName=${encodeURIComponent(category)}`);
         }
 
-        // Add price filter if present
+        // Xử lý bộ lọc giá
         if (filters.price) {
-          params.push(`price=${filters.price}`);
+          if (filters.price.maxPrice) {
+            params.push(
+              `maxPrice=${encodeURIComponent(filters.price.maxPrice)}`
+            );
+          }
+          if (filters.price.minPrice) {
+            params.push(
+              `minPrice=${encodeURIComponent(filters.price.minPrice)}`
+            );
+          }
         }
 
-        // Add category filters if any
-        if (filters.categories.size > 0) {
-          const categoryFilter = Array.from(filters.categories).join(",");
-          params.push(`categories=${categoryFilter}`);
+        // Xử lý bộ lọc danh mục (với lựa chọn độc quyền, ta có object { categoryName: filterId })
+        const categoryKeys = Object.keys(filters.categories);
+        if (categoryKeys.length > 0) {
+          // Tạo mảng các giá trị categoryGeneric bằng cách tách filterId (định dạng "categoryName|categoryGeneric")
+          const categoryGenerics = categoryKeys
+            .map((catName) => {
+              const filterId = filters.categories[catName];
+              const parts = filterId.split("|");
+              return parts[1]; // Lấy phần categoryGeneric
+            })
+            .join(",");
+          params.push(
+            `categoryGeneric=${encodeURIComponent(categoryGenerics)}`
+          );
         }
 
-        // Add sorting if needed
         if (sortBy !== "default") {
-          params.push(`sortBy=${sortBy}`);
+          params.push(`sortBy=${encodeURIComponent(sortBy)}`);
         }
 
-        // Append all parameters to the URL
         if (params.length > 0) {
           url = `${url}?${params.join("&")}`;
         }
@@ -96,7 +123,7 @@ const ProductPage = ({ category, limit }) => {
         const response = await axios.get(url);
         let fetchedProducts = response.data.products;
 
-        // Sort products based on sortBy state
+        // Sắp xếp thêm nếu cần (nếu API chưa sắp xếp)
         if (sortBy === "discountPercentage") {
           fetchedProducts = fetchedProducts.sort(
             (a, b) => b.discountPercentage - a.discountPercentage
@@ -113,53 +140,43 @@ const ProductPage = ({ category, limit }) => {
           fetchedProducts = fetchedProducts.sort(() => Math.random() - 0.5);
         }
 
-        // Limit products if limit is provided
         if (limit) {
           fetchedProducts = fetchedProducts.slice(0, limit);
         }
 
-        setProducts(fetchedProducts); // Update product list
-        setLoading(false); // Stop loading
+        setProducts(fetchedProducts);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching products:", error);
         setError("Có lỗi khi tải sản phẩm. Vui lòng thử lại.");
-        setLoading(false); // Stop loading even on error
+        setLoading(false);
       }
     };
 
     fetchProducts();
-  }, [category, sortBy, limit, filters]); // Re-fetch products when filters or sorting change
-
-  // Clear all filters
-const clearFilters = () => {
-  setFilters({
-    price: null,
-    categories: new Set(),
-  });
-  setSortBy("default");
-};
+  }, [category, sortBy, limit, filters]);
 
   return (
     <Container>
       <Row>
-        {/* Sidebar Filter (Desktop Only) */}
+        {/* Sidebar bộ lọc cho Desktop (chỉ hiển thị khi màn hình ≥1200px) */}
         <Col xl={3} className="sidebar-wrapper d-none d-xl-block">
           <div className="sidebar p-3 rounded mb-3">
-            <Filter onFilterChange={handleFilterChange} filters={filters} />
+            {/* Nút làm mới bộ lọc được đặt ở đầu */}
             <Button
-              className="btn-clear-filters mt-3"
+              className="btn-clear-filters mb-3"
               variant="outline-secondary"
               onClick={clearFilters}
             >
               Làm mới bộ lọc
             </Button>
+            <Filter onFilterChange={handleFilterChange} filters={filters} />
           </div>
         </Col>
 
-        {/* Product List */}
+        {/* Danh sách sản phẩm */}
         <Col xl={9} lg={12}>
           <Row className="product-row">
-            {/* Filter and Sort Controls */}
             <div className="filter-header">
               <div className="product-title-wrapper mb-3 mb-lg-0">
                 <h4 className="product-title">Tất cả sản phẩm</h4>
@@ -167,7 +184,8 @@ const clearFilters = () => {
 
               <div className="filter-controls">
                 <div className="d-flex justify-content-between align-items-center">
-                  <div className="d-block d-lg-none">
+                  {/* Nút bộ lọc hiển thị cho màn hình dưới xl (bao gồm cả lg: 992px - 1199px và mobile) */}
+                  <div className="d-block d-xl-none">
                     <button
                       onClick={handleShowFilter}
                       className="filter-button d-flex align-items-center"
@@ -219,15 +237,13 @@ const clearFilters = () => {
             </div>
           </Row>
 
-          {/* Product Grid */}
           <Row>
             <div className="products__container">
-              {/* Hiển thị vòng tròn xoay khi đang tải */}
               {loading && (
                 <div className="loading-container text-center">
                   <Spinner
                     animation="border"
-                    variant="success" // Vòng xoay màu xanh
+                    variant="success"
                     className="loading-spinner"
                   />
                   <div>Đang tải sản phẩm...</div>
@@ -248,14 +264,14 @@ const clearFilters = () => {
         </Col>
       </Row>
 
-      {/* Filter Modal (Mobile Only) */}
+      {/* Modal bộ lọc cho mobile & màn hình dưới xl */}
       <Modal
         show={showFilter}
         onHide={handleCloseFilter}
-        className="filter-modal d-lg-none"
+        className="filter-modal d-xl-none"
       >
         <Modal.Header className="border-0">
-          <Modal.Title>Bộ lọc</Modal.Title>
+          <Modal.Title>Bộ Lọc</Modal.Title>
           <button
             onClick={handleCloseFilter}
             className="custom-close"
@@ -265,14 +281,15 @@ const clearFilters = () => {
           </button>
         </Modal.Header>
         <Modal.Body>
-          <Filter onFilterChange={handleFilterChange} filters={filters} />
+          {/* Nút làm mới bộ lọc đặt ở đầu modal */}
           <Button
-            className="btn-clear-filters mt-3"
+            className="btn-clear-filters mb-3"
             variant="outline-secondary"
             onClick={clearFilters}
           >
             Làm mới bộ lọc
           </Button>
+          <Filter onFilterChange={handleFilterChange} filters={filters} />
         </Modal.Body>
       </Modal>
     </Container>
