@@ -36,7 +36,6 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import Fuse from "fuse.js";
 
-// Danh mục sản phẩm dùng để hiển thị trong dropdown
 const categories = [
   {
     path: "sua-bot-cao-cap",
@@ -90,10 +89,9 @@ const MyNavbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [products, setProducts] = useState([]); // Lưu danh sách sản phẩm để dùng Fuse.js
+  const [products, setProducts] = useState([]);
   const searchRef = useRef(null);
 
-  // Lấy tất cả sản phẩm khi component mount
   useEffect(() => {
     axios
       .get("/api/products")
@@ -109,7 +107,7 @@ const MyNavbar = () => {
     if (searchTerm.trim() !== "" && products.length > 0) {
       const fuse = new Fuse(products, {
         keys: ["name", "category.name", "category.generic", "brand"],
-        threshold: 0.3, // Điều chỉnh độ nhạy của tìm kiếm
+        threshold: 0.1,
       });
       const result = fuse.search(searchTerm);
       const filteredSuggestions = result.map((item) => item.item).slice(0, 5);
@@ -149,7 +147,6 @@ const MyNavbar = () => {
 
   const [isLargeScreen, setIsLargeScreen] = useState(false);
 
-  // Cập nhật trạng thái màn hình
   useEffect(() => {
     const handleResize = () => {
       setIsLargeScreen(window.innerWidth >= 991);
@@ -180,19 +177,24 @@ const MyNavbar = () => {
     navigate(`/products?search=${encodeURIComponent(searchTerm)}`);
   };
 
-  // Khi người dùng click chọn 1 gợi ý sản phẩm
-    const handleSuggestionClick = (productId) => {
-      navigate(`/product/${productId}`); // Sửa đường dẫn tại đây
-      setShowSuggestions(false);
-    };
+  // click  san phâm gợi ý zề trang chi tiết
+  const handleSuggestionClick = (productId) => {
+    navigate(`/product/${productId}`);
+    setShowSuggestions(false);
+  };
 
-  // Ẩn gợi ý khi click ra ngoài ô tìm kiếm
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target) &&
+        !event.target.closest(".suggestions-container")
+      ) {
+        setSearchTerm("");
         setShowSuggestions(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [searchRef]);
@@ -203,7 +205,6 @@ const MyNavbar = () => {
       <Navbar bg="light" expand="lg" className="py-2">
         <Container>
           <Row className="w-100 align-items-center">
-            {/* Logo */}
             <Col
               xs={4}
               lg={3}
@@ -289,10 +290,9 @@ const MyNavbar = () => {
               />
             </Col>
 
-            {/* Phần giữa: Tìm kiếm, Danh mục */}
+            {/* Phần giữa: Tìm kiếm, Danh mục  di động */}
             <Col lg={7} xs={12} className="order-last order-lg-0">
               <Navbar.Collapse id="navbarSupportedContent">
-                {/* Dropdown Danh mục cho di động */}
                 <div className="d-lg-none w-100 mb-3">
                   <Dropdown className="w-100">
                     <Dropdown.Toggle
@@ -370,7 +370,9 @@ const MyNavbar = () => {
                       onFocus={() => {
                         if (suggestions.length > 0) setShowSuggestions(true);
                       }}
+                      ref={searchRef} // Ref to detect clicks outside
                     />
+
                     <Button
                       variant="danger"
                       type="submit"
@@ -380,47 +382,24 @@ const MyNavbar = () => {
                     </Button>
                     {/* Danh sách gợi ý */}
                     {showSuggestions && (
-                      <div
-                        className="suggestions-container"
-                        style={{
-                          position: "absolute",
-                          top: "100%",
-                          left: 0,
-                          right: 0,
-                          background: "#fff",
-                          border: "1px solid #ddd",
-                          zIndex: 1000,
-                        }}
-                      >
+                      <div className="suggestions-container">
                         {suggestions.length > 0 ? (
                           suggestions.map((product) => (
                             <div
                               key={product._id}
-                              className="suggestion-item p-2"
-                              style={{
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                              }}
+                              className="suggestion-item"
                               onClick={() => handleSuggestionClick(product._id)}
                             >
                               <img
-                                src={product.images[0]} 
+                                src={product.images[0]}
                                 alt={product.name}
-                                style={{
-                                  width: "50px",
-                                  height: "50px",
-                                  marginRight: "10px",
-                                }}
+                                className="suggestion-item-img"
                               />
                               {product.name}
                             </div>
                           ))
                         ) : (
-                          <div
-                            className="suggestion-item p-2 text-center"
-                            style={{ color: "#888" }}
-                          >
+                          <div className="suggestion-item text-center">
                             <FaExclamationCircle className="me-1" />
                             Không tìm thấy sản phẩm
                           </div>
