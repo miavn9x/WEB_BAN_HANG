@@ -97,14 +97,14 @@ router.post("/products", upload.array("images", 20), async (req, res) => {
 router.get("/products", async (req, res) => {
   try {
     const {
-      page = 1, // Mặc định là trang đầu tiên
-      limit = 9900, // Giới hạn sản phẩm tối đa
-      search = "", // Từ khóa tìm kiếm
-      categoryName, // Tên danh mục
-      categoryGeneric, // Danh mục chung
-      minPrice, // Giá tối thiểu
-      maxPrice, // Giá tối đa
-      sortBy = "default", // Sắp xếp
+      page = 1,              // Mặc định là trang đầu tiên
+      limit = 9900,          // Giới hạn sản phẩm tối đa
+      search = "",           // Từ khóa tìm kiếm
+      categoryName,          // Tên danh mục
+      categoryGeneric,       // Danh mục chung
+      minPrice,              // Giá tối thiểu
+      maxPrice,              // Giá tối đa
+      sortBy = "default",    // Sắp xếp
     } = req.query;
 
     // Kiểm tra `page` và `limit` là số nguyên dương
@@ -112,39 +112,50 @@ router.get("/products", async (req, res) => {
     const validLimit = Math.max(1, parseInt(limit, 10));
 
     // Xây dựng query lọc
-    const query = {
-      ...(search && {
-        $or: [
-          { name: { $regex: search, $options: "i" } },
-          { brand: { $regex: search, $options: "i" } },
-          { description: { $regex: search, $options: "i" } },
-        ],
-      }),
-      ...(categoryName && {
-        "category.name": { $regex: categoryName, $options: "i" },
-      }),
-      ...(categoryGeneric && {
-        "category.generic": { $regex: categoryGeneric, $options: "i" },
-      }),
-      ...(minPrice &&
-        !isNaN(minPrice) && {
-          priceAfterDiscount: { $gte: Number(minPrice) },
-        }),
-      ...(maxPrice &&
-        !isNaN(maxPrice) && {
-          priceAfterDiscount: { $lte: Number(maxPrice) },
-        }),
-    };
+    let query = {};
 
-    // Xử lý random riêng
+    // Tìm kiếm chung mở rộng cho nhiều trường
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { brand: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { "category.name": { $regex: search, $options: "i" } },
+        { "category.generic": { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Lọc theo tên danh mục nếu có
+    if (categoryName) {
+      query["category.name"] = { $regex: categoryName, $options: "i" };
+    }
+
+    // Lọc theo loại danh mục chung nếu có
+    if (categoryGeneric) {
+      query["category.generic"] = { $regex: categoryGeneric, $options: "i" };
+    }
+
+    // Lọc theo khoảng giá sau khi giảm
+    let priceFilter = {};
+    if (minPrice && !isNaN(minPrice)) {
+      priceFilter.$gte = Number(minPrice);
+    }
+    if (maxPrice && !isNaN(maxPrice)) {
+      priceFilter.$lte = Number(maxPrice);
+    }
+    if (Object.keys(priceFilter).length > 0) {
+      query.priceAfterDiscount = priceFilter;
+    }
+
+    // Xử lý trường hợp sắp xếp ngẫu nhiên
     if (sortBy === "random") {
       const randomProducts = await Product.aggregate([
         { $match: query },
-        { $sample: { size: validLimit } }, // Random số lượng sản phẩm
+        { $sample: { size: validLimit } }, // Lấy ngẫu nhiên số lượng sản phẩm
       ]);
       return res.status(200).json({
         products: randomProducts,
-        totalPages: 1, // Random không phân trang
+        totalPages: 1, // Không phân trang đối với kết quả ngẫu nhiên
         currentPage: 1,
       });
     }
@@ -152,20 +163,20 @@ router.get("/products", async (req, res) => {
     // Cấu hình sắp xếp
     const sortQuery =
       sortBy === "priceAsc"
-        ? { priceAfterDiscount: 1 } // Giá tăng dần
+        ? { priceAfterDiscount: 1 }     // Giá tăng dần
         : sortBy === "priceDesc"
-        ? { priceAfterDiscount: -1 } // Giá giảm dần
+        ? { priceAfterDiscount: -1 }    // Giá giảm dần
         : sortBy === "discountPercentage"
-        ? { discountPercentage: -1 } // Phần trăm giảm giá
-        : {}; // Mặc định không sắp xếp
+        ? { discountPercentage: -1 }    // Phần trăm giảm giá
+        : {};                          // Mặc định không sắp xếp
 
-    // Fetch sản phẩm với query và sắp xếp
+    // Lấy sản phẩm với query, sắp xếp và phân trang
     const products = await Product.find(query)
       .limit(validLimit)
       .skip((validPage - 1) * validLimit)
       .sort(sortQuery);
 
-    // Đếm tổng số sản phẩm
+    // Đếm tổng số sản phẩm thỏa điều kiện lọc
     const totalProducts = await Product.countDocuments(query);
 
     res.status(200).json({
@@ -178,6 +189,7 @@ router.get("/products", async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy sản phẩm." });
   }
 });
+
 
 // Route lấy chi tiết sản phẩm theo ID
 router.get("/products/:id", async (req, res) => {

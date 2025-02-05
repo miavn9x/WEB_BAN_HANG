@@ -1,5 +1,4 @@
-// src/components/Navbar/MyNavbar.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Navbar,
   Nav,
@@ -28,11 +27,14 @@ import {
   FaCapsules,
   FaUtensils,
   FaBaby,
+  FaExclamationCircle,
 } from "react-icons/fa";
 import "../../styles/Navbar.css";
 import { useNavigate } from "react-router-dom";
 import LoginMenu from "../../pages/Auth/Login/LoginMenu";
 import { useSelector } from "react-redux";
+import axios from "axios";
+import Fuse from "fuse.js";
 
 // Danh mục sản phẩm dùng để hiển thị trong dropdown
 const categories = [
@@ -41,26 +43,14 @@ const categories = [
     label: "Sữa bột cao cấp",
     icon: <FaBabyCarriage />,
   },
-  {
-    path: "sua-tuoi",
-    label: "Sữa tươi dinh dưỡng",
-    icon: <FaGlassWhiskey />,
-  },
-  {
-    path: "bim-ta",
-    label: "Bỉm & tã em bé",
-    icon: <FaTags />,
-  },
+  { path: "sua-tuoi", label: "Sữa tươi dinh dưỡng", icon: <FaGlassWhiskey /> },
+  { path: "bim-ta", label: "Bỉm & tã em bé", icon: <FaTags /> },
   {
     path: "do-choi-phat-trien",
     label: "Đồ chơi phát triển",
     icon: <FaPuzzlePiece />,
   },
-  {
-    path: "cham-soc-me-be",
-    label: "Chăm sóc mẹ và bé",
-    icon: <FaHome />,
-  },
+  { path: "cham-soc-me-be", label: "Chăm sóc mẹ và bé", icon: <FaHome /> },
   {
     path: "thoi-trang-me-be",
     label: "Thời trang mẹ và bé",
@@ -71,21 +61,13 @@ const categories = [
     label: "Dinh dưỡng bà bầu",
     icon: <FaCapsules />,
   },
-  {
-    path: "an-dam-cho-be",
-    label: "Ăn dặm cho bé",
-    icon: <FaUtensils />,
-  },
+  { path: "an-dam-cho-be", label: "Ăn dặm cho bé", icon: <FaUtensils /> },
   {
     path: "dinh-duong-cho-be",
     label: "Dinh dưỡng cho bé",
     icon: <FaCapsules />,
   },
-  {
-    path: "do-dung-thiet-yeu",
-    label: "Đồ dùng thiết yếu",
-    icon: <FaBaby />,
-  },
+  { path: "do-dung-thiet-yeu", label: "Đồ dùng thiết yếu", icon: <FaBaby /> },
 ];
 
 const NavMenu = [
@@ -105,6 +87,39 @@ const systemInfo = [
 const MyNavbar = () => {
   const navigate = useNavigate();
   const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [products, setProducts] = useState([]); // Lưu danh sách sản phẩm để dùng Fuse.js
+  const searchRef = useRef(null);
+
+  // Lấy tất cả sản phẩm khi component mount
+  useEffect(() => {
+    axios
+      .get("/api/products")
+      .then((res) => {
+        setProducts(res.data.products || []);
+      })
+      .catch((err) => {
+        console.error("Error fetching products:", err);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (searchTerm.trim() !== "" && products.length > 0) {
+      const fuse = new Fuse(products, {
+        keys: ["name", "category.name", "category.generic", "brand"],
+        threshold: 0.3, // Điều chỉnh độ nhạy của tìm kiếm
+      });
+      const result = fuse.search(searchTerm);
+      const filteredSuggestions = result.map((item) => item.item).slice(0, 5);
+      setSuggestions(filteredSuggestions);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchTerm, products]);
 
   // Hàm chuyển hướng cho các link chung
   const handleLinkClick = (path) => {
@@ -112,7 +127,6 @@ const MyNavbar = () => {
   };
 
   // Hàm chuyển hướng cho danh mục sản phẩm
-  // Dùng label của danh mục để khớp với tên danh mục ở ProductPage & Filter
   const handleCategoryClick = (categoryLabel) => {
     navigate(`/products?categoryName=${encodeURIComponent(categoryLabel)}`);
   };
@@ -143,7 +157,6 @@ const MyNavbar = () => {
 
     handleResize();
     window.addEventListener("resize", handleResize);
-
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -155,6 +168,34 @@ const MyNavbar = () => {
   );
 
   const isLoggedIn = !!localStorage.getItem("token");
+
+  // Xử lý khi submit form tìm kiếm
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim() !== "" && suggestions.length === 0) {
+      setShowSuggestions(true);
+      return;
+    }
+    setShowSuggestions(false);
+    navigate(`/products?search=${encodeURIComponent(searchTerm)}`);
+  };
+
+  // Khi người dùng click chọn 1 gợi ý sản phẩm
+    const handleSuggestionClick = (productId) => {
+      navigate(`/product/${productId}`); // Sửa đường dẫn tại đây
+      setShowSuggestions(false);
+    };
+
+  // Ẩn gợi ý khi click ra ngoài ô tìm kiếm
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [searchRef]);
 
   return (
     <>
@@ -276,11 +317,12 @@ const MyNavbar = () => {
                   </Dropdown>
                 </div>
 
-                {/* Form Tìm kiếm - giao diện được giữ lại, nhưng không có xử lý */}
+                {/* Form Tìm kiếm */}
                 <Form
-                  className="d-flex w-100"
-                  onSubmit={(e) => e.preventDefault()}
+                  className="d-flex w-100 position-relative"
+                  onSubmit={handleSearchSubmit}
                   role="search"
+                  ref={searchRef}
                 >
                   <div className="d-none d-lg-block me-2 p-0">
                     <Dropdown>
@@ -315,11 +357,19 @@ const MyNavbar = () => {
                   </div>
 
                   {/* Search Input */}
-                  <div className="search-container flex-grow-1">
+                  <div
+                    className="search-container flex-grow-1"
+                    style={{ position: "relative" }}
+                  >
                     <FormControl
                       type="search"
                       placeholder="Tìm theo tên sản phẩm, tiêu đề bài viết..."
                       aria-label="Search"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onFocus={() => {
+                        if (suggestions.length > 0) setShowSuggestions(true);
+                      }}
                     />
                     <Button
                       variant="danger"
@@ -328,6 +378,42 @@ const MyNavbar = () => {
                     >
                       <FaSearch />
                     </Button>
+                    {/* Danh sách gợi ý */}
+                    {showSuggestions && (
+                      <div
+                        className="suggestions-container"
+                        style={{
+                          position: "absolute",
+                          top: "100%",
+                          left: 0,
+                          right: 0,
+                          background: "#fff",
+                          border: "1px solid #ddd",
+                          zIndex: 1000,
+                        }}
+                      >
+                        {suggestions.length > 0 ? (
+                          suggestions.map((product) => (
+                            <div
+                              key={product._id}
+                              className="suggestion-item p-2"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => handleSuggestionClick(product._id)}
+                            >
+                              {product.name}
+                            </div>
+                          ))
+                        ) : (
+                          <div
+                            className="suggestion-item p-2 text-center"
+                            style={{ color: "#888" }}
+                          >
+                            <FaExclamationCircle className="me-1" />
+                            Không tìm thấy sản phẩm
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </Form>
 

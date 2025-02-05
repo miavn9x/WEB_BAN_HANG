@@ -1,4 +1,3 @@
-// pages/ProductPage.jsx
 import React, { useEffect, useState } from "react";
 import {
   Container,
@@ -15,7 +14,8 @@ import Filter from "../../components/Filter/Filter"; // Import Filter component
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../styles/ProductPage.css";
 import axios from "axios";
-import ProductItem from "./ProductItem"; // Giả sử bạn có component ProductItem để hiển thị sản phẩm
+import ProductItem from "./ProductItem"; // Component hiển thị sản phẩm
+import Fuse from "fuse.js";
 
 const ProductPage = () => {
   const location = useLocation();
@@ -23,10 +23,11 @@ const ProductPage = () => {
   const queryParams = new URLSearchParams(location.search);
   const categoryFromURL = queryParams.get("categoryName");
   const genericFromURL = queryParams.get("generic");
+  const searchFromURL = queryParams.get("search"); // Lấy từ khóa tìm kiếm từ URL
 
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({
-    price: null, // Lưu đối tượng { filterId, maxPrice, minPrice } nếu được chọn
+    price: null, // Lưu đối tượng { minPrice, maxPrice }
     categories: {}, // Lưu dạng object: { [categoryName]: filterId }
   });
   const [sortBy, setSortBy] = useState("default");
@@ -44,23 +45,16 @@ const ProductPage = () => {
       filterData;
     setFilters((prevFilters) => {
       if (filterType === "radio") {
-        return {
-          ...prevFilters,
-          [filterName]: filterData, // Lưu đối tượng giá
-        };
+        return { ...prevFilters, [filterName]: filterData };
       }
       if (filterType === "categoryExclusive") {
-        // Nếu được check: gán mới; nếu bỏ check: xóa key đó.
         const newCategories = { ...prevFilters.categories };
         if (isChecked) {
           newCategories[categoryName] = filterId;
         } else {
           delete newCategories[categoryName];
         }
-        return {
-          ...prevFilters,
-          categories: newCategories,
-        };
+        return { ...prevFilters, categories: newCategories };
       }
       return prevFilters;
     });
@@ -73,11 +67,20 @@ const ProductPage = () => {
       categories: {},
     });
     setSortBy("default");
-    // Chuyển hướng về URL không có query param (hiển thị tất cả sản phẩm)
     navigate("/products");
   };
 
-  // Fetch sản phẩm dựa vào các tham số lọc và sắp xếp
+  // Hàm hỗ trợ chuyển chuỗi về dạng không dấu và in thường
+  const normalizeString = (str) => {
+    return str
+      ? str
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+      : "";
+  };
+
+  // Fetch sản phẩm dựa vào các tham số lọc, sắp xếp và tìm kiếm
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
@@ -99,7 +102,7 @@ const ProductPage = () => {
           // Nếu người dùng đã chọn bộ lọc từ Filter thì ưu tiên dùng dữ liệu đó
           const categoryKeys = Object.keys(filters.categories);
           if (categoryKeys.length > 0) {
-            // Tách filterId dạng "categoryName|categoryGeneric" để lấy phần generic
+            // Giả sử filterId có định dạng "categoryName|categoryGeneric"
             const categoryGenerics = categoryKeys
               .map((catName) => {
                 const filterId = filters.categories[catName];
@@ -131,12 +134,45 @@ const ProductPage = () => {
           params.push(`sortBy=${encodeURIComponent(sortBy)}`);
         }
 
+        // Nếu có từ khóa tìm kiếm, thêm vào params (API có thể dùng để lọc sơ bộ)
+        if (searchFromURL) {
+          params.push(`search=${encodeURIComponent(searchFromURL)}`);
+        }
+
         if (params.length > 0) {
           url = `${url}?${params.join("&")}`;
         }
 
         const response = await axios.get(url);
         let fetchedProducts = response.data.products;
+
+        // Nếu có từ khóa tìm kiếm, áp dụng Fuse.js với chuyển đổi về dạng không dấu
+        if (searchFromURL && fetchedProducts.length > 0) {
+          const normalizedQuery = normalizeString(searchFromURL);
+          const fuse = new Fuse(fetchedProducts, {
+            keys: [
+              {
+                name: "name",
+                getFn: (obj) => normalizeString(obj.name),
+              },
+              {
+                name: "category.name",
+                getFn: (obj) => normalizeString(obj.category?.name),
+              },
+              {
+                name: "category.generic",
+                getFn: (obj) => normalizeString(obj.category?.generic),
+              },
+              {
+                name: "brand",
+                getFn: (obj) => normalizeString(obj.brand),
+              },
+            ],
+            threshold: 0.3,
+          });
+          const fuseResult = fuse.search(normalizedQuery);
+          fetchedProducts = fuseResult.map((result) => result.item);
+        }
 
         // Sắp xếp lại nếu cần (nếu API chưa xử lý sắp xếp)
         if (sortBy === "discountPercentage") {
@@ -165,8 +201,14 @@ const ProductPage = () => {
     };
 
     fetchProducts();
-    // Dependencies: categoryFromURL, genericFromURL, sortBy, filters
-  }, [categoryFromURL, genericFromURL, sortBy, filters]);
+  }, [
+    categoryFromURL,
+    genericFromURL,
+    sortBy,
+    filters,
+    searchFromURL,
+    location.search,
+  ]);
 
   return (
     <Container>
