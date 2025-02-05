@@ -26,15 +26,23 @@ import {
 import { useNavigate } from "react-router-dom";
 import "../../styles/Carouselandmenu.css";
 
-// Component danh mục sản phẩm (có hỗ trợ menu con)
+// Component danh mục sản phẩm (hỗ trợ menu con)
 const CategoryMenu = ({ categories }) => {
   const [activeCategory, setActiveCategory] = useState(null);
   const navigate = useNavigate();
 
-  // Hàm xử lý chuyển hướng khi click vào danh mục
+  // Xử lý khi click vào danh mục chính (chỉ lọc theo tên danh mục)
   const handleCategoryClick = (categoryName) => {
-    // Chuyển hướng đến trang /products với query param categoryName
     navigate(`/products?categoryName=${encodeURIComponent(categoryName)}`);
+  };
+
+  // Xử lý khi click vào danh mục con (lọc theo tên danh mục và loại sản phẩm – generic)
+  const handleSubcategoryClick = (categoryName, subcategory) => {
+    navigate(
+      `/products?categoryName=${encodeURIComponent(
+        categoryName
+      )}&generic=${encodeURIComponent(subcategory)}`
+    );
   };
 
   return (
@@ -52,17 +60,27 @@ const CategoryMenu = ({ categories }) => {
             className="category-item position-relative"
             onMouseEnter={() => setActiveCategory(index)}
             onMouseLeave={() => setActiveCategory(null)}
-            onClick={() => handleCategoryClick(category.name)}
             style={{ cursor: "pointer" }}
           >
-            <ListGroup.Item className="d-flex align-items-center">
+            <ListGroup.Item
+              onClick={() => handleCategoryClick(category.name)}
+              className="d-flex align-items-center"
+            >
               {category.icon} <span className="ms-3">{category.name}</span>
             </ListGroup.Item>
-            {/* Hiển thị danh mục con */}
+            {/* Nếu có danh mục con thì hiển thị menu con */}
             {activeCategory === index && category.subcategories && (
               <div className="subcategory-menu position-absolute">
                 {category.subcategories.map((subcategory, subIndex) => (
-                  <div key={subIndex} className="subcategory-item">
+                  <div
+                    key={subIndex}
+                    className="subcategory-item"
+                    onClick={(e) => {
+                      // Ngăn sự kiện click lan lên danh mục cha
+                      e.stopPropagation();
+                      handleSubcategoryClick(category.name, subcategory);
+                    }}
+                  >
                     {subcategory}
                   </div>
                 ))}
@@ -130,12 +148,11 @@ const CarouselAndMenu = () => {
       icon: <FaPuzzlePiece />,
       name: "Đồ chơi phát triển",
       subcategories: [
-        "Đồ chơi kích thích giác quan 0-12 tháng",
-        "Đồ chơi vận động 1-3 tuổi",
-        "Đồ chơi thông minh 3-5 tuổi",
-        "Đồ chơi STEM",
-        "Đồ chơi âm nhạc",
-        "Đồ chơi ngoài trời",
+        "Đồ chơi bé gái",
+        "Đồ chơi bé trai",
+        "Sách, học tập",
+        "Đồ chơi sơ sinh",
+        "Scooter, vận động",
       ],
     },
     {
@@ -167,11 +184,10 @@ const CarouselAndMenu = () => {
       name: "Dinh dưỡng bà bầu",
       subcategories: [
         "Vitamin tổng hợp cho bà bầu",
-        "Sắt & Acid folic",
-        "DHA cho bà bầu",
-        "Canxi cho bà bầu",
-        "Vitamin D3K2",
-        "Thực phẩm bổ sung cho bà bầu",
+        "Sắt và axit folic",
+        "Canxi và Vitamin D3",
+        "Omega 3 và DHA",
+        "Sữa bầu công thức đặc biệt",
       ],
     },
     {
@@ -215,12 +231,12 @@ const CarouselAndMenu = () => {
   return (
     <Container className="mt-3 container_custom">
       <Row>
-        {/* Sidebar */}
+        {/* Sidebar danh mục (chỉ hiển thị ở màn hình lớn) */}
         <Col xs={12} lg={3} className="d-none d-lg-block">
           <CategoryMenu categories={categories} />
         </Col>
 
-        {/* Main Content */}
+        {/* Nội dung chính */}
         <Col xs={12} lg={9}>
           <Carousel id="carouselExampleIndicators" className="carousel-custom">
             <Carousel.Item>

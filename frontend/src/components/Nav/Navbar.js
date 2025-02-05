@@ -1,3 +1,4 @@
+// src/components/Navbar/MyNavbar.jsx
 import React, { useEffect, useState } from "react";
 import {
   Navbar,
@@ -32,20 +33,34 @@ import "../../styles/Navbar.css";
 import { useNavigate } from "react-router-dom";
 import LoginMenu from "../../pages/Auth/Login/LoginMenu";
 import { useSelector } from "react-redux";
+
+// Danh mục sản phẩm dùng để hiển thị trong dropdown
 const categories = [
   {
     path: "sua-bot-cao-cap",
     label: "Sữa bột cao cấp",
     icon: <FaBabyCarriage />,
   },
-  { path: "sua-tuoi", label: "Sữa tươi dinh dưỡng", icon: <FaGlassWhiskey /> },
-  { path: "bim-ta", label: "Bỉm & tã em bé", icon: <FaTags /> },
+  {
+    path: "sua-tuoi",
+    label: "Sữa tươi dinh dưỡng",
+    icon: <FaGlassWhiskey />,
+  },
+  {
+    path: "bim-ta",
+    label: "Bỉm & tã em bé",
+    icon: <FaTags />,
+  },
   {
     path: "do-choi-phat-trien",
     label: "Đồ chơi phát triển",
     icon: <FaPuzzlePiece />,
   },
-  { path: "cham-soc-me-be", label: "Chăm sóc mẹ và bé", icon: <FaHome /> },
+  {
+    path: "cham-soc-me-be",
+    label: "Chăm sóc mẹ và bé",
+    icon: <FaHome />,
+  },
   {
     path: "thoi-trang-me-be",
     label: "Thời trang mẹ và bé",
@@ -56,13 +71,21 @@ const categories = [
     label: "Dinh dưỡng bà bầu",
     icon: <FaCapsules />,
   },
-  { path: "an-dam-cho-be", label: "Ăn dặm cho bé", icon: <FaUtensils /> },
+  {
+    path: "an-dam-cho-be",
+    label: "Ăn dặm cho bé",
+    icon: <FaUtensils />,
+  },
   {
     path: "dinh-duong-cho-be",
     label: "Dinh dưỡng cho bé",
     icon: <FaCapsules />,
   },
-  { path: "do-dung-thiet-yeu", label: "Đồ dùng thiết yếu", icon: <FaBaby /> },
+  {
+    path: "do-dung-thiet-yeu",
+    label: "Đồ dùng thiết yếu",
+    icon: <FaBaby />,
+  },
 ];
 
 const NavMenu = [
@@ -79,16 +102,31 @@ const systemInfo = [
   { icon: <FaPhone />, text: "Hotline: 099999998" },
 ];
 
-
-
-
-
 const MyNavbar = () => {
-  const navigate = useNavigate(); // Sử dụng hook useNavigate
+  const navigate = useNavigate();
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // state lưu từ khóa tìm kiếm
 
+  // Hàm chuyển hướng cho các link chung
   const handleLinkClick = (path) => {
-    navigate(path); // Gọi navigate đúng cách
+    navigate(path);
   };
+
+  // Hàm chuyển hướng cho danh mục sản phẩm
+  // Dùng label của danh mục để khớp với tên danh mục ở ProductPage & Filter
+  const handleCategoryClick = (categoryLabel) => {
+    navigate(`/products?categoryName=${encodeURIComponent(categoryLabel)}`);
+  };
+
+  // Xử lý submit form tìm kiếm
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    // Nếu cần tìm kiếm cả bài viết, bạn có thể chuyển hướng đến trang /search?keyword=...
+    // Ở đây ví dụ chuyển hướng tìm kiếm sản phẩm
+    navigate(`/products?search=${encodeURIComponent(searchTerm)}`);
+    // Reset searchTerm nếu muốn: setSearchTerm("");
+  };
+
   const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
     <div
       ref={ref}
@@ -101,44 +139,40 @@ const MyNavbar = () => {
     </div>
   ));
 
-  const [isMenuVisible, setIsMenuVisible] = useState(false);
-
-
   const handleCloseMenu = () => {
     setIsMenuVisible(false);
   };
-
 
   const [isLargeScreen, setIsLargeScreen] = useState(false);
 
   // Cập nhật trạng thái màn hình
   useEffect(() => {
     const handleResize = () => {
-      setIsLargeScreen(window.innerWidth >= 991); // Kiểm tra nếu kích thước >= 991px
+      setIsLargeScreen(window.innerWidth >= 991);
     };
 
-    handleResize(); // Gọi ngay khi component được render
-    window.addEventListener("resize", handleResize); // Lắng nghe sự thay đổi kích thước
+    handleResize();
+    window.addEventListener("resize", handleResize);
 
-    return () => window.removeEventListener("resize", handleResize); // Cleanup khi component bị huỷ
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
-  // Get cart items from Redux store
-  const cartItems = useSelector((state) => state.cart.items);
 
-  // Calculate the total number of items in the cart
+  // Lấy dữ liệu giỏ hàng từ Redux
+  const cartItems = useSelector((state) => state.cart.items);
   const totalItemsInCart = cartItems.reduce(
     (total, item) => total + item.quantity,
     0
   );
 
   const isLoggedIn = !!localStorage.getItem("token");
+
   return (
     <>
       {/* Navbar chính */}
       <Navbar bg="light" expand="lg" className="py-2">
         <Container>
           <Row className="w-100 align-items-center">
-            {/* Phần trái - Logo */}
+            {/* Logo */}
             <Col
               xs={4}
               lg={3}
@@ -156,17 +190,16 @@ const MyNavbar = () => {
                   height="60"
                 />
                 <span className="logo-text fs-3 navbar-text">
-                  <span className="text-danger fw-bold me-1 ">Baby</span>
+                  <span className="text-danger fw-bold me-1">Baby</span>
                   <span className="text-primary fw-bold">Mart</span>
                 </span>
               </Navbar.Brand>
             </Col>
 
-            {/* Phần phải - Các biểu tượng (Chỉ hiển thị trên di động) */}
+            {/* Các biểu tượng trên di động */}
             <Col xs={7} className="d-lg-none text-end pe-2">
               <Nav className="justify-content-end">
                 <div className="d-flex align-items-center ms-auto">
-                  {/* Biểu tượng tài khoản người dùng */}
                   <Nav.Link
                     className="pb-3 me-1 icon_user"
                     style={{ cursor: "pointer" }}
@@ -196,7 +229,6 @@ const MyNavbar = () => {
                     )}
                   </Nav.Link>
 
-                  {/* Biểu tượng thông báo */}
                   <Nav.Link
                     onClick={() => handleLinkClick("/dang-xuat")}
                     className="p-1 ms-2 position-relative icon-wrapper"
@@ -206,21 +238,19 @@ const MyNavbar = () => {
                     <span className="notification-badge">0</span>
                   </Nav.Link>
 
-                  {/* Biểu tượng giỏ hàng */}
                   <Nav.Link
                     onClick={() => handleLinkClick("/gio-hang")}
                     className="p-1 ms-2 position-relative icon-wrapper"
                     style={{ cursor: "pointer" }}
                   >
                     <FaShoppingCart className="text-dark" size={20} />
-                    {/* Dynamically show the number of items in the cart */}
                     <span className="cart-badge">{totalItemsInCart}</span>
                   </Nav.Link>
                 </div>
               </Nav>
             </Col>
 
-            {/* Nút Toggle (Chỉ hiển thị trên di động) */}
+            {/* Nút Toggle trên di động */}
             <Col xs={1} className="d-lg-none px-0 text-center">
               <Navbar.Toggle
                 aria-controls="navbarSupportedContent"
@@ -228,10 +258,10 @@ const MyNavbar = () => {
               />
             </Col>
 
-            {/* Phần giữa - Tìm kiếm và Danh mục */}
+            {/* Phần giữa: Tìm kiếm, Danh mục */}
             <Col lg={7} xs={12} className="order-last order-lg-0">
               <Navbar.Collapse id="navbarSupportedContent">
-                {/* Danh mục cho di động */}
+                {/* Dropdown Danh mục cho di động */}
                 <div className="d-lg-none w-100 mb-3">
                   <Dropdown className="w-100">
                     <Dropdown.Toggle
@@ -240,14 +270,12 @@ const MyNavbar = () => {
                     >
                       Danh mục sản phẩm
                     </Dropdown.Toggle>
-
                     <Dropdown.Menu className="w-100">
                       {categories.map((category) => (
                         <Dropdown.Item
                           key={category.path}
-                          onClick={() => handleLinkClick(category.path)}
+                          onClick={() => handleCategoryClick(category.label)}
                         >
-                          {/* Hiển thị biểu tượng (icon) nếu có */}
                           {category.icon && (
                             <span className="me-2">{category.icon}</span>
                           )}
@@ -259,7 +287,11 @@ const MyNavbar = () => {
                 </div>
 
                 {/* Form Tìm kiếm */}
-                <Form className="d-flex w-100">
+                <Form
+                  className="d-flex w-100"
+                  onSubmit={handleSearchSubmit}
+                  role="search"
+                >
                   <div className="d-none d-lg-block me-2 p-0">
                     <Dropdown>
                       <Dropdown.Toggle
@@ -272,7 +304,7 @@ const MyNavbar = () => {
                         {categories.map((category) => (
                           <Dropdown.Item
                             key={category.path}
-                            onClick={() => handleLinkClick(category.path)}
+                            onClick={() => handleCategoryClick(category.label)}
                           >
                             {category.icon && (
                               <span className="me-3">{category.icon}</span>
@@ -296,8 +328,10 @@ const MyNavbar = () => {
                   <div className="search-container flex-grow-1">
                     <FormControl
                       type="search"
-                      placeholder="Tìm theo tên sản phẩm..."
+                      placeholder="Tìm theo tên sản phẩm, tiêu đề bài viết..."
                       aria-label="Search"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <Button
                       variant="danger"
@@ -309,14 +343,14 @@ const MyNavbar = () => {
                   </div>
                 </Form>
 
-                {/* Navigation Links (Only for Mobile) */}
+                {/* Navigation Links dành cho Mobile */}
                 <Nav className="flex-column mt-3 d-lg-none">
                   {NavMenu.map((link, index) => (
                     <button
                       key={index}
-                      className="btn btn-link text-dark" // Giữ kiểu dáng giống như Nav.Link
+                      className="btn btn-link text-dark"
                       onClick={() => handleLinkClick(link.path)}
-                      style={{ textDecoration: "none" }} // Xóa gạch chân nếu có
+                      style={{ textDecoration: "none" }}
                     >
                       {link.label}
                     </button>
@@ -325,15 +359,14 @@ const MyNavbar = () => {
               </Navbar.Collapse>
             </Col>
 
-            {/* Phần này - Các biểu tượng Chỉ hiển thị trên máy tính để bàn không hiện thị di động */}
+            {/* Phần biểu tượng trên Desktop */}
             <Col lg={2} className="d-none d-lg-block">
               <Nav className="justify-content-end align-items-end">
-                {/* nút phân cần ghi login theo phân quyên tren pc */}
                 <Nav.Link
                   className="pb-2 me-2 icon_user"
                   style={{ cursor: "pointer" }}
                 >
-                  {localStorage.getItem("token") ? (
+                  {isLoggedIn ? (
                     <Dropdown>
                       <Dropdown.Toggle as={CustomToggle}>
                         <FaUser size={20} className="user-icon logged-in" />
@@ -369,7 +402,7 @@ const MyNavbar = () => {
         </Container>
       </Navbar>
 
-      {/* Navbar bổ sung - Hiển thị trên màn hình lớn */}
+      {/* Navbar bổ sung hiển thị trên Desktop */}
       <Navbar
         expand="lg"
         className="text-white d-none d-lg-block"
@@ -396,7 +429,6 @@ const MyNavbar = () => {
                 ))}
               </NavDropdown>
             ) : (
-              // Kiểm tra điều kiện hiển thị
               (!isLargeScreen ||
                 (link.path !== "/shop-map" && link.path !== "Hotline")) && (
                 <Nav.Link
@@ -410,7 +442,6 @@ const MyNavbar = () => {
               )
             )
           )}
-          {/* Chương trình khuyến mãi - Viết riêng ngoài mảng */}
           <div className="d-flex align-items-center Nav__sale">
             <NavDropdown
               title="KHUYẾN MÃI"
@@ -432,13 +463,10 @@ const MyNavbar = () => {
             </NavDropdown>
           </div>
           <Navbar.Collapse id="navbarNav">
-            <Nav className="me-auto mb-2 mb-lg-0">
-              {/* Các mục điều hướng khác */}
-            </Nav>
+            <Nav className="me-auto mb-2 mb-lg-0"></Nav>
             <Navbar.Text className="text-white ms-auto text-end">
               {systemInfo.map((info, idx) => (
                 <span key={idx}>
-                  {/* Kiểm tra nếu có đường dẫn thì cho phép chuyển hướng */}
                   {info.path ? (
                     <span
                       onClick={() => navigate(info.path)}

@@ -10,21 +10,23 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { CiFilter } from "react-icons/ci";
+import { useLocation, useNavigate } from "react-router-dom";
 import Filter from "../../components/Filter/Filter"; // Import Filter component
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../styles/ProductPage.css";
 import axios from "axios";
 import ProductItem from "./ProductItem"; // Giả sử bạn có component ProductItem để hiển thị sản phẩm
-import { useLocation } from "react-router-dom";
 
 const ProductPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const categoryFromURL = queryParams.get("categoryName");
+  const genericFromURL = queryParams.get("generic");
 
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({
-    price: null, // Sẽ lưu đối tượng { filterId, maxPrice, minPrice } nếu được chọn
+    price: null, // Lưu đối tượng { filterId, maxPrice, minPrice } nếu được chọn
     categories: {}, // Lưu dạng object: { [categoryName]: filterId }
   });
   const [sortBy, setSortBy] = useState("default");
@@ -44,12 +46,11 @@ const ProductPage = () => {
       if (filterType === "radio") {
         return {
           ...prevFilters,
-          [filterName]: filterData, // Lưu toàn bộ đối tượng giá
+          [filterName]: filterData, // Lưu đối tượng giá
         };
       }
       if (filterType === "categoryExclusive") {
-        // Với lựa chọn độc quyền cho 1 danh mục:
-        // Nếu được check thì gán mới, nếu bỏ check thì xóa key đó.
+        // Nếu được check: gán mới; nếu bỏ check: xóa key đó.
         const newCategories = { ...prevFilters.categories };
         if (isChecked) {
           newCategories[categoryName] = filterId;
@@ -65,16 +66,18 @@ const ProductPage = () => {
     });
   };
 
-  // Hàm làm mới bộ lọc
+  // Hàm làm mới bộ lọc: reset state và xóa query param trong URL
   const clearFilters = () => {
     setFilters({
       price: null,
       categories: {},
     });
     setSortBy("default");
+    // Chuyển hướng về URL không có query param (hiển thị tất cả sản phẩm)
+    navigate("/products");
   };
 
-  // Fetch sản phẩm theo các tham số lọc, sắp xếp và phân trang (nếu có)
+  // Fetch sản phẩm dựa vào các tham số lọc và sắp xếp
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
@@ -83,12 +86,34 @@ const ProductPage = () => {
         let url = `/api/products`;
         const params = [];
 
-        // Nếu có category truyền qua URL hoặc từ bộ lọc (trong ví dụ này, ưu tiên lấy từ URL)
-        if (categoryFromURL) {
-          params.push(`categoryName=${encodeURIComponent(categoryFromURL)}`);
+        // Nếu người dùng CHƯA chọn bộ lọc từ Filter (state filters rỗng)
+        if (Object.keys(filters.categories).length === 0 && !filters.price) {
+          if (genericFromURL) {
+            params.push(
+              `categoryGeneric=${encodeURIComponent(genericFromURL)}`
+            );
+          } else if (categoryFromURL) {
+            params.push(`categoryName=${encodeURIComponent(categoryFromURL)}`);
+          }
+        } else {
+          // Nếu người dùng đã chọn bộ lọc từ Filter thì ưu tiên dùng dữ liệu đó
+          const categoryKeys = Object.keys(filters.categories);
+          if (categoryKeys.length > 0) {
+            // Tách filterId dạng "categoryName|categoryGeneric" để lấy phần generic
+            const categoryGenerics = categoryKeys
+              .map((catName) => {
+                const filterId = filters.categories[catName];
+                const parts = filterId.split("|");
+                return parts[1];
+              })
+              .join(",");
+            params.push(
+              `categoryGeneric=${encodeURIComponent(categoryGenerics)}`
+            );
+          }
         }
 
-        // Xử lý bộ lọc giá
+        // Xử lý bộ lọc giá (nếu có)
         if (filters.price) {
           if (filters.price.maxPrice) {
             params.push(
@@ -102,22 +127,6 @@ const ProductPage = () => {
           }
         }
 
-        // Xử lý bộ lọc danh mục (với lựa chọn độc quyền, ta có object { categoryName: filterId })
-        const categoryKeys = Object.keys(filters.categories);
-        if (categoryKeys.length > 0) {
-          // Tạo mảng các giá trị categoryGeneric bằng cách tách filterId (định dạng "categoryName|categoryGeneric")
-          const categoryGenerics = categoryKeys
-            .map((catName) => {
-              const filterId = filters.categories[catName];
-              const parts = filterId.split("|");
-              return parts[1]; // Lấy phần categoryGeneric
-            })
-            .join(",");
-          params.push(
-            `categoryGeneric=${encodeURIComponent(categoryGenerics)}`
-          );
-        }
-
         if (sortBy !== "default") {
           params.push(`sortBy=${encodeURIComponent(sortBy)}`);
         }
@@ -129,7 +138,7 @@ const ProductPage = () => {
         const response = await axios.get(url);
         let fetchedProducts = response.data.products;
 
-        // Sắp xếp thêm nếu cần (nếu API chưa sắp xếp)
+        // Sắp xếp lại nếu cần (nếu API chưa xử lý sắp xếp)
         if (sortBy === "discountPercentage") {
           fetchedProducts = fetchedProducts.sort(
             (a, b) => b.discountPercentage - a.discountPercentage
@@ -156,16 +165,15 @@ const ProductPage = () => {
     };
 
     fetchProducts();
-    // Lưu ý: dependency bao gồm cả categoryFromURL, sortBy, filters
-  }, [categoryFromURL, sortBy, filters]);
+    // Dependencies: categoryFromURL, genericFromURL, sortBy, filters
+  }, [categoryFromURL, genericFromURL, sortBy, filters]);
 
   return (
     <Container>
       <Row>
-        {/* Sidebar bộ lọc cho Desktop (chỉ hiển thị khi màn hình ≥1200px) */}
+        {/* Sidebar bộ lọc cho Desktop (màn hình ≥1200px) */}
         <Col xl={3} className="sidebar-wrapper d-none d-xl-block">
           <div className="sidebar p-3 rounded mb-3">
-            {/* Nút làm mới bộ lọc được đặt ở đầu */}
             <Button
               className="btn-clear-filters mb-3"
               variant="outline-secondary"
@@ -184,10 +192,8 @@ const ProductPage = () => {
               <div className="product-title-wrapper mb-3 mb-lg-0">
                 <h4 className="product-title">Tất cả sản phẩm</h4>
               </div>
-
               <div className="filter-controls">
                 <div className="d-flex justify-content-between align-items-center">
-                  {/* Nút bộ lọc hiển thị cho màn hình dưới xl (bao gồm cả lg và mobile) */}
                   <div className="d-block d-xl-none">
                     <button
                       onClick={handleShowFilter}
@@ -197,7 +203,6 @@ const ProductPage = () => {
                       Bộ Lọc
                     </button>
                   </div>
-
                   <div className="sort-wrapper d-flex align-items-center">
                     <span className="sort-label me-2 d-none d-lg-block">
                       Sắp xếp theo:
@@ -284,7 +289,6 @@ const ProductPage = () => {
           </button>
         </Modal.Header>
         <Modal.Body>
-          {/* Nút làm mới bộ lọc đặt ở đầu modal */}
           <Button
             className="btn-clear-filters mb-3"
             variant="outline-secondary"
