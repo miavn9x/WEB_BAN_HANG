@@ -2,6 +2,7 @@
 @import 'react-inner-image-zoom/lib/InnerImageZoom/styles.min.css';
 @import "slick-carousel/slick/slick.css";
 @import "slick-carousel/slick/slick-theme.css";
+
 .product__modal .MuiPaper-elevation {
     padding: 35px;
     border: 1px solid rgba(0, 0, 0, 0.1) !important;
@@ -277,3 +278,26 @@ button {
     /* Pushes this last group of buttons down */
 }
 
+.post-content.truncated {
+    position: relative;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 10;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+}
+
+.toggle-button-wrapper {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.post-content.truncated::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3em;
+    background: linear-gradient(transparent, #fff);
+    pointer-events: none;
+}

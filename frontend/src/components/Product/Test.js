@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import "./Test.css"; // Add this line for custom CSS
+import "./Test.css"; // custom CSS
 import Slider from "react-slick";
 import InnerImageZoom from "react-inner-image-zoom";
 import QuantityBox from "./QuantityBox";
@@ -9,33 +9,36 @@ import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { Spinner } from "react-bootstrap";
 import { formatter } from "../../utils/fomater";
-import { useDispatch, useSelector } from "react-redux"; // Import useDispatch
-import { addToCart } from "../../redux/actions/cartActions"; // Import addToCart action
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../../redux/actions/cartActions";
 import "../../styles/ProductModals.css";
+import { Helmet } from "react-helmet";
 
 const Test = () => {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL
   const [product, setProduct] = useState(null);
+  const [postContent, setPostContent] = useState(null); // State lưu bài viết của sản phẩm
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const [discountedProducts, setDiscountedProducts] = useState([]);
-  const [quantity, setQuantity] = useState(1); // State for quantity
-  const [cartMessage, setCartMessage] = useState(""); // Di chuyển lên đây
+  const [quantity, setQuantity] = useState(1);
+  const [cartMessage, setCartMessage] = useState("");
 
-  const dispatch = useDispatch(); // Use dispatch to update the Redux store
+  const dispatch = useDispatch();
 
   const zoomSliderBig = useRef();
   const zoomSlider = useRef();
 
   const cartItems = useSelector((state) => state.cart.items);
 
-  // Kiểm tra sản phẩm trong giỏ hàng
+  // Kiểm tra sản phẩm có trong giỏ hàng hay chưa
   const isProductInCart = product
     ? cartItems.some((item) => item.product._id === product._id)
     : false;
 
   useEffect(() => {
+    // Hàm fetch thông tin sản phẩm
     const fetchProductDetails = async () => {
       try {
         setLoading(true);
@@ -50,6 +53,22 @@ const Test = () => {
       }
     };
 
+    // Hàm fetch bài viết liên quan đến sản phẩm
+    const fetchPostContent = async (productId) => {
+      try {
+        const response = await axios.get(`/api/posts/product/${productId}`);
+        // Giả sử bạn muốn hiển thị bài viết đầu tiên
+        if (response.data.posts && response.data.posts.length > 0) {
+          setPostContent(response.data.posts[0]);
+        }
+      } catch (err) {
+        console.error("Error fetching post content:", err);
+        // Nếu không tìm thấy bài viết thì có thể để null hoặc thông báo
+        setPostContent(null);
+      }
+    };
+
+    // Hàm fetch sản phẩm giảm giá (nếu có)
     const fetchDiscountedProducts = async () => {
       try {
         const response = await axios.get(
@@ -62,12 +81,20 @@ const Test = () => {
     };
 
     if (id) {
-      fetchProductDetails();
+      fetchProductDetails().then(() => {
+        // Sau khi lấy thông tin sản phẩm thành công, tiến hành gọi API bài viết
+        if (product?._id) {
+          fetchPostContent(product._id);
+        } else {
+          // Trong trường hợp fetchProductDetails chưa cập nhật product, sử dụng id từ URL
+          fetchPostContent(id);
+        }
+      });
       fetchDiscountedProducts();
     }
-  }, [id]);
+  }, [id, product?._id]);
 
-  // Settings cho slider
+  // Cài đặt cho slider hình ảnh chính và thumbnails
   const settings = {
     dots: false,
     infinite: false,
@@ -90,7 +117,7 @@ const Test = () => {
     zoomSliderBig.current.slickGoTo(index);
   };
 
-  // Hiển thị loading
+  // Xử lý loading và lỗi
   if (loading) {
     return (
       <div className="loading-container text-center">
@@ -100,15 +127,24 @@ const Test = () => {
     );
   }
 
-  // Hiển thị lỗi
   if (error) {
     return <div className="error-message">{error}</div>;
   }
 
-  // Kiểm tra nếu không có sản phẩm
   if (!product) {
     return <div>Không tìm thấy sản phẩm</div>;
   }
+
+  // Tạo các biến SEO dựa trên thông tin sản phẩm
+  const productUrl = window.location.href; // URL hiện tại của sản phẩm
+  const productTitle = product.name;
+  const productDescription = product.description
+    ? product.description.substring(0, 150) + "..."
+    : "Thông tin sản phẩm của BabyMart.vn";
+  const productImage =
+    product.images && product.images.length > 0
+      ? product.images[0]
+      : "/default-image.jpg";
 
   // Handle Add to Cart
   const handleAddToCart = async () => {
@@ -135,230 +171,237 @@ const Test = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="loading-container text-center">
-        <Spinner animation="border" variant="primary" />
-        <div>Đang tải thông tin sản phẩm...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="error-message">{error}</div>;
-  }
-
-  if (!product) {
-    return <div>Không tìm thấy sản phẩm</div>;
-  }
-
   return (
-    <div className="container mt-4">
-      <div className="row">
-        {/* Chi tiết sản phẩm chính */}
-        <div className="col-lg-9 col-md-8">
-          <div className="card mb-4" style={{ maxHeight: "100%" }}>
-            <div className="card-body ">
-              <div className="row product__modal__content">
-                {/* Hình ảnh sản phẩm */}
-                <div className="col-lg-5 col-md-12 col-12 mb-3 mb-md-0">
-                  <div className="product__modal__zoom position-relative">
-                    {product.discountPercentage && (
-                      <div className="badge badge-primary p-2 fs-6 product__discount">
-                        {product.discountPercentage}%
-                      </div>
-                    )}
+    <>
+      {/* Thẻ Helmet để tối ưu SEO */}
+      <Helmet>
+        <title>{productTitle} - BabyMart.vn</title>
+        <meta name="description" content={productDescription} />
+        <meta property="og:title" content={productTitle} />
+        <meta property="og:description" content={productDescription} />
+        <meta property="og:image" content={productImage} />
+        <meta property="og:url" content={productUrl} />
+        <meta name="twitter:title" content={productTitle} />
+        <meta name="twitter:description" content={productDescription} />
+        <meta name="twitter:image" content={productImage} />
+      </Helmet>
 
-                    <Slider
-                      {...settings}
-                      className="zoomSliderBig"
-                      ref={zoomSliderBig}
-                    >
-                      {product.images.map((image, index) => (
-                        <div className="item" key={index}>
-                          <InnerImageZoom
-                            zoomType="hover"
-                            zoomScale={1}
-                            src={image}
-                          />
+      <div className="container mt-4">
+        <div className="row">
+          {/* Chi tiết sản phẩm chính */}
+          <div className="col-lg-9 col-md-8">
+            <div className="card mb-4" style={{ maxHeight: "100%" }}>
+              <div className="card-body">
+                <div className="row product__modal__content">
+                  {/* Hình ảnh sản phẩm */}
+                  <div className="col-lg-5 col-md-12 col-12 mb-3 mb-md-0">
+                    <div className="product__modal__zoom position-relative">
+                      {product.discountPercentage && (
+                        <div className="badge badge-primary p-2 fs-6 product__discount">
+                          {product.discountPercentage}%
                         </div>
-                      ))}
-                    </Slider>
-                  </div>
-                  {/* Thumbnails */}
-                  <div className="thumbnail-container ">
-                    <Slider
-                      {...settings1}
-                      className="zoomSlider"
-                      ref={zoomSlider}
-                    >
-                      {product.images.map((image, index) => (
-                        <div className="item" key={index}>
-                          <img
-                            src={image}
-                            className="w-100"
-                            alt="zoom"
-                            onClick={() => goTo(index)}
-                          />
-                        </div>
-                      ))}
-                    </Slider>
-                  </div>
-                </div>
-
-                {/* Chi tiết sản phẩm */}
-                <div className="col-lg-7 col-md-12 d-flex flex-column product_name">
-                  <h1 className="product-title">{product.name}</h1>
-                  <div className="d-flex align-items-center">
-                    <label htmlFor="quantity" className="me-2">
-                      Tên Thương Hiệu:
-                    </label>
-                    <span>{product.brand}</span> {/* Thương hiệu */}
-                  </div>
-
-                  <p className="text-muted ">
-                    Đánh giá:
-                    {[...Array(Math.floor(product.rating))].map((_, i) => (
-                      <i key={i} className="fas fa-star text-warning"></i>
-                    ))}
-                    {product.rating % 1 !== 0 && (
-                      <i className="fas fa-star-half-alt text-warning"></i>
-                    )}{" "}
-                    | {product.reviews.length} đánh giá
-                  </p>
-
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      height: "100%",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <p className="text-muted"> Chi Tiết Sản Phẩm: </p>
-                    <span>{product.description}</span> {/* Mô tả sản phẩm */}
-                  </div>
-
-                  <div className="product__price w-100">
-                    {cartMessage && (
-                      <div
-                        className={`alert ${
-                          cartMessage.includes("đã có") ||
-                          cartMessage.includes("lỗi")
-                            ? "alert-warning"
-                            : "alert-success"
-                        } mb-3`}
+                      )}
+                      <Slider
+                        {...settings}
+                        className="zoomSliderBig"
+                        ref={zoomSliderBig}
                       >
-                        {cartMessage}
-                      </div>
-                    )}
-                    <div className="quantity-wrapper mb-2">
-                      <div className="d-flex align-items-center">
-                        <label htmlFor="quantity" className="me-2">
-                          Số lượng:
-                        </label>
-                        <QuantityBox
-                          maxQuantity={product?.remainingStock} // Truyền maxQuantity từ sản phẩm
-                          quantity={quantity} // Truyền quantity từ state cha
-                          setQuantity={setQuantity} // Cập nhật state của cha
-                        />
-                        {/* Set quantity handler */}
-                      </div>
+                        {product.images.map((image, index) => (
+                          <div className="item" key={index}>
+                            <InnerImageZoom
+                              zoomType="hover"
+                              zoomScale={1}
+                              src={image}
+                            />
+                          </div>
+                        ))}
+                      </Slider>
                     </div>
-
-                    {/* Giá */}
-                    <div className="price-wrapper">
-                      <div className="d-flex mx-5 justify-content-center ">
-                        {product.originalPrice && (
-                          <span className="price me-5 text-muted mb-0">
-                            <del>{formatter(product.originalPrice)}</del>
-                          </span>
-                        )}
-                        <span className="price text-danger mb-0 fs-3">
-                          {formatter(product.priceAfterDiscount)}
-                        </span>
-                      </div>
+                    {/* Thumbnails */}
+                    <div className="thumbnail-container">
+                      <Slider
+                        {...settings1}
+                        className="zoomSlider"
+                        ref={zoomSlider}
+                      >
+                        {product.images.map((image, index) => (
+                          <div className="item" key={index}>
+                            <img
+                              src={image}
+                              className="w-100"
+                              alt="zoom"
+                              onClick={() => goTo(index)}
+                            />
+                          </div>
+                        ))}
+                      </Slider>
                     </div>
                   </div>
-                  <button
-                    className={`btn btn-lg mb-3 w-50 ${
-                      isProductInCart
-                        ? "btn-secondary disabled"
-                        : "btn-outline-danger"
-                    }`}
-                    onClick={handleAddToCart}
-                    disabled={isProductInCart}
-                  >
-                    {isProductInCart ? "Đã có trong giỏ" : "Thêm vào giỏ"}
-                  </button>
-                  <button
-                    className="btn  btn-lg mt-auto w-50"
-                    style={{ backgroundColor: "#FF6F91", color: "white" }}
-                    // onClick={handleBuyNow}
-                  >
-                    MUA NGAY
-                  </button>
+
+                  {/* Chi tiết sản phẩm */}
+                  <div className="col-lg-7 col-md-12 d-flex flex-column product_name">
+                    <h1 className="product-title">{product.name}</h1>
+                    <div className="d-flex align-items-center">
+                      <label htmlFor="quantity" className="me-2">
+                        Tên Thương Hiệu:
+                      </label>
+                      <span>{product.brand}</span>
+                    </div>
+
+                    <p className="text-muted">
+                      Đánh giá:{" "}
+                      {[...Array(Math.floor(product.rating))].map((_, i) => (
+                        <i key={i} className="fas fa-star text-warning"></i>
+                      ))}
+                      {product.rating % 1 !== 0 && (
+                        <i className="fas fa-star-half-alt text-warning"></i>
+                      )}{" "}
+                      | {product.reviews.length} đánh giá
+                    </p>
+
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        height: "100%",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <p className="text-muted">Chi Tiết Sản Phẩm:</p>
+                      <span>{product.description}</span>
+                    </div>
+
+                    <div className="product__price w-100">
+                      {cartMessage && (
+                        <div
+                          className={`alert ${
+                            cartMessage.includes("đã có") ||
+                            cartMessage.includes("lỗi")
+                              ? "alert-warning"
+                              : "alert-success"
+                          } mb-3`}
+                        >
+                          {cartMessage}
+                        </div>
+                      )}
+                      <div className="quantity-wrapper mb-2">
+                        <div className="d-flex align-items-center">
+                          <label htmlFor="quantity" className="me-2">
+                            Số lượng:
+                          </label>
+                          <QuantityBox
+                            maxQuantity={product?.remainingStock}
+                            quantity={quantity}
+                            setQuantity={setQuantity}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="price-wrapper">
+                        <div className="d-flex mx-5 justify-content-center">
+                          {product.originalPrice && (
+                            <span className="price me-5 text-muted mb-0">
+                              <del>{formatter(product.originalPrice)}</del>
+                            </span>
+                          )}
+                          <span className="price text-danger mb-0 fs-3">
+                            {formatter(product.priceAfterDiscount)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      className={`btn btn-lg mb-3 w-50 ${
+                        isProductInCart
+                          ? "btn-secondary disabled"
+                          : "btn-outline-danger"
+                      }`}
+                      onClick={handleAddToCart}
+                      disabled={isProductInCart}
+                    >
+                      {isProductInCart ? "Đã có trong giỏ" : "Thêm vào giỏ"}
+                    </button>
+                    <button
+                      className="btn btn-lg mt-auto w-50"
+                      style={{ backgroundColor: "#FF6F91", color: "white" }}
+                    >
+                      MUA NGAY
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Product Description */}
-          <div className="product-description">
-            <h2>Mô tả sản phẩm</h2>
-
-            {showMore && <div></div>}
-            <button
-              className="btn btn-danger"
-              onClick={() => setShowMore(!showMore)}
-            >
-              {showMore ? "Thu gọn" : "Xem thêm"}
-            </button>
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="col-lg-3 col-md-4 mt-4 mt-md-0">
-          <div className="sidebar bg-white p-4 rounded shadow">
-            <h5 className="fw-bold mb-3">Đang giảm giá</h5>
-            <ul className="list-group">
-              {discountedProducts.map((product) => (
-                <li
-                  key={product._id}
-                  className="list-group-item d-flex align-items-center border-0"
-                >
-                  <Link
-                    to={`/product/${product._id}`} // Điều hướng đến trang chi tiết sản phẩm
-                    className="d-flex align-items-center text-decoration-none w-100"
-                  >
-                    <img
-                      src={product.images[0] || "https://placehold.co/50x50"}
-                      alt={product.name}
-                      className="rounded"
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        objectFit: "cover",
-                      }}
+            {/* Product Description – Hiển thị nội dung bài viết nếu có */}
+            <div className="product-description">
+              <h2>Mô tả sản phẩm</h2>
+              {postContent ? (
+                <div>
+                  <h4>{postContent.title}</h4>
+                  <div className="post-content-wrapper">
+                    <div
+                      className={`post-content ${!showMore ? "truncated" : ""}`}
+                      dangerouslySetInnerHTML={{ __html: postContent.content }}
                     />
-                    <div className="ms-3">
-                      <p className="mb-0 text-dark fw-bold">{product.name}</p>
-                      <p className="text-danger mb-0">
-                        {formatter(product.priceAfterDiscount)}
-                      </p>
+                    <div className="toggle-button-wrapper">
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => setShowMore(!showMore)}
+                      >
+                        {showMore ? "Thu gọn" : "Xem thêm"}
+                      </button>
                     </div>
-                  </Link>
-                </li>
-              ))}
-              {discountedProducts.length === 0 && (
-                <li className="list-group-item border-0 text-muted">
-                  Không có sản phẩm nào đang giảm giá.
-                </li>
+                  </div>
+                </div>
+              ) : (
+                <p>{""}</p>
               )}
-            </ul>
+            </div>
+          </div>
+
+          {/* Sidebar – Danh sách sản phẩm giảm giá */}
+          <div className="col-lg-3 col-md-4 mt-4 mt-md-0">
+            <div className="sidebar bg-white p-4 rounded shadow">
+              <h5 className="fw-bold mb-3">Đang giảm giá</h5>
+              <ul className="list-group">
+                {discountedProducts.map((product) => (
+                  <li
+                    key={product._id}
+                    className="list-group-item d-flex align-items-center border-0"
+                  >
+                    <Link
+                      to={`/product/${product._id}`}
+                      className="d-flex align-items-center text-decoration-none w-100"
+                    >
+                      <img
+                        src={product.images[0] || "https://placehold.co/50x50"}
+                        alt={product.name}
+                        className="rounded"
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          objectFit: "cover",
+                        }}
+                      />
+                      <div className="ms-3">
+                        <p className="mb-0 text-dark fw-bold">{product.name}</p>
+                        <p className="text-danger mb-0">
+                          {formatter(product.priceAfterDiscount)}
+                        </p>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+                {discountedProducts.length === 0 && (
+                  <li className="list-group-item border-0 text-muted">
+                    Không có sản phẩm nào đang giảm giá.
+                  </li>
+                )}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

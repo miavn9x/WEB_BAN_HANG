@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
+import { Helmet } from "react-helmet"; // Thêm Helmet để tối ưu SEO
 import "../../styles/StoreLocator.css"; // Import file CSS riêng
 
 const StoreLocator = () => {
@@ -22,60 +23,60 @@ const StoreLocator = () => {
   };
 
   // Thông tin địa chỉ và hotline của các cửa hàng
-  const storeAddresses = {
-    "TP.Hồ Chí Minh": {
-      "Quận 1": {
-        address: "123 Đường Nguyễn Huệ, Quận 1, TP.Hồ Chí Minh",
-        hotline: "0909.123.456",
-        link: "https://www.google.com/maps?q=123+Nguyễn+Huệ,+Quận+1,+TP.HCM",
-      },
-      "Quận 3": {
-        address: "456 Đường Lê Văn Sỹ, Quận 3, TP.Hồ Chí Minh",
-        hotline: "0909.654.321",
-        link: "https://www.google.com/maps?q=456+Lê+Văn+Sỹ,+Quận+3,+TP.HCM",
-      },
-      "Quận 5": {
-        address: "789 Đường Trần Hưng Đạo, Quận 5, TP.Hồ Chí Minh",
-        hotline: "0909.789.012",
-        link: "https://www.google.com/maps?q=789+Trần+Hưng+Đạo,+Quận+5,+TP.HCM",
-      },
-      "Quận 7": {
-        address: "101 Đường Nguyễn Văn Linh, Quận 7, TP.Hồ Chí Minh",
-        hotline: "0909.321.654",
-        link: "https://www.google.com/maps?q=101+Nguyễn+Văn+Linh,+Quận+7,+TP.HCM",
-      },
-      "Quận 10": {
-        address: "202 Đường 3/2, Quận 10, TP.Hồ Chí Minh",
-        hotline: "0909.234.567",
-        link: "https://www.google.com/maps?q=202+Đường+3/2,+Quận+10,+TP.HCM",
-      },
-      "Quận Bình Thạnh": {
-        address: "303 Đường Xô Viết Nghệ Tĩnh, Quận Bình Thạnh, TP.Hồ Chí Minh",
-        hotline: "0909.345.678",
-        link: "https://www.google.com/maps?q=303+Xô+Viết+Nghệ+Tĩnh,+Quận+Bình+Thạnh,+TP.HCM",
-      },
-      "Quận Tân Bình": {
-        address: "404 Đường Hoàng Văn Thụ, Quận Tân Bình, TP.Hồ Chí Minh",
-        hotline: "0909.456.789",
-        link: "https://www.google.com/maps?q=404+Hoàng+Văn+Thụ,+Quận+Tân+Bình,+TP.HCM",
-      },
-      "Quận Thủ Đức": {
-        address: "505 Đường Võ Văn Ngân, TP Thủ Đức, TP.Hồ Chí Minh",
-        hotline: "0909.567.890",
-        link: "https://www.google.com/maps?q=505+Võ+Văn+Ngân,+Thủ+Đức,+TP.HCM",
-      },
-      "Quận Phú Nhuận": {
-        address: "606 Đường Phan Xích Long, Quận Phú Nhuận, TP.Hồ Chí Minh",
-        hotline: "0909.678.901",
-        link: "https://www.google.com/maps?q=606+Phan+Xích+Long,+Quận+Phú+Nhuận,+TP.HCM",
-      },
-      "Quận Gò Vấp": {
-        address: "707 Đường Quang Trung, Quận Gò Vấp, TP.Hồ Chí Minh",
-        hotline: "0909.789.123",
-        link: "https://www.google.com/maps?q=707+Quang+Trung,+Quận+Gò+Vấp,+TP.HCM",
-      },
-    },
-  };
+ const storeAddresses = {
+   "TP.Hồ Chí Minh": {
+     "Quận 1": {
+       address: "123 Đường Nguyễn Huệ, Quận 1, TP.Hồ Chí Minh",
+       hotline: "0909.123.456",
+       link: "https://www.google.com/maps?q=123+Nguyễn+Huệ,+Quận+1,+TP.HCM",
+     },
+     "Quận 3": {
+       address: "456 Đường Lê Văn Sỹ, Quận 3, TP.Hồ Chí Minh",
+       hotline: "0909.654.321",
+       link: "https://www.google.com/maps?q=456+Lê+Văn+Sỹ,+Quận+3,+TP.HCM",
+     },
+     "Quận 5": {
+       address: "789 Đường Trần Hưng Đạo, Quận 5, TP.Hồ Chí Minh",
+       hotline: "0909.789.012",
+       link: "https://www.google.com/maps?q=789+Trần+Hưng+Đạo,+Quận+5,+TP.HCM",
+     },
+     "Quận 7": {
+       address: "101 Đường Nguyễn Văn Linh, Quận 7, TP.Hồ Chí Minh",
+       hotline: "0909.321.654",
+       link: "https://www.google.com/maps?q=101+Nguyễn+Văn+Linh,+Quận+7,+TP.HCM",
+     },
+     "Quận 10": {
+       address: "202 Đường 3/2, Quận 10, TP.Hồ Chí Minh",
+       hotline: "0909.234.567",
+       link: "https://www.google.com/maps?q=202+Đường+3/2,+Quận+10,+TP.HCM",
+     },
+     "Quận Bình Thạnh": {
+       address: "303 Đường Xô Viết Nghệ Tĩnh, Quận Bình Thạnh, TP.Hồ Chí Minh",
+       hotline: "0909.345.678",
+       link: "https://www.google.com/maps?q=303+Xô+Viết+Nghệ+Tĩnh,+Quận+Bình+Thạnh,+TP.HCM",
+     },
+     "Quận Tân Bình": {
+       address: "404 Đường Hoàng Văn Thụ, Quận Tân Bình, TP.Hồ Chí Minh",
+       hotline: "0909.456.789",
+       link: "https://www.google.com/maps?q=404+Hoàng+Văn+Thụ,+Quận+Tân+Bình,+TP.HCM",
+     },
+     "Quận Thủ Đức": {
+       address: "505 Đường Võ Văn Ngân, TP Thủ Đức, TP.Hồ Chí Minh",
+       hotline: "0909.567.890",
+       link: "https://www.google.com/maps?q=505+Võ+Văn+Ngân,+Thủ+Đức,+TP.HCM",
+     },
+     "Quận Phú Nhuận": {
+       address: "606 Đường Phan Xích Long, Quận Phú Nhuận, TP.Hồ Chí Minh",
+       hotline: "0909.678.901",
+       link: "https://www.google.com/maps?q=606+Phan+Xích+Long,+Quận+Phú+Nhuận,+TP.HCM",
+     },
+     "Quận Gò Vấp": {
+       address: "707 Đường Quang Trung, Quận Gò Vấp, TP.Hồ Chí Minh",
+       hotline: "0909.789.123",
+       link: "https://www.google.com/maps?q=707+Quang+Trung,+Quận+Gò+Vấp,+TP.HCM",
+     },
+   },
+ };
 
   // State cho các dropdown
   const [province, setProvince] = useState("TP.Hồ Chí Minh");
@@ -101,8 +102,26 @@ const StoreLocator = () => {
     setStoreAddress(storeAddresses[province][selectedStore]);
   };
 
+  // SEO Meta Tags
+  const pageTitle = "Tìm cửa hàng gần bạn - BabyMart.vn";
+  const pageDescription =
+    "Tìm các cửa hàng của BabyMart tại TP.Hồ Chí Minh, dễ dàng tra cứu địa chỉ và hotline. Hãy đến thăm chúng tôi ngay!";
+  const pageImage = "/default-image.jpg"; // Bạn có thể thay đổi thành hình ảnh của cửa hàng
+
   return (
     <div className="store-locator my-5">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content={pageImage} />
+        <meta property="og:url" content={window.location.href} />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={pageImage} />
+      </Helmet>
+
       <div className="container">
         <div className="row">
           {/* Cột tìm kiếm cửa hàng */}

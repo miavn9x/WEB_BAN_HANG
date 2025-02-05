@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import "../../styles/post-detail.css";
 
 const PostDetail = () => {
@@ -24,12 +25,10 @@ const PostDetail = () => {
       });
   }, [id]);
 
-  // Fetch sản phẩm liên quan: nếu bài viết có productId thì dựa vào trường category.generic của sản phẩm đó,
-  // nếu không có (hoặc có lỗi) thì lấy 6 sản phẩm ngẫu nhiên.
+  // Fetch sản phẩm liên quan
   useEffect(() => {
     if (!post) return;
 
-    // Hàm hỗ trợ lấy danh sách sản phẩm (6 sản phẩm) dựa trên filter categoryGeneric hoặc random
     const fetchProducts = (url) => {
       fetch(url)
         .then((res) => res.json())
@@ -44,7 +43,6 @@ const PostDetail = () => {
     };
 
     if (post.productId) {
-      // Lấy chi tiết sản phẩm để truy xuất trường category.generic
       fetch(`/api/products/${post.productId}`)
         .then((res) => res.json())
         .then((data) => {
@@ -54,24 +52,20 @@ const PostDetail = () => {
             data.product.category &&
             data.product.category.generic
           ) {
-            // Lấy 6 sản phẩm cùng loại theo category.generic
             const generic = data.product.category.generic;
             const url = `/api/products?categoryGeneric=${encodeURIComponent(
               generic
             )}&limit=6&sortBy=random`;
             fetchProducts(url);
           } else {
-            // Nếu không có thông tin generic, fallback lấy ngẫu nhiên 6 sản phẩm
             fetchProducts(`/api/products?sortBy=random&limit=6`);
           }
         })
         .catch((err) => {
           console.error("Error fetching product details:", err);
-          // Fallback lấy ngẫu nhiên 6 sản phẩm khi có lỗi
           fetchProducts(`/api/products?sortBy=random&limit=6`);
         });
     } else {
-      // Nếu bài viết không có productId, lấy ngẫu nhiên 6 sản phẩm
       fetchProducts(`/api/products?sortBy=random&limit=6`);
     }
   }, [post]);
@@ -79,8 +73,27 @@ const PostDetail = () => {
   if (loadingPost) return <p>Đang tải bài viết...</p>;
   if (!post) return <p>Bài viết không tồn tại.</p>;
 
+  // SEO Meta Tags
+  const postUrl = window.location.href; // Lấy URL bài viết hiện tại
+  const postTitle = post.title;
+  const postDescription =
+    post.description || post.content.substring(0, 150) + "...";
+  const postImage = post.image || "/default-image.jpg"; // Thêm hình ảnh mặc định nếu không có
+
   return (
     <div className="post-detail container my-4">
+      <Helmet>
+        <title>{postTitle} - BabyMart.vn</title>
+        <meta name="description" content={postDescription} />
+        <meta property="og:title" content={postTitle} />
+        <meta property="og:description" content={postDescription} />
+        <meta property="og:image" content={postImage} />
+        <meta property="og:url" content={postUrl} />
+        <meta name="twitter:title" content={postTitle} />
+        <meta name="twitter:description" content={postDescription} />
+        <meta name="twitter:image" content={postImage} />
+      </Helmet>
+
       <Link to="/PostsList" className="btn btn-secondary mb-3">
         Quay lại danh sách
       </Link>

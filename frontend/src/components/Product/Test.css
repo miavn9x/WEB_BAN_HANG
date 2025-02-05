@@ -114,3 +114,11 @@
     object-fit: cover;
     margin-right: 0.5rem;
 }
+/* Ví dụ trong file Test.css hoặc file CSS tương ứng */
+.post-content.truncated {
+    display: -webkit-box;
+    --webkit-line-clamp: 10;
+    /* Giới hạn 10 dòng */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

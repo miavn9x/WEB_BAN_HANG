@@ -175,5 +175,26 @@ router.get("/posts/:id", async (req, res) => {
 });
 
 
+// Lấy bài viết theo productId
+router.get("/posts/product/:productId", async (req, res) => {
+  const { productId } = req.params;
+
+  // (Nếu cần, bạn có thể kiểm tra định dạng của productId ở đây)
+  if (!productId.match(/^[0-9a-fA-F]{24}$/)) {
+    return res.status(400).json({ message: "Product ID không hợp lệ." });
+  }
+
+  try {
+    const posts = await Post.find({ productId });
+    if (!posts || posts.length === 0) {
+      return res.status(404).json({ message: "Không tìm thấy bài viết cho sản phẩm này." });
+    }
+    res.status(200).json({ posts });
+  } catch (error) {
+    console.error("Lỗi khi lấy bài viết theo sản phẩm:", error);
+    res.status(500).json({ message: "Có lỗi xảy ra khi lấy bài viết." });
+  }
+});
+
 
 module.exports = router;
