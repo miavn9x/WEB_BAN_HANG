@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../redux/actions/cartActions";
 import "../../styles/ProductModals.css";
 import { Helmet } from "react-helmet";
+import Evaluate from "./Evaluate";
 
 const Test = () => {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL
@@ -363,6 +364,9 @@ const Test = () => {
               ) : (
                 <p>{""}</p>
               )}
+            </div>
+            <div>
+              <Evaluate />
             </div>
           </div>
 

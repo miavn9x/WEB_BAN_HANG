@@ -1,3 +1,4 @@
+// src/components/UserPage.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../../../../styles/UserPage.css";
@@ -210,7 +211,7 @@ function UserPage() {
       <div className="loading-container text-center">
         <Spinner
           animation="border"
-          variant="success" // Vòng xoay màu xanh
+          variant="success"
           className="loading-spinner"
         />
         <div>Đang tải thông tin...</div>
@@ -230,21 +231,27 @@ function UserPage() {
 
       {isEditing ? (
         <form onSubmit={handleSubmitEdit}>
+          {/* Thay vì một ô nhập họ và tên, tạo 2 ô riêng biệt: */}
           <div className="mb-3">
-            <label className="form-label">Họ và Tên</label>
+            <label className="form-label">Họ</label>
             <input
               type="text"
               className="form-control"
-              name="fullName"
-              value={`${editData.firstName} ${editData.lastName}`}
-              onChange={(e) => {
-                const [firstName, ...lastNameParts] = e.target.value.split(" ");
-                setEditData({
-                  ...editData,
-                  firstName: firstName || "",
-                  lastName: lastNameParts.join(" ") || "",
-                });
-              }}
+              name="lastName"
+              value={editData.lastName}
+              onChange={handleInputChange}
+              placeholder="Nhập họ của bạn"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Tên</label>
+            <input
+              type="text"
+              className="form-control"
+              name="firstName"
+              value={editData.firstName}
+              onChange={handleInputChange}
+              placeholder="Nhập tên của bạn"
             />
           </div>
           <div className="mb-3">
@@ -267,7 +274,6 @@ function UserPage() {
               onChange={handleInputChange}
             />
           </div>
-
           <div className="button-group d-flex justify-content-between">
             <button type="submit" className="btn btn-primary">
               Lưu thay đổi
@@ -284,7 +290,10 @@ function UserPage() {
       ) : (
         <div>
           <p>
-            <strong>Họ và tên:</strong> {user.firstName} {user.lastName}
+            <strong>Họ:</strong> {user.lastName}
+          </p>
+          <p>
+            <strong>Tên:</strong> {user.firstName}
           </p>
           <p>
             <strong>Email:</strong> {user.email}
@@ -311,35 +320,21 @@ function UserPage() {
             <label className="form-label">Mật khẩu hiện tại</label>
             <input
               type="password"
-              className={`form-control ${
-                error.password.currentPassword ? "is-invalid" : ""
-              }`}
+              className="form-control"
               name="currentPassword"
               value={passwordData.currentPassword}
               onChange={handlePasswordChange}
             />
-            {error.password.currentPassword && (
-              <div className="invalid-feedback">
-                {error.password.currentPassword}
-              </div>
-            )}
           </div>
           <div className="mb-3">
             <label className="form-label">Mật khẩu mới</label>
             <input
               type="password"
-              className={`form-control ${
-                error.password.newPassword ? "is-invalid" : ""
-              }`}
+              className="form-control"
               name="newPassword"
               value={passwordData.newPassword}
               onChange={handlePasswordChange}
             />
-            {error.password.newPassword && (
-              <div className="invalid-feedback">
-                {error.password.newPassword}
-              </div>
-            )}
           </div>
           <div className="button-group d-flex justify-content-between">
             <button type="submit" className="btn btn-primary">

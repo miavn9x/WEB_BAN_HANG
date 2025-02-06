@@ -1,46 +1,43 @@
 const mongoose = require("mongoose");
 
-// Schema cho một mục trong giỏ hàng
 const cartItemSchema = new mongoose.Schema(
   {
     product: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Product", // Tham chiếu đến model "Product"
-      required: [true, "Sản phẩm là bắt buộc"], // Thông báo lỗi khi không có sản phẩm
+      ref: "Product", 
+      required: [true, "Sản phẩm là bắt buộc"], 
     },
     quantity: {
       type: Number,
-      required: [true, "Số lượng là bắt buộc"], // Thông báo lỗi khi không có số lượng
-      min: [1, "Số lượng phải lớn hơn hoặc bằng 1"], // Ràng buộc số lượng tối thiểu
-      default: 1, // Giá trị mặc định là 1
+      required: [true, "Số lượng là bắt buộc"], 
+      min: [1, "Số lượng phải lớn hơn hoặc bằng 1"], 
+      default: 1, 
     },
   },
-  { _id: false } // Không cần tạo `_id` riêng cho từng mục trong `items`
+  { _id: false } 
 );
 
-// Schema cho giỏ hàng
 const cartSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Tham chiếu đến model "User"
-      required: [true, "Người dùng là bắt buộc"], // Thông báo lỗi khi không có người dùng
+      ref: "User", 
+      required: [true, "Người dùng là bắt buộc"], 
     },
     items: {
-      type: [cartItemSchema], // Sử dụng schema của từng mục giỏ hàng
-      required: [true, "Giỏ hàng không thể trống"], // Thông báo lỗi khi giỏ hàng rỗng
+      type: [cartItemSchema], 
+      required: [true, "Giỏ hàng không thể trống"],
       validate: {
         validator: function (items) {
-          return items.length > 0; // Đảm bảo giỏ hàng có ít nhất 1 sản phẩm
+          return items.length > 0; 
         },
-        message: "Giỏ hàng không thể trống", // Thông báo lỗi nếu vi phạm
+        message: "Giỏ hàng không thể trống", 
       },
     },
   },
-  { timestamps: true } // Tự động thêm các trường `createdAt` và `updatedAt`
+  { timestamps: true } 
 );
 
-// Tạo model từ schema
 const Cart = mongoose.model("Cart", cartSchema);
 
 // Xuất model

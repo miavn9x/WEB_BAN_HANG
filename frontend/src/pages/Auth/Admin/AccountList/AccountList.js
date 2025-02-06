@@ -187,7 +187,7 @@ return (
                         type="text"
                         className="form-control"
                         placeholder="Tên"
-                        value={editableAccount.lastName}
+                        value={editableAccount.firstName}
                         onChange={(e) =>
                           handleInputChange("lastName", e.target.value)
                         }

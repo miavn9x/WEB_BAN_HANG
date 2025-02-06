@@ -15,8 +15,6 @@ router.post("/register", async (req, res) => {
         message: "Vui lòng điền đầy đủ thông tin",
       });
     }
-
-    // Kiểm tra email hoặc số điện thoại
     const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
     if (existingUser) {
       return res.status(400).json({

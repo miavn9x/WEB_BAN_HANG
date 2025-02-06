@@ -52,6 +52,14 @@ app.use("/api", postRoutes);
 
 
 
+const reviewRouter = require("./routes/reviewRouter");
+app.use("/api", reviewRouter);
+
+
+const questionRouter = require("./routes/questionRouter");
+app.use("/api", questionRouter);
+
+
 // Chạy server
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);

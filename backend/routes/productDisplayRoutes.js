@@ -2,18 +2,16 @@ const express = require("express");
 const Product = require("../models/productModel");
 const router = express.Router();
 
-// GET tất cả sản phẩm
-// Lọc và sắp xếp sản phẩm
 router.get('/api/products', async (req, res) => {
   try {
     const { price, categories, sortBy, limit } = req.query;
 
     let filters = {};
     if (price) {
-      filters.price = { $lte: price }; // Lọc sản phẩm có giá <= price
+      filters.price = { $lte: price }; 
     }
     if (categories) {
-      filters.categories = { $in: categories.split(',') }; // Lọc theo các danh mục
+      filters.categories = { $in: categories.split(',') }; 
     }
 
     let sort = {};
@@ -22,10 +20,8 @@ router.get('/api/products', async (req, res) => {
     } else if (sortBy === 'priceDesc') {
       sort.price = -1; // Giá giảm dần
     } else if (sortBy === 'discountPercentage') {
-      sort.discountPercentage = -1; // Sắp xếp giảm dần theo tỷ lệ giảm giá
+      sort.discountPercentage = -1; 
     }
-
-    // Lấy danh sách sản phẩm từ MongoDB với các điều kiện lọc và sắp xếp
     const products = await Product.find(filters)
       .sort(sort)
       .limit(parseInt(limit));
@@ -37,10 +33,8 @@ router.get('/api/products', async (req, res) => {
   }
 });
 
-// GET tất cả sản phẩm giảm giá
 router.get('/api/products/discounts', async (req, res) => {
   try {
-    // Lọc sản phẩm có discountPercentage > 0 (giảm giá)
     const discountedProducts = await Product.find({ discountPercentage: { $gt: 0 } });
 
     res.json({ products: discountedProducts });

@@ -67,13 +67,11 @@ router.put("/users/:id", adminMiddleware, async (req, res) => {
 // API lấy thông tin người dùng
 router.get("/profile", authMiddleware, async (req, res) => {
   try {
-    // Tìm người dùng theo ID được xác thực từ authMiddleware
     const user = await User.findById(req.user._id).select("-password"); // Loại bỏ trường mật khẩu khi trả về
     if (!user) {
       return res.status(404).json({ message: "Người dùng không tồn tại" });
     }
 
-    // Trả về thông tin người dùng
     res.status(200).json({
       success: true,
       user: {
@@ -161,7 +159,6 @@ router.put("/profile/password", authMiddleware, async (req, res) => {
       return res.status(401).json({ message: "Mật khẩu cũ không đúng" });
     }
 
-    // Cập nhật mật khẩu mới và mã hóa
     user.password = newPassword; 
 
     const updatedUser = await user.save(); 

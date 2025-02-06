@@ -1,137 +1,123 @@
-<html>
+<!DOCTYPE html>
+<html lang="vi">
 <head>
-    <title>Sự kiện</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đánh Giá</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
         }
-        .event-title {
-            font-size: 24px;
-            font-weight: bold;
+        .rating-box {
+            background-color: #fff7f0;
+            border-radius: 10px;
+            padding: 20px;
             margin-bottom: 20px;
         }
-        .event-card {
-            margin-bottom: 20px;
+        .rating-value {
+            font-size: 2.5rem;
+            color: #ff007f;
         }
-        .event-card img {
-            width: 100%;
-            height: auto;
+        .rating-stars {
+            color: #ffc107;
         }
-        .event-card-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 10px;
+        .rating-count {
+            color: #6c757d;
         }
-        .event-card-subtitle {
-            font-size: 14px;
-            color: gray;
+        .btn-custom {
+            background-color: #fff;
+            border: 1px solid #ff007f;
+            color: #ff007f;
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-size: 0.9rem;
         }
-        .event-card-text {
-            font-size: 14px;
-            margin-top: 10px;
+        .btn-custom.active {
+            background-color: #ff007f;
+            color: #fff;
         }
-        .read-more {
-            color: red;
-            font-size: 14px;
-            margin-top: 10px;
-            display: inline-block;
-        }
-        .sidebar-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .sidebar-item {
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        .pagination {
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #f8d7da;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            font-size: 1.5rem;
+            color: #ff007f;
+        }
+        .review-like {
+            color: #ff007f;
+            font-size: 1.5rem;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container mt-4">
+        <!-- Hộp đánh giá tổng quan -->
+        <div class="rating-box p-4">
+            <h5 class="fw-bold">Đánh Giá</h5>
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center text-md-start">
+                    <div class="rating-value">5.0/5.0</div>
+                    <div class="rating-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="rating-count">Có <strong>133</strong> lượt đánh giá</div>
+                </div>
+                <div class="col-md-6 text-center ">
+                    <button class="btn btn-custom active">Mới nhất</button>
+                    <button class="btn btn-custom">Đã mua nhiều lần</button>
+                    <div class="row mt-3">
+                <div class="col text-center">
+                    <button class="btn btn-custom">5 <i class="fas fa-star"></i></button>
+                    <button class="btn btn-custom">4 <i class="fas fa-star"></i></button>
+                    <button class="btn btn-custom">3 <i class="fas fa-star"></i></button>
+                    <button class="btn btn-custom">2 <i class="fas fa-star"></i></button>
+                    <button class="btn btn-custom">1 <i class="fas fa-star"></i></button>
+                </div>
+            </div>
+                </div>
+
+            </div>
+            
+        </div>
+
+        <!-- Danh sách đánh giá -->
         <div class="row">
             <div class="col-12">
-                <div class="event-title">Sự kiện</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-9">
-                <div class="row">
-                    <div class="col-md-6 col-lg-4 event-card">
-                        <img src="https://placehold.co/300x200" alt="Black Friday event image">
-                        <div class="event-card-title">ĐẠI TIỆC BLACKFRIDAY SHOP KHANG BABY</div>
-                        <div class="event-card-subtitle">Shop Khang Baby | Th 4 27/11/2024</div>
-                        <div class="event-card-text">ĐẠI TIỆC BLACK FRIDAY CHÍNH THỨC BẮT ĐẦU! Hứa hẹn mang tới cho ba mẹ nhiều...</div>
-                        <a class="read-more" href="#">Đọc tiếp</a>
+                <div class="d-flex align-items-center p-3 border rounded bg-white">
+                    <div class="avatar me-3">A</div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center">
+                            <span class="fw-bold me-2">Nguyễn An</span>
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="text-muted" style="font-size: 0.875rem;">05/02/2025 08:24</div>
                     </div>
-                    <div class="col-md-6 col-lg-4 event-card">
-                        <img src="https://placehold.co/300x200" alt="Mother's Day event image">
-                        <div class="event-card-title">NGÀY HỘI MẸ BẦU 2024 CỦA SHOP KHANG CÓ GÌ</div>
-                        <div class="event-card-subtitle">Shop Khang Baby | Th 4 6/11/2024</div>
-                        <div class="event-card-text">SỰ KIỆN NGÀY HỘI MẸ BẦU LỚN NHẤT BẮC GIANG CÓ GÌ? Chỉ có để "Hành trang đi sinh và thiên chức làm mẹ"...</div>
-                        <a class="read-more" href="#">Đọc tiếp</a>
+                    <div class="review-like ms-3">
+                        <i class="far fa-heart"></i>
                     </div>
-                    <div class="col-md-6 col-lg-4 event-card">
-                        <img src="https://placehold.co/300x200" alt="National Day Sale event image">
-                        <div class="event-card-title">Tưng bừng mừng Quốc Khánh - Khang Baby Sale không phanh</div>
-                        <div class="event-card-subtitle">Shop Khang Baby | Th 7 31/08/2024</div>
-                        <div class="event-card-text">Chào mừng Quốc Khánh 2/9, Khang Baby hân hạnh mang tới chương trình giảm giá đặc biệt dành cho các bậc phụ huynh và các bé...</div>
-                        <a class="read-more" href="#">Đọc tiếp</a>
-                    </div>
-                    <div class="col-md-6 col-lg-4 event-card">
-                        <img src="https://placehold.co/300x200" alt="Livestream event image">
-                        <div class="event-card-title">Live tối 24/5/2024</div>
-                        <div class="event-card-subtitle">Shop Khang Baby | Th 6 24/05/2024</div>
-                        <div class="event-card-text">Hứa hẹn 1 phiên sale LIVE siêu hời! Vào xem LIVE ngay</div>
-                        <a class="read-more" href="#">Đọc tiếp</a>
-                    </div>
-                    <div class="col-md-6 col-lg-4 event-card">
-                        <img src="https://placehold.co/300x200" alt="Children's Day event image">
-                        <div class="event-card-title">Mừng Tết Thiếu Nhi - Quà Khang Baby là có QUÀ</div>
-                        <div class="event-card-subtitle">Shop Khang Baby | Th 2 18/5/2024</div>
-                        <div class="event-card-text">Từ 18/5/2024 - 2/6/2024 MỪNG TẾT THIẾU NHI! TỚI KHANG BABY LÀ CÓ QUÀ! Áp dụng cho quốc tế thiếu nhi 1.6 các bé có thể...</div>
-                        <a class="read-more" href="#">Đọc tiếp</a>
-                    </div>
-                    <div class="col-md-6 col-lg-4 event-card">
-                        <img src="https://placehold.co/300x200" alt="Livestream event image">
-                        <div class="event-card-title">Livestream tối 20/4/2024</div>
-                        <div class="event-card-subtitle">Shop Khang Baby | Th 6 20/04/2024</div>
-                        <div class="event-card-text">Hứa hẹn 1 phiên sale LIVE siêu hời! Vào xem LIVE ngay</div>
-                        <a class="read-more" href="#">Đọc tiếp</a>
-                    </div>
-                </div>
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination">
-                        <li class="page-item"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">4</a></li>
-                        <li class="page-item"><a class="page-link" href="#">5</a></li>
-                    </ul>
-                </nav>
-            </div>
-            <div class="col-lg-3">
-                          <div class="sidebar-title">TIN NỔI BẬT</div>
-                <div class="sidebar-item">
-                    <img src="https://placehold.co/300x200" alt="Highlight news image">
-                    <div>Lịch làm việc của một số đơn vị vận chuyển sẽ có sự thay đổi trong dịp Lễ Quốc Khánh 2/9/2024</div>
-                </div>
-                <div class="sidebar-item">
-                    <img src="https://placehold.co/300x200" alt="Highlight news image">
-                    <div>Sữa phát triển trí não toàn diện nhất 2023 hiện nay</div>
-                </div>
-                <div class="sidebar-item">
-                    <img src="https://placehold.co/300x200" alt="Highlight news image">
-                    <div>COMBO TRỌN BỘ VITAMIN BẦU CHUẨN ÚC ĐƯỢC CÁC BÀ MẸ TIN DÙNG 2023</div>
                 </div>
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+3i5Q0z1Kp4p6F5k5t5p5t5p5t5p5" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap JS (nếu cần) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

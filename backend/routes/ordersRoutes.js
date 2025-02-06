@@ -3,12 +3,10 @@ const express = require("express");
 const router = express.Router();
 const Order = require("../models/orderModel");
 const authMiddleware = require("../middleware/authMiddleware");
-// const nodemailer = require("nodemailer");
-const { sendOrderConfirmationEmail } = require('../utils/ordermail'); // Import module gửi email
+const { sendOrderConfirmationEmail } = require('../utils/ordermail'); 
 const Product = require("../models/productModel");
 
 
-// Route tạo đơn hàng theo tưng user
 router.post("/orders", authMiddleware, async (req, res) => {
   try {
     const {
@@ -23,7 +21,6 @@ router.post("/orders", authMiddleware, async (req, res) => {
 
     const userId = req.user._id;
 
-    // Validate input
     if (
       !orderId ||
       !items ||
@@ -46,11 +43,8 @@ router.post("/orders", authMiddleware, async (req, res) => {
       hour12: false,
     });
 
-    // Xác định trạng thái thanh toán dựa trên phương thức
-    // Sửa lại: "Đợi xác nhận" -> "Đã xác nhận" để khớp với enum trong constants
     const initialPaymentStatus =
-      paymentMethod === "cod" ? "Chưa thanh toán" : "Chờ xác nhận"; // Sửa từ "Đã xác nhận" thành "Chờ xác nhận"
-
+      paymentMethod === "cod" ? "Chưa thanh toán" : "Chờ xác nhận"; 
     const newOrder = new Order({
       orderId,
       userId,
@@ -160,7 +154,7 @@ router.get("/order/:orderId", authMiddleware, async (req, res) => {
       orderId: req.params.orderId,
       userId: req.user._id,
     }).populate({
-      path: "items.product", // đảm bảo rằng populate được thực hiện đúng
+      path: "items.product", 
       select: "name price image description category",
     });
 
@@ -187,7 +181,7 @@ router.get("/order/:orderId", authMiddleware, async (req, res) => {
         ...item._doc,
         product: {
           ...item.product._doc,
-          price: item.price, // chắc chắn rằng các thuộc tính này tồn tại trong item.product
+          price: item.price,
           name: item.product.name,
           image: item.product.image
         }
@@ -207,8 +201,6 @@ router.get("/order/:orderId", authMiddleware, async (req, res) => {
     });
   }
 });
-
-
 
 // huy don hang
 router.post("/orders/:orderId/cancel", authMiddleware, async (req, res) => {
@@ -231,8 +223,6 @@ router.post("/orders/:orderId/cancel", authMiddleware, async (req, res) => {
     }
 
     console.log("Order found:", order);
-
-    // Kiểm tra trạng thái có thể hủy
     const cancelableStatuses = [ORDER_STATUS.PROCESSING, ORDER_STATUS.CONFIRMED];
     if (!cancelableStatuses.includes(order.orderStatus)) {
       let message;
@@ -256,7 +246,6 @@ router.post("/orders/:orderId/cancel", authMiddleware, async (req, res) => {
       });
     }
 
-    // Cập nhật chỉ trạng thái đơn hàng, giữ nguyên trạng thái thanh toán
     const updatedOrder = await Order.findOneAndUpdate(
       { orderId: orderId },
       { orderStatus: ORDER_STATUS.CANCELLED },
@@ -284,15 +273,12 @@ router.post("/orders/:orderId/cancel", authMiddleware, async (req, res) => {
     });
   }
 });
-
-// Route lấy tất cả đơn hàng của mọi người
 router.get("/orders", authMiddleware, async (req, res) => {
   try {
     const orders = await Order.find() // Lấy tất cả đơn hàng
-      .populate("items.product") // Populate thông tin sản phẩm trong từng đơn hàng
-      .sort({ orderDate: -1 }); // Sắp xếp theo ngày đặt đơn hàng (mới nhất lên đầu)
+      .populate("items.product") 
+      .sort({ orderDate: -1 }); 
 
-    // Định dạng lại dữ liệu đơn hàng
     const formattedOrders = orders.map((order) => ({
       ...order._doc,
       formattedOrderDate: new Date(order.orderDate).toLocaleString("vi-VN", {
@@ -328,14 +314,11 @@ router.get("/orders", authMiddleware, async (req, res) => {
   }
 });
 
-
-// Route thay đổi trạng thái đơn hàng
 router.put("/order/:id", authMiddleware, async (req, res) => {
   const { id: orderId } = req.params;
   const { orderStatus, paymentStatus } = req.body;
 
   try {
-    // Populate items.product để có thông tin sản phẩm cần cập nhật kho
     const order = await Order.findById(orderId).populate("items.product");
     if (!order) {
       return res.status(404).json({
@@ -344,10 +327,8 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
       });
     }
 
-    // Lưu lại trạng thái cũ trước khi cập nhật
     const oldOrderStatus = order.orderStatus;
 
-    // Cập nhật trạng thái đơn hàng nếu hợp lệ
     if (orderStatus) {
       if (Object.values(ORDER_STATUS).includes(orderStatus)) {
         order.orderStatus = orderStatus;
@@ -359,7 +340,6 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
       }
     }
 
-    // Cập nhật trạng thái thanh toán nếu hợp lệ
     if (paymentStatus) {
       if (Object.values(PAYMENT_STATUS).includes(paymentStatus)) {
         order.paymentStatus = paymentStatus;
@@ -371,17 +351,12 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
       }
     }
 
-    // Lưu đơn hàng với trạng thái mới
     await order.save();
 
-    // Nhóm trạng thái mà chúng ta cần trừ số lượng sản phẩm khỏi kho
     const confirmedStatus = ["Đã xác nhận", "Đang giao hàng", "Đã giao hàng"];
 
-    // Nếu đơn hàng chuyển sang trạng thái trong nhóm xác nhận/giao hàng/đã giao
-    // và trạng thái cũ không thuộc nhóm này thì trừ số lượng sản phẩm khỏi kho.
     if (confirmedStatus.includes(order.orderStatus) && !confirmedStatus.includes(oldOrderStatus)) {
       for (const item of order.items) {
-        // Giả sử item.quantity là số lượng sản phẩm trong đơn hàng
         await Product.findByIdAndUpdate(
           item.product._id,
           { $inc: { remainingStock: -item.quantity } },
@@ -390,8 +365,6 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
       }
     }
 
-    // Nếu đơn hàng chuyển từ trạng thái đã xác nhận/đang giao/đã giao sang "Đã hủy"
-    // thì hoàn trả lại số lượng sản phẩm vào kho.
     if (oldOrderStatus !== "Đã hủy" &&
         confirmedStatus.includes(oldOrderStatus) &&
         order.orderStatus === "Đã hủy") {
@@ -422,12 +395,11 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
 
 const { ORDER_STATUS, PAYMENT_STATUS } = require("../constants/orderConstants");
 
-// backend/routes/ordersRoutes.js
 router.post("/payment/refund", authMiddleware, async (req, res) => {
   const { orderId, amount, paymentMethod } = req.body;
 
   try {
-    const refundSuccess = true; // Simulate successful refund for demonstration
+    const refundSuccess = true; 
 
     if (refundSuccess) {
       const order = await Order.findById(orderId);
@@ -437,9 +409,7 @@ router.post("/payment/refund", authMiddleware, async (req, res) => {
           message: "Order not found.",
         });
       }
-
-      // Change the paymentStatus to "Hoàn tiền" (Refunded)
-      order.paymentStatus = "Hoàn tiền"; // Corrected value
+      order.paymentStatus = "Hoàn tiền"; 
       await order.save();
 
       res.status(200).json({

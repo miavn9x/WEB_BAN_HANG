@@ -30,6 +30,7 @@ import PostsList from "./components/Posts/PostsList";
 import AutoLogout from "./pages/Auth/Login/AutoLogout";
 import PostsManagement from "./components/Posts/PostsManagement";
 import { Helmet } from "react-helmet"; // Thêm Helmet để tối ưu SEO
+import Evaluate from "./components/Product/Evaluate";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -104,6 +105,7 @@ function App() {
         <Route path="/gioi-thieu" element={<Info />} />
         <Route path="/PostsList" element={<PostsList />} />
         <Route path="/posts/:id" element={<PostDetail />} />
+        <Route path="/test" element={<Evaluate />} />
 
         {/* Protected Routes - User & admin */}
         <Route

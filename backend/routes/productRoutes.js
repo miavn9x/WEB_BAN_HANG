@@ -1,3 +1,4 @@
+//productRoutes.js
 const express = require("express");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
@@ -8,7 +9,6 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Cấu hình Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -19,7 +19,7 @@ cloudinary.config({
 const checkDuplicate = async (name, brand, category) => {
   try {
     const existingProduct = await Product.findOne({ name, brand, category });
-    return existingProduct; // Nếu có sản phẩm trùng, sẽ trả về sản phẩm đó
+    return existingProduct; 
   } catch (err) {
     throw new Error("Lỗi kiểm tra trùng lặp");
   }
@@ -41,13 +41,10 @@ router.post("/products", upload.array("images", 20), async (req, res) => {
   } = req.body;
 
   try {
-    // Kiểm tra trùng lặp sản phẩm
     const duplicateProduct = await checkDuplicate(name, brand, categoryName);
     if (duplicateProduct) {
       return res.status(400).json({ message: "Sản phẩm này đã tồn tại." });
     }
-
-    // Upload tất cả các hình ảnh lên Cloudinary
     const imageUploadPromises = req.files.map((file) => {
       return new Promise((resolve, reject) => {
         cloudinary.uploader
@@ -62,7 +59,6 @@ router.post("/products", upload.array("images", 20), async (req, res) => {
     const uploadResults = await Promise.all(imageUploadPromises);
     const images = uploadResults.map((result) => result.secure_url);
 
-    // Tạo mới sản phẩm và lưu vào database
     const newProduct = new Product({
       name,
       category: {
@@ -76,13 +72,12 @@ router.post("/products", upload.array("images", 20), async (req, res) => {
       priceAfterDiscount,
       discountCode,
       images,
-      stock, // Số lượng trong kho
-      remainingStock: stock, // Số lượng còn lại ban đầu bằng số lượng trong kho
+      stock, 
+      remainingStock: stock, 
     });
 
     await newProduct.save();
 
-    // Trả về thông báo thành công
     res.status(201).json({
       message: "Sản phẩm đã được thêm thành công",
       product: newProduct,
@@ -124,18 +119,12 @@ router.get("/products", async (req, res) => {
         { "category.generic": { $regex: search, $options: "i" } },
       ];
     }
-
-    // Lọc theo tên danh mục nếu có
     if (categoryName) {
       query["category.name"] = { $regex: categoryName, $options: "i" };
     }
-
-    // Lọc theo loại danh mục chung nếu có
     if (categoryGeneric) {
       query["category.generic"] = { $regex: categoryGeneric, $options: "i" };
     }
-
-    // Lọc theo khoảng giá sau khi giảm
     let priceFilter = {};
     if (minPrice && !isNaN(minPrice)) {
       priceFilter.$gte = Number(minPrice);
@@ -146,8 +135,6 @@ router.get("/products", async (req, res) => {
     if (Object.keys(priceFilter).length > 0) {
       query.priceAfterDiscount = priceFilter;
     }
-
-    // Xử lý trường hợp sắp xếp ngẫu nhiên
     if (sortBy === "random") {
       const randomProducts = await Product.aggregate([
         { $match: query },
@@ -155,7 +142,7 @@ router.get("/products", async (req, res) => {
       ]);
       return res.status(200).json({
         products: randomProducts,
-        totalPages: 1, // Không phân trang đối với kết quả ngẫu nhiên
+        totalPages: 1, 
         currentPage: 1,
       });
     }
@@ -175,8 +162,6 @@ router.get("/products", async (req, res) => {
       .limit(validLimit)
       .skip((validPage - 1) * validLimit)
       .sort(sortQuery);
-
-    // Đếm tổng số sản phẩm thỏa điều kiện lọc
     const totalProducts = await Product.countDocuments(query);
 
     res.status(200).json({
@@ -290,15 +275,12 @@ router.put("/products/:id", upload.array("images", 20), async (req, res) => {
       { new: true }
     );
 
-    // Log successful update
-    // console.log("Updated product:", updatedProduct);
 
     res.status(200).json({
       message: "Sản phẩm đã được cập nhật thành công.",
       product: updatedProduct,
     });
   } catch (error) {
-    // console.error("Lỗi khi cập nhật sản phẩm:", error);
     res.status(500).json({ 
       message: "Có lỗi xảy ra khi cập nhật sản phẩm.",
       error: error.message 
@@ -330,7 +312,6 @@ router.delete("/products/:id", async (req, res) => {
   }
 });
 
-// Route cập nhật số lượng còn lại khi mua hàng (POST)
 router.post("/products/:id/purchase", async (req, res) => {
   const productId = req.params.id;
   const { quantity } = req.body;
@@ -348,8 +329,6 @@ router.post("/products/:id/purchase", async (req, res) => {
     if (product.remainingStock < quantity) {
       return res.status(400).json({ message: "Số lượng trong kho không đủ." });
     }
-
-    // Giảm số lượng còn lại sau khi mua
     product.remainingStock -= quantity;
 
     await product.save();
@@ -364,19 +343,15 @@ router.post("/products/:id/purchase", async (req, res) => {
   }
 });
 
-// Route lấy sản phẩm liên quan theo generic
 router.get("/products/related", async (req, res) => {
   const { generic, limit } = req.query;
 
   if (!generic) {
     return res.status(400).json({ message: "Thiếu tham số 'generic'" });
   }
-
-  // Chuyển limit về dạng số, nếu không có thì mặc định 6
   const numLimit = Number(limit) || 6;
 
   try {
-    // Giả sử bạn muốn tìm các sản phẩm có category.generic khớp (không phân biệt chữ hoa chữ thường)
     const products = await Product.find({
       "category.generic": { $regex: generic, $options: "i" },
     }).limit(numLimit);

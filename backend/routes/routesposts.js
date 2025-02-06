@@ -54,16 +54,13 @@ router.post("/posts", async (req, res) => {
   }
 
   try {
-    // Nếu có productId, kiểm tra sản phẩm tồn tại
     if (productId) {
       const product = await Product.findById(productId);
       if (!product) {
         return res.status(404).json({ error: "Product not found." });
       }
     }
-    
-    // Parse tags nếu có (tags được truyền dưới dạng mảng object { id, text })
-    const parsedTags = Array.isArray(tags)
+        const parsedTags = Array.isArray(tags)
       ? tags.map((tag) => tag.text || tag)
       : [];
 
@@ -71,7 +68,6 @@ router.post("/posts", async (req, res) => {
       title,
       content,
       tags: parsedTags,
-      // Nếu không có productId, lưu null
       productId: productId || null,
       imageUrl,
     });
@@ -89,8 +85,6 @@ router.post("/posts", async (req, res) => {
 router.put("/posts/:id", async (req, res) => {
   const { id } = req.params;
   const { title, content, tags, productId, imageUrl } = req.body;
-
-  // Chỉ bắt buộc title và content
   if (!title || !content) {
     return res
       .status(400)
@@ -98,7 +92,6 @@ router.put("/posts/:id", async (req, res) => {
   }
 
   try {
-    // Nếu có productId, kiểm tra xem sản phẩm có tồn tại không
     let validProductId = null;
     if (productId) {
       const product = await Product.findById(productId);
@@ -107,8 +100,6 @@ router.put("/posts/:id", async (req, res) => {
       }
       validProductId = productId;
     }
-
-    // Parse tags: nếu tags được gửi dưới dạng mảng object { id, text }
     const parsedTags = Array.isArray(tags)
       ? tags.map((tag) => tag.text || tag)
       : [];
@@ -179,7 +170,6 @@ router.get("/posts/:id", async (req, res) => {
 router.get("/posts/product/:productId", async (req, res) => {
   const { productId } = req.params;
 
-  // (Nếu cần, bạn có thể kiểm tra định dạng của productId ở đây)
   if (!productId.match(/^[0-9a-fA-F]{24}$/)) {
     return res.status(400).json({ message: "Product ID không hợp lệ." });
   }
