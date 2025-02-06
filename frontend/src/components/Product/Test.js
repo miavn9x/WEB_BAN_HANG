@@ -366,7 +366,7 @@ const Test = () => {
               )}
             </div>
             <div>
-              <Evaluate />
+              <Evaluate productId={id} />
             </div>
           </div>
 

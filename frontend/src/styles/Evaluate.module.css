@@ -183,3 +183,6 @@
     border-radius: 3px;
 }
 
+.chatMessage {
+    position: relative;
+}

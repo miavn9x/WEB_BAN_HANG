@@ -60,6 +60,9 @@ const questionRouter = require("./routes/questionRouter");
 app.use("/api", questionRouter);
 
 
+const notificationRouter = require("./routes/notificationRouter");
+app.use("/api", notificationRouter);
+
 // Chạy server
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);

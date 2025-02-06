@@ -31,6 +31,7 @@ import AutoLogout from "./pages/Auth/Login/AutoLogout";
 import PostsManagement from "./components/Posts/PostsManagement";
 import { Helmet } from "react-helmet"; // Thêm Helmet để tối ưu SEO
 import Evaluate from "./components/Product/Evaluate";
+import NotificationIcon from "./components/Nav/NotificationIcon";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -106,6 +107,7 @@ function App() {
         <Route path="/PostsList" element={<PostsList />} />
         <Route path="/posts/:id" element={<PostDetail />} />
         <Route path="/test" element={<Evaluate />} />
+        <Route path="/1" element={<NotificationIcon />} />
 
         {/* Protected Routes - User & admin */}
         <Route

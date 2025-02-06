@@ -1,7 +1,12 @@
-// models/questionAnswerModel.js
 const mongoose = require("mongoose");
 
 const answerSchema = new mongoose.Schema({
+  // Thêm trường productId để liên kết câu trả lời với sản phẩm
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -9,7 +14,7 @@ const answerSchema = new mongoose.Schema({
   },
   answerText: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
-  // Thêm trường replyTo: lưu thông tin của tin được trả lời.
+  // Trường replyTo: lưu thông tin của tin được trả lời.
   replyTo: {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
