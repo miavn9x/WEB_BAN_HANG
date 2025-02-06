@@ -197,8 +197,11 @@ const Test = () => {
                   <div className="col-lg-5 col-md-12 col-12 mb-3 mb-md-0">
                     <div className="product__modal__zoom position-relative">
                       {product.discountPercentage && (
-                        <div className="badge badge-primary p-2 fs-6 product__discount">
-                          {product.discountPercentage}%
+                        <div
+                          className="badge badge-primary p-2  product__discount "
+                          style={{ fontSize: "11px" }}
+                        >
+                          - {product.discountPercentage}%
                         </div>
                       )}
                       <Slider
@@ -240,9 +243,14 @@ const Test = () => {
 
                   {/* Chi tiết sản phẩm */}
                   <div className="col-lg-7 col-md-12 d-flex flex-column product_name">
-                    <h1 className="product-title">{product.name}</h1>
-                    <div className="d-flex align-items-center">
-                      <label htmlFor="quantity" className="me-2">
+                    <p
+                      className="product-title fs-5"
+                      style={{ color: "#333333" }}
+                    >
+                      {product.name}
+                    </p>
+                    <div className="d-flex align-items-center pt-2">
+                      <label htmlFor="quantity" className="me-2 ">
                         Tên Thương Hiệu:
                       </label>
                       <span>{product.brand}</span>
@@ -333,7 +341,7 @@ const Test = () => {
 
             {/* Product Description – Hiển thị nội dung bài viết nếu có */}
             <div className="product-description">
-              <h2>Mô tả sản phẩm</h2>
+              {/* <h2>Mô tả sản phẩm</h2> */}
               {postContent ? (
                 <div>
                   <h4>{postContent.title}</h4>
@@ -361,7 +369,9 @@ const Test = () => {
           {/* Sidebar – Danh sách sản phẩm giảm giá */}
           <div className="col-lg-3 col-md-4 mt-4 mt-md-0">
             <div className="sidebar bg-white p-4 rounded shadow">
-              <h5 className="fw-bold mb-3">Đang giảm giá</h5>
+              <h5 className="text-center mb-3" style={{ color: "#339" }}>
+                Đang giảm giá
+              </h5>
               <ul className="list-group">
                 {discountedProducts.map((product) => (
                   <li
@@ -383,7 +393,12 @@ const Test = () => {
                         }}
                       />
                       <div className="ms-3">
-                        <p className="mb-0 text-dark fw-bold">{product.name}</p>
+                        <span
+                          className="mb-0 text-start"
+                          style={{ color: "#333333" }}
+                        >
+                          {product.name}
+                        </span>
                         <p className="text-danger mb-0">
                           {formatter(product.priceAfterDiscount)}
                         </p>

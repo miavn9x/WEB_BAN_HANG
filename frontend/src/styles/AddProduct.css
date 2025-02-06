@@ -9,17 +9,17 @@ h2 {
 
 .add-product-container .form-control {
     height: 40px;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .add-product-container .form-control-file {
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .add-product-container button[type="submit"] {
     color: white;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 13px;
     padding: 12px!important;
     border-radius: 4px;
     border: none;

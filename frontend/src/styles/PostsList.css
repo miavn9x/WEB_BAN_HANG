@@ -36,7 +36,7 @@
 }
 
 .posts-list-card-title {
-    font-size: 1.1rem;
+    font-size: 0.7rem;
     font-weight: 500;
     color: #555;
     display: -webkit-box;
@@ -82,7 +82,7 @@
 }
 
 .sidebar-text {
-    font-size: 0.9rem;
+    font-size: 0.7rem;
     color: #666;
     line-height: 1.4;
     display: -webkit-box;

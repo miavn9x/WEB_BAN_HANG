@@ -202,7 +202,7 @@ const MyNavbar = () => {
   return (
     <>
       {/* Navbar chính */}
-      <Navbar bg="light" expand="lg" className="py-2">
+      <Navbar  bg="light" expand="lg" className="py-2">
         <Container>
           <Row className="w-100 align-items-center">
             <Col
@@ -221,9 +221,9 @@ const MyNavbar = () => {
                   className="me-2 Logo_image"
                   height="60"
                 />
-                <span className="logo-text fs-3 navbar-text">
-                  <span className="text-danger fw-bold me-1">Baby</span>
-                  <span className="text-primary fw-bold">Mart</span>
+                <span className="logo-text navbar-text">
+                  <span className="text-danger fs-3 fw-bold me-1">Baby</span>
+                  <span className="text-primary fs-3 fw-bold">Mart</span>
                 </span>
               </Navbar.Brand>
             </Col>
@@ -332,7 +332,7 @@ const MyNavbar = () => {
                       >
                         Danh mục sản phẩm
                       </Dropdown.Toggle>
-                      <Dropdown.Menu style={{ width: "210px" }}>
+                      <Dropdown.Menu style={{ width: "210px" ,fontSize:"14px"}}>
                         {categories.map((category) => (
                           <Dropdown.Item
                             key={category.path}
@@ -370,7 +370,9 @@ const MyNavbar = () => {
                       onFocus={() => {
                         if (suggestions.length > 0) setShowSuggestions(true);
                       }}
-                      ref={searchRef} // Ref to detect clicks outside
+                      ref={searchRef} 
+                      // className="search-input py-2"
+                      // style={{padding: "0.5px 0.5rem"}}
                     />
 
                     <Button

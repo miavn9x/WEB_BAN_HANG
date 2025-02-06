@@ -1,18 +1,20 @@
+
+
 .notification-badge,
 .cart-badge {
     position: absolute;
     top: -5px;
     right: -5px;
-    background-color: rgb(255, 255, 255);
+    /* background-color: rgb(255, 255, 255); */
     color: rgb(240, 0, 0);
-    font-size: 10px;
+    font-size: 11px;
     padding: 2px 5px;
     border-radius: 50%;
     transition: all 0.3s ease;
 }
 
 .search-container {
-    padding: 0!important;
+    padding: 0 !important;
     position: relative;
     display: flex;
 }
@@ -90,6 +92,7 @@
 
     }
 }
+
 @media (max-width: 1502px) {
     .promotion-dropdown .dropdown-menu {
         margin-top: 13px !important;
@@ -137,9 +140,12 @@
     margin: 0 !important;
     transition: all 0.3s ease;
 }
-.icon_user{
-margin-bottom: 2px!important;}
-.Nav__sale{
+
+.icon_user {
+    margin-bottom: 2px !important;
+}
+
+.Nav__sale {
     margin: 0 !important;
     padding: 0 !important;
     border-radius: 1px !important;
@@ -181,24 +187,25 @@ margin-bottom: 2px!important;}
 
 @media (max-width: 992px) {
     .icon_user {
-                top: 3px !important;
-        }
+        top: 3px !important;
+    }
 }
 
 @media (max-width: 350px) {
-    .logo-text{
+    .logo-text {
         opacity: 0 !important;
 
     }
-        .logo-text {
-            display: inline-block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            box-sizing: border-box;
-            max-width: 100%;
-         
-        }
+
+    .logo-text {
+        display: inline-block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        box-sizing: border-box;
+        max-width: 100%;
+
+    }
 }
 
 @media (max-width: 200px) {
@@ -215,7 +222,7 @@ margin-bottom: 2px!important;}
 }
 
 html body .nav-link {
-    font-size: clamp(12px, calc(13px + (16 - 12) * ((85vw - 992px) / (1400 - 992))), 20px);
+    font-size: clamp(12px, calc(14px + (16 - 12) * ((85vw - 992px) / (1400 - 992))), 15px);
 }
 
 .navbar-text-custom {
@@ -233,7 +240,7 @@ html body .nav-link {
     border: none;
     padding: 0;
     color: #fff;
-    font-size: 14px;
+    font-size: 13px;
     display: inline-flex;
     align-items: center;
     cursor: pointer;
@@ -280,7 +287,7 @@ html body .nav-link {
     display: flex;
     align-items: center;
     transition: background-color 0.2s ease;
-    font-size: 14px;
+    font-size: 13px;
     color: #333;
 }
 

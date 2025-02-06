@@ -24,12 +24,13 @@ const Footer = () => {
                   width="60"
                   height="auto"
                 />
-                <span className="logo-text ms-2">
-                  <span className="text-danger fw-bold">Baby</span>
-                  <span className="text-primary fw-bold">Mart</span>
+                <span className="logo-text ms-2" style={{ fontSize: "16px" }}>
+                  <span className="text-danger fw-bold"> Baby </span>
+
+                  <span className=" text-primary fw-bold "> Mart </span>
                 </span>
               </div>
-              <p>
+              <p className="pt-1">
                 Siêu thị Baby Mart <br /> Thương hiệu mẹ và bé uy tín và chất
                 lượng, cam kết mang đến trải nghiệm mua sắm tiện lợi, hiện đại
                 và phong phú.
@@ -42,17 +43,14 @@ const Footer = () => {
                 </p>
                 <p>
                   <i className="fas fa-phone"></i> Hotline:
-                  <a href="tel:19006750" className="text-primary ms-1">
+                  <a href="tel:19006750" className=" ms-1">
                     19006750
                   </a>
                 </p>
                 <p>
                   <i className="fas fa-envelope"></i> Email:
-                  <a
-                    href="mailto:support@sapo.vn"
-                    className="text-primary ms-1"
-                  >
-                    support@sapo.vn
+                  <a href="mailto:support.babymart@gmail.com" className=" ms-1">
+                    support.babymart@gmail.com
                   </a>
                 </p>
               </address>
@@ -64,65 +62,59 @@ const Footer = () => {
               <nav className="footer-nav">
                 <ul className="list-unstyled">
                   <li>
-                    <Link
-                      to="/tra-cuu-hoa-don"
-                      className="text-decoration-none"
-                    >
-                      Tra cứu hoá đơn
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/mua-giao-online"
-                      className="text-decoration-none"
-                    >
-                      Mua & Giao nhận Online
-                    </Link>
-                  </li>
-                  <li>
                     <Link to="/tin-khuyen-mai" className="text-decoration-none">
                       Tin Khuyến Mãi
                     </Link>
                   </li>
                   <li>
-                    <Link to="/thanh-toan" className="text-decoration-none">
+                    <Link
+                      to="http://localhost:3000/posts/67a4709e8cb516e37058c69a"
+                      className="text-decoration-none"
+                    >
                       Quy định & hình thức thanh toán
                     </Link>
                   </li>
                   <li>
-                    <Link to="/bao-hanh" className="text-decoration-none">
+                    <Link
+                      to="http://localhost:3000/posts/67a4709e8cb516e37058c69a"
+                      className="text-decoration-none"
+                    >
                       Bảo hành & Bảo trì
                     </Link>
                   </li>
                   <li>
-                    <Link to="/doi-tra" className="text-decoration-none">
+                    <Link
+                      to="http://localhost:3000/posts/67a4709e8cb516e37058c69a"
+                      className="text-decoration-none"
+                    >
                       Đổi trả & Hoàn tiền
                     </Link>
                   </li>
                 </ul>
               </nav>
               <h5 className="mt-3">Chính sách</h5>
-              <ul className="list-unstyled">
+              <ul className="list-unstyled ">
                 <li>
                   <Link
-                    to="/doi-tra"
-                    className="text-primary text-decoration-none"
+                    to="http://localhost:3000/posts/67a4709e8cb516e37058c69a"
+                    className=" text-decoration-none"
                   >
                     Chính sách đổi trả
                   </Link>
                 </li>
                 <li>
                   <Link
-                    to="/bao-mat"
-                    className="text-primary text-decoration-none"
+                    to="http://localhost:3000/posts/67a4709e8cb516e37058c69a"
+                    className=" text-decoration-none"
+                    
                   >
                     Chính sách bảo mật
                   </Link>
                 </li>
                 <li>
                   <Link
-                    to="/dieu-khoan"
-                    className="text-primary text-decoration-none"
+                    to="http://localhost:3000/posts/67a4709e8cb516e37058c69a"
+                    className=" text-decoration-none"
                   >
                     Điều khoản dịch vụ
                   </Link>

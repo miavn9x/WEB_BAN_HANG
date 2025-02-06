@@ -148,13 +148,13 @@
 }
 
 .product__price__reduce {
-    font-size: 13px;
+    font-size: 11px;
     color: #999;
     text-decoration: line-through;
 }
 
 .product__price__increase {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     color: #FF6F91 !important;
 }

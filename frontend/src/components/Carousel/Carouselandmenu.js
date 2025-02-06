@@ -49,9 +49,11 @@ const CategoryMenu = ({ categories }) => {
     <Card className="category-list">
       <Card.Header
         className="text-center pb-1"
-        style={{ backgroundColor: "#FFB6C1", color: "#fff" }}
+        // style={{ backgroundColor: "ffff", color: "#fff" }}
       >
-        <h5 className="text-uppercase">Danh mục sản phẩm</h5>
+        <span className="text-uppercase  fw-bold" style={{ fontSize: "16px" }}>
+          Danh mục sản phẩm
+        </span>
       </Card.Header>
       <ListGroup variant="flush">
         {categories.map((category, index) => (

@@ -44,9 +44,7 @@
     font-weight: 500;
 }
 
-/* .form-control {
-    padding: 10px;
-} */
+
 
 .form-control:focus {
     border-color: #ffc0cb;

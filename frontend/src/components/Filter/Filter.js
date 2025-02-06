@@ -136,7 +136,7 @@ const Filter = ({ onFilterChange, filters }) => {
 
   return (
     <div className="filter-content">
-      {/* Bộ lọc mức giá */}
+      Bộ lọc mức giá
       <div className="filter-section">
         <h6>Mức Giá</h6>
         <Form>

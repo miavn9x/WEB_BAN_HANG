@@ -1,6 +1,7 @@
 .container_custom {
 
     margin: 0 auto;
+    font-size: 13px!important;
 }
 
 
@@ -13,7 +14,7 @@
 }
 
 .category-list .list-group-item {
-    font-size: 16px;
+    font-size: 14px;
     padding: 12px 20px;
     color: #333;
     border: none;
@@ -29,7 +30,7 @@
 }
 
 .category-list .list-group-item i {
-    font-size: 20px;
+    font-size: 14px;
     margin-right: 8px;
 }
 
@@ -94,7 +95,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 140px;
+    height: 120px;
 }
 
 .info-section .info-item:hover {
@@ -103,7 +104,7 @@
 }
 
 .info-section .info-item .me-2 {
-    font-size: 30px;
+    font-size: 25px;
     color: #dc3545;
     margin-bottom: 10px;
 }
@@ -156,3 +157,8 @@
 }
 
 
+.category-list .text-uppercase {
+    text-transform: uppercase;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    color: #FF6F91;
+}
