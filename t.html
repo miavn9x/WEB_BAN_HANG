@@ -1,123 +1,571 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đánh Giá</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .rating-box {
-            background-color: #fff7f0;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .rating-value {
-            font-size: 2.5rem;
-            color: #ff007f;
-        }
-        .rating-stars {
-            color: #ffc107;
-        }
-        .rating-count {
-            color: #6c757d;
-        }
-        .btn-custom {
-            background-color: #fff;
-            border: 1px solid #ff007f;
-            color: #ff007f;
-            border-radius: 20px;
-            padding: 5px 15px;
-            font-size: 0.9rem;
-        }
-        .btn-custom.active {
-            background-color: #ff007f;
-            color: #fff;
-        }
-        .avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #f8d7da;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: #ff007f;
-        }
-        .review-like {
-            color: #ff007f;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div class="container mt-4">
-        <!-- Hộp đánh giá tổng quan -->
-        <div class="rating-box p-4">
-            <h5 class="fw-bold">Đánh Giá</h5>
-            <div class="row align-items-center">
-                <div class="col-md-4 text-center text-md-start">
-                    <div class="rating-value">5.0/5.0</div>
-                    <div class="rating-stars">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import axios from "axios";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Card,
+  InputGroup,
+  FormControl,
+} from "react-bootstrap";
+import styles from "../../styles/Evaluate.module.css";
+
+const CollapsibleText = ({ text, maxLength = 100 }) => {
+  const [expanded, setExpanded] = useState(false);
+  if (!text) return null;
+  if (text.length <= maxLength) return <span>{text}</span>;
+  const displayText = expanded ? text : text.substring(0, maxLength) + "...";
+  return (
+    <span>
+      {displayText}{" "}
+      <Button
+        variant="link"
+        size="sm"
+        onClick={(e) => {
+          e.preventDefault();
+          setExpanded(!expanded);
+        }}
+      >
+        {expanded ? "Ẩn bớt" : "Xem thêm"}
+      </Button>
+    </span>
+  );
+};
+
+const getCurrentUser = () => {
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    const user = JSON.parse(storedUser);
+    if (!user.userId && user._id) {
+      user.userId = user._id;
+    }
+    return user;
+  }
+  return {
+    userId: "60d0fe4f5311236168a109cb",
+    firstName: "Nguyễn",
+    lastName: "Văn A",
+  };
+};
+
+const getUserId = (user) => {
+  if (!user) return "";
+  if (typeof user === "object") {
+    if (user._id) return user._id.toString();
+    if (user.userId) return user.userId.toString();
+  }
+  return user.toString();
+};
+
+const getFullName = (user, currentUser) => {
+  if (!user) return "Unknown";
+  const userIdFromApi = getUserId(user);
+  if (userIdFromApi === currentUser.userId) {
+    return `${currentUser.lastName} ${currentUser.firstName}`;
+  }
+  if (typeof user === "object" && user.lastName && user.firstName) {
+    return `${user.lastName} ${user.firstName}`;
+  }
+};
+
+const getReplySnippet = (replyData) => {
+  if (!replyData) return "";
+  const text = replyData.text || "";
+  return text.length > 50 ? text.substring(0, 50) + "..." : text;
+};
+
+const Evaluate = ({ productId }) => {
+  const [messages, setMessages] = useState([]);
+  const [newMessageText, setNewMessageText] = useState("");
+  const [replyTo, setReplyTo] = useState(null);
+  const [hoveredMessageId, setHoveredMessageId] = useState(null);
+
+  const currentUser = getCurrentUser();
+  const containerRef = useRef(null);
+  const longPressTimer = useRef(null);
+  const messagesEndRef = useRef(null);
+  const messagesAreaRef = useRef(null);
+
+  const scrollToBottom = () => {
+    if (messagesAreaRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesAreaRef.current;
+      if (scrollHeight - scrollTop - clientHeight < 50) {
+        messagesAreaRef.current.scrollTop = scrollHeight;
+      }
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const clearLongPress = () => {
+    clearTimeout(longPressTimer.current);
+  };
+
+  const initiateLongPress = (callback, e) => {
+    e.preventDefault();
+    longPressTimer.current = setTimeout(callback, 2000);
+  };
+
+  const fetchMessages = useCallback(async () => {
+    try {
+      const res = await axios.get(`/api/products/${productId}/messages`);
+      setMessages(res.data.messages);
+    } catch (err) {
+      console.error("Lỗi khi lấy danh sách tin nhắn:", err);
+    }
+  }, [productId]);
+
+  useEffect(() => {
+    fetchMessages();
+    const intervalId = setInterval(() => {
+      fetchMessages();
+    }, 2000);
+    return () => clearInterval(intervalId);
+  }, [fetchMessages]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setReplyTo(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSubmit = async () => {
+    const content = newMessageText.trim();
+    if (!content) return;
+    setNewMessageText("");
+
+    if (replyTo) {
+      const replyToData = {
+        questionId: replyTo.message._id, // lưu _id của tin câu hỏi gốc
+        userId: replyTo.message.userId,
+        text: replyTo.message.text,
+        createdAt: replyTo.message.createdAt,
+      };
+
+      const tempAnswer = {
+        _id: `temp-${Date.now()}`,
+        userId: {
+          _id: currentUser.userId,
+          firstName: currentUser.firstName,
+          lastName: currentUser.lastName,
+        },
+        type: "answer",
+        text: content,
+        createdAt: new Date().toISOString(),
+        pending: true,
+        replyTo: replyToData,
+      };
+      setMessages((prevMessages) => [...prevMessages, tempAnswer]);
+      try {
+        const res = await axios.post(`/api/products/${productId}/messages`, {
+          userId: currentUser.userId,
+          type: "answer",
+          text: content,
+          replyTo: replyToData,
+        });
+        setMessages(res.data.messages);
+        setReplyTo(null);
+      } catch (err) {
+        console.error("handleSubmit (reply) error:", err);
+      }
+    } else {
+      const tempQuestion = {
+        _id: `temp-${Date.now()}`,
+        userId: {
+          _id: currentUser.userId,
+          firstName: currentUser.firstName,
+          lastName: currentUser.lastName,
+        },
+        type: "question",
+        text: content,
+        createdAt: new Date().toISOString(),
+        pending: true,
+      };
+      setMessages((prev) => [...prev, tempQuestion]);
+      try {
+        const res = await axios.post(`/api/products/${productId}/messages`, {
+          userId: currentUser.userId,
+          type: "question",
+          text: content,
+        });
+        setMessages(res.data.messages);
+      } catch (err) {
+        console.error("handleSubmit (question) error:", err);
+        setNewMessageText(content);
+      }
+    }
+  };
+
+  const threads = messages
+    .filter((m) => m.type === "question")
+    .map((q) => {
+      const answers = messages.filter(
+        (m) =>
+          m.type === "answer" && m.replyTo && m.replyTo.questionId === q._id
+      );
+      const questionTime = new Date(q.createdAt).getTime();
+      const answerTimes = answers.map((ans) =>
+        new Date(ans.createdAt).getTime()
+      );
+      const lastUpdated =
+        answerTimes.length > 0
+          ? Math.max(questionTime, ...answerTimes)
+          : questionTime;
+      return { ...q, answers, lastUpdated };
+    });
+
+  const sortedThreads = threads.sort((a, b) => b.lastUpdated - a.lastUpdated);
+  const MAX_THREADS = 5;
+  const visibleThreads = sortedThreads.slice(0, MAX_THREADS);
+
+  return (
+    <Container className="mt-4" ref={containerRef}>
+      {/* Phần đánh giá tổng quan */}
+      <Card className={`p-4 ${styles.ratingBox}`}>
+        <Card.Title className="fw-bold">Đánh Giá</Card.Title>
+        <Row className="align-items-center">
+          <Col md={4} className="text-center text-md-start">
+            <div className={styles.ratingValue}>5.0/5.0</div>
+            <div className={styles.ratingStars}>
+              <i className="fas fa-star" />
+              <i className="fas fa-star" />
+              <i className="fas fa-star" />
+              <i className="fas fa-star" />
+              <i className="fas fa-star" />
+            </div>
+            <div className={styles.ratingCount}>
+              Có <strong>133</strong> lượt đánh giá
+            </div>
+          </Col>
+          <Col md={6} className="text-center">
+            <Button
+              className={`${styles.btnCustom} ${styles.btnCustomActive}`}
+              variant="primary"
+            >
+              Mới nhất
+            </Button>
+            <Button className={`${styles.btnCustom} ms-2`} variant="secondary">
+              Đã mua nhiều lần
+            </Button>
+            <Row className="mt-3">
+              <Col className="text-center">
+                <Button className={styles.btnCustom} variant="outline-primary">
+                  5 <i className="fas fa-star" />
+                </Button>
+                <Button
+                  className={`${styles.btnCustom} ms-2`}
+                  variant="outline-primary"
+                >
+                  4 <i className="fas fa-star" />
+                </Button>
+                <Button
+                  className={`${styles.btnCustom} ms-2`}
+                  variant="outline-primary"
+                >
+                  3 <i className="fas fa-star" />
+                </Button>
+                <Button
+                  className={`${styles.btnCustom} ms-2`}
+                  variant="outline-primary"
+                >
+                  2 <i className="fas fa-star" />
+                </Button>
+                <Button
+                  className={`${styles.btnCustom} ms-2`}
+                  variant="outline-primary"
+                >
+                  1 <i className="fas fa-star" />
+                </Button>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+      </Card>
+
+      {/* Phần đánh giá mẫu */}
+      <Row className="mt-4">
+        <Col xs={12}>
+          <Card className="border rounded bg-white">
+            <Card.Body className="p-3">
+              <div className="d-flex flex-column">
+                <span className="fw-bold">Nguyễn An</span>
+                <div className={styles.ratingStars}>
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                </div>
+                <span className="text-muted" style={{ fontSize: "0.875rem" }}>
+                  05/02/2025 08:24
+                </span>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      <Card className={styles.customQuestionBox}>
+        <Card.Header className={styles.customQuestionHeader}>
+          <span>trò chuyện</span>
+        </Card.Header>
+        <Card.Body>
+          <div className={styles.messagesArea} ref={messagesAreaRef}>
+            {visibleThreads.map((q) => {
+              const isSender = getUserId(q.userId) === currentUser.userId;
+              return (
+                <div
+                  key={q._id}
+                  className={styles.chatMessage}
+                  onMouseEnter={() => setHoveredMessageId(q._id)}
+                  onMouseLeave={() => {
+                    setHoveredMessageId(null);
+                    clearLongPress();
+                  }}
+                  onMouseDown={(e) => {
+                    initiateLongPress(() => {
+                      setReplyTo({
+                        type: "question",
+                        questionId: q._id,
+                        message: q,
+                      });
+                    }, e);
+                  }}
+                  onMouseUp={clearLongPress}
+                  onTouchStart={(e) => {
+                    initiateLongPress(() => {
+                      setReplyTo({
+                        type: "question",
+                        questionId: q._id,
+                        message: q,
+                      });
+                    }, e);
+                  }}
+                  onTouchEnd={clearLongPress}
+                  onContextMenu={(e) => e.preventDefault()}
+                >
+                  <div
+                    className={
+                      isSender ? styles.chatBubbleUser : styles.chatBubbleOther
+                    }
+                    style={{
+                      textAlign: isSender ? "right" : "left",
+                      marginLeft: isSender ? "auto" : "0",
+                      marginRight: isSender ? "0" : "auto",
+                      position: "relative",
+                    }}
+                  >
+                    <p>
+                      {isSender ? (
+                        <>
+                          <CollapsibleText text={q.text} maxLength={100} />{" "}
+                          <strong>
+                            : {getFullName(q.userId, currentUser)}
+                          </strong>
+                        </>
+                      ) : (
+                        <>
+                          <strong>{getFullName(q.userId, currentUser)}:</strong>{" "}
+                          <CollapsibleText text={q.text} maxLength={100} />
+                        </>
+                      )}
+                    </p>
+                    <div
+                      className={styles.replyButton}
+                      style={{
+                        opacity:
+                          hoveredMessageId === q._id ||
+                          (replyTo && replyTo.message._id === q._id)
+                            ? 1
+                            : 0,
+                        transition: "opacity 0.3s ease",
+                        pointerEvents:
+                          hoveredMessageId === q._id ||
+                          (replyTo && replyTo.message._id === q._id)
+                            ? "auto"
+                            : "none",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (replyTo && replyTo.message._id === q._id) {
+                          setReplyTo(null);
+                        } else {
+                          setReplyTo({
+                            type: "question",
+                            questionId: q._id,
+                            message: q,
+                          });
+                        }
+                      }}
+                    >
+                      {replyTo && replyTo.message._id === q._id
+                        ? "Hủy"
+                        : "Trả lời"}
                     </div>
-                    <div class="rating-count">Có <strong>133</strong> lượt đánh giá</div>
-                </div>
-                <div class="col-md-6 text-center ">
-                    <button class="btn btn-custom active">Mới nhất</button>
-                    <button class="btn btn-custom">Đã mua nhiều lần</button>
-                    <div class="row mt-3">
-                <div class="col text-center">
-                    <button class="btn btn-custom">5 <i class="fas fa-star"></i></button>
-                    <button class="btn btn-custom">4 <i class="fas fa-star"></i></button>
-                    <button class="btn btn-custom">3 <i class="fas fa-star"></i></button>
-                    <button class="btn btn-custom">2 <i class="fas fa-star"></i></button>
-                    <button class="btn btn-custom">1 <i class="fas fa-star"></i></button>
-                </div>
-            </div>
-                </div>
-
-            </div>
-            
-        </div>
-
-        <!-- Danh sách đánh giá -->
-        <div class="row">
-            <div class="col-12">
-                <div class="d-flex align-items-center p-3 border rounded bg-white">
-                    <div class="avatar me-3">A</div>
-                    <div class="flex-grow-1">
-                        <div class="d-flex align-items-center">
-                            <span class="fw-bold me-2">Nguyễn An</span>
-                            <div class="rating-stars">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
+                    <div className={styles.chatTimestamp}>
+                      {new Date(q.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                  {q.answers &&
+                    q.answers.map((ans) => {
+                      const isAnswerSender =
+                        getUserId(ans.userId) === currentUser.userId;
+                      return (
+                        <div
+                          key={ans._id}
+                          className={styles.chatMessage}
+                          onMouseEnter={() => setHoveredMessageId(ans._id)}
+                          onMouseLeave={() => {
+                            setHoveredMessageId(null);
+                            clearLongPress();
+                          }}
+                          onMouseDown={(e) => {
+                            initiateLongPress(() => {
+                              setReplyTo({
+                                type: "answer",
+                                questionId: q._id,
+                                message: ans,
+                              });
+                            }, e);
+                          }}
+                          onMouseUp={clearLongPress}
+                          onTouchStart={(e) => {
+                            initiateLongPress(() => {
+                              setReplyTo({
+                                type: "answer",
+                                questionId: q._id,
+                                message: ans,
+                              });
+                            }, e);
+                          }}
+                          onTouchEnd={clearLongPress}
+                          onContextMenu={(e) => e.preventDefault()}
+                        >
+                          <div
+                            className={
+                              isAnswerSender
+                                ? styles.chatBubbleUser
+                                : styles.chatBubbleOther
+                            }
+                            style={{
+                              textAlign: isAnswerSender ? "right" : "left",
+                              marginLeft: isAnswerSender ? "auto" : "0",
+                              marginRight: isAnswerSender ? "0" : "auto",
+                              position: "relative",
+                            }}
+                          >
+                            {ans.replyTo && (
+                              <div className={styles.inlineReply}>
+                                <small>
+                                  Trả lời{" "}
+                                  {getFullName(ans.replyTo.userId, currentUser)}
+                                  : {getReplySnippet(ans.replyTo)}
+                                </small>
+                              </div>
+                            )}
+                            <p>
+                              {isAnswerSender ? (
+                                <>
+                                  <CollapsibleText
+                                    text={ans.text}
+                                    maxLength={100}
+                                  />{" "}
+                                  <strong>
+                                    : {getFullName(ans.userId, currentUser)}
+                                  </strong>
+                                </>
+                              ) : (
+                                <>
+                                  <strong>
+                                    {getFullName(ans.userId, currentUser)}:
+                                  </strong>{" "}
+                                  <CollapsibleText
+                                    text={ans.text}
+                                    maxLength={100}
+                                  />
+                                </>
+                              )}
+                            </p>
+                            <div
+                              className={styles.replyButton}
+                              style={{
+                                opacity:
+                                  hoveredMessageId === ans._id ||
+                                  (replyTo && replyTo.message._id === ans._id)
+                                    ? 1
+                                    : 0,
+                                transition: "opacity 0.3s ease",
+                                pointerEvents:
+                                  hoveredMessageId === ans._id ||
+                                  (replyTo && replyTo.message._id === ans._id)
+                                    ? "auto"
+                                    : "none",
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (
+                                  replyTo &&
+                                  replyTo.message._id === ans._id
+                                ) {
+                                  setReplyTo(null);
+                                } else {
+                                  setReplyTo({
+                                    type: "answer",
+                                    questionId: q._id,
+                                    message: ans,
+                                  });
+                                }
+                              }}
+                            >
+                              {replyTo && replyTo.message._id === ans._id
+                                ? "Hủy"
+                                : "Trả lời"}
                             </div>
+                            <div className={styles.chatTimestamp}>
+                              {new Date(ans.createdAt).toLocaleString()}
+                            </div>
+                          </div>
                         </div>
-                        <div class="text-muted" style="font-size: 0.875rem;">05/02/2025 08:24</div>
-                    </div>
-                    <div class="review-like ms-3">
-                        <i class="far fa-heart"></i>
-                    </div>
+                      );
+                    })}
                 </div>
-            </div>
-        </div>
-    </div>
+              );
+            })}
+            <div ref={messagesEndRef} />
+          </div>
+          <div className={styles.inputArea}>
+            <InputGroup className={styles.customQuestionInputGroup}>
+              <FormControl
+                className={styles.customQuestionInput}
+                placeholder={
+                  replyTo ? "Nhập câu trả lời..." : "Gửi câu hỏi cho admin"
+                }
+                aria-label="Gửi tin nhắn"
+                value={newMessageText}
+                onChange={(e) => setNewMessageText(e.target.value)}
+              />
+              <InputGroup.Text
+                style={{ cursor: "pointer" }}
+                onClick={handleSubmit}
+              >
+                <i className="fas fa-paper-plane" />
+              </InputGroup.Text>
+            </InputGroup>
+          </div>
+        </Card.Body>
+      </Card>
+    </Container>
+  );
+};
 
-    <!-- Bootstrap JS (nếu cần) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+export default Evaluate;

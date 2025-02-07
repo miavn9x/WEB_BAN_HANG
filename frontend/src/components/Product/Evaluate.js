@@ -1,4 +1,3 @@
-// src/components/Product/Evaluate.js
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import {
@@ -12,45 +11,7 @@ import {
 } from "react-bootstrap";
 import styles from "../../styles/Evaluate.module.css";
 
-// Component hiển thị nội dung tin nhắn ẩn/hiện
-const CollapsibleText = ({ text, maxLength = 100 }) => {
-  const [expanded, setExpanded] = useState(false);
-  // Ép về chuỗi an toàn
-  const safeText = text ? text.toString() : "";
-  if (!safeText) return null;
-
-  // Kiểm tra xem nội dung có vượt quá maxLength không
-  const shouldTruncate = safeText.length > maxLength;
-  // Nếu nội dung dài và chưa mở rộng thì cắt bớt
-  const displayText =
-    expanded || !shouldTruncate
-      ? safeText
-      : safeText.substring(0, maxLength) + "...";
-
-  return (
-    <span>
-      {displayText}{" "}
-      {shouldTruncate && (
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            setExpanded(!expanded);
-          }}
-          style={{
-            color: "blue",
-            textDecoration: "underline",
-            marginLeft: "4px",
-          }}
-        >
-          {expanded ? "Ẩn bớt" : "Xem thêm"}
-        </a>
-      )}
-    </span>
-  );
-};
-
-// Các hàm hỗ trợ
+// Lấy thông tin người dùng (từ localStorage hoặc dữ liệu giả)
 const getCurrentUser = () => {
   const storedUser = localStorage.getItem("user");
   if (storedUser) {
@@ -61,7 +22,7 @@ const getCurrentUser = () => {
     return user;
   }
   return {
-    userId: "60d0fe4f5311236168a109cb",
+    userId: "60d0fe4f5311236168a109cb", // Dữ liệu giả
     firstName: "Nguyễn",
     lastName: "Văn A",
   };
@@ -85,30 +46,52 @@ const getFullName = (user, currentUser) => {
   if (typeof user === "object" && user.lastName && user.firstName) {
     return `${user.lastName} ${user.firstName}`;
   }
+  return "Unknown";
 };
 
-const getReplySnippet = (message) => {
-  if (!message) return "";
-  const text = message.questionText || message.answerText || "";
+const getReplySnippet = (replyData) => {
+  if (!replyData) return "";
+  const text = replyData.text || "";
   return text.length > 50 ? text.substring(0, 50) + "..." : text;
 };
 
-const Evaluate = ({ productId }) => {
-  const [questions, setQuestions] = useState([]);
-  const [newQuestionText, setNewQuestionText] = useState("");
-  const [replyTo, setReplyTo] = useState(null);
-  const [hoveredMessageId, setHoveredMessageId] = useState(null);
+const getReplyToId = (replyTo) => {
+  if (!replyTo) return null;
+  if (typeof replyTo === "object" && replyTo._id) {
+    return replyTo._id.toString();
+  }
+  return replyTo.toString();
+};
 
-  // Chỉ hiển thị tối đa 5 cuộc trò chuyện
-  const MAX_THREADS = 5;
+
+const getThreadAnswers = (question, messages) => {
+  const threadAnswers = [];
+  const addAnswers = (parentId) => {
+    messages.forEach((m) => {
+      if (m.type === "answer" && getReplyToId(m.replyTo) === parentId) {
+        threadAnswers.push(m);
+        addAnswers(m._id.toString());
+      }
+    });
+  };
+  addAnswers(question._id.toString());
+  // Sắp xếp theo thời gian tăng dần
+  threadAnswers.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  return threadAnswers;
+};
+
+const Evaluate = ({ productId }) => {
+  const [messages, setMessages] = useState([]);
+  const [newMessageText, setNewMessageText] = useState("");
+  // replyTo: lưu đối tượng tin nhắn (câu hỏi hoặc câu trả lời) mà người dùng đang phản hồi
+  const [replyTo, setReplyTo] = useState(null);
 
   const currentUser = getCurrentUser();
   const containerRef = useRef(null);
-  const longPressTimer = useRef(null);
-  const messagesEndRef = useRef(null);
   const messagesAreaRef = useRef(null);
+  
 
-  // Hàm cuộn xuống cuối danh sách tin nhắn (nếu cần)
+  // Hàm tự động scroll xuống dưới khung tin nhắn
   const scrollToBottom = () => {
     if (messagesAreaRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = messagesAreaRef.current;
@@ -120,157 +103,108 @@ const Evaluate = ({ productId }) => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [questions]);
+  }, [messages]);
 
-  const clearLongPress = () => {
-    clearTimeout(longPressTimer.current);
-  };
-
-  const initiateLongPress = (callback, e) => {
-    e.preventDefault();
-    longPressTimer.current = setTimeout(callback, 2000);
-  };
-
-  // Lấy danh sách câu hỏi theo productId
-  const fetchQuestions = useCallback(async () => {
+  
+  const fetchMessages = useCallback(async () => {
     try {
-      const res = await axios.get(`/api/products/${productId}/questions`);
-      setQuestions(res.data);
+      const res = await axios.get(`/api/products/${productId}/messages`);
+      let msgs = res.data.messages || [];
+      // Xử lý populate cho replyTo
+      msgs = msgs.map((message) => {
+        if (message.replyTo) {
+          // Nếu replyTo chưa được populate, tìm tin gốc trong mảng
+          const replyId =
+            typeof message.replyTo === "object"
+              ? message.replyTo._id
+              : message.replyTo;
+          const original = msgs.find((m) => m._id === replyId);
+          if (original) {
+            return {
+              ...message,
+              replyTo: {
+                _id: original._id,
+                text: original.text,
+                userId: original.userId,
+                createdAt: original.createdAt,
+              },
+            };
+          }
+        }
+        return message;
+      });
+      setMessages(msgs);
     } catch (err) {
-      console.error("Lỗi khi lấy danh sách câu hỏi:", err);
+      console.error("Lỗi khi lấy danh sách tin nhắn:", err);
     }
   }, [productId]);
 
   useEffect(() => {
-    fetchQuestions();
-    const intervalId = setInterval(() => {
-      fetchQuestions();
-    }, 2000);
+    fetchMessages();
+    const intervalId = setInterval(fetchMessages, 2000);
     return () => clearInterval(intervalId);
-  }, [fetchQuestions]);
+  }, [fetchMessages]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target)
-      ) {
-        setReplyTo(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Xử lý gửi câu hỏi hoặc trả lời, kèm theo productId
+  // Gửi tin nhắn (câu hỏi hoặc câu trả lời)
   const handleSubmit = async () => {
-    const content = newQuestionText.trim();
+    const content = newMessageText.trim();
     if (!content) return;
-    setNewQuestionText("");
+    setNewMessageText("");
 
-    // Nếu là trả lời
-    if (replyTo) {
-      const tempAnswer = {
-        _id: `temp-${Date.now()}`,
-        userId: {
-          _id: currentUser.userId,
-          firstName: currentUser.firstName,
-          lastName: currentUser.lastName,
-        },
-        answerText: content,
-        createdAt: new Date().toISOString(),
-        pending: true,
-        replyTo: replyTo.message,
-        productId, // Đính kèm ID sản phẩm
-      };
+    const newMessageData = {
+      userId: currentUser.userId,
+      text: content,
+      createdAt: new Date().toISOString(),
+      type: replyTo ? "answer" : "question",
+      // Nếu có trả lời, gửi replyTo là _id của tin gốc
+      replyTo: replyTo ? replyTo._id : null,
+    };
 
-      // Cập nhật tạm thời vào danh sách câu hỏi
-      setQuestions((prevQuestions) =>
-        prevQuestions.map((q) =>
-          q._id === replyTo.questionId
-            ? { ...q, answers: [...(q.answers || []), tempAnswer] }
-            : q
-        )
+    // Optimistic update: thêm tin nhắn tạm thời vào UI
+    const tempMessage = {
+      _id: `temp-${Date.now()}`,
+      userId: {
+        _id: currentUser.userId,
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+      },
+      ...newMessageData,
+      pending: true,
+    };
+
+    setMessages((prev) => [...prev, tempMessage]);
+
+    try {
+      const res = await axios.post(
+        `/api/products/${productId}/messages`,
+        newMessageData
       );
-      try {
-        const res = await axios.post(
-          // Nếu backend có thể xử lý, bạn có thể đổi endpoint thành dạng: /api/products/${productId}/questions/${replyTo.questionId}/answers
-          `/api/questions/${replyTo.questionId}/answers`,
-          {
-            productId, // Đính kèm ID sản phẩm
-            userId: currentUser.userId,
-            answerText: content,
-            replyTo: replyTo.message,
-          }
-        );
-        setQuestions((prevQuestions) =>
-          prevQuestions.map((q) => {
-            if (q._id === replyTo.questionId) {
-              return {
-                ...q,
-                answers: q.answers.map((a) =>
-                  a._id === tempAnswer._id ? res.data : a
-                ),
-              };
-            }
-            return q;
-          })
-        );
-        setReplyTo(null);
-      } catch (err) {
-        console.error("handleSubmit (reply) error:", err);
-      }
-    } else {
-      // Gửi câu hỏi mới, đính kèm luôn productId
-      const tempQuestion = {
-        _id: `temp-${Date.now()}`,
-        userId: currentUser.userId,
-        questionText: content,
-        createdAt: new Date().toISOString(),
-        answers: [],
-        pending: true,
-        productId, // Đính kèm ID sản phẩm
-      };
-      setQuestions((prev) => [...prev, tempQuestion]);
-      try {
-        const res = await axios.post(`/api/products/${productId}/questions`, {
-          productId, // Đính kèm ID sản phẩm
-          userId: currentUser.userId,
-          questionText: content,
-        });
-        setQuestions((prev) =>
-          prev.map((q) => (q._id === tempQuestion._id ? res.data : q))
-        );
-      } catch (err) {
-        console.error("handleSubmit (question) error:", err);
-        setNewQuestionText(content);
-      }
+      setMessages(res.data.messages);
+      setReplyTo(null);
+    } catch (err) {
+      console.error("Error sending message:", err);
     }
   };
 
-  // --- XỬ LÝ CUỘC TRÒ CHUYỆN ---
-  // Mỗi thread là một câu hỏi kèm theo các câu trả lời, tính toán trường lastUpdated
-  const conversationThreads = questions.map((q) => {
-    const questionTime = new Date(q.createdAt).getTime();
-    const answerTimes = (q.answers || []).map((ans) =>
-      new Date(ans.createdAt).getTime()
-    );
-    const lastUpdated =
-      answerTimes.length > 0
-        ? Math.max(questionTime, ...answerTimes)
-        : questionTime;
-    return { ...q, lastUpdated };
-  });
-  // Sắp xếp theo lastUpdated giảm dần (thread mới nhất đứng đầu)
-  const sortedThreads = conversationThreads.sort(
-    (a, b) => b.lastUpdated - a.lastUpdated
-  );
-  // Chỉ lấy tối đa MAX_THREADS thread mới nhất
-  const visibleThreads = sortedThreads.slice(0, MAX_THREADS);
+  // Nhóm các tin nhắn thành các thread (mỗi thread gồm 1 câu hỏi và các tin trả lời thuộc nó)
+  const threads = messages
+    .filter((m) => m.type === "question")
+    .map((q) => {
+      const answers = getThreadAnswers(q, messages);
+      const questionTime = new Date(q.createdAt).getTime();
+      const answerTimes = answers.map((a) => new Date(a.createdAt).getTime());
+      const lastUpdated =
+        answerTimes.length > 0
+          ? Math.max(questionTime, ...answerTimes)
+          : questionTime;
+      return { ...q, answers, lastUpdated };
+    });
+
+  const sortedThreads = threads.sort((a, b) => b.lastUpdated - a.lastUpdated);
+  const visibleThreads = sortedThreads.slice(0, 5);
 
   return (
     <Container className="mt-4" ref={containerRef}>
-      {/* Phần đánh giá tổng quan */}
       <Card className={`p-4 ${styles.ratingBox}`}>
         <Card.Title className="fw-bold">Đánh Giá</Card.Title>
         <Row className="align-items-center">
@@ -288,242 +222,70 @@ const Evaluate = ({ productId }) => {
             </div>
           </Col>
           <Col md={6} className="text-center">
-            <Button
-              className={`${styles.btnCustom} ${styles.btnCustomActive}`}
-              variant="primary"
-            >
-              Mới nhất
-            </Button>
-            <Button className={`${styles.btnCustom} ms-2`} variant="secondary">
+            <Button variant="primary">Mới nhất</Button>
+            <Button className="ms-2" variant="secondary">
               Đã mua nhiều lần
             </Button>
-            <Row className="mt-3">
-              <Col className="text-center">
-                <Button className={styles.btnCustom} variant="outline-primary">
-                  5 <i className="fas fa-star" />
-                </Button>
-                <Button
-                  className={`${styles.btnCustom} ms-2`}
-                  variant="outline-primary"
-                >
-                  4 <i className="fas fa-star" />
-                </Button>
-                <Button
-                  className={`${styles.btnCustom} ms-2`}
-                  variant="outline-primary"
-                >
-                  3 <i className="fas fa-star" />
-                </Button>
-                <Button
-                  className={`${styles.btnCustom} ms-2`}
-                  variant="outline-primary"
-                >
-                  2 <i className="fas fa-star" />
-                </Button>
-                <Button
-                  className={`${styles.btnCustom} ms-2`}
-                  variant="outline-primary"
-                >
-                  1 <i className="fas fa-star" />
-                </Button>
-              </Col>
-            </Row>
           </Col>
         </Row>
       </Card>
 
-      {/* Phần đánh giá sản phẩm mẫu */}
-      <Row className="mt-4">
-        <Col xs={12}>
-          <Card className="border rounded bg-white">
-            <Card.Body className="p-3">
-              <div className="d-flex flex-column">
-                <span className="fw-bold">Nguyễn An</span>
-                <div className={styles.ratingStars}>
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                </div>
-                <span className="text-muted" style={{ fontSize: "0.875rem" }}>
-                  05/02/2025 08:24
-                </span>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Phần Hỏi – Đáp */}
+      {/* Hiển thị tin nhắn */}
       <Card className={styles.customQuestionBox}>
-        <Card.Header className={styles.customQuestionHeader}>
-          <span>Hỏi Đáp</span>
-        </Card.Header>
         <Card.Body>
           <div className={styles.messagesArea} ref={messagesAreaRef}>
             {visibleThreads.map((q) => {
-              const questionUserId = getUserId(q.userId);
-              const isSender = questionUserId === currentUser.userId;
+              const isSender = getUserId(q.userId) === currentUser.userId;
               return (
-                <div
-                  key={q._id}
-                  className={styles.chatMessage}
-                  onMouseEnter={() => setHoveredMessageId(q._id)}
-                  onMouseLeave={() => {
-                    setHoveredMessageId(null);
-                    clearLongPress();
-                  }}
-                  onMouseDown={(e) => {
-                    if (!isSender) {
-                      initiateLongPress(() => {
-                        setReplyTo({
-                          type: "question",
-                          questionId: q._id,
-                          message: q,
-                        });
-                      }, e);
-                    }
-                  }}
-                  onMouseUp={clearLongPress}
-                  onTouchStart={(e) => {
-                    if (!isSender) {
-                      initiateLongPress(() => {
-                        setReplyTo({
-                          type: "question",
-                          questionId: q._id,
-                          message: q,
-                        });
-                      }, e);
-                    }
-                  }}
-                  onTouchEnd={clearLongPress}
-                  onContextMenu={(e) => e.preventDefault()}
-                >
+                <div key={q._id} className={styles.chatMessage}>
+                  {/* Hiển thị câu hỏi */}
                   <div
                     className={
                       isSender ? styles.chatBubbleUser : styles.chatBubbleOther
                     }
-                    style={{
-                      textAlign: isSender ? "right" : "left",
-                      marginLeft: isSender ? "auto" : "0",
-                      marginRight: isSender ? "0" : "auto",
-                      position: "relative",
-                    }}
                   >
                     <p>
                       {isSender ? (
-                        <>
-                          <CollapsibleText
-                            text={q.questionText}
-                            maxLength={100}
-                          />{" "}
-                          <strong>
-                            : {getFullName(q.userId, currentUser)}
-                          </strong>
-                        </>
+                        <strong>{getFullName(q.userId, currentUser)}</strong>
                       ) : (
-                        <>
-                          <strong>{getFullName(q.userId, currentUser)}:</strong>{" "}
-                          <CollapsibleText
-                            text={q.questionText}
-                            maxLength={100}
-                          />
-                        </>
+                        <strong>{getFullName(q.userId, currentUser)}:</strong>
                       )}
                     </p>
-                    {!isSender && (
-                      <div
-                        className={styles.replyButton}
-                        style={{
-                          opacity:
-                            hoveredMessageId === q._id ||
-                            (replyTo && replyTo.message._id === q._id)
-                              ? 1
-                              : 0,
-                          transition: "opacity 0.3s ease",
-                          pointerEvents:
-                            hoveredMessageId === q._id ||
-                            (replyTo && replyTo.message._id === q._id)
-                              ? "auto"
-                              : "none",
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (replyTo && replyTo.message._id === q._id) {
-                            setReplyTo(null);
-                          } else {
-                            setReplyTo({
-                              type: "question",
-                              questionId: q._id,
-                              message: q,
-                            });
-                          }
-                        }}
-                      >
-                        {replyTo && replyTo.message._id === q._id
-                          ? "Hủy"
-                          : "Trả lời"}
-                      </div>
-                    )}
+                    <p>{q.text}</p>
+                    <div
+                      className={styles.replyButton}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Nếu đang chọn trả lời câu hỏi này rồi => hủy
+                        if (replyTo && replyTo._id === q._id) {
+                          setReplyTo(null);
+                        } else {
+                          setReplyTo(q);
+                        }
+                      }}
+                    >
+                      {replyTo && replyTo._id === q._id ? "Hủy" : "Trả lời"}
+                    </div>
                     <div className={styles.chatTimestamp}>
                       {new Date(q.createdAt).toLocaleString()}
                     </div>
                   </div>
 
+                  {/* Hiển thị danh sách các tin trả lời thuộc thread này */}
                   {q.answers &&
                     q.answers.map((ans) => {
-                      const answerUserId = getUserId(ans.userId);
                       const isAnswerSender =
-                        answerUserId === currentUser.userId;
+                        getUserId(ans.userId) === currentUser.userId;
                       return (
-                        <div
-                          key={ans._id}
-                          className={styles.chatMessage}
-                          onMouseEnter={() => setHoveredMessageId(ans._id)}
-                          onMouseLeave={() => {
-                            setHoveredMessageId(null);
-                            clearLongPress();
-                          }}
-                          onMouseDown={(e) => {
-                            if (!isAnswerSender) {
-                              initiateLongPress(() => {
-                                setReplyTo({
-                                  type: "answer",
-                                  questionId: q._id,
-                                  message: ans,
-                                });
-                              }, e);
-                            }
-                          }}
-                          onMouseUp={clearLongPress}
-                          onTouchStart={(e) => {
-                            if (!isAnswerSender) {
-                              initiateLongPress(() => {
-                                setReplyTo({
-                                  type: "answer",
-                                  questionId: q._id,
-                                  message: ans,
-                                });
-                              }, e);
-                            }
-                          }}
-                          onTouchEnd={clearLongPress}
-                          onContextMenu={(e) => e.preventDefault()}
-                        >
+                        <div key={ans._id} className={styles.chatMessage}>
                           <div
                             className={
                               isAnswerSender
                                 ? styles.chatBubbleUser
                                 : styles.chatBubbleOther
                             }
-                            style={{
-                              textAlign: isAnswerSender ? "right" : "left",
-                              marginLeft: isAnswerSender ? "auto" : "0",
-                              marginRight: isAnswerSender ? "0" : "auto",
-                              position: "relative",
-                            }}
                           >
+                            {/* Nếu tin trả lời có replyTo (đã được populate) thì hiển thị inline reply */}
                             {ans.replyTo && (
                               <div className={styles.inlineReply}>
                                 <small>
@@ -535,64 +297,32 @@ const Evaluate = ({ productId }) => {
                             )}
                             <p>
                               {isAnswerSender ? (
-                                <>
-                                  <CollapsibleText
-                                    text={ans.answerText}
-                                    maxLength={100}
-                                  />{" "}
-                                  <strong>
-                                    : {getFullName(ans.userId, currentUser)}
-                                  </strong>
-                                </>
+                                <strong>
+                                  {getFullName(ans.userId, currentUser)}
+                                </strong>
                               ) : (
-                                <>
-                                  <strong>
-                                    {getFullName(ans.userId, currentUser)}:
-                                  </strong>{" "}
-                                  <CollapsibleText
-                                    text={ans.answerText}
-                                    maxLength={100}
-                                  />
-                                </>
+                                <strong>
+                                  {getFullName(ans.userId, currentUser)}:
+                                </strong>
                               )}
                             </p>
-                            {!isAnswerSender && (
-                              <div
-                                className={styles.replyButton}
-                                style={{
-                                  opacity:
-                                    hoveredMessageId === ans._id ||
-                                    (replyTo && replyTo.message._id === ans._id)
-                                      ? 1
-                                      : 0,
-                                  transition: "opacity 0.3s ease",
-                                  pointerEvents:
-                                    hoveredMessageId === ans._id ||
-                                    (replyTo && replyTo.message._id === ans._id)
-                                      ? "auto"
-                                      : "none",
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (
-                                    replyTo &&
-                                    replyTo.message._id === ans._id
-                                  ) {
-                                    setReplyTo(null);
-                                  } else {
-                                    setReplyTo({
-                                      type: "answer",
-                                      questionId: q._id,
-                                      message: ans,
-                                    });
-                                  }
-                                }}
-                              >
-                                {replyTo && replyTo.message._id === ans._id
-                                  ? "Hủy"
-                                  : "Trả lời"}
-                              </div>
-                            )}
+                            <p>{ans.text}</p>
+                            <div
+                              className={styles.replyButton}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Khi nhấn "Trả lời" ở tin trả lời, set replyTo là tin đó
+                                if (replyTo && replyTo._id === ans._id) {
+                                  setReplyTo(null);
+                                } else {
+                                  setReplyTo(ans);
+                                }
+                              }}
+                            >
+                              {replyTo && replyTo._id === ans._id
+                                ? "Hủy"
+                                : "Trả lời"}
+                            </div>
                             <div className={styles.chatTimestamp}>
                               {new Date(ans.createdAt).toLocaleString()}
                             </div>
@@ -603,7 +333,6 @@ const Evaluate = ({ productId }) => {
                 </div>
               );
             })}
-            <div ref={messagesEndRef} />
           </div>
           <div className={styles.inputArea}>
             <InputGroup className={styles.customQuestionInputGroup}>
@@ -613,8 +342,8 @@ const Evaluate = ({ productId }) => {
                   replyTo ? "Nhập câu trả lời..." : "Gửi câu hỏi cho admin"
                 }
                 aria-label="Gửi tin nhắn"
-                value={newQuestionText}
-                onChange={(e) => setNewQuestionText(e.target.value)}
+                value={newMessageText}
+                onChange={(e) => setNewMessageText(e.target.value)}
               />
               <InputGroup.Text
                 style={{ cursor: "pointer" }}

@@ -1,110 +1,89 @@
 const express = require("express");
 const router = express.Router();
-const Question = require("../models/questionAnswerModel");
-const Notification = require("../models/Notification");
+const mongoose = require("mongoose");
+const questionAnswerModel = require("../models/questionAnswerModel");
 
-// 1. Thêm một câu hỏi cho sản phẩm
-router.post("/products/:productId/questions", async (req, res) => {
+// Thêm tin nhắn (câu hỏi hoặc câu trả lời)
+router.post("/products/:productId/messages", async (req, res) => {
   try {
     const { productId } = req.params;
-    const { userId, questionText } = req.body;
-    const newQuestion = new Question({ productId, userId, questionText });
-    await newQuestion.save();
-    // Populate thông tin của người dùng (tùy chỉnh trường bạn cần)
-    await newQuestion.populate("userId", "firstName lastName");
-    res.status(201).json(newQuestion);
-  } catch (error) {
-    console.error("Error saving question:", error);
-    res.status(500).json({ error: error.message });
-  }
-});
+    const { userId, text, type, replyTo } = req.body;
 
-// 2. Lấy danh sách câu hỏi (với câu trả lời) cho một sản phẩm
-//    Hỗ trợ thêm tùy chọn giới hạn số lượng (limit, skip) nếu cần
-router.get("/products/:productId/questions", async (req, res) => {
-  try {
-    const { productId } = req.params;
-    // Nếu có query parameters limit và skip, chuyển đổi về kiểu số
-    const limit = parseInt(req.query.limit) || 0; // 0 nghĩa là không giới hạn
-    const skip = parseInt(req.query.skip) || 0;
-
-    const questions = await Question.find({ productId })
-      .populate("userId", "firstName lastName")
-      .populate("answers.userId", "firstName lastName")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-    res.json(questions);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// 3. Thêm câu trả lời cho một câu hỏi
-router.post("/questions/:questionId/answers", async (req, res) => {
-  try {
-    const { questionId } = req.params;
-    const { userId, answerText, replyTo } = req.body;
-
-    // Tìm câu hỏi gốc
-    const question = await Question.findById(questionId).populate(
-      "userId",
-      "firstName lastName"
-    );
-    if (!question) {
-      return res.status(404).json({ error: "Question not found" });
+    // Kiểm tra productId có hợp lệ không
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ error: "Invalid productId" });
     }
 
-    // Tạo đối tượng câu trả lời và gắn productId từ câu hỏi
-    const answerData = {
-      productId: question.productId,
+    let conversation = await questionAnswerModel.findOne({ productId });
+    if (!conversation) {
+      conversation = new questionAnswerModel({ productId, messages: [] });
+    }
+
+    const newMessage = {
       userId,
-      answerText,
+      text,
+      type,
+      replyTo: replyTo || null,
+      createdAt: new Date(),
     };
-    if (replyTo) {
-      answerData.replyTo = replyTo;
-    }
-    question.answers.push(answerData);
-    await question.save();
 
-    // Populate lại thông tin của các câu trả lời
-    await question.populate("answers.userId", "firstName lastName");
+    // Thêm tin nhắn vào cuộc trò chuyện
+    conversation.messages.push(newMessage);
 
-    // Nếu người trả lời không phải là người tạo câu hỏi, tạo thông báo cho người tạo câu hỏi
-    if (question.userId._id.toString() !== userId) {
-      const notification = new Notification({
-        receiverId: question.userId._id,
-        senderId: userId,
-        productId: question.productId,
-        message: `Tin của bạn đã được trả lời: "${answerText.substring(
-          0,
-          50
-        )}..."`,
-      });
-      await notification.save();
-    }
+    // Lưu lại cuộc trò chuyện vào MongoDB
+    await conversation.save();
 
-    res.status(201).json(question);
+    res.status(201).json(conversation);
   } catch (error) {
-    console.error("Error saving answer:", error);
+    console.error("Error adding message:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// 4. (Tùy chọn) Lấy tổng số tin nhắn (câu hỏi + câu trả lời) cho một sản phẩm
-router.get("/products/:productId/messages/count", async (req, res) => {
+// Lấy danh sách tin nhắn của sản phẩm
+router.get("/products/:productId/messages", async (req, res) => {
   try {
     const { productId } = req.params;
-    const questions = await Question.find({ productId });
-    let count = 0;
-    questions.forEach((q) => {
-      count += 1; // tính câu hỏi
-      if (q.answers && q.answers.length > 0) {
-        count += q.answers.length; // tính số câu trả lời
+
+    // Kiểm tra productId có hợp lệ không
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ error: "Invalid productId" });
+    }
+
+    // Lấy cuộc trò chuyện và populate thông tin user cho tin nhắn
+    const conversation = await questionAnswerModel
+      .findOne({ productId })
+      .populate("messages.userId", "firstName lastName");
+    // Không populate "messages.replyTo" vì chưa đăng ký model "Message"
+
+    if (!conversation) {
+      return res.status(404).json({ messages: [] });
+    }
+
+    // Thực hiện populate thủ công cho replyTo: tìm tin nhắn gốc trong mảng messages của cùng cuộc trò chuyện.
+    const messages = conversation.messages.map((message) => {
+      if (message.replyTo) {
+        // Tìm tin nhắn gốc có _id trùng với replyTo của tin nhắn hiện tại
+        const original = conversation.messages.find((m) =>
+          m._id.equals(message.replyTo)
+        );
+        if (original) {
+          // Chuyển message về dạng đối tượng thường (plain object)
+          message = message.toObject();
+          message.replyTo = {
+            _id: original._id,
+            text: original.text,
+            userId: original.userId, // đã được populate từ messages.userId
+            createdAt: original.createdAt,
+          };
+        }
       }
+      return message;
     });
-    res.json({ count });
+
+    res.json({ messages });
   } catch (error) {
+    console.error("Error fetching messages:", error);
     res.status(500).json({ error: error.message });
   }
 });

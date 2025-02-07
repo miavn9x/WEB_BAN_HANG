@@ -8,16 +8,14 @@ const AutoLogout = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) return; // Nếu không có token thì không cần theo dõi
+    if (!token) return; 
 
     try {
       const decoded = jwtDecode(token);
-      // Tính thời gian còn lại (ms) trước khi token hết hạn
       const expirationTime = decoded.exp * 1000 - Date.now();
       console.log("Thời gian còn lại (ms):", expirationTime);
 
       if (expirationTime <= 0) {
-        // Nếu token đã hết hạn, xóa token và chuyển hướng
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         localStorage.removeItem("userRole");
@@ -32,7 +30,6 @@ const AutoLogout = () => {
           navigate("/login");
         }, expirationTime);
 
-        // Xóa timer khi component unmount
         return () => clearTimeout(timer);
       }
     } catch (error) {
