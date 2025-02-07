@@ -222,10 +222,46 @@ const Evaluate = ({ productId }) => {
             </div>
           </Col>
           <Col md={6} className="text-center">
-            <Button variant="primary">Mới nhất</Button>
-            <Button className="ms-2" variant="secondary">
+            <Button
+              className={`${styles.btnCustom} ${styles.btnCustomActive}`}
+              variant="primary"
+            >
+              Mới nhất
+            </Button>
+            <Button className={`${styles.btnCustom} ms-2`} variant="secondary">
               Đã mua nhiều lần
             </Button>
+            <Row className="mt-3">
+              <Col className="text-center">
+                <Button className={styles.btnCustom} variant="outline-primary">
+                  5 <i className="fas fa-star" />
+                </Button>
+                <Button
+                  className={`${styles.btnCustom} ms-2`}
+                  variant="outline-primary"
+                >
+                  4 <i className="fas fa-star" />
+                </Button>
+                <Button
+                  className={`${styles.btnCustom} ms-2`}
+                  variant="outline-primary"
+                >
+                  3 <i className="fas fa-star" />
+                </Button>
+                <Button
+                  className={`${styles.btnCustom} ms-2`}
+                  variant="outline-primary"
+                >
+                  2 <i className="fas fa-star" />
+                </Button>
+                <Button
+                  className={`${styles.btnCustom} ms-2`}
+                  variant="outline-primary"
+                >
+                  1 <i className="fas fa-star" />
+                </Button>
+              </Col>
+            </Row>
           </Col>
         </Row>
       </Card>
