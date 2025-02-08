@@ -268,6 +268,9 @@ const Evaluate = ({ productId }) => {
 
       {/* Hiển thị tin nhắn */}
       <Card className={styles.customQuestionBox}>
+        <Card.Header className={styles.customQuestionHeader}>
+          <span>Hỏi – Đáp</span>
+        </Card.Header>
         <Card.Body>
           <div className={styles.messagesArea} ref={messagesAreaRef}>
             {visibleThreads.map((q) => {
