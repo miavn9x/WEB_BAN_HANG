@@ -25,6 +25,7 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Carouselandmenu.css";
+import HomeProduct from "../header/HomeProduct";
 
 // Component danh mục sản phẩm (hỗ trợ menu con)
 const CategoryMenu = ({ categories }) => {
@@ -231,80 +232,88 @@ const CarouselAndMenu = () => {
   ];
 
   return (
-    <Container className="mt-3 container_custom">
-      <Row>
-        {/* Sidebar danh mục (chỉ hiển thị ở màn hình lớn) */}
-        <Col xs={12} lg={3} className="d-none d-lg-block">
-          <CategoryMenu categories={categories} />
-        </Col>
+    <>
+      <Container className="mt-3 container_custom">
+        <Row>
+          {/* Sidebar danh mục (chỉ hiển thị ở màn hình lớn) */}
+          <Col xs={12} lg={3} className="d-none d-lg-block">
+            <CategoryMenu categories={categories} />
+          </Col>
 
-        {/* Nội dung chính */}
-        <Col xs={12} lg={9}>
-          <Carousel id="carouselExampleIndicators" className="carousel-custom">
-            <Carousel.Item>
-              <img
-                src="https://bizweb.dktcdn.net/100/531/894/themes/976680/assets/home_slider_2.jpg"
-                className="d-block w-100"
-                alt="Banner 1"
-              />
-            </Carousel.Item>
-            <Carousel.Item>
-              <img
-                src="https://bizweb.dktcdn.net/100/531/894/themes/976680/assets/home_slider_1.jpg"
-                className="d-block w-100"
-                alt="Banner 2"
-              />
-            </Carousel.Item>
-            <Carousel.Item>
-              <img
-                src="https://cdn1.concung.com/themes/images/2025/01/5/1736149668_image_title_pc.png"
-                className="d-block w-100"
-                alt="Banner 3"
-              />
-            </Carousel.Item>
-            <Carousel.Item>
-              <img
-                src="https://cdn1.concung.com/img/adds/2025/01/1736402117-banner-2400x906-1-.png"
-                className="d-block w-100"
-                alt="Banner 4"
-              />
-            </Carousel.Item>
-          </Carousel>
+          {/* Nội dung chính */}
+          <Col xs={12} lg={9}>
+            <Carousel
+              id="carouselExampleIndicators"
+              className="carousel-custom"
+            >
+              <Carousel.Item>
+                <img
+                  src="https://bizweb.dktcdn.net/100/531/894/themes/976680/assets/home_slider_2.jpg"
+                  className="d-block w-100"
+                  alt="Banner 1"
+                />
+              </Carousel.Item>
+              <Carousel.Item>
+                <img
+                  src="https://bizweb.dktcdn.net/100/531/894/themes/976680/assets/home_slider_1.jpg"
+                  className="d-block w-100"
+                  alt="Banner 2"
+                />
+              </Carousel.Item>
+              <Carousel.Item>
+                <img
+                  src="https://cdn1.concung.com/themes/images/2025/01/5/1736149668_image_title_pc.png"
+                  className="d-block w-100"
+                  alt="Banner 3"
+                />
+              </Carousel.Item>
+              <Carousel.Item>
+                <img
+                  src="https://cdn1.concung.com/img/adds/2025/01/1736402117-banner-2400x906-1-.png"
+                  className="d-block w-100"
+                  alt="Banner 4"
+                />
+              </Carousel.Item>
+            </Carousel>
 
-          {/* Info Section */}
-          <Row className="info-section mt-4 d-none d-md-flex">
-            <Col xs={12} sm={6} md={3} className="mb-4">
-              <InfoCard
-                icon={<FaShippingFast />}
-                title="Giao hoả tốc"
-                description="Nội thành TP. HCM trong 4h"
-              />
-            </Col>
-            <Col xs={12} sm={6} md={3} className="mb-4">
-              <InfoCard
-                icon={<FaUndo />}
-                title="Đổi trả miễn phí"
-                description="Trong vòng 30 ngày miễn phí"
-              />
-            </Col>
-            <Col xs={12} sm={6} md={3} className="mb-4">
-              <InfoCard
-                icon={<FaHeadset />}
-                title="Hỗ trợ 24/7"
-                description="Hỗ trợ khách hàng 24/7"
-              />
-            </Col>
-            <Col xs={12} sm={6} md={3} className="mb-4">
-              <InfoCard
-                icon={<FaBolt />}
-                title="Hot bùng nổ"
-                description="Flash sale giảm giá cực sốc"
-              />
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    </Container>
+            {/* Info Section */}
+            <Row className="info-section mt-4 d-none d-md-flex">
+              <Col xs={12} sm={6} md={3} className="mb-4">
+                <InfoCard
+                  icon={<FaShippingFast />}
+                  title="Giao hoả tốc"
+                  description="Nội thành TP. HCM trong 4h"
+                />
+              </Col>
+              <Col xs={12} sm={6} md={3} className="mb-4">
+                <InfoCard
+                  icon={<FaUndo />}
+                  title="Đổi trả miễn phí"
+                  description="Trong vòng 30 ngày miễn phí"
+                />
+              </Col>
+              <Col xs={12} sm={6} md={3} className="mb-4">
+                <InfoCard
+                  icon={<FaHeadset />}
+                  title="Hỗ trợ 24/7"
+                  description="Hỗ trợ khách hàng 24/7"
+                />
+              </Col>
+              <Col xs={12} sm={6} md={3} className="mb-4">
+                <InfoCard
+                  icon={<FaBolt />}
+                  title="Hot bùng nổ"
+                  description="Flash sale giảm giá cực sốc"
+                />
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+      </Container>
+      <div>
+        <HomeProduct />
+      </div>
+    </>
   );
 };
 

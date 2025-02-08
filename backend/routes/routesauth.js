@@ -119,115 +119,88 @@ router.post("/forgot-password", async (req, res) => {
       subject: "Yêu cầu đặt lại mật khẩu",
       html: `
     <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Đặt lại mật khẩu</title>
-      </head>
-      <body style="
-        margin: 0;
-        padding: 0;
-        background-color: #f4f4f4;
-        font-family: Arial, sans-serif;
-      ">
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="max-width: 600px; margin: auto; padding: 20px;">
-          <tr>
-            <td style="padding: 20px 0 5px; text-align: center; background-color: #ffffff; border-radius: 8px 8px 0 0;">
-              <img src="https://res.cloudinary.com/div27nz1j/image/upload/v1737451253/1_vmcjnj.png" alt="Logo" width="150" style="max-width: 150px; height: auto;">
-                  <h1>  <span style="color: red;" >Baby </span>  <span style="color: blue;">Mart</span></h1>
-            </td>
-       
-          </tr>
-          
-          <tr>
-            <td style="background-color: #ffffff; padding: 10px 30px 40px 30px; border-radius: 0 0 8px 8px;">
-              <h1 style="
-                color: #333333;
-                font-size: 24px;
-                margin: 0 0 20px;
-                text-align: center;
-              ">Yêu cầu đặt lại mật khẩu</h1>
-              
-              <p style="
-                color: #666666;
-                font-size: 16px;
-                line-height: 1.5;
-                margin: 0 0 20px;
-              ">Xin chào <i>${user.firstName} ${user.lastName}</i>,</p>
-              
-              <p style="
-                color: #666666;
-                font-size: 16px;
-                line-height: 1.5;
-                margin: 0 0 20px;
-              ">Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản: ${
-                user.email
-              } của bạn. Vui lòng click vào nút bên dưới để tiếp tục:</p>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${resetUrl}" style="
-                  background-color: #FF6F91;
-                  color: #ffffff;
-                  text-decoration: none;
-                  padding: 12px 30px;
-                  border-radius: 4px;
-                  font-weight: bold;
-                  display: inline-block;
-                ">Đặt lại mật khẩu</a>
-              </div>
-              
-              <p style="
-                color: #666666;
-                font-size: 14px;
-                line-height: 1.5;
-                margin: 0 0 20px;
-              ">Nếu bạn không thể click vào nút trên, vui lòng copy và paste đường link sau vào trình duyệt:</p>
-              
-              <p style="
-                background-color: #f8f8f8;
-                padding: 10px;
-                border-radius: 4px;
-                word-break: break-all;
-                margin: 0 0 20px;
-                font-size: 14px;
-              ">${resetUrl}</p>
-              
-              <p style="
-                color: #666666;
-                font-size: 14px;
-                line-height: 1.5;
-                margin: 0 0 20px;
-              ">Link này sẽ hết hạn sau 1 giờ. Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
-              
-              <hr style="
-                border: none;
-                border-top: 1px solid #eeeeee;
-                margin: 30px 0;
-              ">
-              
-              <p style="
-                color: #999999;
-                font-size: 12px;
-                line-height: 1.5;
-                margin: 0;
-                text-align: center;
-              ">Email này được gửi tự động, vui lòng không trả lời. Nếu bạn cần hỗ trợ, vui lòng liên hệ với chúng tôi qua <a href="mailto:miavn9x@gmail.com" style="color: #4CAF50;">support@example.com</a></p>
-            </td>
-          </tr>
-          
-          <tr>
-            <td style="padding: 20px 0; text-align: center;">
-              <p style="
-                color: #999999;
-                font-size: 12px;
-                margin: 0;
-              ">© ${new Date().getFullYear()} Your Company Name. All rights reserved.</p>
-            </td>
-          </tr>
-        </table>
-      </body>
-    </html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đặt lại mật khẩu</title>
+  </head>
+  <body style="margin: 0; padding: 0;  font-family: Arial, sans-serif;">
+    <table
+      role="presentation"
+      width="100%"
+      cellspacing="0"
+      cellpadding="0"
+      border="0"
+      style="max-width: 600px; margin: 30px auto; background-color: #ffffff; border-collapse: collapse; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden;"
+    >
+      <!-- Header -->
+      <tr>
+        <td style="background-color: #FFB6C1; padding: 15px; text-align: center;">
+          <img
+            src="https://res.cloudinary.com/div27nz1j/image/upload/v1737451253/1_vmcjnj.png"
+            alt="Logo"
+            width="80"
+            style="display: block; margin: auto;"
+          />
+          <h1 style="margin: 10px 0 5px; font-size: 24px; color: #FF6F91; font-weight: bold;">
+            Baby <span style="color: #ffffff;">Chill</span>
+          </h1>
+          <p style="margin: 0; font-size: 12px; color: #ffffff;">
+            CHUỖI HỆ THÔNG SIÊU THỊ MẸ VÀ BÉ
+          </p>
+        </td>
+      </tr>
+      <!-- Nội dung chính -->
+      <tr>
+        <td style="padding: 20px 30px; background-color: #ffffff;">
+          <h2 style="font-size: 22px; color: #FF6F91; text-align: center; margin-bottom: 15px;">
+            Yêu cầu đặt lại mật khẩu
+          </h2>
+          <p style="font-size: 15px; color: #333333; margin-bottom: 15px;">
+            Xin chào <i>${user.firstName} ${user.lastName}</i>,
+          </p>
+          <p style="font-size: 15px; color: #333333; margin-bottom: 15px; line-height: 1.4;">
+            Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản <strong>${
+              user.email
+            }</strong>. Vui lòng nhấn vào nút bên dưới để đặt lại mật khẩu của bạn.
+          </p>
+          <div style="text-align: center; margin: 20px 0;">
+            <a
+              href="${resetUrl}"
+              style="background-color: #ffd5db; color: #FF6F91; text-decoration: none; padding: 10px 25px; border-radius: 4px; font-size: 15px; font-weight: bold; display: inline-block;"
+            >
+              Đặt lại mật khẩu
+            </a>
+          </div>
+          <p style="font-size: 14px; color: #666666; margin-bottom: 15px;">
+            Nếu nút trên không hoạt động, vui lòng sao chép và dán đường link sau vào trình duyệt web của bạn:
+          </p>
+          <p style="font-size: 14px; color: #666666; background-color: #E6E6FA; padding: 10px; border-radius: 4px; word-break: break-all; margin-bottom: 15px;">
+            ${resetUrl}
+          </p>
+          <p style="font-size: 14px; color: #666666; margin-bottom: 15px;">
+            Lưu ý: Link đặt lại mật khẩu này sẽ hết hạn sau 1 giờ. Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.
+          </p>
+          <hr style="border: none; border-top: 1px solid #E6E6FA; margin: 20px 0;">
+          <p style="font-size: 12px; color: #999999; text-align: center; margin: 0;">
+            Email này được gửi tự động, vui lòng không trả lời. Nếu cần hỗ trợ, hãy liên hệ với chúng tôi qua 
+            <a href="mailto:miavn9x@gmail.com" style="color: #FF6F91; text-decoration: none;">support@gmail.com</a>.
+          </p>
+        </td>
+      </tr>
+      <!-- Footer -->
+      <tr>
+        <td style="background-color: #FFB6C1; padding: 10px; text-align: center;">
+          <p style="font-size: 12px; color: #ffffff; margin: 0;">
+            © ${new Date().getFullYear()} Babychill.vn. All rights reserved.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+
   `,
     };
 

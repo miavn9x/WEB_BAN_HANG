@@ -1,571 +1,89 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
-import {
-  Container,
-  Row,
-  Col,
-  Button,
-  Card,
-  InputGroup,
-  FormControl,
-} from "react-bootstrap";
-import styles from "../../styles/Evaluate.module.css";
-
-const CollapsibleText = ({ text, maxLength = 100 }) => {
-  const [expanded, setExpanded] = useState(false);
-  if (!text) return null;
-  if (text.length <= maxLength) return <span>{text}</span>;
-  const displayText = expanded ? text : text.substring(0, maxLength) + "...";
-  return (
-    <span>
-      {displayText}{" "}
-      <Button
-        variant="link"
-        size="sm"
-        onClick={(e) => {
-          e.preventDefault();
-          setExpanded(!expanded);
-        }}
-      >
-        {expanded ? "Ẩn bớt" : "Xem thêm"}
-      </Button>
-    </span>
-  );
-};
-
-const getCurrentUser = () => {
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    const user = JSON.parse(storedUser);
-    if (!user.userId && user._id) {
-      user.userId = user._id;
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Black Friday Sale</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .bg-pink { background-color: #ff66b2; }
+    .content-wrapper {
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 1200px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
-    return user;
-  }
-  return {
-    userId: "60d0fe4f5311236168a109cb",
-    firstName: "Nguyễn",
-    lastName: "Văn A",
-  };
-};
-
-const getUserId = (user) => {
-  if (!user) return "";
-  if (typeof user === "object") {
-    if (user._id) return user._id.toString();
-    if (user.userId) return user.userId.toString();
-  }
-  return user.toString();
-};
-
-const getFullName = (user, currentUser) => {
-  if (!user) return "Unknown";
-  const userIdFromApi = getUserId(user);
-  if (userIdFromApi === currentUser.userId) {
-    return `${currentUser.lastName} ${currentUser.firstName}`;
-  }
-  if (typeof user === "object" && user.lastName && user.firstName) {
-    return `${user.lastName} ${user.firstName}`;
-  }
-};
-
-const getReplySnippet = (replyData) => {
-  if (!replyData) return "";
-  const text = replyData.text || "";
-  return text.length > 50 ? text.substring(0, 50) + "..." : text;
-};
-
-const Evaluate = ({ productId }) => {
-  const [messages, setMessages] = useState([]);
-  const [newMessageText, setNewMessageText] = useState("");
-  const [replyTo, setReplyTo] = useState(null);
-  const [hoveredMessageId, setHoveredMessageId] = useState(null);
-
-  const currentUser = getCurrentUser();
-  const containerRef = useRef(null);
-  const longPressTimer = useRef(null);
-  const messagesEndRef = useRef(null);
-  const messagesAreaRef = useRef(null);
-
-  const scrollToBottom = () => {
-    if (messagesAreaRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = messagesAreaRef.current;
-      if (scrollHeight - scrollTop - clientHeight < 50) {
-        messagesAreaRef.current.scrollTop = scrollHeight;
-      }
+    .product-card {
+      background-color: white;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const clearLongPress = () => {
-    clearTimeout(longPressTimer.current);
-  };
-
-  const initiateLongPress = (callback, e) => {
-    e.preventDefault();
-    longPressTimer.current = setTimeout(callback, 2000);
-  };
-
-  const fetchMessages = useCallback(async () => {
-    try {
-      const res = await axios.get(`/api/products/${productId}/messages`);
-      setMessages(res.data.messages);
-    } catch (err) {
-      console.error("Lỗi khi lấy danh sách tin nhắn:", err);
+    .product-card img {
+      max-width: 100%;
+      border-radius: 10px;
     }
-  }, [productId]);
-
-  useEffect(() => {
-    fetchMessages();
-    const intervalId = setInterval(() => {
-      fetchMessages();
-    }, 2000);
-    return () => clearInterval(intervalId);
-  }, [fetchMessages]);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target)
-      ) {
-        setReplyTo(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleSubmit = async () => {
-    const content = newMessageText.trim();
-    if (!content) return;
-    setNewMessageText("");
-
-    if (replyTo) {
-      const replyToData = {
-        questionId: replyTo.message._id, // lưu _id của tin câu hỏi gốc
-        userId: replyTo.message.userId,
-        text: replyTo.message.text,
-        createdAt: replyTo.message.createdAt,
-      };
-
-      const tempAnswer = {
-        _id: `temp-${Date.now()}`,
-        userId: {
-          _id: currentUser.userId,
-          firstName: currentUser.firstName,
-          lastName: currentUser.lastName,
-        },
-        type: "answer",
-        text: content,
-        createdAt: new Date().toISOString(),
-        pending: true,
-        replyTo: replyToData,
-      };
-      setMessages((prevMessages) => [...prevMessages, tempAnswer]);
-      try {
-        const res = await axios.post(`/api/products/${productId}/messages`, {
-          userId: currentUser.userId,
-          type: "answer",
-          text: content,
-          replyTo: replyToData,
-        });
-        setMessages(res.data.messages);
-        setReplyTo(null);
-      } catch (err) {
-        console.error("handleSubmit (reply) error:", err);
-      }
-    } else {
-      const tempQuestion = {
-        _id: `temp-${Date.now()}`,
-        userId: {
-          _id: currentUser.userId,
-          firstName: currentUser.firstName,
-          lastName: currentUser.lastName,
-        },
-        type: "question",
-        text: content,
-        createdAt: new Date().toISOString(),
-        pending: true,
-      };
-      setMessages((prev) => [...prev, tempQuestion]);
-      try {
-        const res = await axios.post(`/api/products/${productId}/messages`, {
-          userId: currentUser.userId,
-          type: "question",
-          text: content,
-        });
-        setMessages(res.data.messages);
-      } catch (err) {
-        console.error("handleSubmit (question) error:", err);
-        setNewMessageText(content);
-      }
+    .product-card .badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #ff66b2;
+      color: white;
+      border-radius: 50%;
+      padding: 5px 10px;
     }
-  };
-
-  const threads = messages
-    .filter((m) => m.type === "question")
-    .map((q) => {
-      const answers = messages.filter(
-        (m) =>
-          m.type === "answer" && m.replyTo && m.replyTo.questionId === q._id
-      );
-      const questionTime = new Date(q.createdAt).getTime();
-      const answerTimes = answers.map((ans) =>
-        new Date(ans.createdAt).getTime()
-      );
-      const lastUpdated =
-        answerTimes.length > 0
-          ? Math.max(questionTime, ...answerTimes)
-          : questionTime;
-      return { ...q, answers, lastUpdated };
-    });
-
-  const sortedThreads = threads.sort((a, b) => b.lastUpdated - a.lastUpdated);
-  const MAX_THREADS = 5;
-  const visibleThreads = sortedThreads.slice(0, MAX_THREADS);
-
-  return (
-    <Container className="mt-4" ref={containerRef}>
-      {/* Phần đánh giá tổng quan */}
-      <Card className={`p-4 ${styles.ratingBox}`}>
-        <Card.Title className="fw-bold">Đánh Giá</Card.Title>
-        <Row className="align-items-center">
-          <Col md={4} className="text-center text-md-start">
-            <div className={styles.ratingValue}>5.0/5.0</div>
-            <div className={styles.ratingStars}>
-              <i className="fas fa-star" />
-              <i className="fas fa-star" />
-              <i className="fas fa-star" />
-              <i className="fas fa-star" />
-              <i className="fas fa-star" />
-            </div>
-            <div className={styles.ratingCount}>
-              Có <strong>133</strong> lượt đánh giá
-            </div>
-          </Col>
-          <Col md={6} className="text-center">
-            <Button
-              className={`${styles.btnCustom} ${styles.btnCustomActive}`}
-              variant="primary"
-            >
-              Mới nhất
-            </Button>
-            <Button className={`${styles.btnCustom} ms-2`} variant="secondary">
-              Đã mua nhiều lần
-            </Button>
-            <Row className="mt-3">
-              <Col className="text-center">
-                <Button className={styles.btnCustom} variant="outline-primary">
-                  5 <i className="fas fa-star" />
-                </Button>
-                <Button
-                  className={`${styles.btnCustom} ms-2`}
-                  variant="outline-primary"
-                >
-                  4 <i className="fas fa-star" />
-                </Button>
-                <Button
-                  className={`${styles.btnCustom} ms-2`}
-                  variant="outline-primary"
-                >
-                  3 <i className="fas fa-star" />
-                </Button>
-                <Button
-                  className={`${styles.btnCustom} ms-2`}
-                  variant="outline-primary"
-                >
-                  2 <i className="fas fa-star" />
-                </Button>
-                <Button
-                  className={`${styles.btnCustom} ms-2`}
-                  variant="outline-primary"
-                >
-                  1 <i className="fas fa-star" />
-                </Button>
-              </Col>
-            </Row>
-          </Col>
-        </Row>
-      </Card>
-
-      {/* Phần đánh giá mẫu */}
-      <Row className="mt-4">
-        <Col xs={12}>
-          <Card className="border rounded bg-white">
-            <Card.Body className="p-3">
-              <div className="d-flex flex-column">
-                <span className="fw-bold">Nguyễn An</span>
-                <div className={styles.ratingStars}>
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                </div>
-                <span className="text-muted" style={{ fontSize: "0.875rem" }}>
-                  05/02/2025 08:24
-                </span>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      <Card className={styles.customQuestionBox}>
-        <Card.Header className={styles.customQuestionHeader}>
-          <span>trò chuyện</span>
-        </Card.Header>
-        <Card.Body>
-          <div className={styles.messagesArea} ref={messagesAreaRef}>
-            {visibleThreads.map((q) => {
-              const isSender = getUserId(q.userId) === currentUser.userId;
-              return (
-                <div
-                  key={q._id}
-                  className={styles.chatMessage}
-                  onMouseEnter={() => setHoveredMessageId(q._id)}
-                  onMouseLeave={() => {
-                    setHoveredMessageId(null);
-                    clearLongPress();
-                  }}
-                  onMouseDown={(e) => {
-                    initiateLongPress(() => {
-                      setReplyTo({
-                        type: "question",
-                        questionId: q._id,
-                        message: q,
-                      });
-                    }, e);
-                  }}
-                  onMouseUp={clearLongPress}
-                  onTouchStart={(e) => {
-                    initiateLongPress(() => {
-                      setReplyTo({
-                        type: "question",
-                        questionId: q._id,
-                        message: q,
-                      });
-                    }, e);
-                  }}
-                  onTouchEnd={clearLongPress}
-                  onContextMenu={(e) => e.preventDefault()}
-                >
-                  <div
-                    className={
-                      isSender ? styles.chatBubbleUser : styles.chatBubbleOther
-                    }
-                    style={{
-                      textAlign: isSender ? "right" : "left",
-                      marginLeft: isSender ? "auto" : "0",
-                      marginRight: isSender ? "0" : "auto",
-                      position: "relative",
-                    }}
-                  >
-                    <p>
-                      {isSender ? (
-                        <>
-                          <CollapsibleText text={q.text} maxLength={100} />{" "}
-                          <strong>
-                            : {getFullName(q.userId, currentUser)}
-                          </strong>
-                        </>
-                      ) : (
-                        <>
-                          <strong>{getFullName(q.userId, currentUser)}:</strong>{" "}
-                          <CollapsibleText text={q.text} maxLength={100} />
-                        </>
-                      )}
-                    </p>
-                    <div
-                      className={styles.replyButton}
-                      style={{
-                        opacity:
-                          hoveredMessageId === q._id ||
-                          (replyTo && replyTo.message._id === q._id)
-                            ? 1
-                            : 0,
-                        transition: "opacity 0.3s ease",
-                        pointerEvents:
-                          hoveredMessageId === q._id ||
-                          (replyTo && replyTo.message._id === q._id)
-                            ? "auto"
-                            : "none",
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (replyTo && replyTo.message._id === q._id) {
-                          setReplyTo(null);
-                        } else {
-                          setReplyTo({
-                            type: "question",
-                            questionId: q._id,
-                            message: q,
-                          });
-                        }
-                      }}
-                    >
-                      {replyTo && replyTo.message._id === q._id
-                        ? "Hủy"
-                        : "Trả lời"}
-                    </div>
-                    <div className={styles.chatTimestamp}>
-                      {new Date(q.createdAt).toLocaleString()}
-                    </div>
-                  </div>
-                  {q.answers &&
-                    q.answers.map((ans) => {
-                      const isAnswerSender =
-                        getUserId(ans.userId) === currentUser.userId;
-                      return (
-                        <div
-                          key={ans._id}
-                          className={styles.chatMessage}
-                          onMouseEnter={() => setHoveredMessageId(ans._id)}
-                          onMouseLeave={() => {
-                            setHoveredMessageId(null);
-                            clearLongPress();
-                          }}
-                          onMouseDown={(e) => {
-                            initiateLongPress(() => {
-                              setReplyTo({
-                                type: "answer",
-                                questionId: q._id,
-                                message: ans,
-                              });
-                            }, e);
-                          }}
-                          onMouseUp={clearLongPress}
-                          onTouchStart={(e) => {
-                            initiateLongPress(() => {
-                              setReplyTo({
-                                type: "answer",
-                                questionId: q._id,
-                                message: ans,
-                              });
-                            }, e);
-                          }}
-                          onTouchEnd={clearLongPress}
-                          onContextMenu={(e) => e.preventDefault()}
-                        >
-                          <div
-                            className={
-                              isAnswerSender
-                                ? styles.chatBubbleUser
-                                : styles.chatBubbleOther
-                            }
-                            style={{
-                              textAlign: isAnswerSender ? "right" : "left",
-                              marginLeft: isAnswerSender ? "auto" : "0",
-                              marginRight: isAnswerSender ? "0" : "auto",
-                              position: "relative",
-                            }}
-                          >
-                            {ans.replyTo && (
-                              <div className={styles.inlineReply}>
-                                <small>
-                                  Trả lời{" "}
-                                  {getFullName(ans.replyTo.userId, currentUser)}
-                                  : {getReplySnippet(ans.replyTo)}
-                                </small>
-                              </div>
-                            )}
-                            <p>
-                              {isAnswerSender ? (
-                                <>
-                                  <CollapsibleText
-                                    text={ans.text}
-                                    maxLength={100}
-                                  />{" "}
-                                  <strong>
-                                    : {getFullName(ans.userId, currentUser)}
-                                  </strong>
-                                </>
-                              ) : (
-                                <>
-                                  <strong>
-                                    {getFullName(ans.userId, currentUser)}:
-                                  </strong>{" "}
-                                  <CollapsibleText
-                                    text={ans.text}
-                                    maxLength={100}
-                                  />
-                                </>
-                              )}
-                            </p>
-                            <div
-                              className={styles.replyButton}
-                              style={{
-                                opacity:
-                                  hoveredMessageId === ans._id ||
-                                  (replyTo && replyTo.message._id === ans._id)
-                                    ? 1
-                                    : 0,
-                                transition: "opacity 0.3s ease",
-                                pointerEvents:
-                                  hoveredMessageId === ans._id ||
-                                  (replyTo && replyTo.message._id === ans._id)
-                                    ? "auto"
-                                    : "none",
-                              }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (
-                                  replyTo &&
-                                  replyTo.message._id === ans._id
-                                ) {
-                                  setReplyTo(null);
-                                } else {
-                                  setReplyTo({
-                                    type: "answer",
-                                    questionId: q._id,
-                                    message: ans,
-                                  });
-                                }
-                              }}
-                            >
-                              {replyTo && replyTo.message._id === ans._id
-                                ? "Hủy"
-                                : "Trả lời"}
-                            </div>
-                            <div className={styles.chatTimestamp}>
-                              {new Date(ans.createdAt).toLocaleString()}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              );
-            })}
-            <div ref={messagesEndRef} />
+    .product-card .product-title {
+      background-color: #ff66b2;
+      color: white;
+      padding: 5px;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    .product-card .price {
+      color: #ff66b2;
+      font-weight: bold;
+    }
+    .product-card .old-price {
+      text-decoration: line-through;
+      color: gray;
+    }
+    .footer .btn {
+      background-color: #ff66b2;
+      color: white;
+      border-radius: 5px;
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-pink py-5 d-flex justify-content-center">
+    <div class="container content-wrapper">
+      <div class="text-center mb-4">
+        <h1 class="display-4">BLACK FRIDAY</h1>
+        <p class="lead">Sản phẩm sẽ trở về giá gốc khi hết giờ</p>
+        <p class="fw-bold">BẢN TIN KHUYẾN MÃI</p>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+          <div class="product-card">
+            <span class="badge">-16%</span>
+            <img src="https://storage.googleapis.com/a1aa/image/sTl5HaNH-QAWDXSEq2JqsMxZWq5mIBQQBEsIbhQDVvI.jpg" alt="Nước thạch quýt" class="img-fluid">
+            <div class="product-title">Nước thạch quýt</div>
+            <p class="price">22.000đ <span class="old-price">26.000đ</span></p>
+            <button class="btn btn-sm"><i class="fas fa-cart-plus"></i></button>
           </div>
-          <div className={styles.inputArea}>
-            <InputGroup className={styles.customQuestionInputGroup}>
-              <FormControl
-                className={styles.customQuestionInput}
-                placeholder={
-                  replyTo ? "Nhập câu trả lời..." : "Gửi câu hỏi cho admin"
-                }
-                aria-label="Gửi tin nhắn"
-                value={newMessageText}
-                onChange={(e) => setNewMessageText(e.target.value)}
-              />
-              <InputGroup.Text
-                style={{ cursor: "pointer" }}
-                onClick={handleSubmit}
-              >
-                <i className="fas fa-paper-plane" />
-              </InputGroup.Text>
-            </InputGroup>
-          </div>
-        </Card.Body>
-      </Card>
-    </Container>
-  );
-};
-
-export default Evaluate;
+        </div>
+      </div>
+      <div class="footer text-center mt-4">
+        <button class="btn btn-lg">Xem tất cả &gt;</button>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

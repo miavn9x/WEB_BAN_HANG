@@ -1,0 +1,152 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+.home__product {
+    background-color: #ff85a1;
+
+}
+
+.home__product .content__wrapper {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: -48px -5px;
+}
+
+.home__product .product__card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.home__product .product__card img {
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+.home__product .product__card .badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ff66b2;
+    color: white;
+    border-radius: 50%;
+    padding: 5px 10px;
+}
+
+.home__product .product__card .product-title {
+    background-color: #ff66b2;
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.home__product .product__card .price {
+    color: #ff66b2;
+    font-weight: bold;
+}
+
+.home__product .product__card .old-price {
+    text-decoration: line-through;
+    color: gray;
+}
+
+.home__product .footer .btn {
+    background-color: #ff66b2;
+    color: white;
+    border-radius: 5px;
+    padding: 10px 20px;
+}
+
+.figure {
+    position: relative;
+    height: 60px;
+    width: 70px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.2), inset 2px 4px rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.figure>span {
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 2.5em;
+    color: #fa3636;
+}
+
+.countdown__home {
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.count__title {
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    color: #5b494d;
+
+}
+@import url('https://fonts.googleapis.com/css2?family=Tilt+Prism&display=swap');
+.figure .top {
+    padding: 0 2px;
+    font-weight: 700;
+    font-size: 2.5em;
+
+font-family: "Tilt Prism", serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+    font-variation-settings:
+        "XROT" 0,
+        "YROT" 0;
+}
+.figure 
+.bottom {
+    padding: 0 2px;
+    font-weight: 700;
+    font-size: 2.5em;
+
+ font-family: "Tilt Prism", serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+  font-variation-settings:
+    "XROT" 0,
+    "YROT" 0;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
+
+.Flash__sale {
+
+    font-family: "Black Ops One", serif;
+    font-weight: 400;
+    font-style: normal;
+    color: #FF6F91;
+    font-size: 25px;
+    padding-left: 20px
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Agbalumo&display=swap');
+
+.lead__sale {
+    font-family: "Agbalumo", serif;
+    font-weight: 400;
+    font-style: normal;
+    justify-content: center;
+    padding-left: 30px;
+    font-size: 20px;
+}

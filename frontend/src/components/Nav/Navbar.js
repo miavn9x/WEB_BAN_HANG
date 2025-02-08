@@ -600,6 +600,7 @@ const MyNavbar = () => {
             </Navbar.Text>
           </Navbar.Collapse>
         </Container>
+       
       </Navbar>
       <NotificationModal
         show={showNotificationModal}
