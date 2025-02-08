@@ -186,7 +186,6 @@ const Evaluate = ({ productId }) => {
     }
   };
 
-  // Nhóm các tin nhắn thành các thread (mỗi thread gồm 1 câu hỏi và các tin trả lời thuộc nó)
   const threads = messages
     .filter((m) => m.type === "question")
     .map((q) => {
@@ -205,7 +204,7 @@ const Evaluate = ({ productId }) => {
 
   return (
     <Container className="mt-4" ref={containerRef}>
-      <Card className={`p-4 ${styles.ratingBox}`}>
+        <Card className={`p-4 ${styles.ratingBox}`}>
         <Card.Title className="fw-bold">Đánh Giá</Card.Title>
         <Row className="align-items-center">
           <Col md={4} className="text-center text-md-start">
@@ -236,28 +235,16 @@ const Evaluate = ({ productId }) => {
                 <Button className={styles.btnCustom} variant="outline-primary">
                   5 <i className="fas fa-star" />
                 </Button>
-                <Button
-                  className={`${styles.btnCustom} ms-2`}
-                  variant="outline-primary"
-                >
+                <Button className={`${styles.btnCustom} ms-2`} variant="outline-primary">
                   4 <i className="fas fa-star" />
                 </Button>
-                <Button
-                  className={`${styles.btnCustom} ms-2`}
-                  variant="outline-primary"
-                >
+                <Button className={`${styles.btnCustom} ms-2`} variant="outline-primary">
                   3 <i className="fas fa-star" />
                 </Button>
-                <Button
-                  className={`${styles.btnCustom} ms-2`}
-                  variant="outline-primary"
-                >
+                <Button className={`${styles.btnCustom} ms-2`} variant="outline-primary">
                   2 <i className="fas fa-star" />
                 </Button>
-                <Button
-                  className={`${styles.btnCustom} ms-2`}
-                  variant="outline-primary"
-                >
+                <Button className={`${styles.btnCustom} ms-2`} variant="outline-primary">
                   1 <i className="fas fa-star" />
                 </Button>
               </Col>
@@ -266,6 +253,28 @@ const Evaluate = ({ productId }) => {
         </Row>
       </Card>
 
+      {/* Phần đánh giá mẫu */}
+      <Row className="mt-4">
+        <Col xs={12}>
+          <Card className="border rounded bg-white">
+            <Card.Body className="p-3">
+              <div className="d-flex flex-column">
+                <span className="fw-bold">Nguyễn An</span>
+                <div className={styles.ratingStars}>
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                </div>
+                <span className="text-muted" style={{ fontSize: "0.875rem" }}>
+                  05/02/2025 08:24
+                </span>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
       {/* Hiển thị tin nhắn */}
       <Card className={styles.customQuestionBox}>
         <Card.Header className={styles.customQuestionHeader}>

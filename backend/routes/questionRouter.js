@@ -19,21 +19,27 @@ router.post("/products/:productId/messages", async (req, res) => {
       conversation = new questionAnswerModel({ productId, messages: [] });
     }
 
+    // Kiểm tra nếu replyTo được cung cấp thì phải là ObjectId hợp lệ
+    const replyToId =
+      replyTo && mongoose.Types.ObjectId.isValid(replyTo) ? replyTo : null;
+
     const newMessage = {
       userId,
       text,
       type,
-      replyTo: replyTo || null,
+      replyTo: replyToId,
       createdAt: new Date(),
     };
 
     // Thêm tin nhắn vào cuộc trò chuyện
     conversation.messages.push(newMessage);
-
-    // Lưu lại cuộc trò chuyện vào MongoDB
     await conversation.save();
 
-    res.status(201).json(conversation);
+    // Trả về danh sách tin nhắn sau khi thêm (đảm bảo là mảng)
+    res.status(201).json({
+      message: "Message added successfully",
+      messages: conversation.messages,
+    });
   } catch (error) {
     console.error("Error adding message:", error);
     res.status(500).json({ error: error.message });
@@ -54,31 +60,31 @@ router.get("/products/:productId/messages", async (req, res) => {
     const conversation = await questionAnswerModel
       .findOne({ productId })
       .populate("messages.userId", "firstName lastName");
-    // Không populate "messages.replyTo" vì chưa đăng ký model "Message"
 
     if (!conversation) {
       return res.status(404).json({ messages: [] });
     }
 
-    // Thực hiện populate thủ công cho replyTo: tìm tin nhắn gốc trong mảng messages của cùng cuộc trò chuyện.
+    // Thực hiện populate thủ công cho replyTo
     const messages = conversation.messages.map((message) => {
-      if (message.replyTo) {
+      const msgObj = message.toObject();
+
+      if (msgObj.replyTo) {
         // Tìm tin nhắn gốc có _id trùng với replyTo của tin nhắn hiện tại
-        const original = conversation.messages.find((m) =>
-          m._id.equals(message.replyTo)
+        const originalMessage = conversation.messages.find((m) =>
+          m._id.equals(msgObj.replyTo)
         );
-        if (original) {
-          // Chuyển message về dạng đối tượng thường (plain object)
-          message = message.toObject();
-          message.replyTo = {
-            _id: original._id,
-            text: original.text,
-            userId: original.userId, // đã được populate từ messages.userId
-            createdAt: original.createdAt,
+
+        if (originalMessage) {
+          msgObj.replyTo = {
+            _id: originalMessage._id,
+            text: originalMessage.text,
+            userId: originalMessage.userId, // đã populate thông tin userId
+            createdAt: originalMessage.createdAt,
           };
         }
       }
-      return message;
+      return msgObj;
     });
 
     res.json({ messages });
