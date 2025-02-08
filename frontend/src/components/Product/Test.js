@@ -205,6 +205,7 @@ const Test = () => {
             <div className="card mb-4" style={{ maxHeight: "100%" }}>
               <div className="card-body">
                 <div className="row product__modal__content">
+                  {/* Hình ảnh sản phẩm */}
                   <div className="col-lg-5 col-md-12 col-12 mb-3 mb-md-0">
                     <div className="product__modal__zoom position-relative">
                       {product.discountPercentage && (

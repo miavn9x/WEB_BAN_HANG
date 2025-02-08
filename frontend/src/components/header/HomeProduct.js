@@ -1,61 +1,83 @@
 import React, { useEffect, useState } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import "./styles.css"; 
+import "./styles.css";
+import ProductItem from "../Product/ProductItem"; // Component hiển thị sản phẩm
+import axios from "axios"; // Để fetch sản phẩm giảm giá
 const HomeProduct = () => {
-   const COUNTDOWN_DURATION_HOURS = 18; // 👈 Thay đổi giá trị ở đây
-   const [hours, setHours] = useState(0);
-   const [minutes, setMinutes] = useState(0);
-   const [seconds, setSeconds] = useState(0);
+  const COUNTDOWN_DURATION_HOURS = "p"; // 👈 Thay đổi giá trị ở đây
+  const [hours, setHours] = useState(0);
+  const [minutes, setMinutes] = useState(0);
+  const [seconds, setSeconds] = useState(0);
+  const [discountedProducts, setDiscountedProducts] = useState([]); // State lưu sản phẩm giảm giá
 
-   useEffect(() => {
-     const getCurrentTimeInVN = () => {
-       const now = new Date();
-       return new Date(now.getTime() + 7 * 60 * 60 * 1000);
-     };
+  // Fetch sản phẩm giảm giá khi component mount
+useEffect(() => {
+  const fetchDiscountedProducts = async () => {
+    try {
+      const response = await axios.get(
+        "/api/products?randomDiscount=true&limit=10"
+      );
+      // Lọc các sản phẩm có discountPercentage > 0
+      const filteredProducts = response.data.products.filter(
+        (product) => product.discountPercentage > 0
+      );
+      setDiscountedProducts(filteredProducts); // Lưu sản phẩm đã lọc vào state
+    } catch (error) {
+      console.error("Error fetching discounted products:", error);
+    }
+  };
 
-     // Xóa countdown cũ nếu thời lượng thay đổi
-     const savedDuration = localStorage.getItem("countdownDuration");
-     if (savedDuration !== String(COUNTDOWN_DURATION_HOURS)) {
-       localStorage.removeItem("countdown");
-       localStorage.setItem("countdownDuration", COUNTDOWN_DURATION_HOURS);
-     }
+  fetchDiscountedProducts();
+}, []);
 
-     let targetTime = localStorage.getItem("countdown");
 
-     if (!targetTime) {
-       const currentTimeVN = getCurrentTimeInVN();
-       targetTime =
-         currentTimeVN.getTime() + COUNTDOWN_DURATION_HOURS * 60 * 60 * 1000;
-       localStorage.setItem("countdown", targetTime);
-     } else {
-       targetTime = parseInt(targetTime, 10);
-     }
+  // Countdown
+  useEffect(() => {
+    const getCurrentTimeInVN = () => {
+      const now = new Date();
+      return new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    };
 
-     const countdownInterval = setInterval(() => {
-       const currentTimeVN = getCurrentTimeInVN().getTime();
-       const remainingTime = targetTime - currentTimeVN;
+    const savedDuration = localStorage.getItem("countdownDuration");
+    if (savedDuration !== String(COUNTDOWN_DURATION_HOURS)) {
+      localStorage.removeItem("countdown");
+      localStorage.setItem("countdownDuration", COUNTDOWN_DURATION_HOURS);
+    }
 
-       if (remainingTime <= 0) {
-         clearInterval(countdownInterval);
-         setHours(0);
-         setMinutes(0);
-         setSeconds(0);
-         localStorage.removeItem("countdown");
-       } else {
-         const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60));
-         const remainingMinutes = Math.floor(
-           (remainingTime / (1000 * 60)) % 60
-         );
-         const remainingSeconds = Math.floor((remainingTime / 1000) % 60);
+    let targetTime = localStorage.getItem("countdown");
 
-         setHours(remainingHours);
-         setMinutes(remainingMinutes);
-         setSeconds(remainingSeconds);
-       }
-     }, 1000);
+    if (!targetTime) {
+      const currentTimeVN = getCurrentTimeInVN();
+      targetTime =
+        currentTimeVN.getTime() + COUNTDOWN_DURATION_HOURS * 60 * 60 * 1000;
+      localStorage.setItem("countdown", targetTime);
+    } else {
+      targetTime = parseInt(targetTime, 10);
+    }
 
-     return () => clearInterval(countdownInterval);
-   }, [COUNTDOWN_DURATION_HOURS]);
+    const countdownInterval = setInterval(() => {
+      const currentTimeVN = getCurrentTimeInVN().getTime();
+      const remainingTime = targetTime - currentTimeVN;
+
+      if (remainingTime <= 0) {
+        clearInterval(countdownInterval);
+        setHours(0);
+        setMinutes(0);
+        setSeconds(0);
+        localStorage.removeItem("countdown");
+      } else {
+        const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60));
+        const remainingMinutes = Math.floor((remainingTime / (1000 * 60)) % 60);
+        const remainingSeconds = Math.floor((remainingTime / 1000) % 60);
+
+        setHours(remainingHours);
+        setMinutes(remainingMinutes);
+        setSeconds(remainingSeconds);
+      }
+    }, 1000);
+
+    return () => clearInterval(countdownInterval);
+  }, [COUNTDOWN_DURATION_HOURS]);
 
   const formatTime = (time) => String(time).padStart(2, "0");
 
@@ -109,12 +131,20 @@ const HomeProduct = () => {
           </div>
         </div>
 
-        {/* Product card */}
-        <div className="row justify-content-center">
-      
+        {/* Product */}
+        {/* Hiển thị sản phẩm giảm giá */}
+        <div className="row ">
+          {discountedProducts && discountedProducts.length > 0 ? (
+            discountedProducts.map((product) => (
+              <div key={product._id} className="col-12 col-md-2 col-lg-2 py-2">
+                <ProductItem product={product} />
+              </div>
+            ))
+          ) : (
+            <div className="col-12">Không có sản phẩm giảm giá</div>
+          )}
         </div>
 
-        {/* Footer with button */}
         <div className="footer text-center mt-4">
           <button className="btn btn-lg">Xem tất cả &gt;</button>
         </div>

@@ -99,13 +99,15 @@
     color: #5b494d;
 
 }
-@import url('https://fonts.googleapis.com/css2?family=Tilt+Prism&display=swap');
-.figure .top {
-    padding: 0 2px;
-    font-weight: 700;
-    font-size: 2.5em;
 
-font-family: "Tilt Prism", serif;
+@import url('https://fonts.googleapis.com/css2?family=Tilt+Prism&display=swap');
+
+.figure .top {
+    padding: 0 5px;
+    font-weight: 700;
+    font-size: 2.6em;
+
+    font-family: "Tilt Prism", serif;
     font-optical-sizing: auto;
     font-weight: 600;
     font-style: normal;
@@ -113,19 +115,19 @@ font-family: "Tilt Prism", serif;
         "XROT" 0,
         "YROT" 0;
 }
-.figure 
-.bottom {
-    padding: 0 2px;
-    font-weight: 700;
-    font-size: 2.5em;
 
- font-family: "Tilt Prism", serif;
-  font-optical-sizing: auto;
-  font-weight: 600;
-  font-style: normal;
-  font-variation-settings:
-    "XROT" 0,
-    "YROT" 0;
+.figure .bottom {
+    padding: 0 5px;
+    font-weight: 700;
+    font-size: 2.6em;
+
+    font-family: "Tilt Prism", serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+    font-variation-settings:
+        "XROT" 0,
+        "YROT" 0;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
