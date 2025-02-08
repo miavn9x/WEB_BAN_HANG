@@ -1,19 +1,46 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./styles.css";
-import ProductItem from "../Product/ProductItem"; 
-import axios from "axios"; 
+import ProductItem from "../Product/ProductItem";
+import axios from "axios";
 
 const HomeProduct = () => {
-  // Đặt thời gian theo đơn vị (giờ, phút, giây, ngày)
-  const COUNTDOWN_DURATION = "1m"; // Thay đổi giá trị ở đây: "72h", "3d", "120m", "1800s", "5m"
+  const COUNTDOWN_DURATION = "10s"; // Thời gian chính
+  const COUNTDOWN_RESET = "5s"; // Thời gian reset
+
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const [discountedProducts, setDiscountedProducts] = useState([]);
+  const [currentPhase, setCurrentPhase] = useState("main");
+  const [timeOffset, setTimeOffset] = useState(0); // Hiệu số: serverTime - localTime
 
-  // Fetch sản phẩm giảm giá khi component mount
-  const fetchDiscountedProducts = async () => {
+  // useRef để lưu targetTime và phase mà không cần re-render
+  const targetTimeRef = useRef(0);
+  const phaseRef = useRef("main");
+
+  const parseDurationToMs = (duration) => {
+    const unit = duration.slice(-1);
+    const value = parseInt(duration);
+    const units = {
+      d: value * 24 * 60 * 60 * 1000,
+      h: value * 60 * 60 * 1000,
+      m: value * 60 * 1000,
+      s: value * 1000,
+    };
+    return units[unit] || 0;
+  };
+
+  const shuffleArray = (array) => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  };
+
+  const fetchDiscountedProducts = useCallback(async () => {
     try {
       const response = await axios.get(
         "/api/products?randomDiscount=true&limit=10"
@@ -21,149 +48,176 @@ const HomeProduct = () => {
       const filteredProducts = response.data.products.filter(
         (product) => product.discountPercentage > 0
       );
-      setDiscountedProducts(filteredProducts);
+      const shuffledProducts = shuffleArray(filteredProducts);
+      setDiscountedProducts(shuffledProducts);
     } catch (error) {
       console.error("Error fetching discounted products:", error);
     }
-  };
-
-  useEffect(() => {
-    fetchDiscountedProducts();
   }, []);
-  const parseCountdownDuration = (duration) => {
-    const unit = duration.slice(-1); 
-    let timeInMs = 0;
 
-    if (unit === "h") {
-      timeInMs = parseInt(duration) * 60 * 60 * 1000;
-    } else if (unit === "m") {
-      timeInMs = parseInt(duration) * 60 * 1000;
-    } else if (unit === "s") {
-      timeInMs = parseInt(duration) * 1000;
-    } else if (unit === "d") {
-      timeInMs = parseInt(duration) * 24 * 60 * 60 * 1000;
+  // Lấy thời gian hiện tại từ server và tính offset giữa server và client
+  const fetchServerTime = useCallback(async () => {
+    try {
+      const response = await axios.get("/api/time"); // Endpoint trả về { serverTime: <timestamp in ms> }
+      const serverTime = response.data.serverTime;
+      const localTime = new Date().getTime();
+      const offset = serverTime - localTime;
+      setTimeOffset(offset);
+    } catch (error) {
+      console.error("Error fetching server time:", error);
     }
-    return timeInMs;
-  };
+  }, []);
+
+  // Lấy offset từ server một lần khi component mount
+  useEffect(() => {
+    fetchServerTime();
+  }, [fetchServerTime]);
+
+  // Sử dụng useCallback để định nghĩa getCurrentTime dựa trên timeOffset
+  const getCurrentTime = useCallback(
+    () => new Date().getTime() + timeOffset,
+    [timeOffset]
+  );
 
   useEffect(() => {
-    const getCurrentTimeInVN = () => {
-      const now = new Date();
-      return new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const initializeCountdown = () => {
+      const savedData = localStorage.getItem("countdownData");
+      const now = getCurrentTime();
+
+      if (savedData) {
+        const { targetTime, phase } = JSON.parse(savedData);
+        if (targetTime > now) {
+          targetTimeRef.current = targetTime;
+          phaseRef.current = phase;
+          return;
+        }
+      }
+
+      const initialDuration = parseDurationToMs(COUNTDOWN_DURATION);
+      targetTimeRef.current = now + initialDuration;
+      phaseRef.current = "main";
+
+      localStorage.setItem(
+        "countdownData",
+        JSON.stringify({
+          targetTime: targetTimeRef.current,
+          phase: phaseRef.current,
+        })
+      );
     };
 
-    const savedDuration = localStorage.getItem("countdownDuration");
-    if (savedDuration !== COUNTDOWN_DURATION) {
-      localStorage.removeItem("countdown");
-      localStorage.setItem("countdownDuration", COUNTDOWN_DURATION);
-    }
+    let interval;
+    initializeCountdown();
+    setCurrentPhase(phaseRef.current);
 
-    let targetTime = localStorage.getItem("countdown");
-
-    if (!targetTime) {
-      const currentTimeVN = getCurrentTimeInVN();
-      targetTime =
-        currentTimeVN.getTime() + parseCountdownDuration(COUNTDOWN_DURATION);
-      localStorage.setItem("countdown", targetTime);
-    } else {
-      targetTime = parseInt(targetTime, 10);
-    }
-
-    const countdownInterval = setInterval(() => {
-      const currentTimeVN = getCurrentTimeInVN().getTime();
-      const remainingTime = targetTime - currentTimeVN;
+    const updateCountdown = () => {
+      const now = getCurrentTime();
+      const remainingTime = targetTimeRef.current - now;
 
       if (remainingTime <= 0) {
-        clearInterval(countdownInterval);
-        setHours(0);
-        setMinutes(0);
-        setSeconds(0);
-        localStorage.removeItem("countdown");
-        fetchDiscountedProducts();
-        const currentTimeVN = getCurrentTimeInVN();
-        targetTime = currentTimeVN.getTime() + parseCountdownDuration("1h");
-        localStorage.setItem("countdown", targetTime);
+        const nextPhase = phaseRef.current === "main" ? "reset" : "main";
+        const nextDuration =
+          nextPhase === "main"
+            ? parseDurationToMs(COUNTDOWN_DURATION)
+            : parseDurationToMs(COUNTDOWN_RESET);
 
-        setTimeout(() => {
-          startCountdown(targetTime);
-        }, 1000);
-      } else {
-        const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60));
-        const remainingMinutes = Math.floor((remainingTime / (1000 * 60)) % 60);
-        const remainingSeconds = Math.floor((remainingTime / 1000) % 60);
+        targetTimeRef.current = now + nextDuration;
+        phaseRef.current = nextPhase;
 
-        setHours(remainingHours);
-        setMinutes(remainingMinutes);
-        setSeconds(remainingSeconds);
+        localStorage.setItem(
+          "countdownData",
+          JSON.stringify({
+            targetTime: targetTimeRef.current,
+            phase: phaseRef.current,
+          })
+        );
+
+        setCurrentPhase(nextPhase);
+
+        if (nextPhase === "main") {
+          fetchDiscountedProducts();
+        } else {
+          setDiscountedProducts([]);
+        }
       }
-    }, 1000);
 
-    return () => clearInterval(countdownInterval);
-  }, [COUNTDOWN_DURATION]);
-
-  const formatTime = (time) => String(time).padStart(2, "0");
-
-  // Hàm để bắt đầu lại bộ đếm thời gian
-  const startCountdown = (targetTime) => {
-    const countdownInterval = setInterval(() => {
-      const currentTimeVN = new Date().getTime();
-      const remainingTime = targetTime - currentTimeVN;
-
-      if (remainingTime <= 0) {
-        clearInterval(countdownInterval);
-      }
       const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60));
       const remainingMinutes = Math.floor((remainingTime / (1000 * 60)) % 60);
       const remainingSeconds = Math.floor((remainingTime / 1000) % 60);
 
-      setHours(remainingHours);
-      setMinutes(remainingMinutes);
-      setSeconds(remainingSeconds);
-    }, 1000);
-  };
+      setHours(Math.max(0, remainingHours));
+      setMinutes(Math.max(0, remainingMinutes));
+      setSeconds(Math.max(0, remainingSeconds));
+    };
+
+    interval = setInterval(updateCountdown, 1000);
+    if (phaseRef.current === "main") fetchDiscountedProducts();
+
+    return () => clearInterval(interval);
+  }, [
+    COUNTDOWN_DURATION,
+    COUNTDOWN_RESET,
+    fetchDiscountedProducts,
+    getCurrentTime,
+  ]);
 
   return (
     <div className="home__product bg-pink py-5 d-flex justify-content-center">
       <div className="container content__wrapper">
         <div className="row mb-3">
-          {/* Title - Flash sale */}
           <div className="col-12 col-md-6 col-lg-4 text-center text-md-start">
-            <h4 className="Flash__sale">Giá Flash sale mỗi ngày</h4>
-            <p className="lead__sale mx-5">Giảm giá cục sốc</p>
+            <h4 className="Flash__sale">
+              {currentPhase === "main"
+                ? "Giá Flash sale mỗi ngày"
+                : "Chuẩn bị đợt mới"}
+            </h4>
+            <p className="lead__sale mx-5">
+              {currentPhase === "main"
+                ? "Giảm giá cục sốc"
+                : "Đang cập nhật..."}
+            </p>
           </div>
-
-          {/* Countdown Timer */}
           <div className="col-12 col-md-6 col-lg-4 text-center">
             <div className="countdown__home d-flex justify-content-center">
               <div className="countdown-wrap">
                 <div className="countdown d-flex justify-content-center">
                   <div className="bloc-time hours mx-3">
                     <div className="figure">
-                      <span className="top">{formatTime(hours)[0]}</span>
-                      <span className="bottom">{formatTime(hours)[1]}</span>
+                      <span className="top">
+                        {String(hours).padStart(2, "0")[0]}
+                      </span>
+                      <span className="bottom">
+                        {String(hours).padStart(2, "0")[1]}
+                      </span>
                     </div>
                     <div className="mt-2">
-                      <span className="count__title">Hours</span>
+                      <span className="count__title">Giờ</span>
                     </div>
                   </div>
-
                   <div className="bloc-time min mx-3">
                     <div className="figure">
-                      <span className="top">{formatTime(minutes)[0]}</span>
-                      <span className="bottom">{formatTime(minutes)[1]}</span>
+                      <span className="top">
+                        {String(minutes).padStart(2, "0")[0]}
+                      </span>
+                      <span className="bottom">
+                        {String(minutes).padStart(2, "0")[1]}
+                      </span>
                     </div>
                     <div className="mt-2">
-                      <span className="count__title">Minutes</span>
+                      <span className="count__title">Phút</span>
                     </div>
                   </div>
-
                   <div className="bloc-time sec mx-3">
                     <div className="figure">
-                      <span className="top">{formatTime(seconds)[0]}</span>
-                      <span className="bottom">{formatTime(seconds)[1]}</span>
+                      <span className="top">
+                        {String(seconds).padStart(2, "0")[0]}
+                      </span>
+                      <span className="bottom">
+                        {String(seconds).padStart(2, "0")[1]}
+                      </span>
                     </div>
                     <div className="mt-2">
-                      <span className="count__title">Seconds</span>
+                      <span className="count__title">Giây</span>
                     </div>
                   </div>
                 </div>
@@ -171,23 +225,34 @@ const HomeProduct = () => {
             </div>
           </div>
         </div>
-
-        {/* Product */}
-        {/* Hiển thị sản phẩm giảm giá */}
         <div className="row">
-          {discountedProducts && discountedProducts.length > 0 ? (
-            discountedProducts.map((product) => (
-              <div key={product._id} className="col-12 col-md-2 col-lg-2 py-2">
-                <ProductItem product={product} />
+          {currentPhase === "main" ? (
+            discountedProducts.length > 0 ? (
+              discountedProducts.map((product) => (
+                <div key={product._id} className="col-6 col-md-4 col-lg-2 py-2">
+                  <ProductItem product={product} />
+                </div>
+              ))
+            ) : (
+              <div className="col-12 text-center py-4">
+                <i className="fas fa-box-open fa-3x text-muted mb-3"></i>
+                <p className="text-muted">Đang tải sản phẩm...</p>
               </div>
-            ))
+            )
           ) : (
-            <div className="col-12">Không có sản phẩm giảm giá</div>
+            <div className="col-12 text-center py-4">
+              <div className="timeout-message">
+                <i className="fas fa-clock fa-3x text-danger mb-3"></i>
+                <h5 className="text-danger">HẾT THỜI GIAN KHUYẾN MÃI</h5>
+                <p className="text-muted">Đợt khuyến mãi mới sẽ bắt đầu sau</p>
+              </div>
+            </div>
           )}
         </div>
-
         <div className="footer text-center mt-4">
-          <button className="btn btn-lg">Xem tất cả &gt;</button>
+          <button className="btn btn-lg btn-primary">
+            Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
+          </button>
         </div>
       </div>
     </div>
