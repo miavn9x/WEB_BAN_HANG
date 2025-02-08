@@ -1,37 +1,51 @@
 import React, { useEffect, useState } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./styles.css";
-import ProductItem from "../Product/ProductItem"; // Component hiển thị sản phẩm
-import axios from "axios"; // Để fetch sản phẩm giảm giá
+import ProductItem from "../Product/ProductItem"; 
+import axios from "axios"; 
+
 const HomeProduct = () => {
-  const COUNTDOWN_DURATION_HOURS = "p"; // 👈 Thay đổi giá trị ở đây
+  // Đặt thời gian theo đơn vị (giờ, phút, giây, ngày)
+  const COUNTDOWN_DURATION = "1m"; // Thay đổi giá trị ở đây: "72h", "3d", "120m", "1800s", "5m"
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
-  const [discountedProducts, setDiscountedProducts] = useState([]); // State lưu sản phẩm giảm giá
+  const [discountedProducts, setDiscountedProducts] = useState([]);
 
   // Fetch sản phẩm giảm giá khi component mount
-useEffect(() => {
   const fetchDiscountedProducts = async () => {
     try {
       const response = await axios.get(
         "/api/products?randomDiscount=true&limit=10"
       );
-      // Lọc các sản phẩm có discountPercentage > 0
       const filteredProducts = response.data.products.filter(
         (product) => product.discountPercentage > 0
       );
-      setDiscountedProducts(filteredProducts); // Lưu sản phẩm đã lọc vào state
+      setDiscountedProducts(filteredProducts);
     } catch (error) {
       console.error("Error fetching discounted products:", error);
     }
   };
 
-  fetchDiscountedProducts();
-}, []);
+  useEffect(() => {
+    fetchDiscountedProducts();
+  }, []);
+  const parseCountdownDuration = (duration) => {
+    const unit = duration.slice(-1); 
+    let timeInMs = 0;
 
+    if (unit === "h") {
+      timeInMs = parseInt(duration) * 60 * 60 * 1000;
+    } else if (unit === "m") {
+      timeInMs = parseInt(duration) * 60 * 1000;
+    } else if (unit === "s") {
+      timeInMs = parseInt(duration) * 1000;
+    } else if (unit === "d") {
+      timeInMs = parseInt(duration) * 24 * 60 * 60 * 1000;
+    }
+    return timeInMs;
+  };
 
-  // Countdown
   useEffect(() => {
     const getCurrentTimeInVN = () => {
       const now = new Date();
@@ -39,9 +53,9 @@ useEffect(() => {
     };
 
     const savedDuration = localStorage.getItem("countdownDuration");
-    if (savedDuration !== String(COUNTDOWN_DURATION_HOURS)) {
+    if (savedDuration !== COUNTDOWN_DURATION) {
       localStorage.removeItem("countdown");
-      localStorage.setItem("countdownDuration", COUNTDOWN_DURATION_HOURS);
+      localStorage.setItem("countdownDuration", COUNTDOWN_DURATION);
     }
 
     let targetTime = localStorage.getItem("countdown");
@@ -49,7 +63,7 @@ useEffect(() => {
     if (!targetTime) {
       const currentTimeVN = getCurrentTimeInVN();
       targetTime =
-        currentTimeVN.getTime() + COUNTDOWN_DURATION_HOURS * 60 * 60 * 1000;
+        currentTimeVN.getTime() + parseCountdownDuration(COUNTDOWN_DURATION);
       localStorage.setItem("countdown", targetTime);
     } else {
       targetTime = parseInt(targetTime, 10);
@@ -65,6 +79,14 @@ useEffect(() => {
         setMinutes(0);
         setSeconds(0);
         localStorage.removeItem("countdown");
+        fetchDiscountedProducts();
+        const currentTimeVN = getCurrentTimeInVN();
+        targetTime = currentTimeVN.getTime() + parseCountdownDuration("1h");
+        localStorage.setItem("countdown", targetTime);
+
+        setTimeout(() => {
+          startCountdown(targetTime);
+        }, 1000);
       } else {
         const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60));
         const remainingMinutes = Math.floor((remainingTime / (1000 * 60)) % 60);
@@ -77,9 +99,28 @@ useEffect(() => {
     }, 1000);
 
     return () => clearInterval(countdownInterval);
-  }, [COUNTDOWN_DURATION_HOURS]);
+  }, [COUNTDOWN_DURATION]);
 
   const formatTime = (time) => String(time).padStart(2, "0");
+
+  // Hàm để bắt đầu lại bộ đếm thời gian
+  const startCountdown = (targetTime) => {
+    const countdownInterval = setInterval(() => {
+      const currentTimeVN = new Date().getTime();
+      const remainingTime = targetTime - currentTimeVN;
+
+      if (remainingTime <= 0) {
+        clearInterval(countdownInterval);
+      }
+      const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60));
+      const remainingMinutes = Math.floor((remainingTime / (1000 * 60)) % 60);
+      const remainingSeconds = Math.floor((remainingTime / 1000) % 60);
+
+      setHours(remainingHours);
+      setMinutes(remainingMinutes);
+      setSeconds(remainingSeconds);
+    }, 1000);
+  };
 
   return (
     <div className="home__product bg-pink py-5 d-flex justify-content-center">
@@ -133,7 +174,7 @@ useEffect(() => {
 
         {/* Product */}
         {/* Hiển thị sản phẩm giảm giá */}
-        <div className="row ">
+        <div className="row">
           {discountedProducts && discountedProducts.length > 0 ? (
             discountedProducts.map((product) => (
               <div key={product._id} className="col-12 col-md-2 col-lg-2 py-2">
