@@ -35,6 +35,7 @@ import LoginMenu from "../../pages/Auth/Login/LoginMenu";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import Fuse from "fuse.js";
+import NotificationModal from "./NotificationModal";
 
 const categories = [
   {
@@ -91,6 +92,33 @@ const MyNavbar = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [products, setProducts] = useState([]);
   const searchRef = useRef(null);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+
+  // Function to fetch notifications
+  const fetchNotifications = () => {
+    axios
+      .get("/api/notifications", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
+      .then((res) => {
+        setNotificationCount(res.data.notifications.length);
+      })
+      .catch((err) => console.error("Error fetching notifications:", err));
+  };
+
+  useEffect(() => {
+    fetchNotifications(); 
+    const interval = setInterval(fetchNotifications, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleNotificationClick = () => {
+    setShowNotificationModal(true);
+    fetchNotifications(); 
+  };
+
+
 
   useEffect(() => {
     axios
@@ -119,12 +147,10 @@ const MyNavbar = () => {
     }
   }, [searchTerm, products]);
 
-  // Hàm chuyển hướng cho các link chung
   const handleLinkClick = (path) => {
     navigate(path);
   };
 
-  // Hàm chuyển hướng cho danh mục sản phẩm
   const handleCategoryClick = (categoryLabel) => {
     navigate(`/products?categoryName=${encodeURIComponent(categoryLabel)}`);
   };
@@ -202,7 +228,7 @@ const MyNavbar = () => {
   return (
     <>
       {/* Navbar chính */}
-      <Navbar  bg="light" expand="lg" className="py-2">
+      <Navbar bg="light" expand="lg" className="py-2">
         <Container>
           <Row className="w-100 align-items-center">
             <Col
@@ -231,7 +257,7 @@ const MyNavbar = () => {
             {/* Các biểu tượng trên di động */}
             <Col xs={7} className="d-lg-none text-end pe-2">
               <Nav className="justify-content-end">
-                <div className="d-flex align-items-center ms-auto">
+                <div className="d-flex align-items-center ms-auto notification-modal">
                   <Nav.Link
                     className="pb-3 me-1 icon_user"
                     style={{ cursor: "pointer" }}
@@ -262,12 +288,18 @@ const MyNavbar = () => {
                   </Nav.Link>
 
                   <Nav.Link
-                    onClick={() => handleLinkClick("/dang-xuat")}
-                    className="p-1 ms-2 position-relative icon-wrapper"
+                    onClick={handleNotificationClick} // Mở modal khi click
+                    className={`p-1 ms-2 position-relative ${
+                      notificationCount > 0 ? "icon-active" : ""
+                    }`} // Thêm class 'icon-active' nếu có thông báo
                     style={{ cursor: "pointer" }}
                   >
-                    <FaBell className="text-dark" size={20} />
-                    <span className="notification-badge">0</span>
+                    <FaBell size={20} />
+                    {notificationCount > 0 && (
+                      <span className="notification-badge">
+                        {notificationCount}
+                      </span>
+                    )}
                   </Nav.Link>
 
                   <Nav.Link
@@ -332,7 +364,9 @@ const MyNavbar = () => {
                       >
                         Danh mục sản phẩm
                       </Dropdown.Toggle>
-                      <Dropdown.Menu style={{ width: "210px" ,fontSize:"14px"}}>
+                      <Dropdown.Menu
+                        style={{ width: "210px", fontSize: "14px" }}
+                      >
                         {categories.map((category) => (
                           <Dropdown.Item
                             key={category.path}
@@ -370,7 +404,7 @@ const MyNavbar = () => {
                       onFocus={() => {
                         if (suggestions.length > 0) setShowSuggestions(true);
                       }}
-                      ref={searchRef} 
+                      ref={searchRef}
                       // className="search-input py-2"
                       // style={{padding: "0.5px 0.5rem"}}
                     />
@@ -428,7 +462,7 @@ const MyNavbar = () => {
             </Col>
 
             {/* Phần biểu tượng trên Desktop */}
-            <Col lg={2} className="d-none d-lg-block">
+            <Col lg={2} className="d-none d-lg-block notification-modal ">
               <Nav className="justify-content-end align-items-end">
                 <Nav.Link
                   className="pb-2 me-2 icon_user"
@@ -449,13 +483,20 @@ const MyNavbar = () => {
                 </Nav.Link>
 
                 <Nav.Link
-                  onClick={() => handleLinkClick("/dang-xuat")}
-                  className="me-3 position-relative"
+                  onClick={handleNotificationClick}
+                  className={`me-3 position-relative ${
+                    notificationCount > 0 ? "icon-active" : ""
+                  }`}
                   style={{ cursor: "pointer" }}
                 >
                   <FaBell size={20} />
-                  <span className="notification-badge">0</span>
+                  {notificationCount > 0 && (
+                    <span className="notification-badge">
+                      {notificationCount}
+                    </span>
+                  )}
                 </Nav.Link>
+
                 <Nav.Link
                   onClick={() => handleLinkClick("/gio-hang")}
                   className="position-relative"
@@ -560,6 +601,10 @@ const MyNavbar = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
+      <NotificationModal
+        show={showNotificationModal}
+        handleClose={() => setShowNotificationModal(false)}
+      />
     </>
   );
 };

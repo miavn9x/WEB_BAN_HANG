@@ -32,14 +32,11 @@ const Test = () => {
   const zoomSlider = useRef();
 
   const cartItems = useSelector((state) => state.cart.items);
-
-  // Kiểm tra sản phẩm có trong giỏ hàng hay chưa
   const isProductInCart = product
     ? cartItems.some((item) => item.product._id === product._id)
     : false;
 
   useEffect(() => {
-    // Hàm fetch thông tin sản phẩm
     const fetchProductDetails = async () => {
       try {
         setLoading(true);
@@ -54,17 +51,14 @@ const Test = () => {
       }
     };
 
-    // Hàm fetch bài viết liên quan đến sản phẩm
     const fetchPostContent = async (productId) => {
       try {
         const response = await axios.get(`/api/posts/product/${productId}`);
-        // Giả sử bạn muốn hiển thị bài viết đầu tiên
         if (response.data.posts && response.data.posts.length > 0) {
           setPostContent(response.data.posts[0]);
         }
       } catch (err) {
         console.error("Error fetching post content:", err);
-        // Nếu không tìm thấy bài viết thì có thể để null hoặc thông báo
         setPostContent(null);
       }
     };
@@ -83,11 +77,9 @@ const Test = () => {
 
     if (id) {
       fetchProductDetails().then(() => {
-        // Sau khi lấy thông tin sản phẩm thành công, tiến hành gọi API bài viết
         if (product?._id) {
           fetchPostContent(product._id);
         } else {
-          // Trong trường hợp fetchProductDetails chưa cập nhật product, sử dụng id từ URL
           fetchPostContent(id);
         }
       });
@@ -95,7 +87,6 @@ const Test = () => {
     }
   }, [id, product?._id]);
 
-  // Cài đặt cho slider hình ảnh chính và thumbnails
   const settings = {
     dots: false,
     infinite: false,
@@ -172,6 +163,26 @@ const Test = () => {
     }
   };
 
+  const handleBuyNow = async () => {
+    try {
+      if (!isProductInCart) {
+        // Nếu sản phẩm chưa có trong giỏ hàng, thêm vào giỏ
+        if (quantity > product.remainingStock) {
+          setCartMessage("số lượng mặt hàng đủ!");
+          setTimeout(() => setCartMessage(""), 3000);
+          return;
+        }
+        await dispatch(addToCart(product, Number(quantity)));
+      }
+      window.location.href = "/gio-hang";
+    } catch (error) {
+      console.error("Lỗi khi mua ngay:", error);
+      setCartMessage("Có lỗi xảy ra khi xử lý đơn hàng!");
+      setTimeout(() => setCartMessage(""), 3000);
+    }
+  };
+
+
   return (
     <>
       {/* Thẻ Helmet để tối ưu SEO */}
@@ -194,7 +205,6 @@ const Test = () => {
             <div className="card mb-4" style={{ maxHeight: "100%" }}>
               <div className="card-body">
                 <div className="row product__modal__content">
-                  {/* Hình ảnh sản phẩm */}
                   <div className="col-lg-5 col-md-12 col-12 mb-3 mb-md-0">
                     <div className="product__modal__zoom position-relative">
                       {product.discountPercentage && (
@@ -332,6 +342,7 @@ const Test = () => {
                     <button
                       className="btn btn-lg mt-auto w-50"
                       style={{ backgroundColor: "#FF6F91", color: "white" }}
+                      onClick={handleBuyNow}
                     >
                       MUA NGAY
                     </button>

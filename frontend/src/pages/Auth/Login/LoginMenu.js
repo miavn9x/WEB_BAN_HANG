@@ -40,7 +40,7 @@ const LoginMenu = ({ onClose }) => {
             <Dropdown.Item onClick={() => navigate("/thong-tin-ca-nhan")}>
               Thông tin tài khoản
             </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/OrderHistory")}>
+            <Dropdown.Item onClick={() => navigate("/order-history/:orderId")}>
               Lịch sử mua hàng
             </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/gio-hang")}>

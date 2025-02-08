@@ -31,7 +31,7 @@ import AutoLogout from "./pages/Auth/Login/AutoLogout";
 import PostsManagement from "./components/Posts/PostsManagement";
 import { Helmet } from "react-helmet"; // Thêm Helmet để tối ưu SEO
 import Evaluate from "./components/Product/Evaluate";
-import NotificationIcon from "./components/Nav/NotificationIcon";
+import NotificationModal from "./components/Nav/NotificationModal";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -63,7 +63,7 @@ function App() {
 
       {/* Thêm SEO Meta Tags */}
       <Helmet>
-        <title>Chuỗi hệ thống siêu thị mẹ và bé - BabyMart.vn</title>
+        <title>Chuỗi hệ thống siêu thị mẹ và bé - Babychill.vn</title>
         <meta
           name="description"
           content="Mua sắm sản phẩm chất lượng với dịch vụ tốt nhất tại cửa hàng trực tuyến của chúng tôi."
@@ -101,13 +101,14 @@ function App() {
         <Route path="/product/:productId" element={<ProductItem />} />
         <Route path="/gio-hang" element={<Cart />} />
         <Route path="/thanh-toan" element={<Checkout />} />
-        <Route path="/OrderHistory" element={<OrderHistory />} />
+        {/* <Route path="/OrderHistory/:orderId" element={<OrderHistory />} /> */}
         <Route path="/shop-map" element={<StoreLocator />} />
         <Route path="/gioi-thieu" element={<Info />} />
         <Route path="/PostsList" element={<PostsList />} />
         <Route path="/posts/:id" element={<PostDetail />} />
         <Route path="/test" element={<Evaluate />} />
-        <Route path="/1" element={<NotificationIcon />} />
+        <Route path="/1" element={<NotificationModal />} />
+        <Route path="/order-history/:orderId" element={<OrderHistory />} />
 
         {/* Protected Routes - User & admin */}
         <Route

@@ -19,3 +19,8 @@
   display: inline-flex;
   align-items: center;
 }
+
+
+.notification-modal .icon-active svg {
+  color: #ff69b4;
+}

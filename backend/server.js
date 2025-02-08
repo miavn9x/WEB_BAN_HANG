@@ -60,8 +60,8 @@ const questionRouter = require("./routes/questionRouter");
 app.use("/api", questionRouter);
 
 
-const notificationRouter = require("./routes/notificationRouter");
-app.use("/api", notificationRouter);
+const notificationRoutes = require("./routes/notificationRoutes");
+app.use("/api/notifications", notificationRoutes);
 
 // Chạy server
 app.listen(PORT, () => {

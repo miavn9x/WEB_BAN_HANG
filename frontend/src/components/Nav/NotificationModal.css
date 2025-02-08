@@ -1,0 +1,87 @@
+.bg-custom {
+    background-color: #ffd5db !important;
+}
+
+.notification-modal .bg-custom {
+    background-color: #ffd5db !important;
+}
+
+.notification-modal .modal-content {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.notification-modal .modal-header {
+    border-bottom: 1px solid #ddd;
+}
+
+.notification-modal .modal-footer {
+    border-top: 1px solid #ddd;
+}
+
+.notification-modal .card {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+}
+
+.notification-modal .card-body {
+    padding: 16px;
+    overflow-y: auto;
+    /* max-height: 200px; */
+}
+
+.notification-modal .card-body h5 {
+    font-size: 1.1rem;
+}
+
+.notification-modal .card-body p {
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+}
+
+.notification-modal .card-body .d-flex {
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notification-modal .modal-body {
+    max-height: 50vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px o;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+@media (max-width: 768px) {
+    .notification-modal .modal-dialog {
+        width: 100%;
+        max-width: 90%;
+    }
+
+    .notification-modal .card-body h5 {
+        font-size: 1rem;
+    }
+
+    .notification-modal .card-body p {
+        font-size: 0.85rem;
+    }
+}
+
+.notification-modal .delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: none;
+    transition: 0.3s;
+}
+
+.notification-modal .card:hover .delete-btn {
+    display: block;
+}
+
+.notification-modal button {
+    text-decoration: underline;
+}

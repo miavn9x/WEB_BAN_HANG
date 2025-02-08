@@ -189,6 +189,9 @@
     .icon_user {
         top: 3px !important;
     }
+    .notification-modal .icon-active svg {
+  color: #ff69b4;
+}
 }
 
 @media (max-width: 350px) {
@@ -206,6 +209,9 @@
         max-width: 100%;
 
     }
+        .notification-modal .icon-active svg {
+            color: #ff69b4;
+        }
 }
 
 @media (max-width: 200px) {
@@ -213,12 +219,18 @@
         opacity: 0 !important;
 
     }
+        .notification-modal .icon-active svg {
+            color: #ff69b4;
+        }
 }
 
 @media screen and (min-width: 991px) {
     .desktop-hidden {
         display: none !important;
     }
+        .notification-modal .icon-active svg {
+            color: #ff69b4;
+        }
 }
 
 html body .nav-link {
@@ -313,3 +325,4 @@ html body .nav-link {
 .suggestion-item .me-1 {
     margin-right: 5px;
 }
+

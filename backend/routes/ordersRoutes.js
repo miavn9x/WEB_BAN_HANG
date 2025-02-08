@@ -5,6 +5,7 @@ const Order = require("../models/orderModel");
 const authMiddleware = require("../middleware/authMiddleware");
 const { sendOrderConfirmationEmail } = require('../utils/ordermail'); 
 const Product = require("../models/productModel");
+const Notification = require("../models/notificationModel");
 
 
 router.post("/orders", authMiddleware, async (req, res) => {
@@ -65,11 +66,11 @@ router.post("/orders", authMiddleware, async (req, res) => {
     );
 
     try {
-      console.log("Dữ liệu gửi email:", {
-        ...req.body,
-        paymentStatus: initialPaymentStatus,
-        formattedOrderDate: formattedDate,
-      });
+      // console.log("kiem tra Dữ liệu gửi email:", {
+      //   ...req.body,
+      //   paymentStatus: initialPaymentStatus,
+      //   formattedOrderDate: formattedDate,
+      // });
 
       await sendOrderConfirmationEmail(
         {
@@ -314,6 +315,84 @@ router.get("/orders", authMiddleware, async (req, res) => {
   }
 });
 
+// router.put("/order/:id", authMiddleware, async (req, res) => {
+//   const { id: orderId } = req.params;
+//   const { orderStatus, paymentStatus } = req.body;
+
+//   try {
+//     const order = await Order.findById(orderId).populate("items.product");
+//     if (!order) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Không tìm thấy đơn hàng.",
+//       });
+//     }
+
+//     const oldOrderStatus = order.orderStatus;
+
+//     if (orderStatus) {
+//       if (Object.values(ORDER_STATUS).includes(orderStatus)) {
+//         order.orderStatus = orderStatus;
+//       } else {
+//         return res.status(400).json({
+//           success: false,
+//           message: "Trạng thái đơn hàng không hợp lệ.",
+//         });
+//       }
+//     }
+
+//     if (paymentStatus) {
+//       if (Object.values(PAYMENT_STATUS).includes(paymentStatus)) {
+//         order.paymentStatus = paymentStatus;
+//       } else {
+//         return res.status(400).json({
+//           success: false,
+//           message: "Trạng thái thanh toán không hợp lệ.",
+//         });
+//       }
+//     }
+
+//     await order.save();
+
+//     const confirmedStatus = ["Đã xác nhận", "Đang giao hàng", "Đã giao hàng"];
+
+//     if (confirmedStatus.includes(order.orderStatus) && !confirmedStatus.includes(oldOrderStatus)) {
+//       for (const item of order.items) {
+//         await Product.findByIdAndUpdate(
+//           item.product._id,
+//           { $inc: { remainingStock: -item.quantity } },
+//           { new: true }
+//         );
+//       }
+//     }
+
+//     if (oldOrderStatus !== "Đã hủy" &&
+//         confirmedStatus.includes(oldOrderStatus) &&
+//         order.orderStatus === "Đã hủy") {
+//       for (const item of order.items) {
+//         await Product.findByIdAndUpdate(
+//           item.product._id,
+//           { $inc: { remainingStock: item.quantity } },
+//           { new: true }
+//         );
+//       }
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Cập nhật trạng thái đơn hàng thành công.",
+//       order,
+//     });
+//   } catch (error) {
+//     console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Lỗi khi cập nhật trạng thái đơn hàng.",
+//       error: error.message,
+//     });
+//   }
+// });
+
 router.put("/order/:id", authMiddleware, async (req, res) => {
   const { id: orderId } = req.params;
   const { orderStatus, paymentStatus } = req.body;
@@ -328,6 +407,7 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
     }
 
     const oldOrderStatus = order.orderStatus;
+    const userId = order.userId; 
 
     if (orderStatus) {
       if (Object.values(ORDER_STATUS).includes(orderStatus)) {
@@ -354,8 +434,10 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
     await order.save();
 
     const confirmedStatus = ["Đã xác nhận", "Đang giao hàng", "Đã giao hàng"];
-
-    if (confirmedStatus.includes(order.orderStatus) && !confirmedStatus.includes(oldOrderStatus)) {
+    if (
+      confirmedStatus.includes(order.orderStatus) &&
+      !confirmedStatus.includes(oldOrderStatus)
+    ) {
       for (const item of order.items) {
         await Product.findByIdAndUpdate(
           item.product._id,
@@ -365,9 +447,11 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
       }
     }
 
-    if (oldOrderStatus !== "Đã hủy" &&
-        confirmedStatus.includes(oldOrderStatus) &&
-        order.orderStatus === "Đã hủy") {
+    if (
+      oldOrderStatus !== "Đã hủy" &&
+      confirmedStatus.includes(oldOrderStatus) &&
+      order.orderStatus === "Đã hủy"
+    ) {
       for (const item of order.items) {
         await Product.findByIdAndUpdate(
           item.product._id,
@@ -377,6 +461,15 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
       }
     }
 
+    const notificationMessage = `Đơn hàng ${order.orderId} của bạn đã được cập nhật sang trạng thái ${orderStatus} và thanh toán ${paymentStatus}`;
+    const notification = new Notification({
+      user: userId, 
+      title: "Thông báo về đơn hàng của bạn",
+      message: notificationMessage,
+      order: order._id, 
+    });
+
+    await notification.save(); 
     res.status(200).json({
       success: true,
       message: "Cập nhật trạng thái đơn hàng thành công.",
@@ -393,7 +486,9 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
 });
 
 
+
 const { ORDER_STATUS, PAYMENT_STATUS } = require("../constants/orderConstants");
+// xu lý đon hang cua admin
 
 router.post("/payment/refund", authMiddleware, async (req, res) => {
   const { orderId, amount, paymentMethod } = req.body;
