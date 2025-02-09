@@ -20,16 +20,10 @@ import Fuse from "fuse.js";
 const ProductPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Lấy query param "showDiscount"
   const urlParams = new URLSearchParams(location.search);
   const discountParam = urlParams.get("showDiscount");
-
-  // Nếu được chuyển từ HomeProduct, có thể state có showDiscount hoặc query param có "true"
   const showDiscount = location.state?.showDiscount || discountParam === "true";
 
-  // Nếu truy cập từ HomeProduct, mặc định sắp xếp theo "% Giảm giá",
-  // ngược lại mặc định là "random"
   const [sortBy, setSortBy] = useState(
     showDiscount ? "discountPercentage" : "random"
   );
@@ -37,22 +31,18 @@ const ProductPage = () => {
   const queryParams = new URLSearchParams(location.search);
   const categoryFromURL = queryParams.get("categoryName");
   const genericFromURL = queryParams.get("generic");
-  const searchFromURL = queryParams.get("search"); // Lấy từ khóa tìm kiếm từ URL
+  const searchFromURL = queryParams.get("search");
 
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({
-    price: null, // Lưu đối tượng { minPrice, maxPrice }
-    categories: {}, // Lưu dạng object: { [categoryName]: filterId }
+    price: null, 
+    categories: {}, 
   });
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Mở/đóng modal bộ lọc (cho mobile & màn hình nhỏ hơn xl)
   const handleCloseFilter = () => setShowFilter(false);
   const handleShowFilter = () => setShowFilter(true);
-
-  // Cập nhật state filters khi có thay đổi từ Filter component
   const handleFilterChange = (filterData) => {
     const { filterId, isChecked, filterType, filterName, categoryName } =
       filterData;
@@ -72,8 +62,6 @@ const ProductPage = () => {
       return prevFilters;
     });
   };
-
-  // Hàm clearFilters: reset bộ lọc và đặt sortBy về mặc định theo cách truy cập
   const clearFilters = () => {
     setFilters({
       price: null,
@@ -83,7 +71,6 @@ const ProductPage = () => {
     navigate("/products");
   };
 
-  // Hàm hỗ trợ chuyển chuỗi về dạng không dấu và in thường
   const normalizeString = (str) => {
     return str
       ? str
@@ -92,8 +79,6 @@ const ProductPage = () => {
           .toLowerCase()
       : "";
   };
-
-  // Fetch sản phẩm dựa vào các tham số lọc, sắp xếp và tìm kiếm
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
@@ -101,8 +86,6 @@ const ProductPage = () => {
       try {
         let url = `/api/products`;
         const params = [];
-
-        // Nếu người dùng CHƯA chọn bộ lọc từ Filter (state filters rỗng)
         if (Object.keys(filters.categories).length === 0 && !filters.price) {
           if (genericFromURL) {
             params.push(
@@ -112,10 +95,8 @@ const ProductPage = () => {
             params.push(`categoryName=${encodeURIComponent(categoryFromURL)}`);
           }
         } else {
-          // Nếu người dùng đã chọn bộ lọc từ Filter thì ưu tiên dùng dữ liệu đó
           const categoryKeys = Object.keys(filters.categories);
           if (categoryKeys.length > 0) {
-            // Giả sử filterId có định dạng "categoryName|categoryGeneric"
             const categoryGenerics = categoryKeys
               .map((catName) => {
                 const filterId = filters.categories[catName];
@@ -129,7 +110,7 @@ const ProductPage = () => {
           }
         }
 
-        // Xử lý bộ lọc giá (nếu có)
+        // Xử lý bộ lọc giá 
         if (filters.price) {
           if (filters.price.maxPrice) {
             params.push(
@@ -143,12 +124,10 @@ const ProductPage = () => {
           }
         }
 
-        // Nếu sortBy khác "default" và khác "discountPercentage" (vì xử lý giảm giá ở phía client)
         if (sortBy !== "default" && sortBy !== "discountPercentage") {
           params.push(`sortBy=${encodeURIComponent(sortBy)}`);
         }
 
-        // Nếu có từ khóa tìm kiếm, thêm vào params (API có thể dùng để lọc sơ bộ)
         if (searchFromURL) {
           params.push(`search=${encodeURIComponent(searchFromURL)}`);
         }
@@ -159,8 +138,6 @@ const ProductPage = () => {
 
         const response = await axios.get(url);
         let fetchedProducts = response.data.products;
-
-        // Nếu có từ khóa tìm kiếm, áp dụng Fuse.js với chuyển đổi về dạng không dấu
         if (searchFromURL && fetchedProducts.length > 0) {
           const normalizedQuery = normalizeString(searchFromURL);
           const fuse = new Fuse(fetchedProducts, {
@@ -188,13 +165,10 @@ const ProductPage = () => {
           fetchedProducts = fuseResult.map((result) => result.item);
         }
 
-        // Xử lý sắp xếp theo các tùy chọn
         if (sortBy === "discountPercentage") {
-          // Lọc chỉ lấy những sản phẩm có giảm giá (discountPercentage > 0)
           fetchedProducts = fetchedProducts.filter(
             (product) => product.discountPercentage > 0
           );
-          // Sắp xếp giảm dần theo discountPercentage (sử dụng giá trị mặc định là 0 nếu không có)
           fetchedProducts = fetchedProducts.sort(
             (a, b) => (b.discountPercentage || 0) - (a.discountPercentage || 0)
           );
@@ -232,7 +206,6 @@ const ProductPage = () => {
   return (
     <Container>
       <Row>
-        {/* Sidebar bộ lọc cho Desktop (màn hình ≥1200px) */}
         <Col xl={3} className="sidebar-wrapper d-none d-xl-block">
           <div className="sidebar p-3 rounded mb-3">
             <Button

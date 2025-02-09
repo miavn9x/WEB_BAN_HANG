@@ -15,7 +15,7 @@ body {
 }
 .container{
     font-size: 13px;
-            max-width: 1200px!important;
+            /* max-width: 1200px!important; */
 }
 .navbar {
 font-size: 13px;}

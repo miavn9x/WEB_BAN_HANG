@@ -153,3 +153,59 @@
     font-size: 25px;
     color: #fa3636;
 }
+
+/* Bao ngoài của danh mục sản phẩm */
+.custom__cat__container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.custom__cat__row {
+    display: grid;
+    gap: 8px;
+}
+
+.custom__cat__banner {
+    grid-column: span 2;
+}
+
+.custom-cat-item {
+    grid-column: span 1;
+}
+
+@media (min-width: 1025px) {
+    .custom__cat__row {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+@media (max-width: 1024px) and (min-width: 768px) {
+    .custom__cat__row {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .custom__cat__banner {
+        grid-column: span 3;
+    }
+}
+
+@media (max-width: 767px) {
+    .custom__cat__row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.custom__cat__loading,
+.custom__cat__empty {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.custom__cat__container {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #fff;
+    padding: 10px;
+}
