@@ -1,27 +1,27 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./styles.css";
 import ProductItem from "../Product/ProductItem";
 import axios from "axios";
 
 const HomeProduct = () => {
-  const COUNTDOWN_DURATION = "10s"; // Thời gian chính
-  const COUNTDOWN_RESET = "5s"; // Thời gian reset
+  // Nhập: s = giây, m = phút, h = giờ
+  const COUNTDOWN_DURATION = "2h"; // Thời gian của phase "main"
+  const COUNTDOWN_RESET = "10m"; // Thời gian của phase "reset"
 
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const [discountedProducts, setDiscountedProducts] = useState([]);
   const [currentPhase, setCurrentPhase] = useState("main");
-  const [timeOffset, setTimeOffset] = useState(0); // Hiệu số: serverTime - localTime
+  const [timeOffset, setTimeOffset] = useState(0);
+  // Lưu targetTime của phase hiện tại (điểm kết thúc của phase)
+  const [phaseTargetTime, setPhaseTargetTime] = useState(null);
 
-  // useRef để lưu targetTime và phase mà không cần re-render
-  const targetTimeRef = useRef(0);
-  const phaseRef = useRef("main");
-
+  // Hàm chuyển đổi chuỗi thời gian sang miligiây
   const parseDurationToMs = (duration) => {
     const unit = duration.slice(-1);
-    const value = parseInt(duration);
+    const value = parseInt(duration, 10);
     const units = {
       d: value * 24 * 60 * 60 * 1000,
       h: value * 60 * 60 * 1000,
@@ -31,6 +31,7 @@ const HomeProduct = () => {
     return units[unit] || 0;
   };
 
+  // Hàm trộn mảng sản phẩm
   const shuffleArray = (array) => {
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
@@ -40,6 +41,7 @@ const HomeProduct = () => {
     return newArray;
   };
 
+  // Lấy sản phẩm giảm giá từ API
   const fetchDiscountedProducts = useCallback(async () => {
     try {
       const response = await axios.get(
@@ -55,10 +57,10 @@ const HomeProduct = () => {
     }
   }, []);
 
-  // Lấy thời gian hiện tại từ server và tính offset giữa server và client
+  // Lấy thời gian từ server để đồng bộ với client
   const fetchServerTime = useCallback(async () => {
     try {
-      const response = await axios.get("/api/time"); // Endpoint trả về { serverTime: <timestamp in ms> }
+      const response = await axios.get("/api/time"); // API trả về { serverTime: <timestamp in ms> }
       const serverTime = response.data.serverTime;
       const localTime = new Date().getTime();
       const offset = serverTime - localTime;
@@ -68,79 +70,57 @@ const HomeProduct = () => {
     }
   }, []);
 
-  // Lấy offset từ server một lần khi component mount
   useEffect(() => {
     fetchServerTime();
   }, [fetchServerTime]);
 
-  // Sử dụng useCallback để định nghĩa getCurrentTime dựa trên timeOffset
+  // Hàm lấy thời gian hiện tại đã được đồng bộ với server
   const getCurrentTime = useCallback(
     () => new Date().getTime() + timeOffset,
     [timeOffset]
   );
 
+  // Khi component mount, thiết lập targetTime cho phase đầu tiên
   useEffect(() => {
-    const initializeCountdown = () => {
-      const savedData = localStorage.getItem("countdownData");
+    const now = getCurrentTime();
+    // Nếu mới vào trang, ta xác định phase dựa trên thời gian tuyệt đối:
+    // Sử dụng modulo nếu muốn đồng bộ toàn cục (cách 1), nhưng ở đây ta reset lại targetTime
+    const mainDuration = parseDurationToMs(COUNTDOWN_DURATION);
+    // Giả sử nếu hiện tại đã thuộc phase "main", ta set targetTime = now + mainDuration,
+    // nếu không, ta set targetTime = now + resetDuration.
+    if (currentPhase === "main") {
+      setPhaseTargetTime(now + mainDuration);
+    } else {
+      setPhaseTargetTime(now + parseDurationToMs(COUNTDOWN_RESET));
+    }
+    // Nếu bạn muốn đồng bộ hoàn toàn theo thời gian tuyệt đối thì có thể tính modulo,
+    // nhưng khi load trang vào giữa phase thì countdown sẽ không bắt đầu từ full duration.
+  }, [getCurrentTime, currentPhase, COUNTDOWN_DURATION, COUNTDOWN_RESET]);
+
+  // Cập nhật đồng hồ đếm ngược mỗi giây và chuyển phase khi hết thời gian
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!phaseTargetTime) return;
       const now = getCurrentTime();
-
-      if (savedData) {
-        const { targetTime, phase } = JSON.parse(savedData);
-        if (targetTime > now) {
-          targetTimeRef.current = targetTime;
-          phaseRef.current = phase;
-          return;
-        }
-      }
-
-      const initialDuration = parseDurationToMs(COUNTDOWN_DURATION);
-      targetTimeRef.current = now + initialDuration;
-      phaseRef.current = "main";
-
-      localStorage.setItem(
-        "countdownData",
-        JSON.stringify({
-          targetTime: targetTimeRef.current,
-          phase: phaseRef.current,
-        })
-      );
-    };
-
-    let interval;
-    initializeCountdown();
-    setCurrentPhase(phaseRef.current);
-
-    const updateCountdown = () => {
-      const now = getCurrentTime();
-      const remainingTime = targetTimeRef.current - now;
+      let remainingTime = phaseTargetTime - now;
 
       if (remainingTime <= 0) {
-        const nextPhase = phaseRef.current === "main" ? "reset" : "main";
-        const nextDuration =
-          nextPhase === "main"
-            ? parseDurationToMs(COUNTDOWN_DURATION)
-            : parseDurationToMs(COUNTDOWN_RESET);
-
-        targetTimeRef.current = now + nextDuration;
-        phaseRef.current = nextPhase;
-
-        localStorage.setItem(
-          "countdownData",
-          JSON.stringify({
-            targetTime: targetTimeRef.current,
-            phase: phaseRef.current,
-          })
-        );
-
-        setCurrentPhase(nextPhase);
-
-        if (nextPhase === "main") {
-          fetchDiscountedProducts();
+        // Khi hết phase, chuyển phase và reset targetTime dựa trên thời gian đầy đủ của phase mới
+        if (currentPhase === "main") {
+          // Chuyển sang phase reset
+          setCurrentPhase("reset");
+          setPhaseTargetTime(now + parseDurationToMs(COUNTDOWN_RESET));
+          setDiscountedProducts([]); // Xóa sản phẩm nếu cần
         } else {
-          setDiscountedProducts([]);
+          // Chuyển sang phase main
+          setCurrentPhase("main");
+          setPhaseTargetTime(now + parseDurationToMs(COUNTDOWN_DURATION));
+          fetchDiscountedProducts();
         }
+        return;
       }
 
+      // Tính giờ, phút, giây từ remainingTime
       const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60));
       const remainingMinutes = Math.floor((remainingTime / (1000 * 60)) % 60);
       const remainingSeconds = Math.floor((remainingTime / 1000) % 60);
@@ -148,18 +128,24 @@ const HomeProduct = () => {
       setHours(Math.max(0, remainingHours));
       setMinutes(Math.max(0, remainingMinutes));
       setSeconds(Math.max(0, remainingSeconds));
-    };
+    }, 1000);
 
-    interval = setInterval(updateCountdown, 1000);
-    if (phaseRef.current === "main") fetchDiscountedProducts();
-
-    return () => clearInterval(interval);
+    return () => clearInterval(timer);
   }, [
+    phaseTargetTime,
+    getCurrentTime,
+    currentPhase,
     COUNTDOWN_DURATION,
     COUNTDOWN_RESET,
     fetchDiscountedProducts,
-    getCurrentTime,
   ]);
+
+  // Khi chuyển sang phase main, gọi API lấy sản phẩm giảm giá
+  useEffect(() => {
+    if (currentPhase === "main") {
+      fetchDiscountedProducts();
+    }
+  }, [currentPhase, fetchDiscountedProducts]);
 
   return (
     <div className="home__product bg-pink py-5 d-flex justify-content-center">
