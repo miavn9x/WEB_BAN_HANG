@@ -1,4 +1,3 @@
-// components/CarouselAndMenu.jsx
 import React, { useState } from "react";
 import {
   Container,
@@ -47,11 +46,8 @@ const CategoryMenu = ({ categories }) => {
 
   return (
     <Card className="category-list">
-      <Card.Header
-        className="text-center pb-1"
-        // style={{ backgroundColor: "ffff", color: "#fff" }}
-      >
-        <span className="text-uppercase  fw-bold" style={{ fontSize: "16px" }}>
+      <Card.Header className="text-center pb-1">
+        <span className="text-uppercase fw-bold" style={{ fontSize: "16px" }}>
           Danh mục sản phẩm
         </span>
       </Card.Header>

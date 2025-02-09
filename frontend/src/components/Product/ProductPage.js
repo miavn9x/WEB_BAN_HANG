@@ -30,7 +30,7 @@ const ProductPage = () => {
   const showDiscount = location.state?.showDiscount || discountParam === "true";
 
   const [sortBy, setSortBy] = useState(
-    showDiscount ? "discountPercentage" : "random"
+    showDiscount ? "discountPercentage" : "default"
   );
 
   const queryParams = new URLSearchParams(location.search);
@@ -72,7 +72,7 @@ const ProductPage = () => {
       price: null,
       categories: {},
     });
-    setSortBy(showDiscount ? "discountPercentage" : "random");
+    setSortBy(showDiscount ? "discountPercentage" : "default");
     navigate("/products");
   };
 
@@ -84,112 +84,117 @@ const ProductPage = () => {
           .toLowerCase()
       : "";
   };
+
   useEffect(() => {
-const fetchProducts = async () => {
-  setLoading(true);
-  setError(null);
-  try {
-    let url = `/api/products`;
-    const params = [];
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        let url = `/api/products`;
+        const params = [];
 
-    // Xử lý category filters
-const categoryGenerics = [];
-const categoryKeys = Object.keys(filters.categories);
+        // Xử lý category filters
+        const categoryGenerics = [];
+        const categoryKeys = Object.keys(filters.categories);
 
-if (categoryKeys.length > 0) {
-  categoryKeys.forEach((catName) => {
-    const filterId = filters.categories[catName];
-    const parts = filterId.split("|");
-    categoryGenerics.push(parts[1]); // Collect all selected generics
-  });
+        if (categoryKeys.length > 0) {
+          categoryKeys.forEach((catName) => {
+            const filterId = filters.categories[catName];
+            const parts = filterId.split("|");
+            categoryGenerics.push(parts[1]); // Collect all selected generics
+          });
 
-  // Thêm từng categoryGeneric làm tham số riêng
-  categoryGenerics.forEach((generic) => {
-    params.push(`categoryGeneric=${encodeURIComponent(generic)}`);
-  });
-}
+          // Thêm từng categoryGeneric làm tham số riêng
+          categoryGenerics.forEach((generic) => {
+            params.push(`categoryGeneric=${encodeURIComponent(generic)}`);
+          });
+        }
 
-    // Xử lý bộ lọc giá
-    if (filters.price) {
-      if (filters.price.maxPrice) {
-        params.push(`maxPrice=${encodeURIComponent(filters.price.maxPrice)}`);
+        // Xử lý bộ lọc giá
+        if (filters.price) {
+          if (filters.price.maxPrice) {
+            params.push(`maxPrice=${encodeURIComponent(filters.price.maxPrice)}`);
+          }
+          if (filters.price.minPrice) {
+            params.push(`minPrice=${encodeURIComponent(filters.price.minPrice)}`);
+          }
+        }
+
+        // Sắp xếp, tìm kiếm, v.v.
+        if (sortBy !== "default" && sortBy !== "discountPercentage") {
+          params.push(`sortBy=${encodeURIComponent(sortBy)}`);
+        }
+        if (searchFromURL) {
+          params.push(`search=${encodeURIComponent(searchFromURL)}`);
+        }
+        if (categoryFromURL) {
+          params.push(`categoryName=${encodeURIComponent(categoryFromURL)}`);
+        }
+        if (genericFromURL) {
+          params.push(`categoryGeneric=${encodeURIComponent(genericFromURL)}`);
+        }
+
+        if (params.length > 0) {
+          url = `${url}?${params.join("&")}`;
+        }
+
+        const response = await axios.get(url);
+        let fetchedProducts = response.data.products;
+
+        // Nếu có tìm kiếm, sử dụng Fuse.js để lọc thêm (như ban đầu)
+        if (searchFromURL && fetchedProducts.length > 0) {
+          const normalizedQuery = normalizeString(searchFromURL);
+          const fuse = new Fuse(fetchedProducts, {
+            keys: [
+              {
+                name: "name",
+                getFn: (obj) => normalizeString(obj.name),
+              },
+              {
+                name: "category.name",
+                getFn: (obj) => normalizeString(obj.category?.name),
+              },
+              {
+                name: "category.generic",
+                getFn: (obj) => normalizeString(obj.category?.generic),
+              },
+              {
+                name: "brand",
+                getFn: (obj) => normalizeString(obj.brand),
+              },
+            ],
+            threshold: 0.3,
+          });
+          const fuseResult = fuse.search(normalizedQuery);
+          fetchedProducts = fuseResult.map((result) => result.item);
+        }
+
+        // Xử lý sắp xếp
+        if (sortBy === "discountPercentage") {
+          fetchedProducts = fetchedProducts.filter(
+            (product) => product.discountPercentage > 0
+          );
+          fetchedProducts = fetchedProducts.sort(
+            (a, b) => (b.discountPercentage || 0) - (a.discountPercentage || 0)
+          );
+        } else if (sortBy === "priceAsc") {
+          fetchedProducts = fetchedProducts.sort(
+            (a, b) => a.priceAfterDiscount - b.priceAfterDiscount
+          );
+        } else if (sortBy === "priceDesc") {
+          fetchedProducts = fetchedProducts.sort(
+            (a, b) => b.priceAfterDiscount - a.priceAfterDiscount
+          );
+        }
+
+        setProducts(fetchedProducts);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setError("Có lỗi khi tải sản phẩm. Vui lòng thử lại.");
+        setLoading(false);
       }
-      if (filters.price.minPrice) {
-        params.push(`minPrice=${encodeURIComponent(filters.price.minPrice)}`);
-      }
-    }
-
-    // Sắp xếp, tìm kiếm, v.v.
-    if (sortBy !== "default" && sortBy !== "discountPercentage") {
-      params.push(`sortBy=${encodeURIComponent(sortBy)}`);
-    }
-    if (searchFromURL) {
-      params.push(`search=${encodeURIComponent(searchFromURL)}`);
-    }
-
-    if (params.length > 0) {
-      url = `${url}?${params.join("&")}`;
-    }
-
-    const response = await axios.get(url);
-    let fetchedProducts = response.data.products;
-
-    // Nếu có tìm kiếm, sử dụng Fuse.js để lọc thêm (như ban đầu)
-    if (searchFromURL && fetchedProducts.length > 0) {
-      const normalizedQuery = normalizeString(searchFromURL);
-      const fuse = new Fuse(fetchedProducts, {
-        keys: [
-          {
-            name: "name",
-            getFn: (obj) => normalizeString(obj.name),
-          },
-          {
-            name: "category.name",
-            getFn: (obj) => normalizeString(obj.category?.name),
-          },
-          {
-            name: "category.generic",
-            getFn: (obj) => normalizeString(obj.category?.generic),
-          },
-          {
-            name: "brand",
-            getFn: (obj) => normalizeString(obj.brand),
-          },
-        ],
-        threshold: 0.3,
-      });
-      const fuseResult = fuse.search(normalizedQuery);
-      fetchedProducts = fuseResult.map((result) => result.item);
-    }
-
-    // Xử lý sắp xếp
-    if (sortBy === "discountPercentage") {
-      fetchedProducts = fetchedProducts.filter(
-        (product) => product.discountPercentage > 0
-      );
-      fetchedProducts = fetchedProducts.sort(
-        (a, b) => (b.discountPercentage || 0) - (a.discountPercentage || 0)
-      );
-    } else if (sortBy === "priceAsc") {
-      fetchedProducts = fetchedProducts.sort(
-        (a, b) => a.priceAfterDiscount - b.priceAfterDiscount
-      );
-    } else if (sortBy === "priceDesc") {
-      fetchedProducts = fetchedProducts.sort(
-        (a, b) => b.priceAfterDiscount - a.priceAfterDiscount
-      );
-    } else if (sortBy === "random") {
-      fetchedProducts = fetchedProducts.sort(() => Math.random() - 0.5);
-    }
-
-    setProducts(fetchedProducts);
-    setLoading(false);
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    setError("Có lỗi khi tải sản phẩm. Vui lòng thử lại.");
-    setLoading(false);
-  }
-};
+    };
 
     fetchProducts();
   }, [
@@ -266,8 +271,8 @@ if (categoryKeys.length > 0) {
                         >
                           % Giảm giá
                         </Dropdown.Item>
-                        <Dropdown.Item onClick={() => setSortBy("random")}>
-                          Ngẫu nhiên
+                        <Dropdown.Item onClick={() => setSortBy("default")}>
+                          Mặc định
                         </Dropdown.Item>
                       </Dropdown.Menu>
                     </Dropdown>

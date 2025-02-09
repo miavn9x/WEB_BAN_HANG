@@ -105,11 +105,11 @@ const HomeProduct = () => {
   }, [timeState.currentPhase]);
 
   // Hàm điều hướng đến trang danh sách sản phẩm theo danh mục riêng
-  const handleViewCategory = (categoryKey, categoryValue) => {
-    navigate(`/products?${categoryKey}=${encodeURIComponent(categoryValue)}`, {
-      state: { [categoryKey]: categoryValue },
-    });
-  };
+const handleViewCategory = (categoryKey, categoryValue) => {
+  navigate(`/products?${categoryKey}=${encodeURIComponent(categoryValue)}`, {
+    state: { [categoryKey]: categoryValue },
+  });
+};
 
   // Hàm điều hướng đến trang ProductPage với cả 2 danh mục: Sữa bột cao cấp và Sữa dinh dưỡng
   const handleViewAllCategories = () => {
@@ -303,18 +303,12 @@ const getCachedRandomizedProducts = (filteredProducts) => {
           </div>
           <div className="col-4">
             <Button
-              onClick={() =>
-                handleViewCategory("categoryName", "Sữa bột cao cấp")
-              }
+              onClick={() => handleViewCategory("generic", "Sữa bột cao cấp")}
             >
               Sữa bột cao cấp
             </Button>
-          </div>
-          <div className="col-4">
             <Button
-              onClick={() =>
-                handleViewCategory("categoryName", "Sữa dinh dưỡng")
-              }
+              onClick={() => handleViewCategory("generic", "Sữa dinh dưỡng")}
             >
               Sữa dinh dưỡng
             </Button>

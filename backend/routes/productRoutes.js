@@ -92,14 +92,14 @@ router.post("/products", upload.array("images", 20), async (req, res) => {
 router.get("/products", async (req, res) => {
   try {
     const {
-      page = 1,              // Mặc định là trang đầu tiên
-      limit = 9900,          // Giới hạn sản phẩm tối đa
-      search = "",           // Từ khóa tìm kiếm
-      categoryName,          // Tên danh mục
-      categoryGeneric,       // Danh mục chung
-      minPrice,              // Giá tối thiểu
-      maxPrice,              // Giá tối đa
-      sortBy = "default",    // Sắp xếp
+      page = 1, // Mặc định là trang đầu tiên
+      limit = 9900, // Giới hạn sản phẩm tối đa
+      search = "", // Từ khóa tìm kiếm
+      categoryName, // Tên danh mục
+      categoryGeneric, // Danh mục chung
+      minPrice, // Giá tối thiểu
+      maxPrice, // Giá tối đa
+      sortBy = "default", // Sắp xếp
     } = req.query;
 
     // Kiểm tra `page` và `limit` là số nguyên dương
@@ -122,55 +122,50 @@ router.get("/products", async (req, res) => {
     if (categoryName) {
       query["category.name"] = { $regex: categoryName, $options: "i" };
     }
-  if (categoryGeneric) {
-    // Split chuỗi thành mảng nếu có nhiều giá trị
-    const generics =
-      typeof categoryGeneric === "string"
-        ? categoryGeneric.split(",")
-        : categoryGeneric;
+    if (categoryGeneric) {
+      // Split chuỗi thành mảng nếu có nhiều giá trị
+      const generics =
+        typeof categoryGeneric === "string"
+          ? categoryGeneric.split(",")
+          : categoryGeneric;
 
-    // Thêm filter tìm chính xác giá trị trong mảng
-    query["category.generic"] = { $in: generics.map((g) => g.trim()) };
-  }
-let priceFilter = {};
-if (minPrice && !isNaN(minPrice)) {
-  priceFilter.$gte = parseFloat(minPrice);
-}
-if (maxPrice && !isNaN(maxPrice)) {
-  priceFilter.$lte = parseFloat(maxPrice);
-}
-if (Object.keys(priceFilter).length > 0) {
-  query.priceAfterDiscount = priceFilter;
-}
+      // Thêm filter tìm chính xác giá trị trong mảng
+      query["category.generic"] = { $in: generics.map((g) => g.trim()) };
+    }
+    let priceFilter = {};
+    if (minPrice && !isNaN(minPrice)) {
+      priceFilter.$gte = parseFloat(minPrice);
+    }
+    if (maxPrice && !isNaN(maxPrice)) {
+      priceFilter.$lte = parseFloat(maxPrice);
+    }
+    if (Object.keys(priceFilter).length > 0) {
+      query.priceAfterDiscount = priceFilter;
+    }
 
-// Sửa phần sort random thành:
-if (sortBy === "random") {
-  const matchStage = { $match: query };
-  const sampleStage = { $sample: { size: parseInt(validLimit) } };
-  const pipeline = [matchStage];
+    // Sửa phần sort random thành:
+    if (sortBy === "random") {
+      const matchStage = { $match: query };
+      const sampleStage = { $sample: { size: parseInt(validLimit) } };
+      const pipeline = [matchStage, sampleStage];
 
-  if (Object.keys(query).length > 0) {
-    pipeline.unshift(matchStage);
-  }
-  pipeline.push(sampleStage);
-
-  const randomProducts = await Product.aggregate(pipeline);
-  return res.json({
-    products: randomProducts,
-    totalPages: 1,
-    currentPage: 1,
-  });
-}
+      const randomProducts = await Product.aggregate(pipeline);
+      return res.json({
+        products: randomProducts,
+        totalPages: 1,
+        currentPage: 1,
+      });
+    }
 
     // Cấu hình sắp xếp
     const sortQuery =
       sortBy === "priceAsc"
-        ? { priceAfterDiscount: 1 }     // Giá tăng dần
+        ? { priceAfterDiscount: 1 } // Giá tăng dần
         : sortBy === "priceDesc"
-        ? { priceAfterDiscount: -1 }    // Giá giảm dần
+        ? { priceAfterDiscount: -1 } // Giá giảm dần
         : sortBy === "discountPercentage"
-        ? { discountPercentage: -1 }    // Phần trăm giảm giá
-        : {};                          // Mặc định không sắp xếp
+        ? { discountPercentage: -1 } // Phần trăm giảm giá
+        : {}; // Mặc định không sắp xếp
 
     // Lấy sản phẩm với query, sắp xếp và phân trang
     const products = await Product.find(query)
