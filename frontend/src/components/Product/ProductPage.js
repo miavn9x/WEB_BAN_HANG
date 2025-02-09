@@ -66,6 +66,9 @@ const ProductPage = () => {
       }
       return prevFilters;
     });
+
+    // Reset the page and reload products
+    navigate("/products");
   };
   const clearFilters = () => {
     setFilters({
