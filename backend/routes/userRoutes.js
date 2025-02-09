@@ -110,7 +110,6 @@ router.put("/profile", authMiddleware, async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "Người dùng không tồn tại" });
     }
-
     // Cập nhật thông tin người dùng
     user.firstName = firstName;
     user.lastName = lastName;
@@ -136,7 +135,6 @@ router.put("/profile", authMiddleware, async (req, res) => {
       .json({ message: "Không thể cập nhật thông tin người dùng" });
   }
 });
-
 // API thay đổi mật khẩu
 router.put("/profile/password", authMiddleware, async (req, res) => {
   try {
@@ -152,17 +150,12 @@ router.put("/profile/password", authMiddleware, async (req, res) => {
         .status(400)
         .json({ message: "Vui lòng nhập mật khẩu cũ và mật khẩu mới" });
     }
-
-    
     const isMatch = await user.comparePassword(oldPassword); 
     if (!isMatch) {
       return res.status(401).json({ message: "Mật khẩu cũ không đúng" });
     }
-
     user.password = newPassword; 
-
     const updatedUser = await user.save(); 
-    // Tạo lại token mới sau khi thay đổi mật khẩu
     const token = user.generateAuthToken(); 
 
     res.status(200).json({
