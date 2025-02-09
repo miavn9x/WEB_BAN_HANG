@@ -3,6 +3,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./styles.css";
 import ProductItem from "../Product/ProductItem";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const HomeProduct = () => {
   // Nhập: s = giây, m = phút, h = giờ
@@ -15,10 +16,7 @@ const HomeProduct = () => {
   const [discountedProducts, setDiscountedProducts] = useState([]);
   const [currentPhase, setCurrentPhase] = useState("main");
   const [timeOffset, setTimeOffset] = useState(0);
-  // Lưu targetTime của phase hiện tại (điểm kết thúc của phase)
   const [phaseTargetTime, setPhaseTargetTime] = useState(null);
-
-  // Hàm chuyển đổi chuỗi thời gian sang miligiây
   const parseDurationToMs = (duration) => {
     const unit = duration.slice(-1);
     const value = parseInt(duration, 10);
@@ -30,8 +28,6 @@ const HomeProduct = () => {
     };
     return units[unit] || 0;
   };
-
-  // Hàm trộn mảng sản phẩm
   const shuffleArray = (array) => {
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
@@ -40,8 +36,6 @@ const HomeProduct = () => {
     }
     return newArray;
   };
-
-  // Lấy sản phẩm giảm giá từ API
   const fetchDiscountedProducts = useCallback(async () => {
     try {
       const response = await axios.get(
@@ -56,11 +50,9 @@ const HomeProduct = () => {
       console.error("Error fetching discounted products:", error);
     }
   }, []);
-
-  // Lấy thời gian từ server để đồng bộ với client
   const fetchServerTime = useCallback(async () => {
     try {
-      const response = await axios.get("/api/time"); // API trả về { serverTime: <timestamp in ms> }
+      const response = await axios.get("/api/time");
       const serverTime = response.data.serverTime;
       const localTime = new Date().getTime();
       const offset = serverTime - localTime;
@@ -73,31 +65,20 @@ const HomeProduct = () => {
   useEffect(() => {
     fetchServerTime();
   }, [fetchServerTime]);
-
-  // Hàm lấy thời gian hiện tại đã được đồng bộ với server
   const getCurrentTime = useCallback(
     () => new Date().getTime() + timeOffset,
     [timeOffset]
   );
-
-  // Khi component mount, thiết lập targetTime cho phase đầu tiên
   useEffect(() => {
     const now = getCurrentTime();
-    // Nếu mới vào trang, ta xác định phase dựa trên thời gian tuyệt đối:
-    // Sử dụng modulo nếu muốn đồng bộ toàn cục (cách 1), nhưng ở đây ta reset lại targetTime
     const mainDuration = parseDurationToMs(COUNTDOWN_DURATION);
-    // Giả sử nếu hiện tại đã thuộc phase "main", ta set targetTime = now + mainDuration,
-    // nếu không, ta set targetTime = now + resetDuration.
+
     if (currentPhase === "main") {
       setPhaseTargetTime(now + mainDuration);
     } else {
       setPhaseTargetTime(now + parseDurationToMs(COUNTDOWN_RESET));
     }
-    // Nếu bạn muốn đồng bộ hoàn toàn theo thời gian tuyệt đối thì có thể tính modulo,
-    // nhưng khi load trang vào giữa phase thì countdown sẽ không bắt đầu từ full duration.
   }, [getCurrentTime, currentPhase, COUNTDOWN_DURATION, COUNTDOWN_RESET]);
-
-  // Cập nhật đồng hồ đếm ngược mỗi giây và chuyển phase khi hết thời gian
   useEffect(() => {
     const timer = setInterval(() => {
       if (!phaseTargetTime) return;
@@ -105,22 +86,17 @@ const HomeProduct = () => {
       let remainingTime = phaseTargetTime - now;
 
       if (remainingTime <= 0) {
-        // Khi hết phase, chuyển phase và reset targetTime dựa trên thời gian đầy đủ của phase mới
         if (currentPhase === "main") {
-          // Chuyển sang phase reset
           setCurrentPhase("reset");
           setPhaseTargetTime(now + parseDurationToMs(COUNTDOWN_RESET));
-          setDiscountedProducts([]); // Xóa sản phẩm nếu cần
+          setDiscountedProducts([]);
         } else {
-          // Chuyển sang phase main
           setCurrentPhase("main");
           setPhaseTargetTime(now + parseDurationToMs(COUNTDOWN_DURATION));
           fetchDiscountedProducts();
         }
         return;
       }
-
-      // Tính giờ, phút, giây từ remainingTime
       const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60));
       const remainingMinutes = Math.floor((remainingTime / (1000 * 60)) % 60);
       const remainingSeconds = Math.floor((remainingTime / 1000) % 60);
@@ -139,14 +115,18 @@ const HomeProduct = () => {
     COUNTDOWN_RESET,
     fetchDiscountedProducts,
   ]);
-
-  // Khi chuyển sang phase main, gọi API lấy sản phẩm giảm giá
   useEffect(() => {
     if (currentPhase === "main") {
       fetchDiscountedProducts();
     }
   }, [currentPhase, fetchDiscountedProducts]);
 
+
+    const navigate = useNavigate();
+
+    const handleViewAll = () => {
+      navigate("/products", { state: { showDiscount: true } });
+    };
   return (
     <div className="home__product bg-pink py-5 d-flex justify-content-center">
       <div className="container content__wrapper">
@@ -236,7 +216,7 @@ const HomeProduct = () => {
           )}
         </div>
         <div className="footer text-center mt-4">
-          <button className="btn btn-lg btn-primary">
+          <button className="btn btn-lg btn-primary" onClick={handleViewAll}>
             Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
           </button>
         </div>

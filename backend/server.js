@@ -23,6 +23,36 @@ mongoose
 app.use(cors());
 app.use(express.json());
 
+
+router.get('/timer', (req, res) => {
+  const now = Date.now();
+  
+  if (!global.timerState) {
+    global.timerState = {
+      phase: 'main',
+      targetTime: now + 2 * 60 * 60 * 1000 // 2 giờ
+    };
+  }
+
+  if (now >= global.timerState.targetTime) {
+    const nextPhase = global.timerState.phase === 'main' ? 'reset' : 'main';
+    const duration = nextPhase === 'main' ? 2 * 60 * 60 * 1000 : 10 * 60 * 1000;
+    
+    global.timerState = {
+      phase: nextPhase,
+      targetTime: now + duration
+    };
+  }
+
+  res.json({
+    currentPhase: global.timerState.phase,
+    targetTime: global.timerState.targetTime,
+    serverTime: now
+  });
+});
+
+
+
 // Routes
 app.use("/api/auth", authRoutes);
 

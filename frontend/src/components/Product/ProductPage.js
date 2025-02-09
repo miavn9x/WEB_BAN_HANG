@@ -20,6 +20,20 @@ import Fuse from "fuse.js";
 const ProductPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Lấy query param "showDiscount"
+  const urlParams = new URLSearchParams(location.search);
+  const discountParam = urlParams.get("showDiscount");
+
+  // Nếu được chuyển từ HomeProduct, có thể state có showDiscount hoặc query param có "true"
+  const showDiscount = location.state?.showDiscount || discountParam === "true";
+
+  // Nếu truy cập từ HomeProduct, mặc định sắp xếp theo "% Giảm giá",
+  // ngược lại mặc định là "random"
+  const [sortBy, setSortBy] = useState(
+    showDiscount ? "discountPercentage" : "random"
+  );
+
   const queryParams = new URLSearchParams(location.search);
   const categoryFromURL = queryParams.get("categoryName");
   const genericFromURL = queryParams.get("generic");
@@ -30,7 +44,6 @@ const ProductPage = () => {
     price: null, // Lưu đối tượng { minPrice, maxPrice }
     categories: {}, // Lưu dạng object: { [categoryName]: filterId }
   });
-  const [sortBy, setSortBy] = useState("default");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -60,13 +73,13 @@ const ProductPage = () => {
     });
   };
 
-  // Hàm làm mới bộ lọc: reset state và xóa query param trong URL
+  // Hàm clearFilters: reset bộ lọc và đặt sortBy về mặc định theo cách truy cập
   const clearFilters = () => {
     setFilters({
       price: null,
       categories: {},
     });
-    setSortBy("default");
+    setSortBy(showDiscount ? "discountPercentage" : "random");
     navigate("/products");
   };
 
@@ -130,7 +143,8 @@ const ProductPage = () => {
           }
         }
 
-        if (sortBy !== "default") {
+        // Nếu sortBy khác "default" và khác "discountPercentage" (vì xử lý giảm giá ở phía client)
+        if (sortBy !== "default" && sortBy !== "discountPercentage") {
           params.push(`sortBy=${encodeURIComponent(sortBy)}`);
         }
 
@@ -174,10 +188,15 @@ const ProductPage = () => {
           fetchedProducts = fuseResult.map((result) => result.item);
         }
 
-        // Sắp xếp lại nếu cần (nếu API chưa xử lý sắp xếp)
+        // Xử lý sắp xếp theo các tùy chọn
         if (sortBy === "discountPercentage") {
+          // Lọc chỉ lấy những sản phẩm có giảm giá (discountPercentage > 0)
+          fetchedProducts = fetchedProducts.filter(
+            (product) => product.discountPercentage > 0
+          );
+          // Sắp xếp giảm dần theo discountPercentage (sử dụng giá trị mặc định là 0 nếu không có)
           fetchedProducts = fetchedProducts.sort(
-            (a, b) => b.discountPercentage - a.discountPercentage
+            (a, b) => (b.discountPercentage || 0) - (a.discountPercentage || 0)
           );
         } else if (sortBy === "priceAsc") {
           fetchedProducts = fetchedProducts.sort(
