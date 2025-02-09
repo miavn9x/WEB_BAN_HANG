@@ -7,7 +7,7 @@ import "./styles.css"; // file CSS chính (sẽ bao gồm cả custom CSS ở d�
 import { Button } from "@mui/material";
 
 const CACHE_KEY = "randomizedCombinedProducts";
-const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 tiếng tính bằng milliseconds
+const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 tiếng (tính bằng milliseconds)
 
 const HomeProduct = () => {
   // --- Phần bộ đếm và flash sale (không thay đổi) ---
@@ -104,9 +104,26 @@ const HomeProduct = () => {
     }
   }, [timeState.currentPhase]);
 
-  // Hàm điều hướng đến trang danh sách sản phẩm
-  const handleViewAll = () => {
-    navigate("/products", { state: { showDiscount: true } });
+  // Hàm điều hướng đến trang danh sách sản phẩm theo danh mục riêng
+  const handleViewCategory = (categoryKey, categoryValue) => {
+    navigate(`/products?${categoryKey}=${encodeURIComponent(categoryValue)}`, {
+      state: { [categoryKey]: categoryValue },
+    });
+  };
+
+  // Hàm điều hướng đến trang ProductPage với cả 2 danh mục: Sữa bột cao cấp và Sữa dinh dưỡng
+  const handleViewAllCategories = () => {
+    navigate(
+      `/products?categoryName=${encodeURIComponent(
+        "Sữa bột cao cấp"
+      )}&generic=${encodeURIComponent("Sữa dinh dưỡng")}`,
+      {
+        state: {
+          categoryName: "Sữa bột cao cấp",
+          generic: "Sữa dinh dưỡng",
+        },
+      }
+    );
   };
 
   // --- Phần tải sản phẩm ---
@@ -140,30 +157,32 @@ const HomeProduct = () => {
   };
 
   // Hàm lấy thứ tự random từ localStorage hoặc tính mới nếu hết hạn
-  const getCachedRandomizedProducts = (filteredProducts) => {
-    try {
-      const cache = localStorage.getItem(CACHE_KEY);
-      if (cache) {
-        const { timestamp, data } = JSON.parse(cache);
-        // Kiểm tra nếu cache chưa hết hạn
-        if (Date.now() - timestamp < CACHE_DURATION) {
-          return data;
-        }
+const getCachedRandomizedProducts = (filteredProducts) => {
+  // Tạo key cache dựa trên số lượng sản phẩm (hoặc các thuộc tính khác)
+  const dynamicCacheKey = CACHE_KEY + "_" + filteredProducts.length;
+  try {
+    const cache = localStorage.getItem(dynamicCacheKey);
+    if (cache) {
+      const { timestamp, data } = JSON.parse(cache);
+      if (Date.now() - timestamp < CACHE_DURATION) {
+        return data;
       }
-    } catch (error) {
-      console.error("Error reading cache", error);
     }
-    const randomized = shuffleArray(filteredProducts);
-    try {
-      localStorage.setItem(
-        CACHE_KEY,
-        JSON.stringify({ timestamp: Date.now(), data: randomized })
-      );
-    } catch (error) {
-      console.error("Error saving to cache", error);
-    }
-    return randomized;
-  };
+  } catch (error) {
+    console.error("Error reading cache", error);
+  }
+  const randomized = shuffleArray(filteredProducts);
+  try {
+    localStorage.setItem(
+      dynamicCacheKey,
+      JSON.stringify({ timestamp: Date.now(), data: randomized })
+    );
+  } catch (error) {
+    console.error("Error saving to cache", error);
+  }
+  return randomized;
+};
+
 
   return (
     <>
@@ -262,7 +281,12 @@ const HomeProduct = () => {
           </div>
           {timeState.currentPhase === "main" && (
             <div className="footer text-center mt-4">
-              <Button className="btn btn-lg" onClick={handleViewAll}>
+              <Button
+                className="btn btn-lg"
+                onClick={() =>
+                  navigate("/products", { state: { showDiscount: true } })
+                }
+              >
                 Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
               </Button>
             </div>
@@ -272,35 +296,51 @@ const HomeProduct = () => {
 
       {/* --- Phần hiển thị sản phẩm danh mục cải tiến --- */}
       <div className="custom__cat__container py-2 my-4 container">
-        <div className="d-flex text-center ">
+        {/* Phần tiêu đề với các nút danh mục */}
+        <div className="d-flex text-center">
           <div className="col-4">
             <h4 style={{ color: "#555" }}>Các Loại Sữa</h4>
           </div>
-          <div className="col-4 ">
-            <Button>Sữa bột cao cấp</Button>
+          <div className="col-4">
+            <Button
+              onClick={() =>
+                handleViewCategory("categoryName", "Sữa bột cao cấp")
+              }
+            >
+              Sữa bột cao cấp
+            </Button>
           </div>
           <div className="col-4">
-            <Button>Sữa dinh dưỡng</Button>
+            <Button
+              onClick={() =>
+                handleViewCategory("categoryName", "Sữa dinh dưỡng")
+              }
+            >
+              Sữa dinh dưỡng
+            </Button>
           </div>
         </div>
+
         {loading ? (
           <div className="custom__cat__loading text-center py-4">
             <p>Đang tải sản phẩm...</p>
           </div>
         ) : products.length > 0 ? (
           (() => {
-            const combinedProducts = products.filter(
-              (product) =>
-                product.category &&
-                (product.category.name === "Sữa bột cao cấp" ||
-                  product.category.name === "Sữa dinh dưỡng")
-            );
+            // Lọc các sản phẩm có danh mục là "Sữa bột cao cấp" hoặc "Sữa dinh dưỡng"
+            const combinedProducts = products.filter((product) => {
+              if (!product.category || !product.category.name) return false;
+              const name = product.category.name.trim().toLowerCase();
+              return (
+                name === "sữa bột cao cấp".toLowerCase() ||
+                name === "sữa dinh dưỡng".toLowerCase()
+              );
+            });
 
             const randomizedCombinedProducts =
               getCachedRandomizedProducts(combinedProducts);
             return (
               <>
-                {/* Hàng đầu tiên - chứa banner và sản phẩm */}
                 <div className="custom__cat__row">
                   <div className="custom__cat__banner">
                     <img
@@ -313,7 +353,6 @@ const HomeProduct = () => {
                       }}
                     />
                   </div>
-
                   {randomizedCombinedProducts.map((product) => (
                     <div key={product._id} className="custom__cat__item">
                       <ProductItem product={product} />
@@ -328,6 +367,11 @@ const HomeProduct = () => {
             <p>Không có sản phẩm nào.</p>
           </div>
         )}
+
+        {/* Nút "xem thêm" để mở toàn bộ 2 danh mục */}
+        <div className="text-center">
+          <Button onClick={handleViewAllCategories}>xem thêm</Button>
+        </div>
       </div>
     </>
   );

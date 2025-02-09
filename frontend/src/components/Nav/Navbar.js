@@ -43,7 +43,7 @@ const categories = [
     label: "Sữa bột cao cấp",
     icon: <FaBabyCarriage />,
   },
-  { path: "sua-tuoi", label: "Sữa tươi dinh dưỡng", icon: <FaGlassWhiskey /> },
+  { path: "sua-tuoi", label: "Sữa dinh dưỡng", icon: <FaGlassWhiskey /> },
   { path: "bim-ta", label: "Bỉm & tã em bé", icon: <FaTags /> },
   {
     path: "do-choi-phat-trien",

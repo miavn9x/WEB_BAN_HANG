@@ -25,11 +25,11 @@ const categoryOptions = {
     "Sữa non tăng đề kháng",
   ],
   "Sữa dinh dưỡng": [
-    "Sữa tươi cho mẹ bầu",
-    "Sữa tươi tăng canxi cho bà bầu",
-    "Sữa tươi cho mẹ sau sinh",
-    "Sữa tươi cho bé từ 1 tuổi",
-    "Sữa tươi tăng chiều cao cho bé 3-5 tuổi",
+    "Sữa cho mẹ bầu",
+    "Sữa tăng canxi cho bà bầu",
+    "Sữa cho mẹ sau sinh",
+    "Sữa cho bé từ 1 tuổi",
+    "Sữa tăng chiều cao cho bé 3-5 tuổi",
   ],
   "Bỉm & Tã em bé": [
     "Bỉm sơ sinh (< 5kg)",

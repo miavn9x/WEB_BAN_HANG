@@ -99,7 +99,7 @@ const getCategoryIcon = (categoryName) => {
   switch (categoryName) {
     case "Sữa bột cao cấp":
       return <FaBabyCarriage style={{ marginRight: "8px" }} />;
-    case "Sữa tươi dinh dưỡng":
+    case "Sữa dinh dưỡng":
       return <FaGlassWhiskey style={{ marginRight: "8px" }} />;
     case "Bỉm & tã em bé":
       return <FaTags style={{ marginRight: "8px" }} />;
@@ -136,7 +136,6 @@ const Filter = ({ onFilterChange, filters }) => {
 
   return (
     <div className="filter-content">
-      Bộ lọc mức giá
       <div className="filter-section">
         <h6>Mức Giá</h6>
         <Form>

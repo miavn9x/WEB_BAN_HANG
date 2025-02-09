@@ -122,30 +122,45 @@ router.get("/products", async (req, res) => {
     if (categoryName) {
       query["category.name"] = { $regex: categoryName, $options: "i" };
     }
-    if (categoryGeneric) {
-      query["category.generic"] = { $regex: categoryGeneric, $options: "i" };
-    }
-    let priceFilter = {};
-    if (minPrice && !isNaN(minPrice)) {
-      priceFilter.$gte = Number(minPrice);
-    }
-    if (maxPrice && !isNaN(maxPrice)) {
-      priceFilter.$lte = Number(maxPrice);
-    }
-    if (Object.keys(priceFilter).length > 0) {
-      query.priceAfterDiscount = priceFilter;
-    }
-    if (sortBy === "random") {
-      const randomProducts = await Product.aggregate([
-        { $match: query },
-        { $sample: { size: validLimit } }, // Lấy ngẫu nhiên số lượng sản phẩm
-      ]);
-      return res.status(200).json({
-        products: randomProducts,
-        totalPages: 1, 
-        currentPage: 1,
-      });
-    }
+  if (categoryGeneric) {
+    // Split chuỗi thành mảng nếu có nhiều giá trị
+    const generics =
+      typeof categoryGeneric === "string"
+        ? categoryGeneric.split(",")
+        : categoryGeneric;
+
+    // Thêm filter tìm chính xác giá trị trong mảng
+    query["category.generic"] = { $in: generics.map((g) => g.trim()) };
+  }
+let priceFilter = {};
+if (minPrice && !isNaN(minPrice)) {
+  priceFilter.$gte = parseFloat(minPrice);
+}
+if (maxPrice && !isNaN(maxPrice)) {
+  priceFilter.$lte = parseFloat(maxPrice);
+}
+if (Object.keys(priceFilter).length > 0) {
+  query.priceAfterDiscount = priceFilter;
+}
+
+// Sửa phần sort random thành:
+if (sortBy === "random") {
+  const matchStage = { $match: query };
+  const sampleStage = { $sample: { size: parseInt(validLimit) } };
+  const pipeline = [matchStage];
+
+  if (Object.keys(query).length > 0) {
+    pipeline.unshift(matchStage);
+  }
+  pipeline.push(sampleStage);
+
+  const randomProducts = await Product.aggregate(pipeline);
+  return res.json({
+    products: randomProducts,
+    totalPages: 1,
+    currentPage: 1,
+  });
+}
 
     // Cấu hình sắp xếp
     const sortQuery =
