@@ -37,7 +37,6 @@ const CategoryMenu = ({ categories }) => {
     navigate(`/products?categoryName=${encodeURIComponent(categoryName)}`);
   };
 
-  // Xử lý khi click vào danh mục con (lọc theo tên danh mục và loại sản phẩm – generic)
   const handleSubcategoryClick = (categoryName, subcategory) => {
     navigate(
       `/products?categoryName=${encodeURIComponent(
@@ -126,13 +125,13 @@ const CarouselAndMenu = () => {
     },
     {
       icon: <FaGlassWhiskey />,
-      name: "Sữa tươi dinh dưỡng",
+      name: "Sữa dinh dưỡng",
       subcategories: [
-        "Sữa tươi cho mẹ bầu",
-        "Sữa tươi tăng canxi cho bà bầu",
-        "Sữa tươi cho mẹ sau sinh",
-        "Sữa tươi cho bé từ 1 tuổi",
-        "Sữa tươi tăng chiều cao cho bé 3-5 tuổi",
+        "Sữa cho mẹ bầu",
+        "Sữa tăng canxi cho bà bầu",
+        "Sữa cho mẹ sau sinh",
+        "Sữa cho bé từ 1 tuổi",
+        "Sữa tăng chiều cao cho bé 3-5 tuổi",
       ],
     },
     {

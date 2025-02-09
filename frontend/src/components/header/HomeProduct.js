@@ -4,6 +4,10 @@ import { useNavigate } from "react-router-dom";
 import ProductItem from "../Product/ProductItem";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./styles.css"; // file CSS chính (sẽ bao gồm cả custom CSS ở dưới)
+import { Button } from "@mui/material";
+
+const CACHE_KEY = "randomizedCombinedProducts";
+const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 tiếng tính bằng milliseconds
 
 const HomeProduct = () => {
   // --- Phần bộ đếm và flash sale (không thay đổi) ---
@@ -18,14 +22,16 @@ const HomeProduct = () => {
   const [discountedProducts, setDiscountedProducts] = useState([]);
   const navigate = useNavigate();
 
+  // Hàm fetch sản phẩm khuyến mãi
   const fetchDiscountedProducts = useCallback(async () => {
     try {
       const response = await axios.get(
         "/api/products?randomDiscount=true&limit=12"
       );
       const filteredProducts = response.data.products.filter(
-        (product) => product.discountPercentage > 6 // % giảm giá
+        (product) => product.discountPercentage > 6 // chỉ chọn sản phẩm giảm giá > 6%
       );
+      // Sử dụng random cơ bản bằng sort (không hoàn toàn chuẩn)
       const shuffledProducts = filteredProducts.sort(() => Math.random() - 0.5);
       setDiscountedProducts(shuffledProducts);
     } catch (error) {
@@ -33,6 +39,7 @@ const HomeProduct = () => {
     }
   }, []);
 
+  // Hàm fetch trạng thái đồng hồ đếm ngược từ server
   const fetchTimerState = useCallback(async () => {
     try {
       const response = await axios.get("/api/timer");
@@ -50,6 +57,7 @@ const HomeProduct = () => {
     }
   }, []);
 
+  // Hàm cập nhật đồng hồ đếm ngược
   const updateCountdown = useCallback(() => {
     if (!timeState.targetTime) return;
     const currentTime = Date.now() + timeState.serverTimeOffset;
@@ -58,11 +66,9 @@ const HomeProduct = () => {
       fetchTimerState();
       return;
     }
-
     const hours = Math.floor(remaining / (1000 * 60 * 60));
     const minutes = Math.floor((remaining / (1000 * 60)) % 60);
     const seconds = Math.floor((remaining / 1000) % 60);
-
     setTimeState((prev) => ({
       ...prev,
       hours,
@@ -71,17 +77,18 @@ const HomeProduct = () => {
     }));
   }, [timeState.targetTime, timeState.serverTimeOffset, fetchTimerState]);
 
+  // Cập nhật đồng hồ đếm ngược và đồng bộ định kỳ
   useEffect(() => {
     fetchTimerState();
     const timerInterval = setInterval(updateCountdown, 1000);
     const syncInterval = setInterval(fetchTimerState, 30000);
-
     return () => {
       clearInterval(timerInterval);
       clearInterval(syncInterval);
     };
   }, [fetchTimerState, updateCountdown]);
 
+  // Khi phase chuyển sang "main", fetch sản phẩm khuyến mãi
   const prevPhase = useRef(timeState.currentPhase);
   useEffect(() => {
     if (timeState.currentPhase === "main" && prevPhase.current !== "main") {
@@ -90,18 +97,23 @@ const HomeProduct = () => {
     prevPhase.current = timeState.currentPhase;
   }, [timeState.currentPhase, fetchDiscountedProducts]);
 
+  // Nếu không ở phase "main" thì reset danh sách khuyến mãi
   useEffect(() => {
     if (timeState.currentPhase !== "main") {
       setDiscountedProducts([]);
     }
   }, [timeState.currentPhase]);
 
+  // Hàm điều hướng đến trang danh sách sản phẩm
   const handleViewAll = () => {
     navigate("/products", { state: { showDiscount: true } });
   };
+
+  // --- Phần tải sản phẩm ---
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch danh sách sản phẩm từ API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -113,15 +125,49 @@ const HomeProduct = () => {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
-  
+  // --- Thuật toán Fisher–Yates để đảo trộn mảng ---
+  // Mục đích: Đảo trộn thứ tự của các phần tử trong mảng một cách ngẫu nhiên mà không làm thay đổi mảng gốc.
+  const shuffleArray = (array) => {
+    const newArray = array.slice();
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  };
+
+  // Hàm lấy thứ tự random từ localStorage hoặc tính mới nếu hết hạn
+  const getCachedRandomizedProducts = (filteredProducts) => {
+    try {
+      const cache = localStorage.getItem(CACHE_KEY);
+      if (cache) {
+        const { timestamp, data } = JSON.parse(cache);
+        // Kiểm tra nếu cache chưa hết hạn
+        if (Date.now() - timestamp < CACHE_DURATION) {
+          return data;
+        }
+      }
+    } catch (error) {
+      console.error("Error reading cache", error);
+    }
+    const randomized = shuffleArray(filteredProducts);
+    try {
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({ timestamp: Date.now(), data: randomized })
+      );
+    } catch (error) {
+      console.error("Error saving to cache", error);
+    }
+    return randomized;
+  };
 
   return (
     <>
-      {/* Phần Flash sale – không thay đổi */}
+      {/* --- Phần Flash sale – không thay đổi --- */}
       <div className="home__product bg-pink py-5 d-flex justify-content-center">
         <div className="container content__wrapper">
           <div className="row mb-3">
@@ -185,7 +231,7 @@ const HomeProduct = () => {
               </div>
             </div>
           </div>
-          <div className="row  ">
+          <div className="row">
             {timeState.currentPhase === "main" ? (
               discountedProducts.length > 0 ? (
                 discountedProducts.map((product) => (
@@ -208,7 +254,7 @@ const HomeProduct = () => {
                   <i className="fas fa-clock fa-3x text-danger mb-3"></i>
                   <h5 className="text-danger">HẾT THỜI GIAN KHUYẾN MÃI</h5>
                   <p className="text-muted">
-                    Đợt khuyến mãi mới sẽ bắt đầu sau...{" "}
+                    Đợt khuyến mãi mới sẽ bắt đầu sau...
                   </p>
                 </div>
               </div>
@@ -216,9 +262,9 @@ const HomeProduct = () => {
           </div>
           {timeState.currentPhase === "main" && (
             <div className="footer text-center mt-4">
-              <button className="btn btn-lg" onClick={handleViewAll}>
+              <Button className="btn btn-lg" onClick={handleViewAll}>
                 Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -226,13 +272,32 @@ const HomeProduct = () => {
 
       {/* --- Phần hiển thị sản phẩm danh mục cải tiến --- */}
       <div className="custom__cat__container py-2 my-4 container">
+        <div className="d-flex text-center ">
+          <div className="col-4">
+            <h4 style={{ color: "#555" }}>Các Loại Sữa</h4>
+          </div>
+          <div className="col-4 ">
+            <Button>Sữa bột cao cấp</Button>
+          </div>
+          <div className="col-4">
+            <Button>Sữa dinh dưỡng</Button>
+          </div>
+        </div>
         {loading ? (
           <div className="custom__cat__loading text-center py-4">
             <p>Đang tải sản phẩm...</p>
           </div>
         ) : products.length > 0 ? (
           (() => {
-            const displayedProducts = products.slice(0, 10);
+            const combinedProducts = products.filter(
+              (product) =>
+                product.category &&
+                (product.category.name === "Sữa bột cao cấp" ||
+                  product.category.name === "Sữa dinh dưỡng")
+            );
+
+            const randomizedCombinedProducts =
+              getCachedRandomizedProducts(combinedProducts);
             return (
               <>
                 {/* Hàng đầu tiên - chứa banner và sản phẩm */}
@@ -248,7 +313,8 @@ const HomeProduct = () => {
                       }}
                     />
                   </div>
-                  {displayedProducts.map((product) => (
+
+                  {randomizedCombinedProducts.map((product) => (
                     <div key={product._id} className="custom__cat__item">
                       <ProductItem product={product} />
                     </div>
