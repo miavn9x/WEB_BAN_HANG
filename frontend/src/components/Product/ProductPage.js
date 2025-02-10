@@ -116,10 +116,14 @@ const ProductPage = () => {
         // Xử lý bộ lọc giá
         if (filters.price) {
           if (filters.price.maxPrice) {
-            params.push(`maxPrice=${encodeURIComponent(filters.price.maxPrice)}`);
+            params.push(
+              `maxPrice=${encodeURIComponent(filters.price.maxPrice)}`
+            );
           }
           if (filters.price.minPrice) {
-            params.push(`minPrice=${encodeURIComponent(filters.price.minPrice)}`);
+            params.push(
+              `minPrice=${encodeURIComponent(filters.price.minPrice)}`
+            );
           }
         }
 

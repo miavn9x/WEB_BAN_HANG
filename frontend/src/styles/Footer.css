@@ -1,3 +1,4 @@
+/* Các style đã có trong Footer.css */
 body,
 html {
     height: 100%;
@@ -22,8 +23,6 @@ html {
     box-sizing: border-box;
 }
 
-
-
 /* Container cho icons */
 .footer__social-icons {
     display: flex;
@@ -43,15 +42,29 @@ html {
     height: 32px;
     border-radius: 50%;
     background-color: #f5f5f5;
-    color: #666!important;
+    color: #666 !important;
     font-size: 13px;
     transition: all 0.2s ease;
 }
 
 .footer {
-    margin-top: auto!important;
+    margin-top: auto !important;
 }
 
+/* Thêm CSS để chữ không tràn ra ngoài */
+.footer p,
+.footer address,
+.footer li,
+.footer a,
+.footer h5,
+.footer span {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+}
+
+/* Responsive cho icon nếu cần */
 @media (max-width: 250px) {
     .footer__social-icons {
         flex-direction: column;
@@ -63,4 +76,3 @@ html {
         height: 50px;
     }
 }
-

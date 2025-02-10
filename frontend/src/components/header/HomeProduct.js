@@ -5,6 +5,20 @@ import ProductItem from "../Product/ProductItem";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./styles.css"; // file CSS chính (sẽ bao gồm cả custom CSS ở dưới)
 import { Button } from "@mui/material";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/autoplay";
+import "./styles.css";
+import { Autoplay, Pagination } from "swiper/modules";
+
+
+import "swiper/css";
+import "swiper/css/pagination";
+
+import "./styles.css";
+
+// import required modules
 
 const CACHE_KEY = "randomizedCombinedProducts";
 const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 tiếng (tính bằng milliseconds)
@@ -105,25 +119,10 @@ const HomeProduct = () => {
   }, [timeState.currentPhase]);
 
   // Hàm điều hướng đến trang danh sách sản phẩm theo danh mục riêng
-const handleViewCategory = (categoryKey, categoryValue) => {
-  navigate(`/products?${categoryKey}=${encodeURIComponent(categoryValue)}`, {
-    state: { [categoryKey]: categoryValue },
-  });
-};
-
-  // Hàm điều hướng đến trang ProductPage với cả 2 danh mục: Sữa bột cao cấp và Sữa dinh dưỡng
-  const handleViewAllCategories = () => {
-    navigate(
-      `/products?categoryName=${encodeURIComponent(
-        "Sữa bột cao cấp"
-      )}&generic=${encodeURIComponent("Sữa dinh dưỡng")}`,
-      {
-        state: {
-          categoryName: "Sữa bột cao cấp",
-          generic: "Sữa dinh dưỡng",
-        },
-      }
-    );
+  const handleViewCategory = (categoryKey, categoryValue) => {
+    navigate(`/products?${categoryKey}=${encodeURIComponent(categoryValue)}`, {
+      state: { [categoryKey]: categoryValue },
+    });
   };
 
   // --- Phần tải sản phẩm ---
@@ -157,32 +156,31 @@ const handleViewCategory = (categoryKey, categoryValue) => {
   };
 
   // Hàm lấy thứ tự random từ localStorage hoặc tính mới nếu hết hạn
-const getCachedRandomizedProducts = (filteredProducts) => {
-  // Tạo key cache dựa trên số lượng sản phẩm (hoặc các thuộc tính khác)
-  const dynamicCacheKey = CACHE_KEY + "_" + filteredProducts.length;
-  try {
-    const cache = localStorage.getItem(dynamicCacheKey);
-    if (cache) {
-      const { timestamp, data } = JSON.parse(cache);
-      if (Date.now() - timestamp < CACHE_DURATION) {
-        return data;
+  const getCachedRandomizedProducts = (filteredProducts) => {
+    // Tạo key cache dựa trên số lượng sản phẩm (hoặc các thuộc tính khác)
+    const dynamicCacheKey = CACHE_KEY + "_" + filteredProducts.length;
+    try {
+      const cache = localStorage.getItem(dynamicCacheKey);
+      if (cache) {
+        const { timestamp, data } = JSON.parse(cache);
+        if (Date.now() - timestamp < CACHE_DURATION) {
+          return data;
+        }
       }
+    } catch (error) {
+      console.error("Error reading cache", error);
     }
-  } catch (error) {
-    console.error("Error reading cache", error);
-  }
-  const randomized = shuffleArray(filteredProducts);
-  try {
-    localStorage.setItem(
-      dynamicCacheKey,
-      JSON.stringify({ timestamp: Date.now(), data: randomized })
-    );
-  } catch (error) {
-    console.error("Error saving to cache", error);
-  }
-  return randomized;
-};
-
+    const randomized = shuffleArray(filteredProducts);
+    try {
+      localStorage.setItem(
+        dynamicCacheKey,
+        JSON.stringify({ timestamp: Date.now(), data: randomized })
+      );
+    } catch (error) {
+      console.error("Error saving to cache", error);
+    }
+    return randomized;
+  };
 
   return (
     <>
@@ -198,15 +196,15 @@ const getCachedRandomizedProducts = (filteredProducts) => {
               </h4>
               <p className="lead__sale mx-5">
                 {timeState.currentPhase === "main"
-                  ? "Giảm giá cực sốc"
+                  ? "Siêu Giảm Giá"
                   : "Đang cập nhật..."}
               </p>
             </div>
             <div className="col-12 col-md-6 col-lg-4 text-center">
               <div className="countdown__home d-flex justify-content-center">
-                <div className="countdown-wrap">
+                <div className="countdown-wrap ">
                   <div className="countdown d-flex justify-content-center">
-                    <div className="bloc-time hours mx-3">
+                    <div className="bloc-time hours mx-2">
                       <div className="figure">
                         <span className="top">
                           {String(timeState.hours).padStart(2, "0")[0]}
@@ -219,7 +217,7 @@ const getCachedRandomizedProducts = (filteredProducts) => {
                         <span className="count__title">Giờ</span>
                       </div>
                     </div>
-                    <div className="bloc-time min mx-3">
+                    <div className="bloc-time min mx-2">
                       <div className="figure">
                         <span className="top">
                           {String(timeState.minutes).padStart(2, "0")[0]}
@@ -232,7 +230,7 @@ const getCachedRandomizedProducts = (filteredProducts) => {
                         <span className="count__title">Phút</span>
                       </div>
                     </div>
-                    <div className="bloc-time sec mx-3">
+                    <div className="bloc-time sec mx-2">
                       <div className="figure">
                         <span className="top">
                           {String(timeState.seconds).padStart(2, "0")[0]}
@@ -294,24 +292,120 @@ const getCachedRandomizedProducts = (filteredProducts) => {
         </div>
       </div>
 
-      {/* --- Phần hiển thị sản phẩm danh mục cải tiến --- */}
       <div className="custom__cat__container py-2 my-4 container">
-        {/* Phần tiêu đề với các nút danh mục */}
         <div className="d-flex text-center">
-          <div className="col-4">
-            <h4 style={{ color: "#555" }}>Các Loại Sữa</h4>
-          </div>
-          <div className="col-4">
-            <Button
-              onClick={() => handleViewCategory("generic", "Sữa bột cao cấp")}
-            >
-              Sữa bột cao cấp
-            </Button>
-            <Button
-              onClick={() => handleViewCategory("generic", "Sữa dinh dưỡng")}
-            >
-              Sữa dinh dưỡng
-            </Button>
+          <div className="container">
+            <div className="container" style={{ height: "200px" }}>
+              <Swiper
+                direction={"vertical"}
+                pagination={{
+                  clickable: true,
+                }}
+                autoplay={{
+                  delay: 3000, // Thời gian giữa các slide (đơn vị: ms)
+                  disableOnInteraction: false, // Không dừng khi người dùng tương tác
+                }}
+                modules={[Pagination, Autoplay]}
+                className="mySwiper"
+              >
+                <SwiperSlide>
+                  <img
+                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739172432/brand_1_gp8jdq.webp"
+                    alt="Brand 1"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <img
+                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_6_unpnuu.webp"
+                    alt="Brand 6"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <img
+                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_2_hayrt8.webp"
+                    alt="Brand 2"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <img
+                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_7_rsbgoe.webp"
+                    alt="Brand 7"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <img
+                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_3_vsl8yu.webp"
+                    alt="Brand 3"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <img
+                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_8_bfeshq.webp"
+                    alt="Brand 8"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <img
+                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_9_jczh9e.webp"
+                    alt="Brand 9"
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <img
+                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_10_cfzlzm.webp"
+                    alt="Brand 10"
+                  />
+                </SwiperSlide>
+              </Swiper>
+            </div>
+            <div className="row align-items-center  text-center d-flex">
+              <div className="col-lg-4 col-md-12  mb-3">
+                <h4 className="Flash__sale" style={{ color: "#555" }}>
+                  Các Loại Sữa
+                </h4>
+              </div>
+
+              <div className="col-lg-4 mb-3 col-md-6 ">
+                <Button
+                  style={{ color: "#555", fontSize: "13px" }}
+                  className="custom-category-button lead__sale px-3"
+                  onClick={() =>
+                    handleViewCategory("categoryName", "Sữa bột cao cấp")
+                  }
+                  sx={{
+                    border: "1px solid #ccc",
+                    borderRadius: "15px",
+                    "&:hover": {
+                      backgroundColor: "#ffb6c1",
+                      borderColor: "#FF6F91",
+                    },
+                  }}
+                >
+                  Sữa bột cao cấp
+                </Button>
+              </div>
+
+              {/* Nút "Sữa dinh dưỡng": trên PC chiếm 4 cột, trên iPad chiếm 12 cột */}
+              <div className="col-lg-4 mb-3 col-md-6">
+                <Button
+                  style={{ color: "#555", fontSize: "13px" }}
+                  className="custom-category-button lead__sale px-3"
+                  onClick={() =>
+                    handleViewCategory("categoryName", "Sữa dinh dưỡng")
+                  }
+                  sx={{
+                    border: "1px solid #ccc",
+                    borderRadius: "15px",
+                    "&:hover": {
+                      backgroundColor: "#ffb6c1",
+                      borderColor: "#FF6F91",
+                    },
+                  }}
+                >
+                  Sữa dinh dưỡng
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -342,8 +436,6 @@ const getCachedRandomizedProducts = (filteredProducts) => {
                       alt="Giỏ hàng trống"
                       style={{
                         width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
                       }}
                     />
                   </div>
@@ -361,11 +453,76 @@ const getCachedRandomizedProducts = (filteredProducts) => {
             <p>Không có sản phẩm nào.</p>
           </div>
         )}
+      </div>
 
-        {/* Nút "xem thêm" để mở toàn bộ 2 danh mục */}
-        <div className="text-center">
-          <Button onClick={handleViewAllCategories}>xem thêm</Button>
-        </div>
+      <div className="container  py-2 my-4 ">
+        <span className="Flash__sale fs-5">THƯƠNG HIỆU NỔI BẬT </span> <br />
+        <Swiper
+          spaceBetween={10}
+          pagination={{ clickable: true }}
+          autoplay={{
+            delay: 3000,
+            disableOnInteraction: false, // Tiếp tục chạy ngay cả khi người dùng tương tác
+          }}
+          modules={[Pagination, Autoplay]}
+          className="mySwiper"
+          breakpoints={{
+            320: { slidesPerView: 2 },
+            480: { slidesPerView: 3 },
+            768: { slidesPerView: 4 },
+            1024: { slidesPerView: 5 },
+            1200: { slidesPerView: 6 },
+          }}
+        >
+          <SwiperSlide>
+            <img
+              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739172432/brand_1_gp8jdq.webp"
+              alt="Brand 1"
+            />
+          </SwiperSlide>
+          <SwiperSlide>
+            <img
+              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_6_unpnuu.webp"
+              alt="Brand 6"
+            />
+          </SwiperSlide>
+          <SwiperSlide>
+            <img
+              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_2_hayrt8.webp"
+              alt="Brand 2"
+            />
+          </SwiperSlide>
+          <SwiperSlide>
+            <img
+              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_7_rsbgoe.webp"
+              alt="Brand 7"
+            />
+          </SwiperSlide>
+          <SwiperSlide>
+            <img
+              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_3_vsl8yu.webp"
+              alt="Brand 3"
+            />
+          </SwiperSlide>
+          <SwiperSlide>
+            <img
+              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_8_bfeshq.webp"
+              alt="Brand 8"
+            />
+          </SwiperSlide>
+          <SwiperSlide>
+            <img
+              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_9_jczh9e.webp"
+              alt="Brand 9"
+            />
+          </SwiperSlide>
+          <SwiperSlide>
+            <img
+              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_10_cfzlzm.webp"
+              alt="Brand 10"
+            />
+          </SwiperSlide>
+        </Swiper>
       </div>
     </>
   );

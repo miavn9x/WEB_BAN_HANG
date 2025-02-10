@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import "./Test.css"; // custom CSS
 import Slider from "react-slick";
 import InnerImageZoom from "react-inner-image-zoom";
 import QuantityBox from "./QuantityBox";
@@ -15,7 +14,7 @@ import "../../styles/ProductModals.css";
 import { Helmet } from "react-helmet";
 import Evaluate from "./Evaluate";
 
-const Test = () => {
+const ProductModals = () => {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL
   const [product, setProduct] = useState(null);
   const [postContent, setPostContent] = useState(null); // State lưu bài viết của sản phẩm
@@ -182,7 +181,6 @@ const Test = () => {
     }
   };
 
-
   return (
     <>
       {/* Thẻ Helmet để tối ưu SEO */}
@@ -208,12 +206,12 @@ const Test = () => {
                   {/* Hình ảnh sản phẩm */}
                   <div className="col-lg-5 col-md-12 col-12 mb-3 mb-md-0">
                     <div className="product__modal__zoom position-relative">
-                      {product.discountPercentage && (
+                      {product.discountPercentage > 0 && (
                         <div
-                          className="badge badge-primary p-2  product__discount "
-                          style={{ fontSize: "11px" }}
+                          className="badge badge-primary  product__discount"
+                          style={{ fontSize: "12px", padding:"8px 5px" }}
                         >
-                          - {product.discountPercentage}%
+                          - {product.discountPercentage} %
                         </div>
                       )}
                       <Slider
@@ -290,7 +288,7 @@ const Test = () => {
                       <span>{product.description}</span>
                     </div>
 
-                    <div className="product__price w-100">
+                    <div className="product_price w-100 ">
                       {cartMessage && (
                         <div
                           className={`alert ${
@@ -304,7 +302,7 @@ const Test = () => {
                         </div>
                       )}
                       <div className="quantity-wrapper mb-2">
-                        <div className="d-flex align-items-center">
+                        <div className="d-flex align-items-center justify-content-center">
                           <label htmlFor="quantity" className="me-2">
                             Số lượng:
                           </label>
@@ -323,14 +321,15 @@ const Test = () => {
                               <del>{formatter(product.originalPrice)}</del>
                             </span>
                           )}
-                          <span className="price text-danger mb-0 fs-3">
+                          <span className="price text-danger mb-0 fs-5">
                             {formatter(product.priceAfterDiscount)}
                           </span>
                         </div>
                       </div>
                     </div>
                     <button
-                      className={`btn btn-lg mb-3 w-50 ${
+                    style={{padding: "5px "}}
+                      className={`btn btn-lg mb-2 w-50 ${
                         isProductInCart
                           ? "btn-secondary disabled"
                           : "btn-outline-danger"
@@ -436,4 +435,4 @@ const Test = () => {
   );
 };
 
-export default Test;
+export default ProductModals;

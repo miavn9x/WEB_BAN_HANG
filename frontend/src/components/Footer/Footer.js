@@ -26,8 +26,7 @@ const Footer = () => {
                 />
                 <span className="logo-text ms-2" style={{ fontSize: "16px" }}>
                   <span className="text-danger fw-bold"> Baby </span>
-
-                  <span className=" text-primary fw-bold "> Mart </span>
+                  <span className="text-primary fw-bold"> Mart </span>
                 </span>
               </div>
               <p className="pt-1">
@@ -43,13 +42,13 @@ const Footer = () => {
                 </p>
                 <p>
                   <i className="fas fa-phone"></i> Hotline:
-                  <a href="tel:19006750" className=" ms-1">
+                  <a href="tel:19006750" className="ms-1">
                     19006750
                   </a>
                 </p>
                 <p>
                   <i className="fas fa-envelope"></i> Email:
-                  <a href="mailto:support.babymart@gmail.com" className=" ms-1">
+                  <a href="mailto:support.babymart@gmail.com" className="ms-1">
                     support.babymart@gmail.com
                   </a>
                 </p>
@@ -93,11 +92,11 @@ const Footer = () => {
                 </ul>
               </nav>
               <h5 className="mt-3">Chính sách</h5>
-              <ul className="list-unstyled ">
+              <ul className="list-unstyled">
                 <li>
                   <Link
                     to="http://localhost:3000/posts/67a4709e8cb516e37058c69a"
-                    className=" text-decoration-none"
+                    className="text-decoration-none"
                   >
                     Chính sách đổi trả
                   </Link>
@@ -105,8 +104,7 @@ const Footer = () => {
                 <li>
                   <Link
                     to="http://localhost:3000/posts/67a4709e8cb516e37058c69a"
-                    className=" text-decoration-none"
-                    
+                    className="text-decoration-none"
                   >
                     Chính sách bảo mật
                   </Link>
@@ -114,7 +112,7 @@ const Footer = () => {
                 <li>
                   <Link
                     to="http://localhost:3000/posts/67a4709e8cb516e37058c69a"
-                    className=" text-decoration-none"
+                    className="text-decoration-none"
                   >
                     Điều khoản dịch vụ
                   </Link>

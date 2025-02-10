@@ -17,7 +17,7 @@ import ProductEdit from "./pages/Auth/Admin/AddProduct/ProductEdit";
 import AccountList from "./pages/Auth/Admin/AccountList/AccountList";
 import UserPage from "./pages/Auth/Admin/AccountList/UserPage";
 import Cart from "./components/Product/Cart";
-import Test from "./components/Product/Test";
+// import Test from "./components/Product/ProductModal";
 import ProductItem from "./components/Product/ProductItem";
 import Checkout from "./components/Product/Checkout";
 import OrderHistory from "./components/Product/OrderHistory";
@@ -32,6 +32,7 @@ import PostsManagement from "./components/Posts/PostsManagement";
 import { Helmet } from "react-helmet"; // Thêm Helmet để tối ưu SEO
 import Evaluate from "./components/Product/Evaluate";
 import NotificationModal from "./components/Nav/NotificationModal";
+import ProductModals from "./components/Product/ProductModals";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -97,7 +98,7 @@ function App() {
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/products" element={<ProductPage />} />
-        <Route path="/product/:id" element={<Test />} />
+        <Route path="/product/:id" element={<ProductModals />} />
         <Route path="/product/:productId" element={<ProductItem />} />
         <Route path="/gio-hang" element={<Cart />} />
         <Route path="/thanh-toan" element={<Checkout />} />
