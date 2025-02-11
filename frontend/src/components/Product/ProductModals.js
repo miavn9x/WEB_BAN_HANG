@@ -63,16 +63,21 @@ const ProductModals = () => {
     };
 
     // Hàm fetch sản phẩm giảm giá (nếu có)
-    const fetchDiscountedProducts = async () => {
-      try {
-        const response = await axios.get(
-          "/api/products?randomDiscount=true&limit=6"
-        );
-        setDiscountedProducts(response.data.products);
-      } catch (err) {
-        console.error("Error fetching discounted products:", err);
-      }
-    };
+const fetchDiscountedProducts = async () => {
+  try {
+    const response = await axios.get(
+      "/api/products?randomDiscount=true&limit=16"
+    );
+    // Lọc các sản phẩm có discountPercentage > " nhập số % giam giá cần lấy"
+    const productsWithValidDiscount = response.data.products.filter(
+      (product) => product.discountPercentage > 1
+    );
+    setDiscountedProducts(productsWithValidDiscount);
+  } catch (err) {
+    console.error("Error fetching discounted products:", err);
+  }
+};
+
 
     if (id) {
       fetchProductDetails().then(() => {

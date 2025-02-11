@@ -182,6 +182,14 @@ const HomeProduct = () => {
     return randomized;
   };
 
+  // --- Lọc sản phẩm cho danh mục "Bỉm & tã em bé" ---
+  const filteredDiapersProducts = products.filter((product) => {
+    if (!product.category || !product.category.name) return false;
+    return (
+      product.category.name.trim().toLowerCase() ===
+      "bỉm & tã em bé".toLowerCase()
+    );
+  });
   return (
     <>
       {/* --- Phần Flash sale – không thay đổi --- */}
@@ -385,7 +393,6 @@ const HomeProduct = () => {
                 </Button>
               </div>
 
-              {/* Nút "Sữa dinh dưỡng": trên PC chiếm 4 cột, trên iPad chiếm 12 cột */}
               <div className="col-lg-4 mb-3 col-md-6">
                 <Button
                   style={{ color: "#555", fontSize: "13px" }}
@@ -453,6 +460,49 @@ const HomeProduct = () => {
             <p>Không có sản phẩm nào.</p>
           </div>
         )}
+      </div>
+      {/* --- Mục hiển thị sản phẩm cho danh mục "Bỉm & tã em bé" --- */}
+      <div
+        className="home__product bg-none py-5 d-flex justify-content-center"
+     
+        style={{backgroundColor: "transparent !important", background:"none !important"}}
+      >
+        <div className="container content__wrapper">
+          <div className="row mb-3">
+            <div className="col-12 text-center text-md-start">
+              <h4 className="Flash__sale fs-5">Bỉm & tã em bé</h4>
+            </div>
+          </div>
+          <div className="row">
+            {filteredDiapersProducts.length > 0 ? (
+              filteredDiapersProducts.map((product) => (
+                <div
+                  key={product._id}
+                  className="col-6 col-md-3 col-lg-2 py-2 g-2"
+                >
+                  <ProductItem product={product} />
+                </div>
+              ))
+            ) : (
+              <div className="col-12 text-center py-4">
+                <i className="fas fa-box-open fa-3x text-muted mb-3"></i>
+                <p className="text-muted">Đang tải sản phẩm...</p>
+              </div>
+            )}
+          </div>
+          <div className="footer text-center mt-4">
+            <Button
+              className="btn btn-lg"
+              onClick={() =>
+                navigate("/products?categoryName=Bỉm%20%26%20tã%20em%20bé", {
+                  state: { categoryName: "Bỉm & tã em bé" },
+                })
+              }
+            >
+              Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="container  py-2 my-4 ">

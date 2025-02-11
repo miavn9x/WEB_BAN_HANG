@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import "../../../../styles/ProductEdit.css"; // Make sure this file exists for styling
+import "../../../../styles/ProductEdit.css"; // Đảm bảo file CSS tồn tại để định dạng giao diện
 
 const ProductEdit = () => {
   const [products, setProducts] = useState([]);
@@ -15,85 +15,123 @@ const ProductEdit = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [selectedType, setSelectedType] = useState("");
 
-const categoryOptions = {
-  "Sữa bột cao cấp": [
-    "Sữa bột cho bé 0-6 tháng",
-    "Sữa bột cho bé 6-12 tháng",
-    "Sữa bột cho bé 1-3 tuổi",
-    "Sữa bột cho bé 3-5 tuổi",
-    "Sữa bột organic",
-    "Sữa non tăng đề kháng",
-  ],
-  "Sữa dinh dưỡng": [
-    "Sữa cho mẹ bầu",
-    "Sữa tăng canxi cho bà bầu",
-    "Sữa cho mẹ sau sinh",
-    "Sữa cho bé từ 1 tuổi",
-    "Sữa tăng chiều cao cho bé 3-5 tuổi",
-  ],
-  "Bỉm & Tã em bé": [
-    "Bỉm sơ sinh (< 5kg)",
-    "Bỉm size S (4-8kg)",
-    "Bỉm size M (6-11kg)",
-    "Bỉm size L (9-14kg)",
-    "Bỉm size XL (12-17kg)",
-    "Bỉm quần cho bé tập đi",
-  ],
-  "Đồ chơi em bé": [
-    "Đồ chơi bé gái",
-    "Đồ chơi bé trai",
-    "Sách, học tập",
-    "Đồ chơi sơ sinh",
-    "Scooter, vận động",
-  ],
-  "Chăm sóc gia đình": [
-    "Chăm sóc da bầu (chống rạn)",
-    "Dầu massage bầu",
-    "Kem dưỡng da cho bé",
-    "Dầu tắm gội cho bé",
-    "Phấn rôm chống hăm",
-    "Nhiệt kế & Máy hút mũi",
-  ],
-  "Thời trang mẹ và bé": [
-    "Đồ bầu theo tháng (1-8 tháng)",
-    "Váy bầu công sở",
-    "Đồ sau sinh",
-    "Quần áo sơ sinh (0-12 tháng)",
-    "Quần áo bé 1-3 tuổi",
-    "Quần áo bé 3-5 tuổi",
-  ],
-  "Dinh dưỡng bà bầu": [
-    "Vitamin tổng hợp cho bà bầu",
-    "Sắt và axit folic",
-    "Canxi và Vitamin D3",
-    "Omega 3 và DHA",
-    "Sữa bầu công thức đặc biệt",
-  ],
-  "Ăn dặm cho bé": [
-    "Bột ăn dặm 6-8 tháng",
-    "Bột ăn dặm 8-12 tháng",
-    "Cháo ăn dặm 12-24 tháng",
-    "Bánh ăn dặm",
-    "Vitamin & Khoáng chất ăn dặm",
-    "Dụng cụ ăn dặm",
-  ],
-  "Dinh dưỡng cho bé": [
-    "Vitamin tổng hợp cho bé 0-12 tháng",
-    "Vitamin cho bé 1-3 tuổi",
-    "Vitamin cho bé 3-5 tuổi",
-    "Men vi sinh cho bé",
-    "Kẽm & Sắt cho bé",
-    "DHA cho bé",
-  ],
-  "Đồ dùng thiết yếu": [
-    "Máy hút sữa & Phụ kiện",
-    "Bình sữa & Núm ti",
-    "Máy tiệt trùng & Hâm sữa",
-    "Nôi & Cũi cho bé",
-    "Xe đẩy & Địu",
-    "Ghế ăn & Ghế rung",
-  ],
-};
+  // --- Phần thương hiệu trong edit ---
+  // Danh sách thương hiệu theo nhóm (theo danh mục)
+  const predefinedBrandsByCategory = {
+    Sữa: [
+      "Vinamilk",
+      "Dielac",
+      "Nutifood",
+      "TH True Milk",
+      "Mami",
+      "Friso",
+      "Meiji",
+      "Aptamil",
+      "Similac",
+      "Enfamil",
+      "Nestlé",
+    ],
+    "Bỉm & Tã": ["Pampers", "Huggies", "MamyPoko", "Bambo Nature"],
+    "Chăm sóc & Dinh dưỡng": [
+      "Pigeon",
+      "Mee Mee",
+      "Johnson's Baby",
+      "Abbott",
+      "Mead Johnson",
+      "Hersheys",
+    ],
+    "Thời trang & Đồ dùng": [
+      "Mothercare",
+      "Carter's",
+      "OshKosh B'gosh",
+      "Zara Kids",
+      "Mother & Baby",
+    ],
+    Khác: ["Fisher-Price", "Chicco", "Blackmores"],
+  };
+
+  // State lưu lựa chọn từ dropdown cho thương hiệu trong form edit
+  const [editSelectedBrand, setEditSelectedBrand] = useState("");
+
+  const categoryOptions = {
+    "Sữa bột cao cấp": [
+      "Sữa bột cho bé 0-6 tháng",
+      "Sữa bột cho bé 6-12 tháng",
+      "Sữa bột cho bé 1-3 tuổi",
+      "Sữa bột cho bé 3-5 tuổi",
+      "Sữa bột organic",
+      "Sữa non tăng đề kháng",
+    ],
+    "Sữa dinh dưỡng": [
+      "Sữa cho mẹ bầu",
+      "Sữa tăng canxi cho bà bầu",
+      "Sữa cho mẹ sau sinh",
+      "Sữa cho bé từ 1 tuổi",
+      "Sữa tăng chiều cao cho bé 3-5 tuổi",
+    ],
+    "Bỉm & Tã em bé": [
+      "Bỉm sơ sinh (< 5kg)",
+      "Bỉm size S (4-8kg)",
+      "Bỉm size M (6-11kg)",
+      "Bỉm size L (9-14kg)",
+      "Bỉm size XL (12-17kg)",
+      "Bỉm quần cho bé tập đi",
+    ],
+    "Đồ chơi em bé": [
+      "Đồ chơi bé gái",
+      "Đồ chơi bé trai",
+      "Sách, học tập",
+      "Đồ chơi sơ sinh",
+      "Scooter, vận động",
+    ],
+    "Chăm sóc gia đình": [
+      "Chăm sóc da bầu (chống rạn)",
+      "Dầu massage bầu",
+      "Kem dưỡng da cho bé",
+      "Dầu tắm gội cho bé",
+      "Phấn rôm chống hăm",
+      "Nhiệt kế & Máy hút mũi",
+    ],
+    "Thời trang mẹ và bé": [
+      "Đồ bầu theo tháng (1-8 tháng)",
+      "Váy bầu công sở",
+      "Đồ sau sinh",
+      "Quần áo sơ sinh (0-12 tháng)",
+      "Quần áo bé 1-3 tuổi",
+      "Quần áo bé 3-5 tuổi",
+    ],
+    "Dinh dưỡng bà bầu": [
+      "Vitamin tổng hợp cho bà bầu",
+      "Sắt và axit folic",
+      "Canxi và Vitamin D3",
+      "Omega 3 và DHA",
+      "Sữa bầu công thức đặc biệt",
+    ],
+    "Ăn dặm cho bé": [
+      "Bột ăn dặm 6-8 tháng",
+      "Bột ăn dặm 8-12 tháng",
+      "Cháo ăn dặm 12-24 tháng",
+      "Bánh ăn dặm",
+      "Vitamin & Khoáng chất ăn dặm",
+      "Dụng cụ ăn dặm",
+    ],
+    "Dinh dưỡng cho bé": [
+      "Vitamin tổng hợp cho bé 0-12 tháng",
+      "Vitamin cho bé 1-3 tuổi",
+      "Vitamin cho bé 3-5 tuổi",
+      "Men vi sinh cho bé",
+      "Kẽm & Sắt cho bé",
+      "DHA cho bé",
+    ],
+    "Đồ dùng thiết yếu": [
+      "Máy hút sữa & Phụ kiện",
+      "Bình sữa & Núm ti",
+      "Máy tiệt trùng & Hâm sữa",
+      "Nôi & Cũi cho bé",
+      "Xe đẩy & Địu",
+      "Ghế ăn & Ghế rung",
+    ],
+  };
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -118,7 +156,6 @@ const categoryOptions = {
     }
   }, [currentPage, search, categoryFilter, selectedType]);
 
-
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
@@ -137,120 +174,124 @@ const categoryOptions = {
     }
   };
 
-const handleEditProduct = (product) => {
-  setEditingProduct(product);
-  setEditFormData({
-    ...product,
-    category: {
-      name: product.category.name || "",
-      generic: product.category.generic || "",
-    },
-  });
-  setSelectedImages([]);
-  setErrorMessage(null);
-};
+  const handleEditProduct = (product) => {
+    setEditingProduct(product);
+    setEditFormData({
+      ...product,
+      category: {
+        name: product.category.name || "",
+        generic: product.category.generic || "",
+      },
+    });
+    setSelectedImages([]);
+    // Thiết lập giá trị cho dropdown thương hiệu trong form edit:
+    setEditSelectedBrand(
+      product.brand &&
+        Object.values(predefinedBrandsByCategory).flat().includes(product.brand)
+        ? product.brand
+        : product.brand
+        ? "other"
+        : ""
+    );
+    setErrorMessage(null);
+  };
 
-const handleEditFormChange = (e) => {
-  const { name, value } = e.target;
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target;
 
-  setEditFormData((prev) => {
-    const newFormData = { ...prev };
+    setEditFormData((prev) => {
+      const newFormData = { ...prev };
 
-    if (name === "category.name") {
-      newFormData.category = {
-        ...newFormData.category,
-        name: value,
-        generic: "",
-      };
-    } else if (name === "category.generic") {
-      newFormData.category = {
-        ...newFormData.category,
-        generic: value,
-      };
-    } else if (name === "stock") {
-      // Xử lý khi thay đổi số lượng kho
-      const newStock = parseInt(value) || 0;
-      const oldStock = parseInt(prev.stock) || 0;
-      const oldRemainingStock = parseInt(prev.remainingStock) || 0;
-
-      // Tính toán sự chênh lệch
-      const difference = newStock - oldStock;
-
-      // Cập nhật số lượng kho và số lượng còn lại
-      newFormData.stock = newStock;
-      newFormData.remainingStock = Math.max(0, oldRemainingStock + difference);
-    } else if (name === "remainingStock") {
-      // Đảm bảo số lượng còn lại không vượt quá số lượng kho
-      const maxStock = parseInt(newFormData.stock) || 0;
-      newFormData.remainingStock = Math.min(parseInt(value) || 0, maxStock);
-    } else {
-      newFormData[name] = value;
-    }
-
-    // Tính toán giá sau giảm giá
-    if (name === "originalPrice" || name === "discountPercentage") {
-      const price = parseFloat(newFormData.originalPrice);
-      const discount = parseFloat(newFormData.discountPercentage);
-      if (!isNaN(price) && !isNaN(discount)) {
-        newFormData.priceAfterDiscount = (
-          price *
-          (1 - discount / 100)
-        ).toFixed();
+      if (name === "category.name") {
+        newFormData.category = {
+          ...newFormData.category,
+          name: value,
+          generic: "",
+        };
+      } else if (name === "category.generic") {
+        newFormData.category = {
+          ...newFormData.category,
+          generic: value,
+        };
+      } else if (name === "stock") {
+        const newStock = parseInt(value) || 0;
+        const oldStock = parseInt(prev.stock) || 0;
+        const oldRemainingStock = parseInt(prev.remainingStock) || 0;
+        const difference = newStock - oldStock;
+        newFormData.stock = newStock;
+        newFormData.remainingStock = Math.max(
+          0,
+          oldRemainingStock + difference
+        );
+      } else if (name === "remainingStock") {
+        const maxStock = parseInt(newFormData.stock) || 0;
+        newFormData.remainingStock = Math.min(parseInt(value) || 0, maxStock);
+      } else {
+        newFormData[name] = value;
       }
-    }
 
-    return newFormData;
-  });
-};
+      if (name === "originalPrice" || name === "discountPercentage") {
+        const price = parseFloat(newFormData.originalPrice);
+        const discount = parseFloat(newFormData.discountPercentage);
+        if (!isNaN(price) && !isNaN(discount)) {
+          newFormData.priceAfterDiscount = (
+            price *
+            (1 - discount / 100)
+          ).toFixed();
+        }
+      }
+
+      return newFormData;
+    });
+  };
 
   const handleImageChange = (e) => {
     setSelectedImages(e.target.files);
   };
 
-const handleUpdateProduct = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+  const handleUpdateProduct = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const formData = new FormData();
+    try {
+      const formData = new FormData();
 
-    // Thêm các trường cơ bản
-    Object.keys(editFormData).forEach((key) => {
-      if (
-        key !== "images" &&
-        key !== "_id" &&
-        key !== "__v" &&
-        key !== "category"
-      ) {
-        formData.append(key, editFormData[key]);
+      // Thêm các trường cơ bản
+      Object.keys(editFormData).forEach((key) => {
+        if (
+          key !== "images" &&
+          key !== "_id" &&
+          key !== "__v" &&
+          key !== "category"
+        ) {
+          formData.append(key, editFormData[key]);
+        }
+      });
+
+      // Thêm category như một object
+      formData.append("category[name]", editFormData.category.name);
+      formData.append("category[generic]", editFormData.category.generic);
+
+      // Thêm hình ảnh nếu có
+      if (selectedImages.length > 0) {
+        for (let i = 0; i < selectedImages.length; i++) {
+          formData.append("images", selectedImages[i]);
+        }
       }
-    });
 
-    // Thêm category như một object
-    formData.append("category[name]", editFormData.category.name);
-    formData.append("category[generic]", editFormData.category.generic);
+      await axios.put(`/api/products/${editingProduct._id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-    // Thêm hình ảnh nếu có
-    if (selectedImages.length > 0) {
-      for (let i = 0; i < selectedImages.length; i++) {
-        formData.append("images", selectedImages[i]);
-      }
+      setEditingProduct(null);
+      fetchProducts();
+    } catch (error) {
+      console.error("Error updating product:", error);
+      setErrorMessage("Lỗi khi cập nhật sản phẩm.");
+    } finally {
+      setLoading(false);
     }
-
-    await axios.put(`/api/products/${editingProduct._id}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-
-    setEditingProduct(null);
-    fetchProducts();
-  } catch (error) {
-    console.error("Error updating product:", error);
-    setErrorMessage("Lỗi khi cập nhật sản phẩm.");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const handleCancelEdit = () => {
     setEditingProduct(null);
@@ -331,8 +372,8 @@ const handleUpdateProduct = async (e) => {
         <div className="product-management">
           <div className="table-responsive">
             <table className="table table-bordered product-table">
-              <thead >
-                <tr >
+              <thead>
+                <tr>
                   <th>STT</th>
                   <th>Tên</th>
                   <th>Danh mục</th>
@@ -345,7 +386,7 @@ const handleUpdateProduct = async (e) => {
                   <th>SL Gốc</th>
                   <th>SL Còn</th>
                   <th>Hình ảnh</th>
-                  <th  >Hành động</th>
+                  <th>Hành động</th>
                 </tr>
               </thead>
               <tbody>
@@ -375,7 +416,6 @@ const handleUpdateProduct = async (e) => {
                               </option>
                             ))}
                           </select>
-
                           <select
                             name="category.generic"
                             value={editFormData.category?.generic || ""}
@@ -391,6 +431,58 @@ const handleUpdateProduct = async (e) => {
                               )
                             )}
                           </select>
+
+                          {/* --- Phần edit thương hiệu theo nhóm --- */}
+                          <div className="form-group">
+                            <label>Thương hiệu</label>
+                            <select
+                              name="brandSelect"
+                              className="form-control mb-2"
+                              value={editSelectedBrand}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                setEditSelectedBrand(value);
+                                if (value !== "other") {
+                                  setEditFormData((prev) => ({
+                                    ...prev,
+                                    brand: value,
+                                  }));
+                                } else {
+                                  setEditFormData((prev) => ({
+                                    ...prev,
+                                    brand: "",
+                                  }));
+                                }
+                              }}
+                              required
+                            >
+                              <option value="">Chọn thương hiệu</option>
+                              {Object.entries(predefinedBrandsByCategory).map(
+                                ([group, brands]) => (
+                                  <optgroup key={group} label={group}>
+                                    {brands.map((brand) => (
+                                      <option key={brand} value={brand}>
+                                        {brand}
+                                      </option>
+                                    ))}
+                                  </optgroup>
+                                )
+                              )}
+                              <option value="other">Nhập Thương Hiệu</option>
+                            </select>
+                            {editSelectedBrand === "other" && (
+                              <input
+                                type="text"
+                                name="brand"
+                                className="form-control mt-2"
+                                placeholder="Nhập thương hiệu"
+                                value={editFormData.brand || ""}
+                                onChange={handleEditFormChange}
+                                required
+                              />
+                            )}
+                          </div>
+                          {/* --- Kết thúc phần edit thương hiệu --- */}
 
                           <textarea
                             name="description"
@@ -435,11 +527,10 @@ const handleUpdateProduct = async (e) => {
                               min="0"
                               placeholder="Số lượng trong kho"
                             />
-                            <small className="text-muted ">
+                            <small className="text-muted">
                               Số lượng hiện tại: {editFormData.stock}
                             </small>
                           </div>
-
                           <div className="form-group">
                             <label>Số lượng còn lại:</label>
                             <input
