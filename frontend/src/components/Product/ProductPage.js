@@ -37,6 +37,7 @@ const ProductPage = () => {
   const categoryFromURL = queryParams.get("categoryName");
   const genericFromURL = queryParams.get("generic");
   const searchFromURL = queryParams.get("search");
+const brandFromURL = queryParams.get("brand");
 
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({
@@ -88,130 +89,111 @@ const ProductPage = () => {
       : "";
   };
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        let url = `/api/products`;
-        const params = [];
+useEffect(() => {
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      let url = `/api/products`;
+      const params = [];
 
-        // Xử lý category filters
-        const categoryGenerics = [];
-        const categoryKeys = Object.keys(filters.categories);
+      // ... xử lý các bộ lọc khác như category, giá, search
 
-        if (categoryKeys.length > 0) {
-          categoryKeys.forEach((catName) => {
-            const filterId = filters.categories[catName];
-            const parts = filterId.split("|");
-            categoryGenerics.push(parts[1]); // Collect all selected generics
-          });
-
-          // Thêm từng categoryGeneric làm tham số riêng
-          categoryGenerics.forEach((generic) => {
-            params.push(`categoryGeneric=${encodeURIComponent(generic)}`);
-          });
-        }
-
-        // Xử lý bộ lọc giá
-        if (filters.price) {
-          if (filters.price.maxPrice) {
-            params.push(
-              `maxPrice=${encodeURIComponent(filters.price.maxPrice)}`
-            );
-          }
-          if (filters.price.minPrice) {
-            params.push(
-              `minPrice=${encodeURIComponent(filters.price.minPrice)}`
-            );
-          }
-        }
-
-        // Sắp xếp, tìm kiếm, v.v.
-        if (sortBy !== "default" && sortBy !== "discountPercentage") {
-          params.push(`sortBy=${encodeURIComponent(sortBy)}`);
-        }
-        if (searchFromURL) {
-          params.push(`search=${encodeURIComponent(searchFromURL)}`);
-        }
-        if (categoryFromURL) {
-          params.push(`categoryName=${encodeURIComponent(categoryFromURL)}`);
-        }
-        if (genericFromURL) {
-          params.push(`categoryGeneric=${encodeURIComponent(genericFromURL)}`);
-        }
-
-        if (params.length > 0) {
-          url = `${url}?${params.join("&")}`;
-        }
-
-        const response = await axios.get(url);
-        let fetchedProducts = response.data.products;
-
-        // Nếu có tìm kiếm, sử dụng Fuse.js để lọc thêm (như ban đầu)
-        if (searchFromURL && fetchedProducts.length > 0) {
-          const normalizedQuery = normalizeString(searchFromURL);
-          const fuse = new Fuse(fetchedProducts, {
-            keys: [
-              {
-                name: "name",
-                getFn: (obj) => normalizeString(obj.name),
-              },
-              {
-                name: "category.name",
-                getFn: (obj) => normalizeString(obj.category?.name),
-              },
-              {
-                name: "category.generic",
-                getFn: (obj) => normalizeString(obj.category?.generic),
-              },
-              {
-                name: "brand",
-                getFn: (obj) => normalizeString(obj.brand),
-              },
-            ],
-            threshold: 0.3,
-          });
-          const fuseResult = fuse.search(normalizedQuery);
-          fetchedProducts = fuseResult.map((result) => result.item);
-        }
-
-        // Xử lý sắp xếp
-        if (sortBy === "discountPercentage") {
-          fetchedProducts = fetchedProducts.filter(
-            (product) => product.discountPercentage > 0
-          );
-          fetchedProducts = fetchedProducts.sort(
-            (a, b) => (b.discountPercentage || 0) - (a.discountPercentage || 0)
-          );
-        } else if (sortBy === "priceAsc") {
-          fetchedProducts = fetchedProducts.sort(
-            (a, b) => a.priceAfterDiscount - b.priceAfterDiscount
-          );
-        } else if (sortBy === "priceDesc") {
-          fetchedProducts = fetchedProducts.sort(
-            (a, b) => b.priceAfterDiscount - a.priceAfterDiscount
-          );
-        }
-
-        setProducts(fetchedProducts);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        setError("Có lỗi khi tải sản phẩm. Vui lòng thử lại.");
-        setLoading(false);
+      // Lấy các tham số tìm kiếm từ URL (nếu có)
+      if (searchFromURL) {
+        params.push(`search=${encodeURIComponent(searchFromURL)}`);
       }
-    };
+      if (categoryFromURL) {
+        params.push(`categoryName=${encodeURIComponent(categoryFromURL)}`);
+      }
+      if (genericFromURL) {
+        params.push(`categoryGeneric=${encodeURIComponent(genericFromURL)}`);
+      }
+      // (Nếu API hỗ trợ lọc theo brand từ server, bạn có thể thêm)
+      if (brandFromURL) {
+        params.push(`brand=${encodeURIComponent(brandFromURL)}`);
+      }
 
-    fetchProducts();
-  }, [
-    categoryFromURL,
-    genericFromURL,
-    sortBy,
-    filters,
-    searchFromURL,
-    location.search,
-  ]);
+      if (params.length > 0) {
+        url = `${url}?${params.join("&")}`;
+      }
+
+      const response = await axios.get(url);
+      let fetchedProducts = response.data.products;
+
+      // Nếu có tìm kiếm, sử dụng Fuse.js để lọc thêm
+      if (searchFromURL && fetchedProducts.length > 0) {
+        const normalizedQuery = normalizeString(searchFromURL);
+        const fuse = new Fuse(fetchedProducts, {
+          keys: [
+            {
+              name: "name",
+              getFn: (obj) => normalizeString(obj.name),
+            },
+            {
+              name: "category.name",
+              getFn: (obj) => normalizeString(obj.category?.name),
+            },
+            {
+              name: "category.generic",
+              getFn: (obj) => normalizeString(obj.category?.generic),
+            },
+            {
+              name: "brand",
+              getFn: (obj) => normalizeString(obj.brand),
+            },
+          ],
+          threshold: 0.3,
+        });
+        const fuseResult = fuse.search(normalizedQuery);
+        fetchedProducts = fuseResult.map((result) => result.item);
+      }
+
+      // Lọc theo brand (nếu có)
+      if (brandFromURL && fetchedProducts.length > 0) {
+        const normalizedBrand = normalizeString(brandFromURL);
+        fetchedProducts = fetchedProducts.filter(
+          (product) => normalizeString(product.brand) === normalizedBrand
+        );
+      }
+
+      // Xử lý sắp xếp (discountPercentage, priceAsc, priceDesc, ...)
+      if (sortBy === "discountPercentage") {
+        fetchedProducts = fetchedProducts.filter(
+          (product) => product.discountPercentage > 0
+        );
+        fetchedProducts = fetchedProducts.sort(
+          (a, b) => (b.discountPercentage || 0) - (a.discountPercentage || 0)
+        );
+      } else if (sortBy === "priceAsc") {
+        fetchedProducts = fetchedProducts.sort(
+          (a, b) => a.priceAfterDiscount - b.priceAfterDiscount
+        );
+      } else if (sortBy === "priceDesc") {
+        fetchedProducts = fetchedProducts.sort(
+          (a, b) => b.priceAfterDiscount - a.priceAfterDiscount
+        );
+      }
+
+      setProducts(fetchedProducts);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setError("Có lỗi khi tải sản phẩm. Vui lòng thử lại.");
+      setLoading(false);
+    }
+  };
+
+  fetchProducts();
+}, [
+  categoryFromURL,
+  genericFromURL,
+  brandFromURL, // đảm bảo thêm dependency này
+  sortBy,
+  filters,
+  searchFromURL,
+  location.search,
+]);
 
   return (
     <Container>
@@ -233,21 +215,21 @@ const ProductPage = () => {
         <Col xl={9} lg={12}>
           <Row className="product-row">
             <div className="filter-header">
-              <div className="product-title-wrapper mb-3 mb-lg-0">
-                <h4 className="product-title">Tất cả sản phẩm</h4>
-              </div>
               <div className="filter-controls">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div className="d-block d-xl-none">
-                    <button
-                      onClick={handleShowFilter}
-                      className="filter-button d-flex align-items-center"
-                    >
-                      <CiFilter className="me-1" />
-                      Bộ Lọc
-                    </button>
+                <div className="d-flex justify-content-between ">
+                  {/* Nút Bộ Lọc (chỉ hiển thị trên mobile) */}
+                  <div className="d-block d-xl-none mx-3">
+                    <span className="loc">
+                      <button
+                        onClick={handleShowFilter}
+                        className="filter-button d-flex"
+                      >
+                        <CiFilter className="me-1" />
+                        Bộ Lọc
+                      </button>
+                    </span>
                   </div>
-                  <div className="sort-wrapper d-flex align-items-center">
+                  <div className="sort-wrapper d-flex align-items-center ms-auto  mx-3">
                     <span className="sort-label me-2 d-none d-lg-block">
                       Sắp xếp theo:
                     </span>

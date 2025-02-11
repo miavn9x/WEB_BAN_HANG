@@ -72,7 +72,6 @@
 
 @media (max-width: 991.98px) {
     .filter-header {
-        display: flex;
         flex-direction: column;
     }
 
@@ -102,7 +101,6 @@
 @media (min-width: 992px) {
     
     .filter-header {
-        display: flex;
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
@@ -114,8 +112,7 @@
     }
 
     .filter-controls {
-        display: flex;
-        align-items: center;
+        align-items: end;
     }
 
     .sort-dropdown {
@@ -163,11 +160,18 @@
 
     .sort-wrapper {
         width: 100%;
+    justify-content: center;
     }
 
     .sort-dropdown {
         width: 100%;
+      
     }
+        .d-flex.align-items-center:last-child {
+            margin-top: auto;
+            justify-content: center;
+            padding: 10px;
+        }
 
     /* Căn giữa nút dropdown */
     .dropdown-toggle {

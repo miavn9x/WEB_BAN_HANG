@@ -17,7 +17,6 @@ import ProductEdit from "./pages/Auth/Admin/AddProduct/ProductEdit";
 import AccountList from "./pages/Auth/Admin/AccountList/AccountList";
 import UserPage from "./pages/Auth/Admin/AccountList/UserPage";
 import Cart from "./components/Product/Cart";
-// import Test from "./components/Product/ProductModal";
 import ProductItem from "./components/Product/ProductItem";
 import Checkout from "./components/Product/Checkout";
 import OrderHistory from "./components/Product/OrderHistory";
@@ -33,6 +32,7 @@ import { Helmet } from "react-helmet"; // Thêm Helmet để tối ưu SEO
 import Evaluate from "./components/Product/Evaluate";
 import NotificationModal from "./components/Nav/NotificationModal";
 import ProductModals from "./components/Product/ProductModals";
+import Tests from "./components/Carousel/Tests";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -110,6 +110,7 @@ function App() {
         <Route path="/test" element={<Evaluate />} />
         <Route path="/1" element={<NotificationModal />} />
         <Route path="/order-history/:orderId" element={<OrderHistory />} />
+        <Route path="/2" element={<Tests/>} />
 
         {/* Protected Routes - User & admin */}
         <Route

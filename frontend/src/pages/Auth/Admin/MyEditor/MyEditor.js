@@ -39,10 +39,10 @@ const fileInputRef = useRef(null);
     { id: "#noibat", text: "#noibat" },
     { id: "#tinmoi", text: "#tinmoi" },
     { id: "#baimoi", text: "#baimoi" },
-    { id: "#hot", text: "#hot" },
-    { id: "#sale", text: "#sale" },
     { id: "#xemnhieu", text: "#xemnhieu" },
     { id: "#moinhat", text: "#moinhat" },
+    { id: "#hot", text: "#hot" },
+    { id: "#sale", text: "#sale" },
   ];
 
   // Nếu tạo bài viết mới, load bản nháp từ localStorage

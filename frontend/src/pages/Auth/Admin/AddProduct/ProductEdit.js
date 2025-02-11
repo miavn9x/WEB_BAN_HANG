@@ -47,7 +47,18 @@ const ProductEdit = () => {
       "Zara Kids",
       "Mother & Baby",
     ],
-    Khác: ["Fisher-Price", "Chicco", "Blackmores"],
+    "Nổi Bật": [
+      "Fisher-Price",
+      "Chicco",
+      "Blackmores",
+      "aribaly",
+      "hikid",
+      "meadjohnson",
+      "blackmores",
+      "arifood",
+      "aptamil",
+      "cosmic light",
+    ],
   };
 
   // State lưu lựa chọn từ dropdown cho thương hiệu trong form edit

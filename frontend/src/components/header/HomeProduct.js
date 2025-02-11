@@ -1,30 +1,22 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ProductItem from "../Product/ProductItem";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import "./styles.css"; // file CSS chính (sẽ bao gồm cả custom CSS ở dưới)
+import "./styles.css"; // File CSS chính (bao gồm cả custom CSS bên dưới)
 import { Button } from "@mui/material";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/autoplay";
-import "./styles.css";
 import { Autoplay, Pagination } from "swiper/modules";
-
-
-import "swiper/css";
-import "swiper/css/pagination";
-
-import "./styles.css";
-
-// import required modules
+import { Card, Col, Row } from "react-bootstrap";
 
 const CACHE_KEY = "randomizedCombinedProducts";
-const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 tiếng (tính bằng milliseconds)
+const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 tiếng
 
 const HomeProduct = () => {
-  // --- Phần bộ đếm và flash sale (không thay đổi) ---
+  // --- Phần đồng hồ đếm ngược và flash sale ---
   const [timeState, setTimeState] = useState({
     hours: 0,
     minutes: 0,
@@ -36,16 +28,14 @@ const HomeProduct = () => {
   const [discountedProducts, setDiscountedProducts] = useState([]);
   const navigate = useNavigate();
 
-  // Hàm fetch sản phẩm khuyến mãi
   const fetchDiscountedProducts = useCallback(async () => {
     try {
       const response = await axios.get(
         "/api/products?randomDiscount=true&limit=12"
       );
       const filteredProducts = response.data.products.filter(
-        (product) => product.discountPercentage > 6 // chỉ chọn sản phẩm giảm giá > 6%
+        (product) => product.discountPercentage > 6
       );
-      // Sử dụng random cơ bản bằng sort (không hoàn toàn chuẩn)
       const shuffledProducts = filteredProducts.sort(() => Math.random() - 0.5);
       setDiscountedProducts(shuffledProducts);
     } catch (error) {
@@ -53,7 +43,6 @@ const HomeProduct = () => {
     }
   }, []);
 
-  // Hàm fetch trạng thái đồng hồ đếm ngược từ server
   const fetchTimerState = useCallback(async () => {
     try {
       const response = await axios.get("/api/timer");
@@ -71,7 +60,6 @@ const HomeProduct = () => {
     }
   }, []);
 
-  // Hàm cập nhật đồng hồ đếm ngược
   const updateCountdown = useCallback(() => {
     if (!timeState.targetTime) return;
     const currentTime = Date.now() + timeState.serverTimeOffset;
@@ -91,7 +79,6 @@ const HomeProduct = () => {
     }));
   }, [timeState.targetTime, timeState.serverTimeOffset, fetchTimerState]);
 
-  // Cập nhật đồng hồ đếm ngược và đồng bộ định kỳ
   useEffect(() => {
     fetchTimerState();
     const timerInterval = setInterval(updateCountdown, 1000);
@@ -102,7 +89,6 @@ const HomeProduct = () => {
     };
   }, [fetchTimerState, updateCountdown]);
 
-  // Khi phase chuyển sang "main", fetch sản phẩm khuyến mãi
   const prevPhase = useRef(timeState.currentPhase);
   useEffect(() => {
     if (timeState.currentPhase === "main" && prevPhase.current !== "main") {
@@ -111,14 +97,12 @@ const HomeProduct = () => {
     prevPhase.current = timeState.currentPhase;
   }, [timeState.currentPhase, fetchDiscountedProducts]);
 
-  // Nếu không ở phase "main" thì reset danh sách khuyến mãi
   useEffect(() => {
     if (timeState.currentPhase !== "main") {
       setDiscountedProducts([]);
     }
   }, [timeState.currentPhase]);
 
-  // Hàm điều hướng đến trang danh sách sản phẩm theo danh mục riêng
   const handleViewCategory = (categoryKey, categoryValue) => {
     navigate(`/products?${categoryKey}=${encodeURIComponent(categoryValue)}`, {
       state: { [categoryKey]: categoryValue },
@@ -129,7 +113,6 @@ const HomeProduct = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch danh sách sản phẩm từ API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -144,8 +127,6 @@ const HomeProduct = () => {
     fetchProducts();
   }, []);
 
-  // --- Thuật toán Fisher–Yates để đảo trộn mảng ---
-  // Mục đích: Đảo trộn thứ tự của các phần tử trong mảng một cách ngẫu nhiên mà không làm thay đổi mảng gốc.
   const shuffleArray = (array) => {
     const newArray = array.slice();
     for (let i = newArray.length - 1; i > 0; i--) {
@@ -155,9 +136,7 @@ const HomeProduct = () => {
     return newArray;
   };
 
-  // Hàm lấy thứ tự random từ localStorage hoặc tính mới nếu hết hạn
   const getCachedRandomizedProducts = (filteredProducts) => {
-    // Tạo key cache dựa trên số lượng sản phẩm (hoặc các thuộc tính khác)
     const dynamicCacheKey = CACHE_KEY + "_" + filteredProducts.length;
     try {
       const cache = localStorage.getItem(dynamicCacheKey);
@@ -182,7 +161,6 @@ const HomeProduct = () => {
     return randomized;
   };
 
-  // --- Lọc sản phẩm cho danh mục "Bỉm & tã em bé" ---
   const filteredDiapersProducts = products.filter((product) => {
     if (!product.category || !product.category.name) return false;
     return (
@@ -190,10 +168,46 @@ const HomeProduct = () => {
       "bỉm & tã em bé".toLowerCase()
     );
   });
+
+  const [posts, setPosts] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/posts")
+      .then((res) => res.json())
+      .then((data) => {
+        setPosts(data.posts);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching posts:", err);
+        setError("Có lỗi xảy ra khi tải bài viết.");
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <p>Đang tải bài viết...</p>;
+  if (error) return <p>{error}</p>;
+
+  const limitedPosts = posts.slice(0, 12);
+
+  const handleClick = () => {
+    navigate("/PostsList");
+  };
+
+
+  // thuong hiệu
+const handleBrandClick = (brandName) => {
+  // Chuẩn hóa brand name
+  const normalizedBrand = brandName.trim().toLowerCase();
+  navigate(`/products?brand=${encodeURIComponent(normalizedBrand)}`, {
+    state: { brand: normalizedBrand },
+  });
+};
   return (
     <>
-      <div >
-        {/* --- Phần Flash sale – không thay đổi --- */}
+      <div>
+        {/* --- Phần Flash sale --- */}
         <div className="home__product bg-pink py-5 d-flex justify-content-center">
           <div className="container content__wrapper">
             <div className="row mb-3">
@@ -289,7 +303,7 @@ const HomeProduct = () => {
             {timeState.currentPhase === "main" && (
               <div className="footer text-center mt-4">
                 <Button
-                  className="btn btn-lg"
+                  className="common-view-all-btn"
                   onClick={() =>
                     navigate("/products", { state: { showDiscount: true } })
                   }
@@ -307,12 +321,10 @@ const HomeProduct = () => {
               <div className="container" style={{ height: "200px" }}>
                 <Swiper
                   direction={"vertical"}
-                  pagination={{
-                    clickable: true,
-                  }}
+                  pagination={{ clickable: true }}
                   autoplay={{
-                    delay: 3000, // Thời gian giữa các slide (đơn vị: ms)
-                    disableOnInteraction: false, // Không dừng khi người dùng tương tác
+                    delay: 3000,
+                    disableOnInteraction: false,
                   }}
                   modules={[Pagination, Autoplay]}
                   className="mySwiper"
@@ -367,14 +379,14 @@ const HomeProduct = () => {
                   </SwiperSlide>
                 </Swiper>
               </div>
-              <div className="row align-items-center  text-center d-flex">
-                <div className="col-lg-4 col-md-12  mb-3">
+              <div className="row align-items-center text-center d-flex">
+                <div className="col-lg-4 col-md-12 mb-3">
                   <h4 className="Flash__sale" style={{ color: "#555" }}>
                     Các Loại Sữa
                   </h4>
                 </div>
 
-                <div className="col-lg-4 mb-3 col-md-6 ">
+                <div className="col-lg-4 mb-3 col-md-6">
                   <Button
                     style={{ color: "#555", fontSize: "13px" }}
                     className="custom-category-button lead__sale px-3"
@@ -423,7 +435,6 @@ const HomeProduct = () => {
             </div>
           ) : products.length > 0 ? (
             (() => {
-              // Lọc các sản phẩm có danh mục là "Sữa bột cao cấp" hoặc "Sữa dinh dưỡng"
               const combinedProducts = products.filter((product) => {
                 if (!product.category || !product.category.name) return false;
                 const name = product.category.name.trim().toLowerCase();
@@ -442,9 +453,7 @@ const HomeProduct = () => {
                       <img
                         src="https://theme.hstatic.net/200000381339/1001207774/14/cart_empty_background.png?v=164"
                         alt="Giỏ hàng trống"
-                        style={{
-                          width: "100%",
-                        }}
+                        style={{ width: "100%" }}
                       />
                     </div>
                     {randomizedCombinedProducts.map((product) => (
@@ -462,7 +471,7 @@ const HomeProduct = () => {
             </div>
           )}
         </div>
-        {/* --- Mục hiển thị sản phẩm cho danh mục "Bỉm & tã em bé" --- */}
+        {/* --- Sản phẩm cho danh mục "Bỉm & tã em bé" --- */}
         <div
           className="home__product bg-none py-5 d-flex justify-content-center"
           style={{
@@ -495,7 +504,7 @@ const HomeProduct = () => {
             </div>
             <div className="footer text-center mt-4">
               <Button
-                className="btn btn-lg"
+                className="common-view-all-btn"
                 onClick={() =>
                   navigate("/products?categoryName=Bỉm%20%26%20tã%20em%20bé", {
                     state: { categoryName: "Bỉm & tã em bé" },
@@ -508,14 +517,15 @@ const HomeProduct = () => {
           </div>
         </div>
 
-        <div className="container  py-2 my-4 ">
-          <span className="Flash__sale fs-5">THƯƠNG HIỆU NỔI BẬT </span> <br />
+        <div className="container py-2 my-4">
+          <span className="Flash__sale fs-5">THƯƠNG HIỆU NỔI BẬT </span>
+          <br />
           <Swiper
             spaceBetween={10}
             pagination={{ clickable: true }}
             autoplay={{
               delay: 3000,
-              disableOnInteraction: false, // Tiếp tục chạy ngay cả khi người dùng tương tác
+              disableOnInteraction: false,
             }}
             modules={[Pagination, Autoplay]}
             className="mySwiper"
@@ -527,55 +537,115 @@ const HomeProduct = () => {
               1200: { slidesPerView: 6 },
             }}
           >
-            <SwiperSlide>
+            <SwiperSlide onClick={() => handleBrandClick("cosmic light")}>
+              {/* cosmic light*/}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739172432/brand_1_gp8jdq.webp"
                 alt="Brand 1"
               />
             </SwiperSlide>
-            <SwiperSlide>
+            <SwiperSlide onClick={() => handleBrandClick("aptamil")}>
+              {/*  aptamil*/}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_6_unpnuu.webp"
                 alt="Brand 6"
               />
             </SwiperSlide>
-            <SwiperSlide>
+            <SwiperSlide onClick={() => handleBrandClick("arifood")}>
+              {/* arifood */}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_2_hayrt8.webp"
                 alt="Brand 2"
               />
             </SwiperSlide>
-            <SwiperSlide>
+            <SwiperSlide onClick={() => handleBrandClick("blackmores")}>
+              {/* blackmores */}
+
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_7_rsbgoe.webp"
                 alt="Brand 7"
               />
             </SwiperSlide>
-            <SwiperSlide>
+            <SwiperSlide onClick={() => handleBrandClick("blackmores")}>
+              {/* blackmores */}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_3_vsl8yu.webp"
                 alt="Brand 3"
               />
             </SwiperSlide>
-            <SwiperSlide>
+            <SwiperSlide onClick={() => handleBrandClick("hikid")}>
+              {/* hikid */}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_8_bfeshq.webp"
                 alt="Brand 8"
               />
             </SwiperSlide>
-            <SwiperSlide>
+            <SwiperSlide onClick={() => handleBrandClick("aribaly")}>
+              {/* aribaly */}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_9_jczh9e.webp"
                 alt="Brand 9"
               />
             </SwiperSlide>
-            <SwiperSlide>
+            <SwiperSlide onClick={() => handleBrandClick("Pampers")}>
+              {/* Pampers */}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_10_cfzlzm.webp"
                 alt="Brand 10"
               />
             </SwiperSlide>
           </Swiper>
+        </div>
+        <div className="quick__post-container">
+          <div className="container py-2 my-4">
+            <Row>
+              <div className="row mb-3">
+                <span className="Flash__sale mx-2 fs-5">Bài viết</span>
+              </div>
+              {limitedPosts.length === 0 ? (
+                <Col>
+                  <p>Không có bài viết nào.</p>
+                </Col>
+              ) : (
+                limitedPosts.map((post) => (
+                  <Col
+                    xs={6}
+                    sm={4}
+                    md={3}
+                    lg={3}
+                    className="mb-4"
+                    key={post._id}
+                  >
+                    <Link
+                      to={`/posts/${post._id}`}
+                      className="quick__post-link"
+                    >
+                      <Card className="quick__post-card">
+                        {post.imageUrl && (
+                          <Card.Img
+                            variant="top"
+                            src={post.imageUrl}
+                            className="quick__post-card-img"
+                            loading="lazy"
+                          />
+                        )}
+                        <Card.Body className="quick__post-card-body">
+                          <Card.Title className="quick__post-card-title">
+                            {post.title}
+                          </Card.Title>
+                        </Card.Body>
+                      </Card>
+                    </Link>
+                  </Col>
+                ))
+              )}
+            </Row>
+            <div className="footer text-center mt-4">
+              <Button className="common-view-all-btn" onClick={handleClick}>
+                Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </>

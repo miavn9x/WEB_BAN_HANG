@@ -155,7 +155,6 @@
     color: #fa3636;
 }
 
-/* Bao ngoài của danh mục sản phẩm */
 .custom__cat__container {
     display: flex;
     flex-direction: column;
@@ -248,3 +247,76 @@ body {
     opacity: 0;
 }
 
+.quick__post-container .quick__post-card {
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.quick__post-container .quick__post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.quick__post-container .quick__post-card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.quick__post-container .quick__post-card-img {
+    height: 180px;
+    object-fit: cover;
+    /* Ensure images fit nicely */
+}
+
+.quick__post-container .quick__post-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.quick__post-container .quick__flash-sale {
+    font-weight: 700;
+    color: #333;
+    font-size: 20px;
+}
+
+@media (max-width: 992px) {
+    .quick__post-container .quick__post-card-img {
+        height: 160px;
+    }
+}
+
+@media (max-width: 768px) {
+    .quick__post-container .quick__post-card-img {
+        height: 140px;
+    }
+}
+
+.quick__post-container .quick__post-link {
+    text-decoration: none;
+}
+
+.quick__post-container .quick__post-link:hover {
+    text-decoration: none;
+}
+/* styles.css */
+
+.common-view-all-btn {
+    background-color: #ff6f91;
+    color: #fff;
+    padding: 6px 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.common-view-all-btn:hover {
+    background-color: #e65c80;
+}

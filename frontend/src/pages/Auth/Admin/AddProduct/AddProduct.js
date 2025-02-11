@@ -107,7 +107,6 @@ const AddProduct = () => {
     Sữa: [
       "Vinamilk",
       "Dielac",
-      "Nutifood",
       "TH True Milk",
       "Mami",
       "Friso",
@@ -133,7 +132,18 @@ const AddProduct = () => {
       "Zara Kids",
       "Mother & Baby",
     ],
-    Khác: ["Fisher-Price", "Chicco", "Blackmores"],
+    "Nổi Bật": [
+      "Fisher-Price",
+      "Chicco",
+      "Blackmores",
+      "aribaly",
+      "hikid",
+      "meadjohnson",
+      "blackmores",
+      "arifood",
+      "aptamil",
+      "cosmic light",
+    ],
   };
 
   // State lưu lựa chọn thương hiệu từ dropdown (mặc định rỗng)
