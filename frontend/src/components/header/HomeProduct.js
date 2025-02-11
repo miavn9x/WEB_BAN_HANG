@@ -192,74 +192,293 @@ const HomeProduct = () => {
   });
   return (
     <>
-      {/* --- Phần Flash sale – không thay đổi --- */}
-      <div className="home__product bg-pink py-5 d-flex justify-content-center">
-        <div className="container content__wrapper">
-          <div className="row mb-3">
-            <div className="col-12 col-md-6 col-lg-4 text-center text-md-start">
-              <h4 className="Flash__sale">
-                {timeState.currentPhase === "main"
-                  ? " Flash sale mỗi ngày"
-                  : "Chuẩn bị đợt sale mới"}
-              </h4>
-              <p className="lead__sale mx-5">
-                {timeState.currentPhase === "main"
-                  ? "Siêu Giảm Giá"
-                  : "Đang cập nhật..."}
-              </p>
-            </div>
-            <div className="col-12 col-md-6 col-lg-4 text-center">
-              <div className="countdown__home d-flex justify-content-center">
-                <div className="countdown-wrap ">
-                  <div className="countdown d-flex justify-content-center">
-                    <div className="bloc-time hours mx-2">
-                      <div className="figure">
-                        <span className="top">
-                          {String(timeState.hours).padStart(2, "0")[0]}
-                        </span>
-                        <span className="bottom">
-                          {String(timeState.hours).padStart(2, "0")[1]}
-                        </span>
+      <div >
+        {/* --- Phần Flash sale – không thay đổi --- */}
+        <div className="home__product bg-pink py-5 d-flex justify-content-center">
+          <div className="container content__wrapper">
+            <div className="row mb-3">
+              <div className="col-12 col-md-6 col-lg-4 text-center text-md-start">
+                <h4 className="Flash__sale">
+                  {timeState.currentPhase === "main"
+                    ? " Flash sale mỗi ngày"
+                    : "Chuẩn bị đợt sale mới"}
+                </h4>
+                <p className="lead__sale mx-5">
+                  {timeState.currentPhase === "main"
+                    ? "Siêu Giảm Giá"
+                    : "Đang cập nhật..."}
+                </p>
+              </div>
+              <div className="col-12 col-md-6 col-lg-4 text-center">
+                <div className="countdown__home d-flex justify-content-center">
+                  <div className="countdown-wrap ">
+                    <div className="countdown d-flex justify-content-center">
+                      <div className="bloc-time hours mx-2">
+                        <div className="figure">
+                          <span className="top">
+                            {String(timeState.hours).padStart(2, "0")[0]}
+                          </span>
+                          <span className="bottom">
+                            {String(timeState.hours).padStart(2, "0")[1]}
+                          </span>
+                        </div>
+                        <div className="mt-2">
+                          <span className="count__title">Giờ</span>
+                        </div>
                       </div>
-                      <div className="mt-2">
-                        <span className="count__title">Giờ</span>
+                      <div className="bloc-time min mx-2">
+                        <div className="figure">
+                          <span className="top">
+                            {String(timeState.minutes).padStart(2, "0")[0]}
+                          </span>
+                          <span className="bottom">
+                            {String(timeState.minutes).padStart(2, "0")[1]}
+                          </span>
+                        </div>
+                        <div className="mt-2">
+                          <span className="count__title">Phút</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="bloc-time min mx-2">
-                      <div className="figure">
-                        <span className="top">
-                          {String(timeState.minutes).padStart(2, "0")[0]}
-                        </span>
-                        <span className="bottom">
-                          {String(timeState.minutes).padStart(2, "0")[1]}
-                        </span>
-                      </div>
-                      <div className="mt-2">
-                        <span className="count__title">Phút</span>
-                      </div>
-                    </div>
-                    <div className="bloc-time sec mx-2">
-                      <div className="figure">
-                        <span className="top">
-                          {String(timeState.seconds).padStart(2, "0")[0]}
-                        </span>
-                        <span className="bottom">
-                          {String(timeState.seconds).padStart(2, "0")[1]}
-                        </span>
-                      </div>
-                      <div className="mt-2">
-                        <span className="count__title">Giây</span>
+                      <div className="bloc-time sec mx-2">
+                        <div className="figure">
+                          <span className="top">
+                            {String(timeState.seconds).padStart(2, "0")[0]}
+                          </span>
+                          <span className="bottom">
+                            {String(timeState.seconds).padStart(2, "0")[1]}
+                          </span>
+                        </div>
+                        <div className="mt-2">
+                          <span className="count__title">Giây</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+            <div className="row">
+              {timeState.currentPhase === "main" ? (
+                discountedProducts.length > 0 ? (
+                  discountedProducts.map((product) => (
+                    <div
+                      key={product._id}
+                      className="col-6 col-md-3 col-lg-2 py-2 g-2"
+                    >
+                      <ProductItem product={product} />
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-12 text-center py-4">
+                    <i className="fas fa-box-open fa-3x text-muted mb-3"></i>
+                    <p className="text-muted">Đang tải sản phẩm...</p>
+                  </div>
+                )
+              ) : (
+                <div className="col-12 text-center py-4">
+                  <div className="timeout-message">
+                    <i className="fas fa-clock fa-3x text-danger mb-3"></i>
+                    <h5 className="text-danger">HẾT THỜI GIAN KHUYẾN MÃI</h5>
+                    <p className="text-muted">
+                      Đợt khuyến mãi mới sẽ bắt đầu sau...
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+            {timeState.currentPhase === "main" && (
+              <div className="footer text-center mt-4">
+                <Button
+                  className="btn btn-lg"
+                  onClick={() =>
+                    navigate("/products", { state: { showDiscount: true } })
+                  }
+                >
+                  Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
+                </Button>
+              </div>
+            )}
           </div>
-          <div className="row">
-            {timeState.currentPhase === "main" ? (
-              discountedProducts.length > 0 ? (
-                discountedProducts.map((product) => (
+        </div>
+
+        <div className="custom__cat__container py-2 my-4 container">
+          <div className="d-flex text-center">
+            <div className="container">
+              <div className="container" style={{ height: "200px" }}>
+                <Swiper
+                  direction={"vertical"}
+                  pagination={{
+                    clickable: true,
+                  }}
+                  autoplay={{
+                    delay: 3000, // Thời gian giữa các slide (đơn vị: ms)
+                    disableOnInteraction: false, // Không dừng khi người dùng tương tác
+                  }}
+                  modules={[Pagination, Autoplay]}
+                  className="mySwiper"
+                >
+                  <SwiperSlide>
+                    <img
+                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739172432/brand_1_gp8jdq.webp"
+                      alt="Brand 1"
+                    />
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <img
+                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_6_unpnuu.webp"
+                      alt="Brand 6"
+                    />
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <img
+                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_2_hayrt8.webp"
+                      alt="Brand 2"
+                    />
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <img
+                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_7_rsbgoe.webp"
+                      alt="Brand 7"
+                    />
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <img
+                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_3_vsl8yu.webp"
+                      alt="Brand 3"
+                    />
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <img
+                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_8_bfeshq.webp"
+                      alt="Brand 8"
+                    />
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <img
+                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_9_jczh9e.webp"
+                      alt="Brand 9"
+                    />
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <img
+                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_10_cfzlzm.webp"
+                      alt="Brand 10"
+                    />
+                  </SwiperSlide>
+                </Swiper>
+              </div>
+              <div className="row align-items-center  text-center d-flex">
+                <div className="col-lg-4 col-md-12  mb-3">
+                  <h4 className="Flash__sale" style={{ color: "#555" }}>
+                    Các Loại Sữa
+                  </h4>
+                </div>
+
+                <div className="col-lg-4 mb-3 col-md-6 ">
+                  <Button
+                    style={{ color: "#555", fontSize: "13px" }}
+                    className="custom-category-button lead__sale px-3"
+                    onClick={() =>
+                      handleViewCategory("categoryName", "Sữa bột cao cấp")
+                    }
+                    sx={{
+                      border: "1px solid #ccc",
+                      borderRadius: "15px",
+                      "&:hover": {
+                        backgroundColor: "#ffb6c1",
+                        borderColor: "#FF6F91",
+                      },
+                    }}
+                  >
+                    Sữa bột cao cấp
+                  </Button>
+                </div>
+
+                <div className="col-lg-4 mb-3 col-md-6">
+                  <Button
+                    style={{ color: "#555", fontSize: "13px" }}
+                    className="custom-category-button lead__sale px-3"
+                    onClick={() =>
+                      handleViewCategory("categoryName", "Sữa dinh dưỡng")
+                    }
+                    sx={{
+                      border: "1px solid #ccc",
+                      borderRadius: "15px",
+                      "&:hover": {
+                        backgroundColor: "#ffb6c1",
+                        borderColor: "#FF6F91",
+                      },
+                    }}
+                  >
+                    Sữa dinh dưỡng
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="custom__cat__loading text-center py-4">
+              <p>Đang tải sản phẩm...</p>
+            </div>
+          ) : products.length > 0 ? (
+            (() => {
+              // Lọc các sản phẩm có danh mục là "Sữa bột cao cấp" hoặc "Sữa dinh dưỡng"
+              const combinedProducts = products.filter((product) => {
+                if (!product.category || !product.category.name) return false;
+                const name = product.category.name.trim().toLowerCase();
+                return (
+                  name === "sữa bột cao cấp".toLowerCase() ||
+                  name === "sữa dinh dưỡng".toLowerCase()
+                );
+              });
+
+              const randomizedCombinedProducts =
+                getCachedRandomizedProducts(combinedProducts);
+              return (
+                <>
+                  <div className="custom__cat__row">
+                    <div className="custom__cat__banner">
+                      <img
+                        src="https://theme.hstatic.net/200000381339/1001207774/14/cart_empty_background.png?v=164"
+                        alt="Giỏ hàng trống"
+                        style={{
+                          width: "100%",
+                        }}
+                      />
+                    </div>
+                    {randomizedCombinedProducts.map((product) => (
+                      <div key={product._id} className="custom__cat__item">
+                        <ProductItem product={product} />
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })()
+          ) : (
+            <div className="custom__cat__empty text-center py-4">
+              <p>Không có sản phẩm nào.</p>
+            </div>
+          )}
+        </div>
+        {/* --- Mục hiển thị sản phẩm cho danh mục "Bỉm & tã em bé" --- */}
+        <div
+          className="home__product bg-none py-5 d-flex justify-content-center"
+          style={{
+            backgroundColor: "transparent !important",
+            background: "none !important",
+          }}
+        >
+          <div className="container content__wrapper">
+            <div className="row mb-3">
+              <div className="col-12 text-center text-md-start">
+                <h4 className="Flash__sale fs-5">Bỉm & tã em bé</h4>
+              </div>
+            </div>
+            <div className="row">
+              {filteredDiapersProducts.length > 0 ? (
+                filteredDiapersProducts.map((product) => (
                   <div
                     key={product._id}
                     className="col-6 col-md-3 col-lg-2 py-2 g-2"
@@ -272,307 +491,92 @@ const HomeProduct = () => {
                   <i className="fas fa-box-open fa-3x text-muted mb-3"></i>
                   <p className="text-muted">Đang tải sản phẩm...</p>
                 </div>
-              )
-            ) : (
-              <div className="col-12 text-center py-4">
-                <div className="timeout-message">
-                  <i className="fas fa-clock fa-3x text-danger mb-3"></i>
-                  <h5 className="text-danger">HẾT THỜI GIAN KHUYẾN MÃI</h5>
-                  <p className="text-muted">
-                    Đợt khuyến mãi mới sẽ bắt đầu sau...
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-          {timeState.currentPhase === "main" && (
+              )}
+            </div>
             <div className="footer text-center mt-4">
               <Button
                 className="btn btn-lg"
                 onClick={() =>
-                  navigate("/products", { state: { showDiscount: true } })
+                  navigate("/products?categoryName=Bỉm%20%26%20tã%20em%20bé", {
+                    state: { categoryName: "Bỉm & tã em bé" },
+                  })
                 }
               >
                 Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
               </Button>
             </div>
-          )}
-        </div>
-      </div>
-
-      <div className="custom__cat__container py-2 my-4 container">
-        <div className="d-flex text-center">
-          <div className="container">
-            <div className="container" style={{ height: "200px" }}>
-              <Swiper
-                direction={"vertical"}
-                pagination={{
-                  clickable: true,
-                }}
-                autoplay={{
-                  delay: 3000, // Thời gian giữa các slide (đơn vị: ms)
-                  disableOnInteraction: false, // Không dừng khi người dùng tương tác
-                }}
-                modules={[Pagination, Autoplay]}
-                className="mySwiper"
-              >
-                <SwiperSlide>
-                  <img
-                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739172432/brand_1_gp8jdq.webp"
-                    alt="Brand 1"
-                  />
-                </SwiperSlide>
-                <SwiperSlide>
-                  <img
-                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_6_unpnuu.webp"
-                    alt="Brand 6"
-                  />
-                </SwiperSlide>
-                <SwiperSlide>
-                  <img
-                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_2_hayrt8.webp"
-                    alt="Brand 2"
-                  />
-                </SwiperSlide>
-                <SwiperSlide>
-                  <img
-                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_7_rsbgoe.webp"
-                    alt="Brand 7"
-                  />
-                </SwiperSlide>
-                <SwiperSlide>
-                  <img
-                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_3_vsl8yu.webp"
-                    alt="Brand 3"
-                  />
-                </SwiperSlide>
-                <SwiperSlide>
-                  <img
-                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_8_bfeshq.webp"
-                    alt="Brand 8"
-                  />
-                </SwiperSlide>
-                <SwiperSlide>
-                  <img
-                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_9_jczh9e.webp"
-                    alt="Brand 9"
-                  />
-                </SwiperSlide>
-                <SwiperSlide>
-                  <img
-                    src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_10_cfzlzm.webp"
-                    alt="Brand 10"
-                  />
-                </SwiperSlide>
-              </Swiper>
-            </div>
-            <div className="row align-items-center  text-center d-flex">
-              <div className="col-lg-4 col-md-12  mb-3">
-                <h4 className="Flash__sale" style={{ color: "#555" }}>
-                  Các Loại Sữa
-                </h4>
-              </div>
-
-              <div className="col-lg-4 mb-3 col-md-6 ">
-                <Button
-                  style={{ color: "#555", fontSize: "13px" }}
-                  className="custom-category-button lead__sale px-3"
-                  onClick={() =>
-                    handleViewCategory("categoryName", "Sữa bột cao cấp")
-                  }
-                  sx={{
-                    border: "1px solid #ccc",
-                    borderRadius: "15px",
-                    "&:hover": {
-                      backgroundColor: "#ffb6c1",
-                      borderColor: "#FF6F91",
-                    },
-                  }}
-                >
-                  Sữa bột cao cấp
-                </Button>
-              </div>
-
-              <div className="col-lg-4 mb-3 col-md-6">
-                <Button
-                  style={{ color: "#555", fontSize: "13px" }}
-                  className="custom-category-button lead__sale px-3"
-                  onClick={() =>
-                    handleViewCategory("categoryName", "Sữa dinh dưỡng")
-                  }
-                  sx={{
-                    border: "1px solid #ccc",
-                    borderRadius: "15px",
-                    "&:hover": {
-                      backgroundColor: "#ffb6c1",
-                      borderColor: "#FF6F91",
-                    },
-                  }}
-                >
-                  Sữa dinh dưỡng
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
 
-        {loading ? (
-          <div className="custom__cat__loading text-center py-4">
-            <p>Đang tải sản phẩm...</p>
-          </div>
-        ) : products.length > 0 ? (
-          (() => {
-            // Lọc các sản phẩm có danh mục là "Sữa bột cao cấp" hoặc "Sữa dinh dưỡng"
-            const combinedProducts = products.filter((product) => {
-              if (!product.category || !product.category.name) return false;
-              const name = product.category.name.trim().toLowerCase();
-              return (
-                name === "sữa bột cao cấp".toLowerCase() ||
-                name === "sữa dinh dưỡng".toLowerCase()
-              );
-            });
-
-            const randomizedCombinedProducts =
-              getCachedRandomizedProducts(combinedProducts);
-            return (
-              <>
-                <div className="custom__cat__row">
-                  <div className="custom__cat__banner">
-                    <img
-                      src="https://theme.hstatic.net/200000381339/1001207774/14/cart_empty_background.png?v=164"
-                      alt="Giỏ hàng trống"
-                      style={{
-                        width: "100%",
-                      }}
-                    />
-                  </div>
-                  {randomizedCombinedProducts.map((product) => (
-                    <div key={product._id} className="custom__cat__item">
-                      <ProductItem product={product} />
-                    </div>
-                  ))}
-                </div>
-              </>
-            );
-          })()
-        ) : (
-          <div className="custom__cat__empty text-center py-4">
-            <p>Không có sản phẩm nào.</p>
-          </div>
-        )}
-      </div>
-      {/* --- Mục hiển thị sản phẩm cho danh mục "Bỉm & tã em bé" --- */}
-      <div
-        className="home__product bg-none py-5 d-flex justify-content-center"
-     
-        style={{backgroundColor: "transparent !important", background:"none !important"}}
-      >
-        <div className="container content__wrapper">
-          <div className="row mb-3">
-            <div className="col-12 text-center text-md-start">
-              <h4 className="Flash__sale fs-5">Bỉm & tã em bé</h4>
-            </div>
-          </div>
-          <div className="row">
-            {filteredDiapersProducts.length > 0 ? (
-              filteredDiapersProducts.map((product) => (
-                <div
-                  key={product._id}
-                  className="col-6 col-md-3 col-lg-2 py-2 g-2"
-                >
-                  <ProductItem product={product} />
-                </div>
-              ))
-            ) : (
-              <div className="col-12 text-center py-4">
-                <i className="fas fa-box-open fa-3x text-muted mb-3"></i>
-                <p className="text-muted">Đang tải sản phẩm...</p>
-              </div>
-            )}
-          </div>
-          <div className="footer text-center mt-4">
-            <Button
-              className="btn btn-lg"
-              onClick={() =>
-                navigate("/products?categoryName=Bỉm%20%26%20tã%20em%20bé", {
-                  state: { categoryName: "Bỉm & tã em bé" },
-                })
-              }
-            >
-              Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
-            </Button>
-          </div>
+        <div className="container  py-2 my-4 ">
+          <span className="Flash__sale fs-5">THƯƠNG HIỆU NỔI BẬT </span> <br />
+          <Swiper
+            spaceBetween={10}
+            pagination={{ clickable: true }}
+            autoplay={{
+              delay: 3000,
+              disableOnInteraction: false, // Tiếp tục chạy ngay cả khi người dùng tương tác
+            }}
+            modules={[Pagination, Autoplay]}
+            className="mySwiper"
+            breakpoints={{
+              320: { slidesPerView: 2 },
+              480: { slidesPerView: 3 },
+              768: { slidesPerView: 4 },
+              1024: { slidesPerView: 5 },
+              1200: { slidesPerView: 6 },
+            }}
+          >
+            <SwiperSlide>
+              <img
+                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739172432/brand_1_gp8jdq.webp"
+                alt="Brand 1"
+              />
+            </SwiperSlide>
+            <SwiperSlide>
+              <img
+                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_6_unpnuu.webp"
+                alt="Brand 6"
+              />
+            </SwiperSlide>
+            <SwiperSlide>
+              <img
+                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_2_hayrt8.webp"
+                alt="Brand 2"
+              />
+            </SwiperSlide>
+            <SwiperSlide>
+              <img
+                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_7_rsbgoe.webp"
+                alt="Brand 7"
+              />
+            </SwiperSlide>
+            <SwiperSlide>
+              <img
+                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_3_vsl8yu.webp"
+                alt="Brand 3"
+              />
+            </SwiperSlide>
+            <SwiperSlide>
+              <img
+                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_8_bfeshq.webp"
+                alt="Brand 8"
+              />
+            </SwiperSlide>
+            <SwiperSlide>
+              <img
+                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_9_jczh9e.webp"
+                alt="Brand 9"
+              />
+            </SwiperSlide>
+            <SwiperSlide>
+              <img
+                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_10_cfzlzm.webp"
+                alt="Brand 10"
+              />
+            </SwiperSlide>
+          </Swiper>
         </div>
-      </div>
-
-      <div className="container  py-2 my-4 ">
-        <span className="Flash__sale fs-5">THƯƠNG HIỆU NỔI BẬT </span> <br />
-        <Swiper
-          spaceBetween={10}
-          pagination={{ clickable: true }}
-          autoplay={{
-            delay: 3000,
-            disableOnInteraction: false, // Tiếp tục chạy ngay cả khi người dùng tương tác
-          }}
-          modules={[Pagination, Autoplay]}
-          className="mySwiper"
-          breakpoints={{
-            320: { slidesPerView: 2 },
-            480: { slidesPerView: 3 },
-            768: { slidesPerView: 4 },
-            1024: { slidesPerView: 5 },
-            1200: { slidesPerView: 6 },
-          }}
-        >
-          <SwiperSlide>
-            <img
-              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739172432/brand_1_gp8jdq.webp"
-              alt="Brand 1"
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img
-              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_6_unpnuu.webp"
-              alt="Brand 6"
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img
-              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_2_hayrt8.webp"
-              alt="Brand 2"
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img
-              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_7_rsbgoe.webp"
-              alt="Brand 7"
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img
-              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_3_vsl8yu.webp"
-              alt="Brand 3"
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img
-              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_8_bfeshq.webp"
-              alt="Brand 8"
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img
-              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_9_jczh9e.webp"
-              alt="Brand 9"
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img
-              src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_10_cfzlzm.webp"
-              alt="Brand 10"
-            />
-          </SwiperSlide>
-        </Swiper>
       </div>
     </>
   );

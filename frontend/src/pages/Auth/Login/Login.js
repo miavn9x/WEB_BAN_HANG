@@ -89,89 +89,91 @@ const Login = () => {
 
   return (
     <Container className="login-container">
-      <h3 className="text-center mb-2">ĐĂNG NHẬP TÀI KHOẢN</h3>
-      <p className="text-center mb-4">
-        Bạn chưa có tài khoản?{" "}
-        <Link
-          to="/register"
-          className="text-decoration-none"
-          style={{ color: "#FF6F91" }}
-        >
-          Đăng ký tại đây
-        </Link>
-      </p>
+      <div>
+        <h3 className="text-center mb-2">ĐĂNG NHẬP TÀI KHOẢN</h3>
+        <p className="text-center mb-4">
+          Bạn chưa có tài khoản?{" "}
+          <Link
+            to="/register"
+            className="text-decoration-none"
+            style={{ color: "#FF6F91" }}
+          >
+            Đăng ký tại đây
+          </Link>
+        </p>
 
-      <div className="text-center pb-3">
-        {error && <div className="text-danger">{error}</div>}
-      </div>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3">
-          <Form.Label>
-            Email <span className="text-danger">*</span>
-          </Form.Label>
-          <Form.Control
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Email"
-            required
-            style={{ padding: "10px" }}
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>
-            Mật khẩu <span className="text-danger">*</span>
-          </Form.Label>
-          <Form.Control
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Mật khẩu"
-            required
-            style={{ padding: "10px" }}
-          />
-        </Form.Group>
-
-        <div className="mb-3">
-          <div className="text-dark text-decoration-none">
-            Quên mật khẩu?&nbsp;
-            <Link
-              to="/ForgotPassword"
-              className="text-decoration-none"
-              style={{ color: "#FF6F91" }}
-            >
-              Nhấn vào đây
-            </Link>
-          </div>
+        <div className="text-center pb-3">
+          {error && <div className="text-danger">{error}</div>}
         </div>
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3">
+            <Form.Label>
+              Email <span className="text-danger">*</span>
+            </Form.Label>
+            <Form.Control
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Email"
+              required
+              style={{ padding: "10px" }}
+            />
+          </Form.Group>
 
-        <Button
-          type="submit"
-          className="w-100 rounded-pill fw-bold"
-          style={{
-            backgroundColor: "#ffc0cb",
-            border: "none",
-            padding: "10px 0",
-          }}
-          disabled={loading}
-        >
-          {loading ? (
-            <div className="loading-container text-center">
-              <Spinner
-                animation="border"
-                variant="success"
-                className="loading-spinner"
-              />
-              <div>Đang tải...</div>
+          <Form.Group className="mb-3">
+            <Form.Label>
+              Mật khẩu <span className="text-danger">*</span>
+            </Form.Label>
+            <Form.Control
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Mật khẩu"
+              required
+              style={{ padding: "10px" }}
+            />
+          </Form.Group>
+
+          <div className="mb-3">
+            <div className="text-dark text-decoration-none">
+              Quên mật khẩu?&nbsp;
+              <Link
+                to="/ForgotPassword"
+                className="text-decoration-none"
+                style={{ color: "#FF6F91" }}
+              >
+                Nhấn vào đây
+              </Link>
             </div>
-          ) : (
-            "Đăng nhập"
-          )}
-        </Button>
-      </Form>
+          </div>
+
+          <Button
+            type="submit"
+            className="w-100 rounded-pill fw-bold"
+            style={{
+              backgroundColor: "#ffc0cb",
+              border: "none",
+              padding: "10px 0",
+            }}
+            disabled={loading}
+          >
+            {loading ? (
+              <div className="loading-container text-center">
+                <Spinner
+                  animation="border"
+                  variant="success"
+                  className="loading-spinner"
+                />
+                <div>Đang tải...</div>
+              </div>
+            ) : (
+              "Đăng nhập"
+            )}
+          </Button>
+        </Form>
+      </div>
     </Container>
   );
 };
