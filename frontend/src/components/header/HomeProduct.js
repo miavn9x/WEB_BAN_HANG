@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import ProductItem from "../Product/ProductItem";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import "./styles.css"; // File CSS chính (bao gồm cả custom CSS bên dưới)
+import "./HomeProduct.css"; // File CSS chính (bao gồm cả custom CSS bên dưới)
 import { Button } from "@mui/material";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";

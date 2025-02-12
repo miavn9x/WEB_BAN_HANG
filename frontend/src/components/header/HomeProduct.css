@@ -307,16 +307,16 @@ body {
 /* styles.css */
 
 .common-view-all-btn {
-    background-color: #ff6f91;
-    color: #fff;
-    padding: 6px 12px;
-    font-size: 1rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 15px;
-    transition: background-color 0.3s ease;
+    background-color: #ff6f91!important;
+    color: #fff!important;
+    padding: 6px 12px!important;
+    font-size: 1rem!important;
+    font-weight: 600!important;
+    border: 1px solid #FF6F91!important;
+    border-radius: 15px!important;
+    transition: background-color 0.3s ease!important;
 }
 
 .common-view-all-btn:hover {
-    background-color: #e65c80;
+    background-color: #e65c80!important;
 }
