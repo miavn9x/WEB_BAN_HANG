@@ -23,14 +23,8 @@ mongoose
 app.use(cors());
 app.use(express.json());
 
-
-
-
-
-
 // Routes
 app.use("/api/auth", authRoutes);
-
 
 const userRoutes = require("./routes/userRoutes"); // Import routes
 
@@ -55,15 +49,11 @@ app.use("/api", cartRoutes);
 const postRoutes = require("./routes/routesposts");
 app.use("/api", postRoutes);
 
-
-
 const reviewRouter = require("./routes/reviewRouter");
 app.use("/api", reviewRouter);
 
-
 const questionRouter = require("./routes/questionRouter");
 app.use("/api", questionRouter);
-
 
 const notificationRoutes = require("./routes/notificationRoutes");
 app.use("/api/notifications", notificationRoutes);
