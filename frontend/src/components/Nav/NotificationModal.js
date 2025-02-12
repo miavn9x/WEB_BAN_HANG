@@ -7,32 +7,73 @@ import "./NotificationModal.css"; // Import CSS
 
 const NotificationModal = ({ show, handleClose }) => {
   const [notifications, setNotifications] = useState([]);
-  const [selectedNotifications, setSelectedNotifications] = useState([]); // Track selected notifications
+  const [selectedNotifications, setSelectedNotifications] = useState([]); // Theo dõi các thông báo được chọn
   const navigate = useNavigate();
+
+  // Hàm lấy thông báo từ API và cập nhật localStorage
+  const fetchNotifications = async () => {
+    const token = localStorage.getItem("token");
+    // Nếu không có token (người dùng đã đăng xuất) thì không thực hiện gọi API và xóa cache thông báo
+    if (!token) {
+      setNotifications([]);
+      localStorage.removeItem("notifications");
+      return;
+    }
+    try {
+      const res = await axios.get("/api/notifications", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data.success) {
+        setNotifications(res.data.notifications);
+        localStorage.setItem(
+          "notifications",
+          JSON.stringify(res.data.notifications)
+        );
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải thông báo:", error);
+    }
+  };
 
   useEffect(() => {
     if (show) {
-      const fetchNotifications = async () => {
-        try {
-          const token = localStorage.getItem("token");
-          const res = await axios.get("/api/notifications", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.data.success) {
-            setNotifications(res.data.notifications); // Load notifications
-          }
-        } catch (error) {
-          console.error("Lỗi khi tải thông báo:", error);
-        }
-      };
+      const token = localStorage.getItem("token");
+      // Nếu không có token, xóa thông báo và không tiến hành lấy dữ liệu
+      if (!token) {
+        setNotifications([]);
+        localStorage.removeItem("notifications");
+        return;
+      }
+
+      // Kiểm tra localStorage trước để hiển thị nhanh cache thông báo (nếu có)
+      const cachedNotifications = localStorage.getItem("notifications");
+      if (cachedNotifications) {
+        setNotifications(JSON.parse(cachedNotifications));
+      }
+      // Lấy thông báo từ server
       fetchNotifications();
+
+      // Sử dụng polling để cập nhật thông báo theo thời gian thực (ví dụ mỗi 10 giây)
+      const intervalId = setInterval(() => {
+        fetchNotifications();
+      }, 10000);
+
+      return () => clearInterval(intervalId);
     }
   }, [show]);
 
-  // Xử lý khi xem chi tiết đơn hàng từ thông báo
+  // Sắp xếp thông báo: chưa đọc (unread) ở trên, đã đọc (read) ở dưới và theo thời gian (mới nhất trước)
+  const sortedNotifications = [...notifications].sort((a, b) => {
+    if (a.read === b.read) {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    }
+    return a.read - b.read;
+  });
+
+  // Xử lý khi người dùng xem chi tiết đơn hàng từ thông báo
   const handleViewOrderDetails = async (orderId, notificationId) => {
     try {
-      // Đánh dấu thông báo là đã đọc khi người dùng xem
+      // Đánh dấu thông báo là đã đọc
       await axios.put(
         `/api/notifications/${notificationId}/read`,
         {},
@@ -42,8 +83,17 @@ const NotificationModal = ({ show, handleClose }) => {
           },
         }
       );
+      // Cập nhật trạng thái đã đọc cho thông báo được chọn
+      const updatedNotifications = notifications.map((noti) =>
+        noti._id === notificationId ? { ...noti, read: true } : noti
+      );
+      setNotifications(updatedNotifications);
+      localStorage.setItem(
+        "notifications",
+        JSON.stringify(updatedNotifications)
+      );
 
-      // Chuyển hướng đến trang chi tiết đơn hàng
+      // Chuyển hướng đến trang chi tiết đơn hàng và đóng modal
       navigate(`/order-history/${orderId}`);
       handleClose();
     } catch (error) {
@@ -77,19 +127,21 @@ const NotificationModal = ({ show, handleClose }) => {
           })
         )
       );
-      // Cập nhật lại danh sách thông báo sau khi xóa
-      setNotifications(
-        notifications.filter(
-          (noti) => !selectedNotifications.includes(noti._id)
-        )
+      const updatedNotifications = notifications.filter(
+        (noti) => !selectedNotifications.includes(noti._id)
       );
-      setSelectedNotifications([]); // Clear selected notifications after deletion
+      setNotifications(updatedNotifications);
+      localStorage.setItem(
+        "notifications",
+        JSON.stringify(updatedNotifications)
+      );
+      setSelectedNotifications([]);
     } catch (error) {
       console.error("Lỗi khi xóa thông báo:", error);
     }
   };
 
-  // Xác định văn bản hiển thị trên nút dựa vào số lượng thông báo đã chọn
+  // Xác định văn bản hiển thị trên nút dựa vào số lượng thông báo được chọn
   const getActionButtonText = () => {
     return selectedNotifications.length === notifications.length
       ? "Xóa tất cả"
@@ -122,7 +174,7 @@ const NotificationModal = ({ show, handleClose }) => {
           </div>
         ) : (
           <Row>
-            {notifications.map((noti) => (
+            {sortedNotifications.map((noti) => (
               <Col key={noti._id} md={6} className="mb-3">
                 <Card
                   className={`shadow-sm ${
@@ -132,9 +184,6 @@ const NotificationModal = ({ show, handleClose }) => {
                     cursor: "pointer",
                     borderRadius: "8px",
                     position: "relative",
-                  }}
-                  onClick={() => {
-                    // Khi click vào Card (ngoại trừ checkbox và nút xem chi tiết) thì không thực hiện hành động gì
                   }}
                 >
                   <Card.Body>
@@ -178,12 +227,10 @@ const NotificationModal = ({ show, handleClose }) => {
           Đóng
         </Button>
         {selectedNotifications.length === 0 ? (
-          // Nếu chưa chọn thông báo nào, hiển thị nút "Chọn tất cả"
           <Button variant="warning" onClick={handleSelectAllNotifications}>
             Chọn tất cả
           </Button>
         ) : (
-          // Nếu có thông báo được chọn
           <Button variant="danger" onClick={handleDeleteNotifications}>
             {getActionButtonText()}
           </Button>

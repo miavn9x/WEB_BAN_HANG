@@ -92,34 +92,61 @@ const MyNavbar = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [products, setProducts] = useState([]);
   const searchRef = useRef(null);
+
+  // Quản lý số lượng thông báo và modal thông báo
   const [notificationCount, setNotificationCount] = useState(0);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
 
-  // Function to fetch notifications
+  // Quản lý trạng thái đăng nhập (dựa trên token)
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+
+  // Lắng nghe sự thay đổi của localStorage (chỉ hỗ trợ khi đăng xuất từ các tab khác)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsLoggedIn(!!localStorage.getItem("token"));
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // Hàm lấy thông báo từ API (với kiểm tra token)
   const fetchNotifications = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setNotificationCount(0);
+      setIsLoggedIn(false);
+      return;
+    } else {
+      setIsLoggedIn(true);
+    }
     axios
       .get("/api/notifications", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        setNotificationCount(res.data.notifications.length);
+        const notifications = res.data.notifications || [];
+        setNotificationCount(notifications.length);
       })
-      .catch((err) => console.error("Error fetching notifications:", err));
+      .catch((err) => {
+        console.error("Error fetching notifications:", err);
+        setNotificationCount(0);
+      });
   };
 
+  // Polling: cập nhật thông báo mỗi 10 giây để giảm tải (10000ms)
   useEffect(() => {
-    fetchNotifications(); 
+    fetchNotifications();
     const interval = setInterval(fetchNotifications, 1000);
     return () => clearInterval(interval);
   }, []);
 
+  // Xử lý click vào icon thông báo (mở modal)
   const handleNotificationClick = () => {
     setShowNotificationModal(true);
-    fetchNotifications(); 
+    fetchNotifications();
   };
 
-
-
+  // Lấy dữ liệu sản phẩm để hỗ trợ tìm kiếm
   useEffect(() => {
     axios
       .get("/api/products")
@@ -131,6 +158,7 @@ const MyNavbar = () => {
       });
   }, []);
 
+  // Xử lý gợi ý tìm kiếm bằng Fuse.js
   useEffect(() => {
     if (searchTerm.trim() !== "" && products.length > 0) {
       const fuse = new Fuse(products, {
@@ -172,12 +200,10 @@ const MyNavbar = () => {
   };
 
   const [isLargeScreen, setIsLargeScreen] = useState(false);
-
   useEffect(() => {
     const handleResize = () => {
       setIsLargeScreen(window.innerWidth >= 991);
     };
-
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -190,9 +216,7 @@ const MyNavbar = () => {
     0
   );
 
-  const isLoggedIn = !!localStorage.getItem("token");
-
-  // Xử lý khi submit form tìm kiếm
+  // Xử lý submit form tìm kiếm
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchTerm.trim() !== "" && suggestions.length === 0) {
@@ -203,7 +227,7 @@ const MyNavbar = () => {
     navigate(`/products?search=${encodeURIComponent(searchTerm)}`);
   };
 
-  // click  san phâm gợi ý zề trang chi tiết
+  // Click vào sản phẩm gợi ý để chuyển đến trang chi tiết
   const handleSuggestionClick = (productId) => {
     navigate(`/product/${productId}`);
     setShowSuggestions(false);
@@ -220,7 +244,6 @@ const MyNavbar = () => {
         setShowSuggestions(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [searchRef]);
@@ -288,10 +311,10 @@ const MyNavbar = () => {
                   </Nav.Link>
 
                   <Nav.Link
-                    onClick={handleNotificationClick} // Mở modal khi click
+                    onClick={handleNotificationClick}
                     className={`p-1 ms-2 position-relative ${
                       notificationCount > 0 ? "icon-active" : ""
-                    }`} // Thêm class 'icon-active' nếu có thông báo
+                    }`}
                     style={{ cursor: "pointer" }}
                   >
                     <FaBell size={20} />
@@ -302,13 +325,21 @@ const MyNavbar = () => {
                     )}
                   </Nav.Link>
 
+                  {/* Chỉ hiển thị cart badge nếu người dùng đăng nhập */}
                   <Nav.Link
                     onClick={() => handleLinkClick("/gio-hang")}
                     className="p-1 ms-2 position-relative icon-wrapper"
                     style={{ cursor: "pointer" }}
                   >
-                    <FaShoppingCart className="text-dark" size={20} />
-                    <span className="cart-badge">{totalItemsInCart}</span>
+                    <FaShoppingCart
+                      size={20}
+                      style={{
+                        color: totalItemsInCart > 0 ? "#ff69b4" : "#000000",
+                      }}
+                    />
+                    {isLoggedIn && totalItemsInCart > 0 && (
+                      <span className="cart-badge">{totalItemsInCart}</span>
+                    )}
                   </Nav.Link>
                 </div>
               </Nav>
@@ -322,7 +353,7 @@ const MyNavbar = () => {
               />
             </Col>
 
-            {/* Phần giữa: Tìm kiếm, Danh mục  di động */}
+            {/* Phần giữa: Tìm kiếm và Danh mục (di động) */}
             <Col lg={7} xs={12} className="order-last order-lg-0">
               <Navbar.Collapse id="navbarSupportedContent">
                 <div className="d-lg-none w-100 mb-3">
@@ -390,7 +421,6 @@ const MyNavbar = () => {
                     </Dropdown>
                   </div>
 
-                  {/* Search Input */}
                   <div
                     className="search-container flex-grow-1"
                     style={{ position: "relative" }}
@@ -405,10 +435,7 @@ const MyNavbar = () => {
                         if (suggestions.length > 0) setShowSuggestions(true);
                       }}
                       ref={searchRef}
-                      // className="search-input py-2"
-                      // style={{padding: "0.5px 0.5rem"}}
                     />
-
                     <Button
                       variant="danger"
                       type="submit"
@@ -416,7 +443,6 @@ const MyNavbar = () => {
                     >
                       <FaSearch />
                     </Button>
-                    {/* Danh sách gợi ý */}
                     {showSuggestions && (
                       <div className="suggestions-container">
                         {suggestions.length > 0 ? (
@@ -462,7 +488,7 @@ const MyNavbar = () => {
             </Col>
 
             {/* Phần biểu tượng trên Desktop */}
-            <Col lg={2} className="d-none d-lg-block notification-modal ">
+            <Col lg={2} className="d-none d-lg-block notification-modal">
               <Nav className="justify-content-end align-items-end">
                 <Nav.Link
                   className="pb-2 me-2 icon_user"
@@ -497,13 +523,21 @@ const MyNavbar = () => {
                   )}
                 </Nav.Link>
 
+                {/* Chỉ hiển thị cart badge nếu người dùng đăng nhập */}
                 <Nav.Link
                   onClick={() => handleLinkClick("/gio-hang")}
                   className="position-relative"
                   style={{ cursor: "pointer" }}
                 >
-                  <FaShoppingCart size={20} />
-                  <span className="cart-badge">{totalItemsInCart}</span>
+                  <FaShoppingCart
+                    size={20}
+                    style={{
+                      color: totalItemsInCart > 0 ? "#ff69b4" : "#000000",
+                    }}
+                  />
+                  {isLoggedIn && totalItemsInCart > 0 && (
+                    <span className="cart-badge">{totalItemsInCart}</span>
+                  )}
                 </Nav.Link>
               </Nav>
             </Col>
@@ -600,8 +634,9 @@ const MyNavbar = () => {
             </Navbar.Text>
           </Navbar.Collapse>
         </Container>
-       
       </Navbar>
+
+      {/* Modal thông báo */}
       <NotificationModal
         show={showNotificationModal}
         handleClose={() => setShowNotificationModal(false)}
