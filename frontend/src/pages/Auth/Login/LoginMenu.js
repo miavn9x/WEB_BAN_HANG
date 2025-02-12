@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Dropdown } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import "../../../styles/LoginMenu.css";
 
 const LoginMenu = ({ onClose }) => {
@@ -9,21 +10,34 @@ const LoginMenu = ({ onClose }) => {
   const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
-    const role = localStorage.getItem("userRole");
-    // console.log("Vai trò người dùng:", role);
-    if (role) {
-      setUserRole(role);
-    } else {
-      console.warn("Không tìm thấy 'userRole' trong localStorage.");
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
     }
-  }, []);
+
+    try {
+      const decodedToken = jwtDecode(token);
+
+      // Kiểm tra xem token có hết hạn không
+      if (decodedToken.exp * 1000 < Date.now()) {
+        localStorage.clear();
+        navigate("/login");
+        return;
+      }
+
+      setUserRole(decodedToken.role);
+    } catch (error) {
+      console.error("Lỗi giải mã token:", error);
+      localStorage.clear();
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userRole");
-
-    const previousPage = location.state?.from || "/";
-    navigate(previousPage);
+    localStorage.clear();
+    navigate(location.state?.from || "/");
   };
 
   return (
@@ -34,9 +48,6 @@ const LoginMenu = ({ onClose }) => {
         </button>
         {userRole === "admin" ? (
           <>
-            <div className="d-lg-block d-lg-none">
-              <Dropdown.Item>&nbsp;&nbsp;</Dropdown.Item>
-            </div>
             <Dropdown.Item onClick={() => navigate("/thong-tin-ca-nhan")}>
               Thông tin tài khoản
             </Dropdown.Item>
@@ -50,11 +61,12 @@ const LoginMenu = ({ onClose }) => {
             <Dropdown.Item onClick={() => navigate("/admin/user-management")}>
               Quản lý user
             </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/admin/edit-product")}>
-              Quản lý sản phẩm
-            </Dropdown.Item>
+
             <Dropdown.Item onClick={() => navigate("/admin/quan-ly-don-hang")}>
               Quản lý đơn hàng
+            </Dropdown.Item>
+            <Dropdown.Item onClick={() => navigate("/admin/edit-product")}>
+              Quản lý sản phẩm
             </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/admin/add-product")}>
               Đăng sản phẩm
@@ -71,12 +83,9 @@ const LoginMenu = ({ onClose }) => {
             <Dropdown.Item onClick={() => navigate("/thong-tin-ca-nhan")}>
               Thông tin tài khoản
             </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/OrderHistory")}>
-              lịch sử mua hàng
+            <Dropdown.Item onClick={() => navigate("/order-history/:orderId")}>
+              Lịch sử mua hàng
             </Dropdown.Item>
-            {/* <Dropdown.Item onClick={() => navigate("/user/san-pham-da-mua")}>
-              Các sản phẩm đã mua
-            </Dropdown.Item> */}
             <Dropdown.Item onClick={() => navigate("/gio-hang")}>
               Giỏ hàng
             </Dropdown.Item>

@@ -1,3 +1,4 @@
+//middleware/adminMiddleware
 const jwt = require("jsonwebtoken");
 
 // Lấy secret từ file .env

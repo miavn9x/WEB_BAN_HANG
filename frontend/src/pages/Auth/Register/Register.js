@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Container, Form, Button } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom"; // Thêm hook điều hướng
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../../styles/Register.css";
 
@@ -13,11 +13,10 @@ const Register = () => {
     password: "",
   });
 
-  const [error, setError] = useState(""); // Lưu thông báo lỗi
+  const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false); // Quản lý trạng thái loading
-
-  const navigate = useNavigate(); // Hook điều hướng
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Xử lý thay đổi giá trị input
   const handleChange = (e) => {
@@ -31,26 +30,27 @@ const Register = () => {
   // Gửi dữ liệu đăng ký
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Hiển thị trạng thái loading
-    setError(""); // Xóa lỗi cũ
-    setMessage(""); // Xóa thành công cũ
+    setLoading(true);
+    setError("");
+    setMessage("");
 
     try {
-      const response = await axios.post(`/api/auth/register/`, formData);
-      setMessage("Đăng ký thành công! Vui lòng đăng nhập.");
-      setError(""); // Xóa thông báo lỗi
-      console.log("Đăng ký thành công:", response.data); // Log thông tin người dùng mới
+      await axios.post(`/api/auth/register/`, formData);
 
-      setTimeout(() => navigate("/login"), 2000); // Chuyển hướng sau 2 giây
+      setMessage("Đăng ký thành công! Vui lòng đăng nhập.");
+      setError("");
+
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      console.error("Lỗi đăng ký:", err.response?.data); // In chi tiết lỗi trả về từ server
+      console.error("Lỗi đăng ký:", err.response?.data);
       setError(err.response?.data?.message || "Đăng ký thất bại!");
-      setMessage(""); // Xóa thông báo thành công
+      setMessage("");
     } finally {
-      setLoading(false); // Tắt trạng thái loading
+      setLoading(false);
     }
   };
-  // thông báo tắt sau 2 giây
+
+  // Thông báo tự động ẩn sau 2 giây
   useEffect(() => {
     if (message || error) {
       const timer = setTimeout(() => {
@@ -60,6 +60,7 @@ const Register = () => {
       return () => clearTimeout(timer);
     }
   }, [message, error]);
+
   return (
     <Container className="register-container">
       <h3 className="text-center mb-2">ĐĂNG KÝ TÀI KHOẢN</h3>
@@ -75,11 +76,13 @@ const Register = () => {
       </p>
 
       <h5 className="text-center mb-4">THÔNG TIN CÁ NHÂN</h5>
-      {/* Hiển thị thông báo lỗi */}
+
+      {/* Hiển thị thông báo */}
       <div className="text-center pb-3">
         {message && <div className="text-success">{message}</div>}
         {error && <div className="text-danger">{error}</div>}
       </div>
+
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
           <Form.Label>
@@ -92,7 +95,6 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Họ"
             required
-            style={{ padding: "10px" }}
           />
         </Form.Group>
 
@@ -107,7 +109,6 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Tên"
             required
-            style={{ padding: "10px" }}
           />
         </Form.Group>
 
@@ -122,7 +123,6 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Số điện thoại"
             required
-            style={{ padding: "10px" }}
           />
         </Form.Group>
 
@@ -137,7 +137,6 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Email"
             required
-            style={{ padding: "10px" }}
           />
         </Form.Group>
 
@@ -152,7 +151,6 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Mật khẩu"
             required
-            style={{ padding: "10px" }}
           />
         </Form.Group>
 
@@ -164,7 +162,7 @@ const Register = () => {
             border: "none",
             padding: "10px 0",
           }}
-          disabled={loading} // Disable nút khi đang loading
+          disabled={loading}
         >
           {loading ? "Đang xử lý..." : "Đăng ký"}
         </Button>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Form, Button,  } from "react-bootstrap";
+import { Container, Form, Button } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -14,6 +14,16 @@ const ResetPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Kiểm tra đầu vào trước khi gửi yêu cầu đến API
+    if (!password || !confirmPassword) {
+      return setError("Vui lòng nhập đầy đủ mật khẩu!");
+    }
+
+    if (password.length < 6) {
+      return setError("Mật khẩu phải có ít nhất 6 ký tự!");
+    }
+
     if (password !== confirmPassword) {
       return setError("Mật khẩu không khớp!");
     }
@@ -23,16 +33,17 @@ const ResetPassword = () => {
     setMessage("");
 
     try {
-      const response = await axios.post(
-        `/api/auth/reset-password/${token}`, // Chỉ cần đường dẫn tương đối
-        { newPassword: password }
-      );
+      const response = await axios.post(`/api/auth/reset-password/${token}`, {
+        newPassword: password,
+      });
 
-      setMessage(response.data.message);
+      setMessage(response.data.message || "Đặt lại mật khẩu thành công!");
+
       setTimeout(() => {
         navigate("/login");
       }, 3000);
     } catch (err) {
+      console.error("Lỗi đặt lại mật khẩu:", err.response?.data);
       setError(
         err.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại sau!"
       );
@@ -40,8 +51,8 @@ const ResetPassword = () => {
       setLoading(false);
     }
   };
-  // thông báo tắt sau 2 giây
 
+  // Tự động xóa thông báo sau 2 giây
   useEffect(() => {
     if (message || error) {
       const timer = setTimeout(() => {
@@ -72,6 +83,7 @@ const ResetPassword = () => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Nhập mật khẩu mới"
             required
+            minLength={6}
           />
         </Form.Group>
 
@@ -85,7 +97,7 @@ const ResetPassword = () => {
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Nhập lại mật khẩu mới"
             required
-            style={{ padding: "10px" }}
+            minLength={6}
           />
         </Form.Group>
 

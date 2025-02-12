@@ -187,7 +187,7 @@ return (
                         type="text"
                         className="form-control"
                         placeholder="Tên"
-                        value={editableAccount.firstName}
+                        value={editableAccount.lastName} // <-- Sửa ở đây
                         onChange={(e) =>
                           handleInputChange("lastName", e.target.value)
                         }
@@ -197,6 +197,7 @@ return (
                     `${account.firstName} ${account.lastName}`
                   )}
                 </td>
+
                 <td>
                   {editableAccount?._id === account._id ? (
                     <input

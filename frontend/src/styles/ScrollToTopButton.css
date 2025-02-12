@@ -1,0 +1,35 @@
+.scroll-to-top {
+    position: fixed;
+    bottom: 100px;
+    right: 40px;
+    z-index: 1000;
+}
+
+/* Nút cuộn: hình tròn với background tối và icon màu trắng */
+.scroll-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #FF6F91;
+    /* Màu nền tối */
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0.8;
+}
+
+.scroll-button:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Định dạng icon: màu trắng và kích thước phù hợp */
+.scroll-button .icon {
+    color: #fff;
+    /* Icon màu trắng */
+    font-size: 20px;
+}

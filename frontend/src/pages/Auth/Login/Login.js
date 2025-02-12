@@ -1,17 +1,12 @@
-// Login.js
 import React, { useEffect, useState } from "react";
 import { Container, Form, Button, Spinner } from "react-bootstrap";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../../../styles/Login.css";
-import { jwtDecode } from "jwt-decode"; // Sử dụng thư viện jwt-decode (lưu ý: tên hàm là jwtDecode, không phải jwtDecode từ "jwt-decode")
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -24,27 +19,21 @@ const Login = () => {
       try {
         const decodedToken = jwtDecode(token);
         if (decodedToken.exp * 1000 > Date.now()) {
-          // Nếu token chưa hết hạn, có thể chuyển hướng đến trang mặc định (hoặc trang đã login)
           navigate("/");
         } else {
-          localStorage.removeItem("token");
+          localStorage.clear();
           navigate("/login");
         }
       } catch (error) {
-        localStorage.removeItem("token");
+        localStorage.clear();
         navigate("/login");
       }
-    } else {
-      navigate("/login");
     }
   }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -54,15 +43,16 @@ const Login = () => {
 
     try {
       const response = await axios.post(`/api/auth/login/`, formData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
       if (response.data.token) {
+        // Lưu **chỉ** token, không lưu user vào Local Storage
         localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-        localStorage.setItem("userRole", response.data.user.role);
+
+        // Decode token để lấy userId nếu cần
+        const decodedToken = jwtDecode(response.data.token);
+        console.log("User ID:", decodedToken.userId); // Chỉ hiển thị trong console nếu cần
 
         const redirectTo = location.state?.from || "/";
         navigate(redirectTo);
@@ -117,7 +107,6 @@ const Login = () => {
               onChange={handleChange}
               placeholder="Email"
               required
-              style={{ padding: "10px" }}
             />
           </Form.Group>
 
@@ -132,13 +121,12 @@ const Login = () => {
               onChange={handleChange}
               placeholder="Mật khẩu"
               required
-              style={{ padding: "10px" }}
             />
           </Form.Group>
 
           <div className="mb-3">
             <div className="text-dark text-decoration-none">
-              Quên mật khẩu?&nbsp;
+              Quên mật khẩu?{" "}
               <Link
                 to="/ForgotPassword"
                 className="text-decoration-none"

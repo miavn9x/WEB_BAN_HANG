@@ -33,6 +33,7 @@ import Evaluate from "./components/Product/Evaluate";
 import NotificationModal from "./components/Nav/NotificationModal";
 import ProductModals from "./components/Product/ProductModals";
 import Tests from "./components/Carousel/Tests";
+import ScrollToTopButton from "./pages/ScrollToTopButton";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -60,6 +61,7 @@ function App() {
   return (
     <BrowserRouter>
       <AutoLogout />
+      <ScrollToTopButton />
       <Header userRole={userRole} isAuthenticated={isAuthenticated} />
 
       {/* Thêm SEO Meta Tags */}
@@ -110,7 +112,7 @@ function App() {
         <Route path="/test" element={<Evaluate />} />
         <Route path="/1" element={<NotificationModal />} />
         <Route path="/order-history/:orderId" element={<OrderHistory />} />
-        <Route path="/2" element={<Tests/>} />
+        <Route path="/2" element={<Tests />} />
 
         {/* Protected Routes - User & admin */}
         <Route
