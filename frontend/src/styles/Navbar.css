@@ -326,3 +326,13 @@ html body .nav-link {
     margin-right: 5px;
 }
 
+.btn-check:checked+.btn,
+.btn.active,
+.btn.show,
+.btn:first-child:active,
+:not(.btn-check)+.btn:active {
+    color: var(--bs-btn-active-color);
+    background-color: #FF6F91!important;
+    border-color: #FF6F91!important;
+}
+

@@ -5,7 +5,7 @@ const router = express.Router();
 const convertToMilliseconds = (hours = 0, minutes = 0, seconds = 0) =>
   (hours * 3600 + minutes * 60 + seconds) * 1000;
 
-const MAIN_PHASE_DURATION = convertToMilliseconds(0, 20, 0); // 2 giờ vị trí 1, phút vị rí 2, giây vị trí 3 
+const MAIN_PHASE_DURATION = convertToMilliseconds(0, 1, 0); // 2 giờ vị trí 1, phút vị rí 2, giây vị trí 3 
 const RESET_PHASE_DURATION = convertToMilliseconds(0, 0, 30); // 10 phút
 
 router.get("/timer", (req, res) => {

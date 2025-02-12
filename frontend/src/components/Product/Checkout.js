@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col } from "react-bootstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { formatter } from "../../utils/fomater";
 import axios from "axios";
+import "../../styles/Checkout.css";
+import { CiShoppingBasket } from "react-icons/ci";
+
+
 
 const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -220,6 +223,7 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
             <Form onSubmit={handleCompleteOrder}>
               <Form.Check
                 className="mt-4"
+                style={{ fontSize: "25px" }}
                 type="radio"
                 id="cod"
                 name="paymentMethod"
@@ -230,11 +234,14 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                       src="https://hstatic.net/0/0/global/design/seller/image/payment/cod.svg?v=6"
                       style={{
                         marginRight: "10px",
-                        width: "30px",
+                        width: "50px",
                         height: "auto",
                       }}
                     />
-                    Thanh toán khi giao hàng (COD)
+                    <span style={{ fontSize: "14px" }}>
+                      {" "}
+                      Thanh toán khi giao hàng (COD)
+                    </span>
                   </>
                 }
                 value="cod"
@@ -243,6 +250,7 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
               />
               <Form.Check
                 className="mt-4"
+                style={{ fontSize: "25px" }}
                 type="radio"
                 id="bank"
                 name="paymentMethod"
@@ -257,7 +265,10 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                         height: "auto",
                       }}
                     />
-                    Chuyển khoản qua ngân hàng
+                    <span style={{ fontSize: "14px" }}>
+                      {" "}
+                      Chuyển khoản qua ngân hàng
+                    </span>
                   </>
                 }
                 value="bank"
@@ -288,18 +299,23 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
               <div>Quý khách quyên khoản với nỗi dung mã đơn hàng</div>
               <hr />
               <div className="d-flex justify-content-between mt-4">
-                <Button
+                <button
+                  className="d-flex"
                   variant="link"
                   onClick={() => navigate("/gio-hang")}
-                  className="btn btn-link"
+                  style={{
+                    fontSize: "35px",
+                    color: "#FF6F91",
+                    backgroundColor: "transparent",
+                  }}
                 >
-                  Giỏ hàng
-                </Button>
-                <Button
-                  variant="primary"
-                  className="ms-auto btn-complete"
-                  type="submit"
-                >
+                  <CiShoppingBasket />{" "}
+                  <span style={{ fontSize: "14px", color: "#55555" }}>
+                    Quay lại
+                  </span>
+                </button>
+
+                <Button className="ms-auto btn-secondary " type="submit">
                   Hoàn tất đơn hàng
                 </Button>
               </div>

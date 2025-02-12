@@ -51,7 +51,7 @@ const NotificationModal = ({ show, handleClose }) => {
     }
   };
 
-  // Toggle selection of a notification
+  // Toggle selection của 1 thông báo
   const toggleSelectNotification = (notificationId) => {
     setSelectedNotifications((prevSelected) =>
       prevSelected.includes(notificationId)
@@ -60,10 +60,14 @@ const NotificationModal = ({ show, handleClose }) => {
     );
   };
 
-  // Xử lý xóa đã chọn thông báo (nếu cần thiết sau này)
+  // Hàm chọn tất cả các thông báo
+  const handleSelectAllNotifications = () => {
+    setSelectedNotifications(notifications.map((noti) => noti._id));
+  };
+
+  // Hàm xóa các thông báo được chọn
   const handleDeleteNotifications = async () => {
     try {
-      // Send request to delete selected notifications (if needed)
       await Promise.all(
         selectedNotifications.map((id) =>
           axios.delete(`/api/notifications/${id}`, {
@@ -73,7 +77,7 @@ const NotificationModal = ({ show, handleClose }) => {
           })
         )
       );
-      // Remove deleted notifications from the state (if deleted)
+      // Cập nhật lại danh sách thông báo sau khi xóa
       setNotifications(
         notifications.filter(
           (noti) => !selectedNotifications.includes(noti._id)
@@ -83,6 +87,13 @@ const NotificationModal = ({ show, handleClose }) => {
     } catch (error) {
       console.error("Lỗi khi xóa thông báo:", error);
     }
+  };
+
+  // Xác định văn bản hiển thị trên nút dựa vào số lượng thông báo đã chọn
+  const getActionButtonText = () => {
+    return selectedNotifications.length === notifications.length
+      ? "Xóa tất cả"
+      : "Xóa đã chọn";
   };
 
   return (
@@ -122,6 +133,9 @@ const NotificationModal = ({ show, handleClose }) => {
                     borderRadius: "8px",
                     position: "relative",
                   }}
+                  onClick={() => {
+                    // Khi click vào Card (ngoại trừ checkbox và nút xem chi tiết) thì không thực hiện hành động gì
+                  }}
                 >
                   <Card.Body>
                     <div className="d-flex align-items-center">
@@ -130,6 +144,7 @@ const NotificationModal = ({ show, handleClose }) => {
                         checked={selectedNotifications.includes(noti._id)}
                         onChange={() => toggleSelectNotification(noti._id)}
                         className="me-2"
+                        onClick={(e) => e.stopPropagation()}
                       />
                       <h6 className="fw-bold text-center">{noti.title}</h6>
                     </div>
@@ -163,12 +178,14 @@ const NotificationModal = ({ show, handleClose }) => {
           Đóng
         </Button>
         {selectedNotifications.length === 0 ? (
-          <Button variant="warning" onClick={handleDeleteNotifications}>
-            Xóa đã chọn
+          // Nếu chưa chọn thông báo nào, hiển thị nút "Chọn tất cả"
+          <Button variant="warning" onClick={handleSelectAllNotifications}>
+            Chọn tất cả
           </Button>
         ) : (
+          // Nếu có thông báo được chọn
           <Button variant="danger" onClick={handleDeleteNotifications}>
-            Xóa đã chọn
+            {getActionButtonText()}
           </Button>
         )}
       </Modal.Footer>

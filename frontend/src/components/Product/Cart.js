@@ -200,6 +200,7 @@ const Cart = () => {
                       onChange={(e) =>
                         handleSelectItem(item.product._id, e.target.checked)
                       }
+                      style={{fontSize:"30px"}}
                     />
                     <img
                       src={
