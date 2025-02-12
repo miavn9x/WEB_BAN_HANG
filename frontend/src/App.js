@@ -34,10 +34,26 @@ import NotificationModal from "./components/Nav/NotificationModal";
 import ProductModals from "./components/Product/ProductModals";
 import Tests from "./components/Carousel/Tests";
 import ScrollToTopButton from "./pages/ScrollToTopButton";
-
+import { useDispatch } from "react-redux";
+import {
+  fetchCart,
+  loadCartFromLocalStorage,
+} from "./redux/actions/cartActions";
 function App() {
   const [userRole, setUserRole] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      dispatch(fetchCart()); // Fetch từ server nếu đã login
+    } else {
+      dispatch(loadCartFromLocalStorage()); // Load từ localStorage nếu là khách
+    }
+  }, [dispatch]);
 
   useEffect(() => {
     const checkAuth = () => {

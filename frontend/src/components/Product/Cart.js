@@ -11,6 +11,7 @@ import "./Cart.css";
 import { formatter } from "../../utils/fomater";
 import { fetchUserProfile } from "../../redux/actions/userActions";
 import { useNavigate } from "react-router-dom";
+import { CART_ACTIONS } from "../../redux/constants/actionTypes";
 
 // Selector để lấy danh sách sản phẩm trong giỏ
 const selectCartItems = createSelector(
@@ -31,13 +32,14 @@ const Cart = () => {
     address: "",
   });
 
-  const [isLoading, setIsLoading] = useState(true); // Thêm state để kiểm tra trạng thái loading
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Lấy thông tin người dùng từ API
+  // Khi component mount, lấy thông tin người dùng (nếu có token)
   useEffect(() => {
     dispatch(fetchUserProfile());
   }, [dispatch]);
 
+  // Cập nhật thông tin người dùng khi userProfile thay đổi
   useEffect(() => {
     if (userProfile) {
       setEditableUserInfo({
@@ -46,21 +48,37 @@ const Cart = () => {
         phone: userProfile.phone || "",
         address: userProfile.address || "",
       });
+    } else {
+      // Nếu userProfile null (đã logout) thì xoá thông tin giao diện của người dùng
+      setEditableUserInfo({
+        fullName: "",
+        email: "",
+        phone: "",
+        address: "",
+      });
     }
   }, [userProfile]);
 
-  // Mảng lưu các product _id của sản phẩm được chọn thanh toán
-  const [selectedItems, setSelectedItems] = useState([]);
-
-  // Lấy giỏ hàng khi component mount
+  // Lấy lại giỏ hàng dựa trên token thay vì phụ thuộc vào userProfile
   useEffect(() => {
-    const fetchCartData = async () => {
-      await dispatch(fetchCart());
-      setIsLoading(false); // Đặt loading thành false sau khi dữ liệu được tải xong
+    const updateCart = async () => {
+      setIsLoading(true); // Hiển thị loading khi đang fetch
+      const token = localStorage.getItem("token");
+      if (token) {
+        await dispatch(fetchCart()); // Nếu có token (người dùng đã đăng nhập) thì lấy giỏ hàng từ API
+      } else {
+        // Nếu không có token (đăng xuất) thì xoá giỏ hàng trong Redux
+        dispatch({ type: CART_ACTIONS.CLEAR_CART });
+        localStorage.removeItem("cart"); // Xoá giỏ hàng trong localStorage
+      }
+      setIsLoading(false);
     };
 
-    fetchCartData();
-  }, [dispatch]);
+    updateCart();
+  }, [dispatch]); // Chỉ chạy 1 lần khi component mount
+
+  // Mảng lưu các product _id của sản phẩm được chọn thanh toán
+  const [selectedItems, setSelectedItems] = useState([]);
 
   // Tính tổng tạm (chỉ tính cho các sản phẩm được chọn)
   const calculateSubtotal = () => {
@@ -200,7 +218,7 @@ const Cart = () => {
                       onChange={(e) =>
                         handleSelectItem(item.product._id, e.target.checked)
                       }
-                      style={{fontSize:"30px"}}
+                      style={{ fontSize: "30px" }}
                     />
                     <img
                       src={

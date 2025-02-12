@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Dropdown } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // Lưu ý: jwt-decode xuất theo kiểu default
 import "../../../styles/LoginMenu.css";
+import { logoutUser } from "../../../redux/actions/authActions"; // Thêm import
+// In LoginMenu.js
+import { useDispatch } from "react-redux";
+// Other imports...
 
 const LoginMenu = ({ onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [userRole, setUserRole] = useState("");
+  const dispatch = useDispatch(); // Thêm hook dispatch
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -22,7 +27,9 @@ const LoginMenu = ({ onClose }) => {
 
       // Kiểm tra xem token có hết hạn không
       if (decodedToken.exp * 1000 < Date.now()) {
-        localStorage.clear();
+        // Nếu token hết hạn, chỉ xóa token và giỏ hàng (không xóa toàn bộ dữ liệu)
+        localStorage.removeItem("token");
+        localStorage.removeItem("cart");
         navigate("/login");
         return;
       }
@@ -30,13 +37,17 @@ const LoginMenu = ({ onClose }) => {
       setUserRole(decodedToken.role);
     } catch (error) {
       console.error("Lỗi giải mã token:", error);
-      localStorage.clear();
+      localStorage.removeItem("token");
+      localStorage.removeItem("cart");
       navigate("/login");
     }
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.clear();
+    // Chỉ xóa token và giỏ hàng khỏi localStorage, không xóa toàn bộ dữ liệu
+    localStorage.removeItem("token");
+    localStorage.removeItem("cart");
+    dispatch(logoutUser());
     navigate(location.state?.from || "/");
   };
 
@@ -61,7 +72,6 @@ const LoginMenu = ({ onClose }) => {
             <Dropdown.Item onClick={() => navigate("/admin/user-management")}>
               Quản lý user
             </Dropdown.Item>
-
             <Dropdown.Item onClick={() => navigate("/admin/quan-ly-don-hang")}>
               Quản lý đơn hàng
             </Dropdown.Item>

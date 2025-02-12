@@ -84,13 +84,14 @@ export const cartReducer = (state = initialState, action) => {
     }
 
     case CART_ACTIONS.SET_CART: {
+      const newItems = action.payload.map((item) => ({
+        product: item.product,
+        quantity: Math.min(item.quantity, item.product.remainingStock),
+      }));
       return {
         ...state,
-        items: action.payload.map((item) => ({
-          product: item.product,
-          quantity: Math.min(item.quantity, item.product.remainingStock),
-        })),
-        total: calculateTotal(action.payload),
+        items: newItems,
+        total: calculateTotal(newItems),
       };
     }
 

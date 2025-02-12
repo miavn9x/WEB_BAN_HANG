@@ -4,13 +4,15 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../../../styles/Login.css";
 import { jwtDecode } from "jwt-decode";
-
+import { fetchCart } from "../../../redux/actions/cartActions"; // Thêm import
+import { useDispatch } from "react-redux";
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch(); // Thêm hook dispatch
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -41,31 +43,26 @@ const Login = () => {
     setLoading(true);
     setError("");
 
-    try {
-      const response = await axios.post(`/api/auth/login/`, formData, {
-        headers: { "Content-Type": "application/json" },
-      });
+  try {
+    const response = await axios.post(`/api/auth/login/`, formData);
+    if (response.data.token) {
+      localStorage.setItem("token", response.data.token);
 
-      if (response.data.token) {
-        // Lưu **chỉ** token, không lưu user vào Local Storage
-        localStorage.setItem("token", response.data.token);
+      // Đảm bảo fetchCart hoàn thành trước khi chuyển trang
+      await dispatch(fetchCart()); // Thêm await
 
-        // Decode token để lấy userId nếu cần
-        const decodedToken = jwtDecode(response.data.token);
-        console.log("User ID:", decodedToken.userId); // Chỉ hiển thị trong console nếu cần
-
-        const redirectTo = location.state?.from || "/";
-        navigate(redirectTo);
-      }
-    } catch (err) {
-      console.error("Chi tiết lỗi:", err.response?.data);
-      setError(
-        err.response?.data?.message ||
-          "Không thể kết nối đến server. Vui lòng thử lại sau."
-      );
-    } finally {
-      setLoading(false);
+      const redirectTo = location.state?.from || "/";
+      navigate(redirectTo, { replace: true }); // Thêm replace: true để tránh history stack
     }
+  } catch (err) {
+    console.error("Chi tiết lỗi:", err.response?.data);
+    setError(
+      err.response?.data?.message ||
+        "Không thể kết nối đến server. Vui lòng thử lại sau."
+    );
+  } finally {
+    setLoading(false);
+  }
   };
 
   useEffect(() => {

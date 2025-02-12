@@ -1,3 +1,4 @@
+// src/redux/reducers/userReducer.js
 const initialState = {
   info: null,
   loading: false,
@@ -19,6 +20,8 @@ const userReducer = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+    case "LOGOUT":
+      return { ...initialState }; // Reset state khi logout
     default:
       return state;
   }

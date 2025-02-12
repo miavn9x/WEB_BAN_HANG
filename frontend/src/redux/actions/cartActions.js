@@ -90,11 +90,20 @@ export const fetchCart = () => async (dispatch) => {
     }));
 
     dispatch({ type: CART_ACTIONS.SET_CART, payload: cartItems });
+    localStorage.setItem("cart", JSON.stringify(cartItems));
   } catch (error) {
     console.error(
       "Lỗi khi lấy giỏ hàng:",
       error.response?.data || error.message
     );
+  }
+};
+
+// Nếu giỏ hàng không có trong Redux, kiểm tra và lấy từ localStorage
+export const loadCartFromLocalStorage = () => (dispatch) => {
+  const cartFromLocalStorage = JSON.parse(localStorage.getItem("cart"));
+  if (cartFromLocalStorage) {
+    dispatch({ type: CART_ACTIONS.SET_CART, payload: cartFromLocalStorage });
   }
 };
 
@@ -159,4 +168,12 @@ export const fetchUserProfile = () => async (dispatch) => {
     console.error("Lỗi khi lấy thông tin người dùng:", error.message);
     dispatch({ type: "FETCH_USER_PROFILE_FAILURE", payload: error.message });
   }
+};
+
+// Action xóa giỏ hàng trong Redux và localStorage (cho trường hợp logout)
+export const clearCart = () => (dispatch) => {
+  dispatch({
+    type: CART_ACTIONS.CLEAR_CART,
+  });
+  localStorage.removeItem("cart");
 };
