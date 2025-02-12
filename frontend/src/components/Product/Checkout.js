@@ -6,7 +6,9 @@ import axios from "axios";
 import "../../styles/Checkout.css";
 import { CiShoppingBasket } from "react-icons/ci";
 
-
+// Import useDispatch và action cập nhật giỏ hàng từ localStorage (hoặc fetchCart)
+import { useDispatch } from "react-redux";
+import { loadCartFromLocalStorage } from "../../redux/actions/cartActions";
 
 const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -14,6 +16,7 @@ const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const orderData = location.state?.orderData || {};
+  const dispatch = useDispatch();
 
   // Hàm tạo mã đơn hàng duy nhất
   const generateOrderId = () => {
@@ -30,6 +33,12 @@ const Checkout = () => {
   const handlePaymentMethodChange = (event) => {
     setPaymentMethod(event.target.value);
   };
+
+  // Tính tổng số lượng các sản phẩm trong đơn hàng
+  const totalQuantity =
+    orderData.items && orderData.items.length > 0
+      ? orderData.items.reduce((sum, item) => sum + item.quantity, 0)
+      : 0;
 
   const handleCompleteOrder = async (event) => {
     event.preventDefault();
@@ -95,7 +104,7 @@ const Checkout = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Xóa trên server chỉ những sản phẩm được chọn thanh toán
+        // Xoá trên server những sản phẩm được chọn thanh toán
         const selectedProductIds = orderData.items.map(
           (item) => item.product._id
         );
@@ -104,12 +113,16 @@ const Checkout = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Cập nhật localStorage: chỉ giữ lại những sản phẩm không được chọn thanh toán
+        // Cập nhật localStorage: chỉ giữ lại các sản phẩm không được chọn thanh toán
         const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
         const updatedCart = storedCart.filter(
           (item) => !selectedProductIds.includes(item.product._id)
         );
         localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+        // Dispatch action cập nhật Redux store dựa trên localStorage mới
+        dispatch(loadCartFromLocalStorage());
+        // (Hoặc thay thế bằng dispatch(fetchCart()) nếu bạn muốn gọi API lấy lại giỏ hàng)
 
         localStorage.setItem(
           "lastOrderDetails",
@@ -167,25 +180,44 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
             <p>Số điện thoại: {orderData.userInfo?.phone}</p>
             <p>Địa Chỉ: {orderData.userInfo?.address}</p>
             <h6 className="text-center">Chi tiết đơn hàng</h6>
-            {orderData.items?.map((item) => (
-              <div key={item.product._id} className="product-item mb-3">
-                <div className="d-flex align-items-center">
-                  <img
-                    src={item.product.images?.[0]}
-                    alt={item.product.name}
-                    style={{ width: "50px", marginRight: "10px" }}
-                  />
-                  <div>
-                    <p className="mb-1">{item.product.name}</p>
-                    <p className="mb-1">Số lượng: {item.quantity}</p>
-                    <p className="mb-0">
-                      Đơn giá: {formatter(item.product.priceAfterDiscount)}
-                    </p>
+            {/* Nếu số lượng sản phẩm vượt quá 5, hiển thị container scroll */}
+            <div
+              style={{
+                maxHeight:
+                  orderData.items && orderData.items.length > 5
+                    ? "300px"
+                    : "auto",
+                overflowY:
+                  orderData.items && orderData.items.length > 5
+                    ? "auto"
+                    : "visible",
+              }}
+            >
+              {orderData.items?.map((item) => (
+                <div key={item.product._id} className="product-item mb-3">
+                  <div className="d-flex align-items-center">
+                    <img
+                      src={item.product.images?.[0]}
+                      alt={item.product.name}
+                      style={{ width: "50px", marginRight: "10px" }}
+                    />
+                    <div>
+                      <p className="mb-1">{item.product.name}</p>
+                      <p className="mb-1">Số lượng: {item.quantity}</p>
+                      <p className="mb-0">
+                        Đơn giá: {formatter(item.product.priceAfterDiscount)}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
             <div className="order-summary-totals mt-3">
+              <div className="d-flex justify-content-between mt-2">
+                <span>Tổng số lượng:</span>
+                <span>{totalQuantity} sản phẩm</span>
+              </div>
               <div className="d-flex justify-content-between">
                 <span>Tạm tính:</span>
                 <span>{formatter(orderData.subtotal)}</span>
@@ -300,6 +332,7 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
               <hr />
               <div className="d-flex justify-content-between mt-4">
                 <button
+                  type="button" // Thêm thuộc tính này để không submit form khi bấm nút
                   className="d-flex"
                   variant="link"
                   onClick={() => navigate("/gio-hang")}
@@ -315,7 +348,7 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                   </span>
                 </button>
 
-                <Button className="ms-auto btn-secondary " type="submit">
+                <Button className="ms-auto btn-secondary" type="submit">
                   Hoàn tất đơn hàng
                 </Button>
               </div>

@@ -80,6 +80,19 @@ const Cart = () => {
   // Mảng lưu các product _id của sản phẩm được chọn thanh toán
   const [selectedItems, setSelectedItems] = useState([]);
 
+  // Hàm toggle chọn/hủy chọn tất cả các sản phẩm
+  const toggleSelectAll = () => {
+    // Lấy danh sách các product id từ cartItems (đảm bảo item.product tồn tại)
+    const allProductIds = cartItems
+      .filter((item) => item.product)
+      .map((item) => item.product._id);
+    if (selectedItems.length === allProductIds.length) {
+      setSelectedItems([]); // Nếu đã chọn hết, thì hủy chọn tất cả
+    } else {
+      setSelectedItems(allProductIds); // Nếu chưa chọn hết, chọn tất cả
+    }
+  };
+
   // Tính tổng tạm (chỉ tính cho các sản phẩm được chọn)
   const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => {
@@ -204,78 +217,104 @@ const Cart = () => {
               </div>
             </p>
           ) : (
-            cartItems.map((item) =>
-              item?.product ? (
-                <div
-                  key={item.product._id}
-                  className="cart-item border p-3 rounded mb-3 d-flex flex-wrap align-items-center"
-                >
-                  <div className="d-flex align-items-center mb-3 mb-md-0">
-                    <input
-                      className="form-check-input me-2"
-                      type="checkbox"
-                      checked={selectedItems.includes(item.product._id)}
-                      onChange={(e) =>
-                        handleSelectItem(item.product._id, e.target.checked)
-                      }
-                      style={{ fontSize: "30px" }}
-                    />
-                    <img
-                      src={
-                        item.product.images?.[0] ||
-                        "https://via.placeholder.com/150"
-                      }
-                      alt={item.product.name || "Sản phẩm"}
-                      className="img-fluid"
-                    />
-                  </div>
-                  <div className="item-details flex-grow-1 px-3">
-                    <div className="item-details_name mx-auto">
-                      {item.product.name || "Sản phẩm không tên"}
+            <>
+              {/* Bao bọc danh sách sản phẩm trong container scroll */}
+              <div
+                style={{
+                  maxHeight: cartItems.length > 10 ? "600px" : "auto",
+                  overflowY: cartItems.length > 10 ? "auto" : "visible",
+                }}
+              >
+                {cartItems.map((item) =>
+                  item?.product ? (
+                    <div
+                      key={item.product._id}
+                      className="cart-item border p-3 rounded mb-3 d-flex flex-wrap align-items-center"
+                    >
+                      <div className="d-flex align-items-center mb-3 mb-md-0">
+                        <input
+                          className="form-check-input me-2"
+                          type="checkbox"
+                          checked={selectedItems.includes(item.product._id)}
+                          onChange={(e) =>
+                            handleSelectItem(item.product._id, e.target.checked)
+                          }
+                          style={{ fontSize: "30px" }}
+                        />
+                        <img
+                          src={
+                            item.product.images?.[0] ||
+                            "https://via.placeholder.com/150"
+                          }
+                          alt={item.product.name || "Sản phẩm"}
+                          className="img-fluid"
+                        />
+                      </div>
+                      <div className="item-details flex-grow-1 px-3">
+                        <div className="item-details_name mx-auto">
+                          {item.product.name || "Sản phẩm không tên"}
+                        </div>
+                        <div style={{ color: "red" }}>
+                          {formatter(
+                            Number(item.product.priceAfterDiscount) || 0
+                          )}
+                        </div>
+                      </div>
+                      <div className="item-actions d-flex gap-2 ms-auto">
+                        <button
+                          className="btn btn-outline-secondary"
+                          onClick={() =>
+                            handleQuantityChange(item.product._id, "decrease")
+                          }
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          className="form-control"
+                          style={{ width: "50px" }}
+                          value={item.quantity}
+                          onChange={(e) =>
+                            handleQuantityInputChange(
+                              item.product._id,
+                              e.target.value
+                            )
+                          }
+                        />
+                        <button
+                          className="btn btn-outline-secondary"
+                          onClick={() =>
+                            handleQuantityChange(item.product._id, "increase")
+                          }
+                        >
+                          +
+                        </button>
+                        <button
+                          className="btn btn-outline-danger"
+                          onClick={() => handleRemoveFromCart(item.product._id)}
+                        >
+                          XÓA
+                        </button>
+                      </div>
                     </div>
-                    <div style={{ color: "red" }}>
-                      {formatter(Number(item.product.priceAfterDiscount) || 0)}
-                    </div>
-                  </div>
-                  <div className="item-actions d-flex gap-2 ms-auto">
-                    <button
-                      className="btn btn-outline-secondary"
-                      onClick={() =>
-                        handleQuantityChange(item.product._id, "decrease")
-                      }
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      className="form-control"
-                      style={{ width: "50px" }}
-                      value={item.quantity}
-                      onChange={(e) =>
-                        handleQuantityInputChange(
-                          item.product._id,
-                          e.target.value
-                        )
-                      }
-                    />
-                    <button
-                      className="btn btn-outline-secondary"
-                      onClick={() =>
-                        handleQuantityChange(item.product._id, "increase")
-                      }
-                    >
-                      +
-                    </button>
-                    <button
-                      className="btn btn-outline-danger"
-                      onClick={() => handleRemoveFromCart(item.product._id)}
-                    >
-                      XÓA
-                    </button>
-                  </div>
-                </div>
-              ) : null
-            )
+                  ) : null
+                )}
+              </div>
+              {/* Container cho nút chọn tất cả/hủy chọn luôn nằm ở dưới cùng */}
+              <div className="select-all-container text-end">
+                {!isLoading && cartItems.length > 0 && (
+                  <button
+                    className="btn btn-secondary "
+                    onClick={toggleSelectAll}
+                  >
+                    {selectedItems.length ===
+                    cartItems.filter((item) => item.product).length
+                      ? "Hủy chọn"
+                      : "Chọn tất cả"}
+                  </button>
+                )}
+              </div>
+            </>
           )}
         </div>
 
