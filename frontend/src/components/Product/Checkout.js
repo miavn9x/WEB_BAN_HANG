@@ -120,19 +120,18 @@ const Checkout = () => {
 
         // Dispatch action cập nhật Redux store dựa trên localStorage mới
         dispatch(loadCartFromLocalStorage());
-        // (Hoặc bạn có thể dùng dispatch(fetchCart()) nếu cần)
 
-        localStorage.setItem(
-          "lastOrderDetails",
-          JSON.stringify({
-            orderId,
-            orderDetails: {
-              ...orderDetails,
-              order: data.order,
-              formattedOrderDate: formattedDate,
-            },
-          })
-        );
+        // localStorage.setItem(
+        //   "lastOrderDetails",
+        //   JSON.stringify({
+        //     orderId,
+        //     orderDetails: {
+        //       ...orderDetails,
+        //       order: data.order,
+        //       formattedOrderDate: formattedDate,
+        //     },
+        //   })
+        // );
 
         const successMessage = `Đặt hàng thành công!
 Mã đơn hàng: ${orderId}
