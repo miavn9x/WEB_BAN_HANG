@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import ProductItem from "../Product/ProductItem";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import "./HomeProduct.css"; // File CSS chính (bao gồm cả custom CSS bên dưới)
+import "./HomeProduct.css";
 import { Button } from "@mui/material";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -12,10 +12,10 @@ import "swiper/css/autoplay";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Card, Col, Row } from "react-bootstrap";
 
-const CACHE_KEY = "randomizedCombinedProducts";
-const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 tiếng
 
 const HomeProduct = () => {
+  const navigate = useNavigate();
+
   // --- Phần đồng hồ đếm ngược và flash sale ---
   const [timeState, setTimeState] = useState({
     hours: 0,
@@ -26,7 +26,6 @@ const HomeProduct = () => {
     serverTimeOffset: 0,
   });
   const [discountedProducts, setDiscountedProducts] = useState([]);
-  const navigate = useNavigate();
 
   const fetchDiscountedProducts = useCallback(async () => {
     try {
@@ -36,6 +35,7 @@ const HomeProduct = () => {
       const filteredProducts = response.data.products.filter(
         (product) => product.discountPercentage > 6
       );
+      // Random đơn giản:
       const shuffledProducts = filteredProducts.sort(() => Math.random() - 0.5);
       setDiscountedProducts(shuffledProducts);
     } catch (error) {
@@ -109,7 +109,7 @@ const HomeProduct = () => {
     });
   };
 
-  // --- Phần tải sản phẩm ---
+  // --- Phần tải sản phẩm chung ---
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -136,39 +136,55 @@ const HomeProduct = () => {
     return newArray;
   };
 
-  const getCachedRandomizedProducts = (filteredProducts) => {
-    const dynamicCacheKey = CACHE_KEY + "_" + filteredProducts.length;
+
+  const [threeHourTargetTime, setThreeHourTargetTime] = useState(null);
+  const [randomizedCombinedProducts, setRandomizedCombinedProducts] = useState(
+    []
+  );
+
+  const getCombinedProducts = useCallback(() => {
+    return products.filter((product) => {
+      if (!product.category || !product.category.name) return false;
+      const name = product.category.name.trim().toLowerCase();
+      return (
+        name === "sữa bột cao cấp".toLowerCase() ||
+        name === "sữa dinh dưỡng".toLowerCase()
+      );
+    });
+  }, [products]);
+
+  const fetchThreeHourTimer = useCallback(async () => {
     try {
-      const cache = localStorage.getItem(dynamicCacheKey);
-      if (cache) {
-        const { timestamp, data } = JSON.parse(cache);
-        if (Date.now() - timestamp < CACHE_DURATION) {
-          return data;
+      const response = await axios.get("/api/timer/three-hour");
+      const newTargetTime = response.data.targetTime;
+      if (!threeHourTargetTime || newTargetTime !== threeHourTargetTime) {
+        setThreeHourTargetTime(newTargetTime);
+        const combined = getCombinedProducts();
+        if (combined.length > 0) {
+          setRandomizedCombinedProducts(shuffleArray(combined));
         }
       }
     } catch (error) {
-      console.error("Error reading cache", error);
+      console.error("Error fetching three-hour timer:", error);
     }
-    const randomized = shuffleArray(filteredProducts);
-    try {
-      localStorage.setItem(
-        dynamicCacheKey,
-        JSON.stringify({ timestamp: Date.now(), data: randomized })
-      );
-    } catch (error) {
-      console.error("Error saving to cache", error);
+  }, [threeHourTargetTime, getCombinedProducts]);
+
+  // Gọi API /timer/three-hour ngay khi mount và định kỳ (mỗi 30 giây)
+  useEffect(() => {
+    fetchThreeHourTimer();
+    const threeHourInterval = setInterval(fetchThreeHourTimer, 30000);
+    return () => clearInterval(threeHourInterval);
+  }, [fetchThreeHourTimer]);
+
+  // Cập nhật randomizedCombinedProducts ngay khi danh sách products thay đổi (nếu cần)
+  useEffect(() => {
+    const combined = getCombinedProducts();
+    if (combined.length > 0) {
+      setRandomizedCombinedProducts(shuffleArray(combined));
     }
-    return randomized;
-  };
+  }, [products, getCombinedProducts]);
 
-  const filteredDiapersProducts = products.filter((product) => {
-    if (!product.category || !product.category.name) return false;
-    return (
-      product.category.name.trim().toLowerCase() ===
-      "bỉm & tã em bé".toLowerCase()
-    );
-  });
-
+  // --- Phần tải bài viết ---
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
 
@@ -195,15 +211,14 @@ const HomeProduct = () => {
     navigate("/PostsList");
   };
 
+  // --- Xử lý click cho thương hiệu ---
+  const handleBrandClick = (brandName) => {
+    const normalizedBrand = brandName.trim().toLowerCase();
+    navigate(`/products?brand=${encodeURIComponent(normalizedBrand)}`, {
+      state: { brand: normalizedBrand },
+    });
+  };
 
-  // thuong hiệu
-const handleBrandClick = (brandName) => {
-  // Chuẩn hóa brand name
-  const normalizedBrand = brandName.trim().toLowerCase();
-  navigate(`/products?brand=${encodeURIComponent(normalizedBrand)}`, {
-    state: { brand: normalizedBrand },
-  });
-};
   return (
     <>
       <div>
@@ -225,7 +240,7 @@ const handleBrandClick = (brandName) => {
               </div>
               <div className="col-12 col-md-6 col-lg-4 text-center">
                 <div className="countdown__home d-flex justify-content-center">
-                  <div className="countdown-wrap ">
+                  <div className="countdown-wrap">
                     <div className="countdown d-flex justify-content-center">
                       <div className="bloc-time hours mx-2">
                         <div className="figure">
@@ -315,6 +330,7 @@ const handleBrandClick = (brandName) => {
           </div>
         </div>
 
+        {/* --- Phần sản phẩm theo danh mục Sữa --- */}
         <div className="custom__cat__container py-2 my-4 container">
           <div className="d-flex text-center">
             <div className="container">
@@ -385,7 +401,6 @@ const handleBrandClick = (brandName) => {
                     Các Loại Sữa
                   </h4>
                 </div>
-
                 <div className="col-lg-4 mb-3 col-md-6">
                   <Button
                     style={{ color: "#555", fontSize: "13px" }}
@@ -405,7 +420,6 @@ const handleBrandClick = (brandName) => {
                     Sữa bột cao cấp
                   </Button>
                 </div>
-
                 <div className="col-lg-4 mb-3 col-md-6">
                   <Button
                     style={{ color: "#555", fontSize: "13px" }}
@@ -429,48 +443,33 @@ const handleBrandClick = (brandName) => {
             </div>
           </div>
 
+          {/* Hiển thị sản phẩm đã random dựa theo API /timer/three-hour */}
           {loading ? (
             <div className="custom__cat__loading text-center py-4">
               <p>Đang tải sản phẩm...</p>
             </div>
-          ) : products.length > 0 ? (
-            (() => {
-              const combinedProducts = products.filter((product) => {
-                if (!product.category || !product.category.name) return false;
-                const name = product.category.name.trim().toLowerCase();
-                return (
-                  name === "sữa bột cao cấp".toLowerCase() ||
-                  name === "sữa dinh dưỡng".toLowerCase()
-                );
-              });
-
-              const randomizedCombinedProducts =
-                getCachedRandomizedProducts(combinedProducts);
-              return (
-                <>
-                  <div className="custom__cat__row">
-                    <div className="custom__cat__banner">
-                      <img
-                        src="https://theme.hstatic.net/200000381339/1001207774/14/cart_empty_background.png?v=164"
-                        alt="Giỏ hàng trống"
-                        style={{ width: "100%" }}
-                      />
-                    </div>
-                    {randomizedCombinedProducts.map((product) => (
-                      <div key={product._id} className="custom__cat__item">
-                        <ProductItem product={product} />
-                      </div>
-                    ))}
-                  </div>
-                </>
-              );
-            })()
+          ) : randomizedCombinedProducts.length > 0 ? (
+            <div className="custom__cat__row">
+              <div className="custom__cat__banner">
+                <img
+                  src="https://theme.hstatic.net/200000381339/1001207774/14/cart_empty_background.png?v=164"
+                  alt="Giỏ hàng trống"
+                  style={{ width: "100%" }}
+                />
+              </div>
+              {randomizedCombinedProducts.map((product) => (
+                <div key={product._id} className="custom__cat__item">
+                  <ProductItem product={product} />
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="custom__cat__empty text-center py-4">
               <p>Không có sản phẩm nào.</p>
             </div>
           )}
         </div>
+
         {/* --- Sản phẩm cho danh mục "Bỉm & tã em bé" --- */}
         <div
           className="home__product bg-none py-5 d-flex justify-content-center"
@@ -486,15 +485,30 @@ const handleBrandClick = (brandName) => {
               </div>
             </div>
             <div className="row">
-              {filteredDiapersProducts.length > 0 ? (
-                filteredDiapersProducts.map((product) => (
-                  <div
-                    key={product._id}
-                    className="col-6 col-md-3 col-lg-2 py-2 g-2"
-                  >
-                    <ProductItem product={product} />
-                  </div>
-                ))
+              {products.filter((product) => {
+                if (!product.category || !product.category.name) return false;
+                return (
+                  product.category.name.trim().toLowerCase() ===
+                  "bỉm & tã em bé".toLowerCase()
+                );
+              }).length > 0 ? (
+                products
+                  .filter((product) => {
+                    if (!product.category || !product.category.name)
+                      return false;
+                    return (
+                      product.category.name.trim().toLowerCase() ===
+                      "bỉm & tã em bé".toLowerCase()
+                    );
+                  })
+                  .map((product) => (
+                    <div
+                      key={product._id}
+                      className="col-6 col-md-3 col-lg-2 py-2 g-2"
+                    >
+                      <ProductItem product={product} />
+                    </div>
+                  ))
               ) : (
                 <div className="col-12 text-center py-4">
                   <i className="fas fa-box-open fa-3x text-muted mb-3"></i>
@@ -517,6 +531,7 @@ const handleBrandClick = (brandName) => {
           </div>
         </div>
 
+        {/* --- Phần thương hiệu nổi bật --- */}
         <div className="container py-2 my-4">
           <span className="Flash__sale fs-5">THƯƠNG HIỆU NỔI BẬT </span>
           <br />
@@ -538,57 +553,48 @@ const handleBrandClick = (brandName) => {
             }}
           >
             <SwiperSlide onClick={() => handleBrandClick("cosmic light")}>
-              {/* cosmic light*/}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739172432/brand_1_gp8jdq.webp"
                 alt="Brand 1"
               />
             </SwiperSlide>
             <SwiperSlide onClick={() => handleBrandClick("aptamil")}>
-              {/*  aptamil*/}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_6_unpnuu.webp"
                 alt="Brand 6"
               />
             </SwiperSlide>
             <SwiperSlide onClick={() => handleBrandClick("arifood")}>
-              {/* arifood */}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_2_hayrt8.webp"
                 alt="Brand 2"
               />
             </SwiperSlide>
             <SwiperSlide onClick={() => handleBrandClick("blackmores")}>
-              {/* blackmores */}
-
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_7_rsbgoe.webp"
                 alt="Brand 7"
               />
             </SwiperSlide>
             <SwiperSlide onClick={() => handleBrandClick("blackmores")}>
-              {/* blackmores */}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_3_vsl8yu.webp"
                 alt="Brand 3"
               />
             </SwiperSlide>
             <SwiperSlide onClick={() => handleBrandClick("hikid")}>
-              {/* hikid */}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_8_bfeshq.webp"
                 alt="Brand 8"
               />
             </SwiperSlide>
             <SwiperSlide onClick={() => handleBrandClick("aribaly")}>
-              {/* aribaly */}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_9_jczh9e.webp"
                 alt="Brand 9"
               />
             </SwiperSlide>
             <SwiperSlide onClick={() => handleBrandClick("Pampers")}>
-              {/* Pampers */}
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_10_cfzlzm.webp"
                 alt="Brand 10"
@@ -596,6 +602,8 @@ const handleBrandClick = (brandName) => {
             </SwiperSlide>
           </Swiper>
         </div>
+
+        {/* --- Phần bài viết --- */}
         <div className="quick__post-container">
           <div className="container py-2 my-4">
             <Row>
