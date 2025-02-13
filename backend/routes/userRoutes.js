@@ -174,6 +174,25 @@ router.put("/profile/password", authMiddleware, async (req, res) => {
   }
 });
 
+// API xóa người dùng (chỉ admin mới có quyền)
+router.delete("/users/:id", adminMiddleware, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "Không tìm thấy người dùng" });
+    }
+
+    res.status(200).json({ message: "Xóa tài khoản thành công" });
+  } catch (error) {
+    console.error("Lỗi xóa người dùng:", error);
+    res.status(500).json({
+      message: "Lỗi khi xóa tài khoản",
+      error: error.message,
+    });
+  }
+});
 
 
 

@@ -7,6 +7,11 @@ const PostsManagement = () => {
   // State mapping từ productId sang tên sản phẩm
   const [productNames, setProductNames] = useState({});
 
+  // Pagination: mỗi trang hiển thị 5 bài viết
+  const itemsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(posts.length / itemsPerPage);
+
   // Hàm fetch thông tin sản phẩm dựa trên danh sách productIds
   const fetchProductNames = async (productIds) => {
     const mapping = {};
@@ -70,65 +75,102 @@ const PostsManagement = () => {
     }
   };
 
+  // Lấy danh sách bài viết của trang hiện tại
+  const currentPosts = posts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
   return (
     <div className="posts-management container">
       <h4 className="my-3">Quản Lý Bài Viết</h4>
       {/* Bọc bảng trong div.table-responsive để bảng hiển thị tốt trên thiết bị nhỏ */}
-      <div className="table-responsive">
-        <table className="table table-bordered">
-          <thead>
-            <tr>
-              <th>Tiêu Đề</th>
-              <th>Tags</th>
-              <th>Sản Phẩm</th>
-              <th>Ngày</th>
-              <th>Hành Động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {posts.map((post) => (
-              <tr key={post._id}>
-                <td
-                  style={{
-                    maxWidth: "100px",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {post.title}
-                </td>
-                <td>{post.tags.join(", ")}</td>
-                <td
-                  style={{
-                    maxWidth: "200px",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {productNames[post.productId] || post.productId}
-                </td>
-                <td>{new Date(post.date).toLocaleString()}</td>
-                <td>
-                  <Link
-                    className="btn btn-sm btn-primary me-2"
-                    to={`/admin/add-bai-viet?id=${post._id}`}
-                  >
-                    Sửa
-                  </Link>
-                  <button
-                    className="btn btn-sm btn-danger"
-                    onClick={() => handleDelete(post._id)}
-                  >
-                    Xóa
-                  </button>
-                </td>
+      {/* Bọc container này có chiều cao cố định 50vh, nếu nội dung vượt quá sẽ xuất hiện thanh cuộn */}
+      <div style={{ height: "50vh", overflowY: "auto" }}>
+        <div className="table-responsive">
+          <table className="table table-bordered">
+            <thead>
+              <tr>
+                <th>Tiêu Đề</th>
+                <th>Tags</th>
+                <th>Sản Phẩm</th>
+                <th>Ngày</th>
+                <th>Hành Động</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {currentPosts.map((post) => (
+                <tr key={post._id}>
+                  <td
+                    style={{
+                      maxWidth: "100px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {post.title}
+                  </td>
+                  <td>{post.tags.join(", ")}</td>
+                  <td
+                    style={{
+                      maxWidth: "200px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {productNames[post.productId] || post.productId}
+                  </td>
+                  <td>{new Date(post.date).toLocaleString()}</td>
+                  <td>
+                    <Link
+                      className="btn btn-sm btn-primary me-2"
+                      to={`/admin/add-bai-viet?id=${post._id}`}
+                    >
+                      Sửa
+                    </Link>
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => handleDelete(post._id)}
+                    >
+                      Xóa
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      {/* Pagination controls */}
+      {totalPages > 1 && (
+        <div className="d-flex justify-content-center align-items-center mt-3 flex-nowrap">
+          <button
+            className="btn btn-secondary btn-sm me-2"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            &laquo; Trước
+          </button>
+          <span>
+            Trang {currentPage} của {totalPages}
+          </span>
+          <button
+            className="btn btn-secondary btn-sm ms-2"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Sau &raquo;
+          </button>
+        </div>
+      )}
     </div>
   );
 };

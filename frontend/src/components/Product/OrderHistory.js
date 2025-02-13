@@ -11,6 +11,11 @@ const OrderHistory = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showRating, setShowRating] = useState(false);
 
+  // Phân trang
+  const itemsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(orders.length / itemsPerPage);
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -38,6 +43,12 @@ const OrderHistory = () => {
     }
   };
 
+  // Lấy danh sách đơn hàng của trang hiện tại
+  const currentOrders = orders.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const handleShowDetails = (order) => {
     setSelectedOrder(order);
     setShowRating(false); // reset form đánh giá khi mở modal mới
@@ -56,45 +67,88 @@ const OrderHistory = () => {
     setShowRating(false);
   };
 
+  // Xử lý chuyển trang
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
   if (loading) return <div>Đang tải...</div>;
 
   return (
     <Container className="order-history-container">
       <h2 className="my-4 order-history-title">Lịch sử đơn hàng</h2>
-      <Table responsive striped bordered hover className="order-history-table">
-        <thead>
-          <tr>
-            <th>Mã đơn hàng</th>
-            <th>Ngày đặt</th>
-            <th>Tổng tiền</th>
-            <th>Phương thức thanh toán</th>
-            <th>Chi tiết</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((order) => (
-            <tr key={order.orderId}>
-              <td>{order.orderId}</td>
-              <td>{order.formattedOrderDate}</td>
-              <td>{formatter(order.totalAmount)}</td>
-              <td>
-                {order.paymentMethod === "cod"
-                  ? "Thanh toán khi nhận hàng"
-                  : "Chuyển khoản ngân hàng"}
-              </td>
-              <td>
-                <Button
-                  variant="info"
-                  size="sm"
-                  onClick={() => handleShowDetails(order)}
-                >
-                  Xem chi tiết
-                </Button>
-              </td>
+
+      {/* Bọc bảng đơn hàng trong div với chiều cao 50vh */}
+      <div style={{ height: "50vh", overflowY: "auto" }}>
+        <Table
+          responsive
+          striped
+          bordered
+          hover
+          className="order-history-table"
+        >
+          <thead>
+            <tr>
+              <th>Mã đơn hàng</th>
+              <th>Ngày đặt</th>
+              <th>Tổng tiền</th>
+              <th>Phương thức thanh toán</th>
+              <th>Chi tiết</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {currentOrders.map((order) => (
+              <tr key={order.orderId}>
+                <td>{order.orderId}</td>
+                <td>{order.formattedOrderDate}</td>
+                <td>{formatter(order.totalAmount)}</td>
+                <td>
+                  {order.paymentMethod === "cod"
+                    ? "Thanh toán khi nhận hàng"
+                    : "Chuyển khoản ngân hàng"}
+                </td>
+                <td>
+                  <Button
+                    variant="info"
+                    size="sm"
+                    onClick={() => handleShowDetails(order)}
+                  >
+                    Xem chi tiết
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+
+      {/* Pagination controls */}
+      {totalPages > 1 && (
+        <div className="d-flex justify-content-center align-items-center mt-3 flex-nowrap">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="me-2"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1 || loading}
+          >
+            &laquo; Trước
+          </Button>
+          <span>
+            Trang {currentPage} của {totalPages}
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="ms-2"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages || loading}
+          >
+            Sau &raquo;
+          </Button>
+        </div>
+      )}
 
       {/* Modal Chi tiết đơn hàng */}
       <Modal
@@ -168,7 +222,10 @@ const OrderHistory = () => {
                             <img
                               src={item.image}
                               alt={item.name}
-                              style={{ width: "50px", marginRight: "10px" }}
+                              style={{
+                                width: "50px",
+                                marginRight: "10px",
+                              }}
                             />
                             {item.name.length > 10
                               ? item.name.substring(0, 10) + "..."

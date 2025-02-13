@@ -380,258 +380,261 @@ const ProductEdit = () => {
           </div>
         )}
 
-        <div className="product-management ">
-          <div className="table-responsive">
-            <table className="table table-bordered product-table ">
-              <thead>
-                <tr className="">
-                  <th>STT</th>
-                  <th>Tên</th>
-                  <th>Danh mục</th>
-                  <th>Loại sản phẩm</th>
-                  <th>Thương hiệu</th>
-                  <th>Mô tả</th>
-                  <th>Giá gốc</th>
-                  <th>% giảm</th>
-                  <th>Giảm giá</th>
-                  <th>SL Gốc</th>
-                  <th>SL Còn</th>
-                  <th>Hình ảnh</th>
-                  <th>Hành động</th>
-                </tr>
-              </thead>
-              <tbody >
-                {products.map((product, index) => (
-                  <tr key={product._id}>
-                    {editingProduct?._id === product._id ? (
-                      <td colSpan="12">
-                        <form onSubmit={handleUpdateProduct}>
-                          <input
-                            type="text"
-                            name="name"
-                            value={editFormData.name || ""}
-                            onChange={handleEditFormChange}
-                            className="form-control mb-2"
-                            placeholder="Tên sản phẩm"
-                          />
-                          <select
-                            name="category.name"
-                            value={editFormData.category?.name || ""}
-                            onChange={handleEditFormChange}
-                            className="form-control mb-2"
-                          >
-                            <option value="">Chọn danh mục</option>
-                            {Object.keys(categoryOptions).map((category) => (
-                              <option key={category} value={category}>
-                                {category}
-                              </option>
-                            ))}
-                          </select>
-                          <select
-                            name="category.generic"
-                            value={editFormData.category?.generic || ""}
-                            onChange={handleEditFormChange}
-                            className="form-control mb-2"
-                          >
-                            <option value="">Chọn loại sản phẩm</option>
-                            {categoryOptions[editFormData.category?.name]?.map(
-                              (type) => (
+        <div className="product-management">
+          {/* Bọc bảng sản phẩm trong container có chiều cao 50vh và overflowY: auto */}
+          <div style={{ height: "60vh", overflowY: "auto" }}>
+            <div className="table-responsive">
+              <table className="table table-bordered product-table">
+                <thead>
+                  <tr>
+                    <th>STT</th>
+                    <th>Tên</th>
+                    <th>Danh mục</th>
+                    <th>Loại sản phẩm</th>
+                    <th>Thương hiệu</th>
+                    <th>Mô tả</th>
+                    <th>Giá gốc</th>
+                    <th>% giảm</th>
+                    <th>Giá sau giảm</th>
+                    <th>SL Gốc</th>
+                    <th>SL Còn</th>
+                    <th>Hình ảnh</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.map((product, index) => (
+                    <tr key={product._id}>
+                      {editingProduct?._id === product._id ? (
+                        <td colSpan="12">
+                          <form onSubmit={handleUpdateProduct}>
+                            <input
+                              type="text"
+                              name="name"
+                              value={editFormData.name || ""}
+                              onChange={handleEditFormChange}
+                              className="form-control mb-2"
+                              placeholder="Tên sản phẩm"
+                            />
+                            <select
+                              name="category.name"
+                              value={editFormData.category?.name || ""}
+                              onChange={handleEditFormChange}
+                              className="form-control mb-2"
+                            >
+                              <option value="">Chọn danh mục</option>
+                              {Object.keys(categoryOptions).map((category) => (
+                                <option key={category} value={category}>
+                                  {category}
+                                </option>
+                              ))}
+                            </select>
+                            <select
+                              name="category.generic"
+                              value={editFormData.category?.generic || ""}
+                              onChange={handleEditFormChange}
+                              className="form-control mb-2"
+                            >
+                              <option value="">Chọn loại sản phẩm</option>
+                              {categoryOptions[
+                                editFormData.category?.name
+                              ]?.map((type) => (
                                 <option key={type} value={type}>
                                   {type}
                                 </option>
-                              )
-                            )}
-                          </select>
-
-                          {/* --- Phần edit thương hiệu theo nhóm --- */}
-                          <div className="form-group">
-                            <label>Thương hiệu</label>
-                            <select
-                              name="brandSelect"
-                              className="form-control mb-2"
-                              value={editSelectedBrand}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                setEditSelectedBrand(value);
-                                if (value !== "other") {
-                                  setEditFormData((prev) => ({
-                                    ...prev,
-                                    brand: value,
-                                  }));
-                                } else {
-                                  setEditFormData((prev) => ({
-                                    ...prev,
-                                    brand: "",
-                                  }));
-                                }
-                              }}
-                              required
-                            >
-                              <option value="">Chọn thương hiệu</option>
-                              {Object.entries(predefinedBrandsByCategory).map(
-                                ([group, brands]) => (
-                                  <optgroup key={group} label={group}>
-                                    {brands.map((brand) => (
-                                      <option key={brand} value={brand}>
-                                        {brand}
-                                      </option>
-                                    ))}
-                                  </optgroup>
-                                )
-                              )}
-                              <option value="other">Nhập Thương Hiệu</option>
+                              ))}
                             </select>
-                            {editSelectedBrand === "other" && (
-                              <input
-                                type="text"
-                                name="brand"
-                                className="form-control mt-2"
-                                placeholder="Nhập thương hiệu"
-                                value={editFormData.brand || ""}
-                                onChange={handleEditFormChange}
-                                required
-                              />
-                            )}
-                          </div>
-                          {/* --- Kết thúc phần edit thương hiệu --- */}
 
-                          <textarea
-                            name="description"
-                            value={editFormData.description || ""}
-                            onChange={handleEditFormChange}
-                            className="form-control mb-2"
-                            placeholder="Mô tả sản phẩm"
-                            style={{ height: "100px" }}
-                          />
-                          <input
-                            type="number"
-                            name="originalPrice"
-                            value={editFormData.originalPrice || ""}
-                            onChange={handleEditFormChange}
-                            className="form-control mb-2"
-                            placeholder="Giá gốc"
-                          />
-                          <input
-                            type="number"
-                            name="discountPercentage"
-                            value={editFormData.discountPercentage || ""}
-                            onChange={handleEditFormChange}
-                            className="form-control mb-2"
-                            placeholder="Giảm giá (%)"
-                          />
-                          <input
-                            type="number"
-                            name="priceAfterDiscount"
-                            value={editFormData.priceAfterDiscount || ""}
-                            readOnly
-                            className="form-control mb-2"
-                            placeholder="Giá sau giảm"
-                          />
-                          <div className="form-group">
-                            <label>Số lượng trong kho:</label>
-                            <input
-                              type="number"
-                              name="stock"
-                              value={editFormData.stock || ""}
+                            {/* --- Phần edit thương hiệu theo nhóm --- */}
+                            <div className="form-group">
+                              <label>Thương hiệu</label>
+                              <select
+                                name="brandSelect"
+                                className="form-control mb-2"
+                                value={editSelectedBrand}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  setEditSelectedBrand(value);
+                                  if (value !== "other") {
+                                    setEditFormData((prev) => ({
+                                      ...prev,
+                                      brand: value,
+                                    }));
+                                  } else {
+                                    setEditFormData((prev) => ({
+                                      ...prev,
+                                      brand: "",
+                                    }));
+                                  }
+                                }}
+                                required
+                              >
+                                <option value="">Chọn thương hiệu</option>
+                                {Object.entries(predefinedBrandsByCategory).map(
+                                  ([group, brands]) => (
+                                    <optgroup key={group} label={group}>
+                                      {brands.map((brand) => (
+                                        <option key={brand} value={brand}>
+                                          {brand}
+                                        </option>
+                                      ))}
+                                    </optgroup>
+                                  )
+                                )}
+                                <option value="other">Nhập Thương Hiệu</option>
+                              </select>
+                              {editSelectedBrand === "other" && (
+                                <input
+                                  type="text"
+                                  name="brand"
+                                  className="form-control mt-2"
+                                  placeholder="Nhập thương hiệu"
+                                  value={editFormData.brand || ""}
+                                  onChange={handleEditFormChange}
+                                  required
+                                />
+                              )}
+                            </div>
+                            {/* --- Kết thúc phần edit thương hiệu --- */}
+
+                            <textarea
+                              name="description"
+                              value={editFormData.description || ""}
                               onChange={handleEditFormChange}
                               className="form-control mb-2"
-                              min="0"
-                              placeholder="Số lượng trong kho"
+                              placeholder="Mô tả sản phẩm"
+                              style={{ height: "100px" }}
                             />
-                            <small className="text-muted">
-                              Số lượng hiện tại: {editFormData.stock}
-                            </small>
-                          </div>
-                          <div className="form-group">
-                            <label>Số lượng còn lại:</label>
                             <input
                               type="number"
-                              name="remainingStock"
-                              value={editFormData.remainingStock || ""}
+                              name="originalPrice"
+                              value={editFormData.originalPrice || ""}
                               onChange={handleEditFormChange}
                               className="form-control mb-2"
-                              min="0"
-                              max={editFormData.stock}
-                              placeholder="Số lượng còn lại"
+                              placeholder="Giá gốc"
                             />
-                            <small className="text-muted">
-                              Không thể vượt quá số lượng trong kho (
-                              {editFormData.stock})
-                            </small>
-                          </div>
-                          <input
-                            type="file"
-                            name="images"
-                            multiple
-                            onChange={handleImageChange}
-                            className="form-control mb-2"
-                          />
-                          <button
-                            type="submit"
-                            className="btn btn-primary btn-sm mr-2"
-                            disabled={loading}
-                          >
-                            {loading ? "Đang lưu..." : "Lưu"}
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-secondary btn-sm"
-                            onClick={handleCancelEdit}
-                          >
-                            Hủy
-                          </button>
-                        </form>
-                      </td>
-                    ) : (
-                      <>
-                        <td>{index + 1}</td>
-                        <td>{product.name}</td>
-                        <td>{product.category.name}</td>
-                        <td>{product.category.generic}</td>
-                        <td>{product.brand}</td>
-                        <td>{product.description}</td>
-                        <td>{product.originalPrice}</td>
-                        <td>{product.discountPercentage}%</td>
-                        <td>{product.priceAfterDiscount}</td>
-                        <td>{product.stock}</td>
-                        <td>{product.remainingStock}</td>
-                        <td>
-                          {product.images.map((image, index) => (
-                            <img
-                              key={index}
-                              src={image}
-                              alt={product.name}
-                              width="50"
-                              height="50"
-                              className="mr-2"
+                            <input
+                              type="number"
+                              name="discountPercentage"
+                              value={editFormData.discountPercentage || ""}
+                              onChange={handleEditFormChange}
+                              className="form-control mb-2"
+                              placeholder="Giảm giá (%)"
                             />
-                          ))}
+                            <input
+                              type="number"
+                              name="priceAfterDiscount"
+                              value={editFormData.priceAfterDiscount || ""}
+                              readOnly
+                              className="form-control mb-2"
+                              placeholder="Giá sau giảm"
+                            />
+                            <div className="form-group">
+                              <label>Số lượng trong kho:</label>
+                              <input
+                                type="number"
+                                name="stock"
+                                value={editFormData.stock || ""}
+                                onChange={handleEditFormChange}
+                                className="form-control mb-2"
+                                min="0"
+                                placeholder="Số lượng trong kho"
+                              />
+                              <small className="text-muted">
+                                Số lượng hiện tại: {editFormData.stock}
+                              </small>
+                            </div>
+                            <div className="form-group">
+                              <label>Số lượng còn lại:</label>
+                              <input
+                                type="number"
+                                name="remainingStock"
+                                value={editFormData.remainingStock || ""}
+                                onChange={handleEditFormChange}
+                                className="form-control mb-2"
+                                min="0"
+                                max={editFormData.stock}
+                                placeholder="Số lượng còn lại"
+                              />
+                              <small className="text-muted">
+                                Không thể vượt quá số lượng trong kho (
+                                {editFormData.stock})
+                              </small>
+                            </div>
+                            <input
+                              type="file"
+                              name="images"
+                              multiple
+                              onChange={handleImageChange}
+                              className="form-control mb-2"
+                            />
+                            <button
+                              type="submit"
+                              className="btn btn-primary btn-sm mr-2"
+                              disabled={loading}
+                            >
+                              {loading ? "Đang lưu..." : "Lưu"}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              onClick={handleCancelEdit}
+                            >
+                              Hủy
+                            </button>
+                          </form>
                         </td>
-                        <td className="text-center">
-                          <button
-                            className="btn btn-warning btn-sm mx-2"
-                            onClick={() => handleEditProduct(product)}
-                          >
-                            sửa
-                          </button>
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleDeleteProduct(product._id)}
-                          >
-                            Xóa
-                          </button>
-                        </td>
-                      </>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      ) : (
+                        <>
+                          <td>{index + 1}</td>
+                          <td>{product.name}</td>
+                          <td>{product.category.name}</td>
+                          <td>{product.category.generic}</td>
+                          <td>{product.brand}</td>
+                          <td>{product.description}</td>
+                          <td>{product.originalPrice}</td>
+                          <td>{product.discountPercentage}%</td>
+                          <td>{product.priceAfterDiscount}</td>
+                          <td>{product.stock}</td>
+                          <td>{product.remainingStock}</td>
+                          <td>
+                            {product.images.map((image, index) => (
+                              <img
+                                key={index}
+                                src={image}
+                                alt={product.name}
+                                width="50"
+                                height="50"
+                                className="mr-2"
+                              />
+                            ))}
+                          </td>
+                          <td className="text-center">
+                            <button
+                              className="btn btn-warning btn-sm mx-2"
+                              onClick={() => handleEditProduct(product)}
+                            >
+                              sửa
+                            </button>
+                            <button
+                              className="btn btn-danger btn-sm"
+                              onClick={() => handleDeleteProduct(product._id)}
+                            >
+                              Xóa
+                            </button>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
         {/* Pagination */}
-        <div className=" d-flex justify-content-center align-items-center mt-3 flex-nowrap">
+        <div className="d-flex justify-content-center align-items-center mt-3 flex-nowrap">
           <button
             className="btn btn-secondary btn-sm me-2"
             onClick={() => handlePageChange(currentPage - 1)}

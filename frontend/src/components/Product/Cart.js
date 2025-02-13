@@ -31,7 +31,6 @@ const Cart = () => {
     phone: "",
     address: "",
   });
-
   const [isLoading, setIsLoading] = useState(true);
 
   // Khi component mount, lấy thông tin người dùng (nếu có token)
@@ -218,11 +217,12 @@ const Cart = () => {
             </p>
           ) : (
             <>
-              {/* Bao bọc danh sách sản phẩm trong container scroll */}
+              {/* Bao bọc danh sách sản phẩm trong container với chiều cao cố định (50vh) */}
               <div
                 style={{
-                  maxHeight: cartItems.length > 10 ? "600px" : "auto",
-                  overflowY: cartItems.length > 10 ? "auto" : "visible",
+                  height: "50vh",
+                  overflowY: "auto",
+                  paddingRight: "15px",
                 }}
               >
                 {cartItems.map((item) =>
@@ -304,7 +304,7 @@ const Cart = () => {
               <div className="select-all-container text-end">
                 {!isLoading && cartItems.length > 0 && (
                   <button
-                    className="btn btn-secondary "
+                    className="btn btn-secondary"
                     onClick={toggleSelectAll}
                   >
                     {selectedItems.length ===
@@ -381,8 +381,8 @@ const Cart = () => {
           <div className="total-info text-end mt-4">
             <div>Tổng cộng: {formatter(calculateSubtotal())}</div>
             <div>
-              Phí vận chuyển:
-              <span style={{ color: "blue" }}> {formatter(25000)}</span>
+              Phí vận chuyển:{" "}
+              <span style={{ color: "blue" }}>{formatter(25000)}</span>
             </div>
             <div className="total-price fw-bold">
               Thành tiền:{" "}
