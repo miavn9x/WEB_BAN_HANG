@@ -380,11 +380,11 @@ const ProductEdit = () => {
           </div>
         )}
 
-        <div className="product-management">
+        <div className="product-management ">
           <div className="table-responsive">
-            <table className="table table-bordered product-table">
+            <table className="table table-bordered product-table ">
               <thead>
-                <tr>
+                <tr className="">
                   <th>STT</th>
                   <th>Tên</th>
                   <th>Danh mục</th>
@@ -400,7 +400,7 @@ const ProductEdit = () => {
                   <th>Hành động</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody >
                 {products.map((product, index) => (
                   <tr key={product._id}>
                     {editingProduct?._id === product._id ? (
@@ -631,9 +631,9 @@ const ProductEdit = () => {
         </div>
 
         {/* Pagination */}
-        <div className="pagination">
+        <div className=" d-flex justify-content-center align-items-center mt-3 flex-nowrap">
           <button
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm me-2"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1 || loading}
           >
@@ -643,7 +643,7 @@ const ProductEdit = () => {
             Trang {currentPage} của {totalPages}
           </span>
           <button
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm ms-2"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages || loading}
           >

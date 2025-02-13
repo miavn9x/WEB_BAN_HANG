@@ -241,7 +241,7 @@ useEffect(() => {
               variant="outline-secondary"
               onClick={clearFilters}
             >
-              Làm mới bộ lọc
+              Làm mới lựa chọn
             </Button>
             <Filter onFilterChange={handleFilterChange} filters={filters} />
           </div>
@@ -261,8 +261,7 @@ useEffect(() => {
                         className="filter-button d-flex"
                       >
                         <CiFilter className="me-1" />
-                        Bộ Lọc
-                      </button>
+Tìm kiếm nhanh                       </button>
                     </span>
                   </div>
                   <div className="sort-wrapper d-flex align-items-center ms-auto  mx-3">
@@ -356,7 +355,7 @@ useEffect(() => {
             variant="outline-secondary"
             onClick={clearFilters}
           >
-            Làm mới bộ lọc
+            Làm mới lựa chọn
           </Button>
           <Filter onFilterChange={handleFilterChange} filters={filters} />
         </Modal.Body>

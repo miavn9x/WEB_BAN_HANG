@@ -1,22 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Modal, Button, Card, Row, Col, Form } from "react-bootstrap";
 import axios from "axios";
 import { FaBell, FaRegClock } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import "./NotificationModal.css"; // Import CSS
+import "./NotificationModal.css";
 
 const NotificationModal = ({ show, handleClose }) => {
   const [notifications, setNotifications] = useState([]);
-  const [selectedNotifications, setSelectedNotifications] = useState([]); // Theo dõi các thông báo được chọn
+  const [selectedNotifications, setSelectedNotifications] = useState([]);
   const navigate = useNavigate();
 
-  // Hàm lấy thông báo từ API và cập nhật localStorage
+  // Lấy thông báo trực tiếp từ API và lưu vào state
   const fetchNotifications = async () => {
-    const token = localStorage.getItem("token");
-    // Nếu không có token (người dùng đã đăng xuất) thì không thực hiện gọi API và xóa cache thông báo
+    const token = localStorage.getItem("token"); // Token dùng để xác thực
     if (!token) {
       setNotifications([]);
-      localStorage.removeItem("notifications");
       return;
     }
     try {
@@ -25,10 +23,6 @@ const NotificationModal = ({ show, handleClose }) => {
       });
       if (res.data.success) {
         setNotifications(res.data.notifications);
-        localStorage.setItem(
-          "notifications",
-          JSON.stringify(res.data.notifications)
-        );
       }
     } catch (error) {
       console.error("Lỗi khi tải thông báo:", error);
@@ -38,62 +32,42 @@ const NotificationModal = ({ show, handleClose }) => {
   useEffect(() => {
     if (show) {
       const token = localStorage.getItem("token");
-      // Nếu không có token, xóa thông báo và không tiến hành lấy dữ liệu
       if (!token) {
         setNotifications([]);
-        localStorage.removeItem("notifications");
         return;
       }
-
-      // Kiểm tra localStorage trước để hiển thị nhanh cache thông báo (nếu có)
-      const cachedNotifications = localStorage.getItem("notifications");
-      if (cachedNotifications) {
-        setNotifications(JSON.parse(cachedNotifications));
-      }
-      // Lấy thông báo từ server
       fetchNotifications();
 
-      // Sử dụng polling để cập nhật thông báo theo thời gian thực (ví dụ mỗi 10 giây)
-      const intervalId = setInterval(() => {
-        fetchNotifications();
-      }, 10000);
-
+      // Polling cập nhật thông báo mỗi 15 giây (tăng khoảng thời gian polling)
+      const intervalId = setInterval(fetchNotifications, 15000);
       return () => clearInterval(intervalId);
     }
   }, [show]);
 
-  // Sắp xếp thông báo: chưa đọc (unread) ở trên, đã đọc (read) ở dưới và theo thời gian (mới nhất trước)
-  const sortedNotifications = [...notifications].sort((a, b) => {
-    if (a.read === b.read) {
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    }
-    return a.read - b.read;
-  });
+  // Sử dụng useMemo để sắp xếp thông báo chỉ khi notifications thay đổi
+  const sortedNotifications = useMemo(() => {
+    return [...notifications].sort((a, b) => {
+      if (a.read === b.read) {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      return a.read - b.read;
+    });
+  }, [notifications]);
 
-  // Xử lý khi người dùng xem chi tiết đơn hàng từ thông báo
   const handleViewOrderDetails = async (orderId, notificationId) => {
     try {
-      // Đánh dấu thông báo là đã đọc
       await axios.put(
         `/api/notifications/${notificationId}/read`,
         {},
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
-      // Cập nhật trạng thái đã đọc cho thông báo được chọn
+      // Cập nhật trạng thái đã đọc trong state
       const updatedNotifications = notifications.map((noti) =>
         noti._id === notificationId ? { ...noti, read: true } : noti
       );
       setNotifications(updatedNotifications);
-      localStorage.setItem(
-        "notifications",
-        JSON.stringify(updatedNotifications)
-      );
-
-      // Chuyển hướng đến trang chi tiết đơn hàng và đóng modal
       navigate(`/order-history/${orderId}`);
       handleClose();
     } catch (error) {
@@ -101,21 +75,18 @@ const NotificationModal = ({ show, handleClose }) => {
     }
   };
 
-  // Toggle selection của 1 thông báo
   const toggleSelectNotification = (notificationId) => {
-    setSelectedNotifications((prevSelected) =>
-      prevSelected.includes(notificationId)
-        ? prevSelected.filter((id) => id !== notificationId)
-        : [...prevSelected, notificationId]
+    setSelectedNotifications((prev) =>
+      prev.includes(notificationId)
+        ? prev.filter((id) => id !== notificationId)
+        : [...prev, notificationId]
     );
   };
 
-  // Hàm chọn tất cả các thông báo
   const handleSelectAllNotifications = () => {
     setSelectedNotifications(notifications.map((noti) => noti._id));
   };
 
-  // Hàm xóa các thông báo được chọn
   const handleDeleteNotifications = async () => {
     try {
       await Promise.all(
@@ -131,22 +102,16 @@ const NotificationModal = ({ show, handleClose }) => {
         (noti) => !selectedNotifications.includes(noti._id)
       );
       setNotifications(updatedNotifications);
-      localStorage.setItem(
-        "notifications",
-        JSON.stringify(updatedNotifications)
-      );
       setSelectedNotifications([]);
     } catch (error) {
       console.error("Lỗi khi xóa thông báo:", error);
     }
   };
 
-  // Xác định văn bản hiển thị trên nút dựa vào số lượng thông báo được chọn
-  const getActionButtonText = () => {
-    return selectedNotifications.length === notifications.length
+  const getActionButtonText = () =>
+    selectedNotifications.length === notifications.length
       ? "Xóa tất cả"
       : "Xóa đã chọn";
-  };
 
   return (
     <Modal

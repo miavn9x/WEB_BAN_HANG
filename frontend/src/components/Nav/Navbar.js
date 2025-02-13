@@ -93,14 +93,13 @@ const MyNavbar = () => {
   const [products, setProducts] = useState([]);
   const searchRef = useRef(null);
 
-  // Quản lý số lượng thông báo và modal thông báo
+  // Quản lý số lượng thông báo (chỉ tính những chưa đọc) và modal thông báo
   const [notificationCount, setNotificationCount] = useState(0);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
 
-  // Quản lý trạng thái đăng nhập (dựa trên token)
+  // Quản lý trạng thái đăng nhập (token)
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
 
-  // Lắng nghe sự thay đổi của localStorage (chỉ hỗ trợ khi đăng xuất từ các tab khác)
   useEffect(() => {
     const handleStorageChange = () => {
       setIsLoggedIn(!!localStorage.getItem("token"));
@@ -109,15 +108,12 @@ const MyNavbar = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // Hàm lấy thông báo từ API (với kiểm tra token)
+  // Lấy số đếm thông báo từ API, chỉ đếm những chưa đọc
   const fetchNotifications = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       setNotificationCount(0);
-      setIsLoggedIn(false);
       return;
-    } else {
-      setIsLoggedIn(true);
     }
     axios
       .get("/api/notifications", {
@@ -125,7 +121,9 @@ const MyNavbar = () => {
       })
       .then((res) => {
         const notifications = res.data.notifications || [];
-        setNotificationCount(notifications.length);
+        // Chỉ đếm những thông báo chưa đọc (read === false)
+        const unreadCount = notifications.filter((noti) => !noti.read).length;
+        setNotificationCount(unreadCount);
       })
       .catch((err) => {
         console.error("Error fetching notifications:", err);
@@ -133,20 +131,17 @@ const MyNavbar = () => {
       });
   };
 
-  // Polling: cập nhật thông báo mỗi 10 giây để giảm tải (10000ms)
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 1000);
+    const interval = setInterval(fetchNotifications, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  // Xử lý click vào icon thông báo (mở modal)
   const handleNotificationClick = () => {
     setShowNotificationModal(true);
     fetchNotifications();
   };
 
-  // Lấy dữ liệu sản phẩm để hỗ trợ tìm kiếm
   useEffect(() => {
     axios
       .get("/api/products")
@@ -158,7 +153,6 @@ const MyNavbar = () => {
       });
   }, []);
 
-  // Xử lý gợi ý tìm kiếm bằng Fuse.js
   useEffect(() => {
     if (searchTerm.trim() !== "" && products.length > 0) {
       const fuse = new Fuse(products, {
@@ -209,14 +203,12 @@ const MyNavbar = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Lấy dữ liệu giỏ hàng từ Redux
   const cartItems = useSelector((state) => state.cart.items);
   const totalItemsInCart = cartItems.reduce(
     (total, item) => total + item.quantity,
     0
   );
 
-  // Xử lý submit form tìm kiếm
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchTerm.trim() !== "" && suggestions.length === 0) {
@@ -227,7 +219,6 @@ const MyNavbar = () => {
     navigate(`/products?search=${encodeURIComponent(searchTerm)}`);
   };
 
-  // Click vào sản phẩm gợi ý để chuyển đến trang chi tiết
   const handleSuggestionClick = (productId) => {
     navigate(`/product/${productId}`);
     setShowSuggestions(false);
@@ -250,7 +241,6 @@ const MyNavbar = () => {
 
   return (
     <>
-      {/* Navbar chính */}
       <Navbar bg="light" expand="lg" className="py-2">
         <Container>
           <Row className="w-100 align-items-center">
@@ -276,8 +266,6 @@ const MyNavbar = () => {
                 </span>
               </Navbar.Brand>
             </Col>
-
-            {/* Các biểu tượng trên di động */}
             <Col xs={7} className="d-lg-none text-end pe-2">
               <Nav className="justify-content-end">
                 <div className="d-flex align-items-center ms-auto notification-modal">
@@ -309,7 +297,6 @@ const MyNavbar = () => {
                       </div>
                     )}
                   </Nav.Link>
-
                   <Nav.Link
                     onClick={handleNotificationClick}
                     className={`p-1 ms-2 position-relative ${
@@ -324,8 +311,6 @@ const MyNavbar = () => {
                       </span>
                     )}
                   </Nav.Link>
-
-                  {/* Chỉ hiển thị cart badge nếu người dùng đăng nhập */}
                   <Nav.Link
                     onClick={() => handleLinkClick("/gio-hang")}
                     className="p-1 ms-2 position-relative icon-wrapper"
@@ -344,16 +329,12 @@ const MyNavbar = () => {
                 </div>
               </Nav>
             </Col>
-
-            {/* Nút Toggle trên di động */}
             <Col xs={1} className="d-lg-none px-0 text-center">
               <Navbar.Toggle
                 aria-controls="navbarSupportedContent"
                 className="border-0"
               />
             </Col>
-
-            {/* Phần giữa: Tìm kiếm và Danh mục (di động) */}
             <Col lg={7} xs={12} className="order-last order-lg-0">
               <Navbar.Collapse id="navbarSupportedContent">
                 <div className="d-lg-none w-100 mb-3">
@@ -379,8 +360,6 @@ const MyNavbar = () => {
                     </Dropdown.Menu>
                   </Dropdown>
                 </div>
-
-                {/* Form Tìm kiếm */}
                 <Form
                   className="d-flex w-100 position-relative"
                   onSubmit={handleSearchSubmit}
@@ -420,7 +399,6 @@ const MyNavbar = () => {
                       </Dropdown.Menu>
                     </Dropdown>
                   </div>
-
                   <div
                     className="search-container flex-grow-1"
                     style={{ position: "relative" }}
@@ -470,8 +448,6 @@ const MyNavbar = () => {
                     )}
                   </div>
                 </Form>
-
-                {/* Navigation Links dành cho Mobile */}
                 <Nav className="flex-column mt-3 d-lg-none">
                   {NavMenu.map((link, index) => (
                     <button
@@ -486,8 +462,6 @@ const MyNavbar = () => {
                 </Nav>
               </Navbar.Collapse>
             </Col>
-
-            {/* Phần biểu tượng trên Desktop */}
             <Col lg={2} className="d-none d-lg-block notification-modal">
               <Nav className="justify-content-end align-items-end">
                 <Nav.Link
@@ -507,7 +481,6 @@ const MyNavbar = () => {
                     </div>
                   )}
                 </Nav.Link>
-
                 <Nav.Link
                   onClick={handleNotificationClick}
                   className={`me-3 position-relative ${
@@ -522,8 +495,6 @@ const MyNavbar = () => {
                     </span>
                   )}
                 </Nav.Link>
-
-                {/* Chỉ hiển thị cart badge nếu người dùng đăng nhập */}
                 <Nav.Link
                   onClick={() => handleLinkClick("/gio-hang")}
                   className="position-relative"
@@ -544,8 +515,6 @@ const MyNavbar = () => {
           </Row>
         </Container>
       </Navbar>
-
-      {/* Navbar bổ sung hiển thị trên Desktop */}
       <Navbar
         expand="lg"
         className="text-white d-none d-lg-block"
@@ -635,8 +604,6 @@ const MyNavbar = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-
-      {/* Modal thông báo */}
       <NotificationModal
         show={showNotificationModal}
         handleClose={() => setShowNotificationModal(false)}

@@ -1,4 +1,3 @@
-// OrderHistory.jsx
 import React, { useState, useEffect } from "react";
 import { Container, Table, Modal, Button, Row, Col } from "react-bootstrap";
 import { formatter } from "../../utils/fomater";
@@ -102,7 +101,7 @@ const OrderHistory = () => {
         show={showModal}
         onHide={() => setShowModal(false)}
         size="lg"
-        dialogClassName="order-modal"
+        dialogClassName="order-history-modal"
       >
         <Modal.Header closeButton>
           <Modal.Title>Chi tiết đơn hàng: {selectedOrder?.orderId}</Modal.Title>
@@ -235,7 +234,7 @@ const OrderHistory = () => {
                   <>
                     <h5 className="mt-3">Đánh giá sản phẩm</h5>
                     <OrderRating
-                      orderId={selectedOrder.orderId} // truyền orderId ở đây
+                      orderId={selectedOrder.orderId}
                       productIds={selectedOrder.items.map(
                         (item) => item.product._id
                       )}

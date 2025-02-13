@@ -39,7 +39,8 @@
 /* Định dạng ô trong bảng */
 .product-table th,
 .product-table td {
-    text-align: left;
+    text-align: center;
+        vertical-align: middle;
     padding: 8px 12px;
     white-space: nowrap;
     overflow: hidden;

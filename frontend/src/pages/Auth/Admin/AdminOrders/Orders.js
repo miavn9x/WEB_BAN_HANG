@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Table,
@@ -23,6 +23,11 @@ const Orders = () => {
     paymentStatus: "",
   });
 
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 10;
+  const totalPages = Math.ceil(orders.length / ordersPerPage);
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -34,7 +39,13 @@ const Orders = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setOrders(response.data.orders);
+      // Sắp xếp đơn hàng theo ngày tạo (newest first)
+      const sortedOrders = response.data.orders.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setOrders(sortedOrders);
+      // Nếu có đơn hàng mới, reset về trang 1
+      setCurrentPage(1);
     } catch (err) {
       console.error("Error fetching orders:", err);
       alert("Không thể tải danh sách đơn hàng.");
@@ -52,7 +63,6 @@ const Orders = () => {
     setShowModal(true);
   };
 
-  // frontend/Orders.js
   const handleUpdateStatus = async () => {
     setUpdating(true);
 
@@ -63,7 +73,7 @@ const Orders = () => {
     }
 
     try {
-      // Refund logic if the payment status is changing to "Hoàn tiền"
+      // Refund logic nếu chuyển thanh toán sang "Hoàn tiền"
       if (
         newStatus.paymentStatus === "Hoàn tiền" &&
         selectedOrder.paymentStatus !== "Hoàn tiền"
@@ -73,13 +83,12 @@ const Orders = () => {
             "Bạn có chắc chắn muốn hoàn tiền cho đơn hàng này không?"
           )
         ) {
-          // Call backend to perform the refund
           const refundResponse = await axios.post(
             `/api/payment/refund`,
             {
               orderId: selectedOrder._id,
               amount: selectedOrder.totalAmount,
-              paymentMethod: "Banking", // or determine based on the order
+              paymentMethod: "Banking",
             },
             {
               headers: {
@@ -98,12 +107,11 @@ const Orders = () => {
         }
       }
 
-      // Update order status (orderStatus and paymentStatus)
       const response = await axios.put(
         `/api/order/${selectedOrder._id}`,
         {
           orderStatus: newStatus.orderStatus,
-          paymentStatus: newStatus.paymentStatus, // Ensure it's "Hoàn tiền" here
+          paymentStatus: newStatus.paymentStatus,
         },
         {
           headers: {
@@ -112,7 +120,6 @@ const Orders = () => {
         }
       );
 
-      // Update orders in the frontend state
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order._id === selectedOrder._id ? response.data.order : order
@@ -159,42 +166,81 @@ const Orders = () => {
 
   if (loading) return <div>Đang tải...</div>;
 
+  // Phân trang: Tính toán các đơn hàng hiển thị theo trang hiện tại
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
+
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+
   return (
     <Container className="orders-container">
       <h2 className="my-4 orders-title">Lịch sử đơn hàng</h2>
-      <Table responsive striped bordered hover className="orders-table">
-        <thead>
-          <tr>
-            <th>Mã đơn hàng</th>
-            <th>Ngày đặt</th>
-            <th>Tổng tiền</th>
-            <th>Trạng thái đơn hàng</th>
-            <th>Trạng thái thanh toán</th>
-            <th>Chi tiết</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((order) => (
-            <tr key={order._id}>
-              <td>{order.orderId}</td>
-              <td>{order.formattedOrderDate}</td>
-              <td>{formatter(order.totalAmount)}</td>
-              <td>{getOrderStatusBadge(order.orderStatus)}</td>
-              <td>{getPaymentStatusBadge(order.paymentStatus)}</td>
-              <td>
-                <Button
-                  variant="info"
-                  size="sm"
-                  onClick={() => handleShowDetails(order)}
-                >
-                  Xem chi tiết
-                </Button>
-              </td>
+
+      {/* Khung hiển thị đơn hàng với chiều cao cố định 50vh và thanh cuộn */}
+      <div style={{ height: "50vh", overflowY: "auto" }}>
+        <Table responsive striped bordered hover className="orders-table">
+          <thead>
+            <tr>
+              <th>Mã đơn hàng</th>
+              <th>Ngày đặt</th>
+              <th>Tổng tiền</th>
+              <th>Trạng thái đơn hàng</th>
+              <th>Trạng thái thanh toán</th>
+              <th>Chi tiết</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
-      {/* Modal */}
+          </thead>
+          <tbody>
+            {currentOrders.map((order) => (
+              <tr key={order._id}>
+                <td>{order.orderId}</td>
+                <td>{order.formattedOrderDate}</td>
+                <td>{formatter(order.totalAmount)}</td>
+                <td>{getOrderStatusBadge(order.orderStatus)}</td>
+                <td>{getPaymentStatusBadge(order.paymentStatus)}</td>
+                <td>
+                  <Button
+                    variant="info"
+                    size="sm"
+                    onClick={() => handleShowDetails(order)}
+                  >
+                    Xem chi tiết
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+
+      {/* Bộ nút phân trang */}
+      {totalPages > 1 && (
+        <div className=" d-flex justify-content-center align-items-center mt-3 flex-nowrap">
+          <button
+            className="btn btn-secondary btn-sm me-2"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1 || loading}
+          >
+            &laquo; Trước
+          </button>
+          <span>
+            Trang {currentPage} của {totalPages}
+          </span>
+          <button
+            className="btn btn-secondary btn-sm ms-2"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages || loading}
+          >
+            Sau &raquo;
+          </button>
+        </div>
+      )}
+
+      {/* Modal chi tiết đơn hàng */}
       <Modal
         show={showModal}
         onHide={() => setShowModal(false)}
@@ -249,7 +295,6 @@ const Orders = () => {
             </Row>
           )}
         </Modal.Body>
-
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             Đóng
