@@ -49,8 +49,8 @@ app.use("/api", cartRoutes);
 const postRoutes = require("./routes/routesposts");
 app.use("/api", postRoutes);
 
-const reviewRouter = require("./routes/reviewRouter");
-app.use("/api", reviewRouter);
+// const reviewRouter = require("./routes/reviewRouter");
+// app.use("/api", reviewRouter);
 
 const questionRouter = require("./routes/questionRouter");
 app.use("/api", questionRouter);

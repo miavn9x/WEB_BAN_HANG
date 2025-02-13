@@ -13,7 +13,7 @@
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@mui/icons-material": "^6.4.1",
-    "@mui/material": "^6.4.1",
+    "@mui/material": "^6.4.4",
     "@mui/styled-engine-sc": "^6.4.0",
     "@reduxjs/toolkit": "^2.5.0",
     "@tinymce/tinymce-react": "^5.1.1",

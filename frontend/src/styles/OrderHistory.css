@@ -81,17 +81,11 @@
 .btn-danger:focus,
 .btn-danger:active {
     background-color: #FFB6C1 !important;
-    /* Khi hover: Hồng nhạt chuyển sang sắc hơn */
     border-color: #FFF8DC !important;
     color: #fff;
 }
 
-/* Nút khác (ví dụ nút Đóng, Xem chi tiết) */
-/* .btn-info {
-    background-color: #ffd5db !important;
-    border-color: #FFF8DC !important;
-    color: #333;
-} */
+
 
 .btn-info:hover,
 .btn-info:focus,
@@ -101,10 +95,8 @@
     color: #fff;
 }
 
-/* Một số style cho các chi tiết nhỏ */
 .text-detail {
     color: #E6E6FA;
-    /* Tím lavender cho các chi tiết nhỏ */
 }
 
 .payment-details p {

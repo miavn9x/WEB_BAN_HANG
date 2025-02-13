@@ -373,4 +373,44 @@ router.get("/products/related", async (req, res) => {
   }
 });
 
+
+
+// Endpoint để thêm đánh giá cho sản phẩm
+router.post("/products/:productId/reviews", async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { rating, reviewText } = req.body;
+    // Giả sử bạn có middleware auth để lấy userId
+    const userId = req.user ? req.user._id : null;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Số sao không hợp lệ" });
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Không tìm thấy sản phẩm" });
+    }
+
+    product.reviews.push({ userId, rating, reviewText });
+    // Tính lại điểm đánh giá trung bình (nếu cần)
+    const totalRatings = product.reviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+    product.rating = totalRatings / product.reviews.length;
+
+    await product.save();
+    res.json({ success: true, message: "Đánh giá đã được gửi thành công" });
+  } catch (error) {
+    console.error("Error adding review:", error);
+    res.status(500).json({ success: false, message: "Lỗi server" });
+  }
+});
+
+
 module.exports = router;
