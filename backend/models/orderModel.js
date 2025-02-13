@@ -36,16 +36,16 @@ const orderSchema = new mongoose.Schema(
     paymentMethod: {
       type: String,
       required: true,
-      enum: Object.values(PAYMENT_METHODS), 
+      enum: Object.values(PAYMENT_METHODS),
     },
     paymentStatus: {
       type: String,
-      enum: Object.values(PAYMENT_STATUS), 
+      enum: Object.values(PAYMENT_STATUS),
       default: PAYMENT_STATUS.PENDING,
     },
     orderStatus: {
       type: String,
-      enum: Object.values(ORDER_STATUS), 
+      enum: Object.values(ORDER_STATUS),
       default: ORDER_STATUS.PROCESSING,
     },
     userInfo: {
@@ -72,6 +72,7 @@ const orderSchema = new mongoose.Schema(
         });
       },
     },
+    rated: { type: Boolean, default: false },
   },
   {
     timestamps: true,

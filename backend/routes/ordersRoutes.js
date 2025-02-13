@@ -407,6 +407,34 @@ router.put("/order/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// Trong file routes/orderRoutes.js (hoặc file chứa các route đơn hàng)
+router.put("/orders/:orderId/rate", authMiddleware, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const userId = req.user._id;
+
+    const order = await Order.findOne({ orderId, userId });
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy đơn hàng!" });
+    }
+
+    if (order.rated) {
+      return res.status(400).json({ success: false, message: "Đơn hàng đã được đánh giá!" });
+    }
+
+    order.rated = true;
+    await order.save();
+
+    res.status(200).json({ success: true, message: "Đánh giá đơn hàng thành công!", order });
+  } catch (error) {
+    console.error("Lỗi khi cập nhật trạng thái đánh giá:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server khi cập nhật trạng thái đánh giá!",
+      error: error.message,
+    });
+  }
+});
 
 
 const { ORDER_STATUS, PAYMENT_STATUS } = require("../constants/orderConstants");

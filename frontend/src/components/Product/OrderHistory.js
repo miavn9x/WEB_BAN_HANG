@@ -1,3 +1,4 @@
+// OrderHistory.jsx
 import React, { useState, useEffect } from "react";
 import { Container, Table, Modal, Button, Row, Col } from "react-bootstrap";
 import { formatter } from "../../utils/fomater";
@@ -207,7 +208,7 @@ const OrderHistory = () => {
                   </tfoot>
                 </Table>
               </div>
-              {/* Nếu đơn hàng đã giao, thanh toán và chưa được đánh giá */}
+              {/* Hiển thị nút đánh giá nếu đơn hàng đã giao, đã thanh toán, chưa được rated */}
               {selectedOrder.orderStatus === "Đã giao hàng" &&
                 selectedOrder.paymentStatus === "Đã thanh toán" &&
                 !selectedOrder.rated &&
@@ -227,13 +228,14 @@ const OrderHistory = () => {
                   <strong>Đơn hàng đã được đánh giá.</strong>
                 </div>
               )}
-              {/* Khi người dùng nhấn đánh giá, hiển thị 1 ô đánh giá cho toàn bộ sản phẩm */}
+              {/* Khi người dùng nhấn đánh giá, hiển thị form đánh giá cho toàn bộ sản phẩm */}
               {showRating &&
                 selectedOrder &&
                 selectedOrder.items.length > 0 && (
                   <>
                     <h5 className="mt-3">Đánh giá sản phẩm</h5>
                     <OrderRating
+                      orderId={selectedOrder.orderId} // truyền orderId ở đây
                       productIds={selectedOrder.items.map(
                         (item) => item.product._id
                       )}

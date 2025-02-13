@@ -1,8 +1,9 @@
+// OrderRating.jsx
 import React, { useState } from "react";
 import { Box, Button, TextField, Typography, Paper } from "@mui/material";
 import Rating from "@mui/material/Rating";
 
-const OrderRating = ({ productIds, initialRating = 0, onSuccess }) => {
+const OrderRating = ({ orderId, productIds, initialRating = 0, onSuccess }) => {
   const [rating, setRating] = useState(initialRating);
   const [reviewText, setReviewText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,7 @@ const OrderRating = ({ productIds, initialRating = 0, onSuccess }) => {
     try {
       const token = localStorage.getItem("token");
 
-      // Gửi đánh giá cho tất cả các sản phẩm trong đơn hàng
+      // Gửi đánh giá cho từng sản phẩm trong đơn hàng
       const reviewPromises = productIds.map((productId) =>
         fetch(`/api/products/${productId}/reviews`, {
           method: "POST",
@@ -40,6 +41,24 @@ const OrderRating = ({ productIds, initialRating = 0, onSuccess }) => {
           setLoading(false);
           return;
         }
+      }
+
+      // Sau khi gửi đánh giá cho sản phẩm thành công, cập nhật trạng thái đánh giá cho đơn hàng
+      const rateResponse = await fetch(`/api/orders/${orderId}/rate`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const rateData = await rateResponse.json();
+      if (!rateData.success) {
+        alert(
+          rateData.message ||
+            "Có lỗi xảy ra khi cập nhật trạng thái đánh giá đơn hàng"
+        );
+        setLoading(false);
+        return;
       }
 
       alert("Cảm ơn bạn đã đánh giá sản phẩm!");
