@@ -10,7 +10,7 @@ import {
 } from "react-bootstrap";
 import { CiFilter } from "react-icons/ci";
 import { useLocation, useNavigate } from "react-router-dom";
-import Filter from "../../components/Filter/Filter"; // Import Filter component
+import Filter from "../Filter/Filter"; // Import Filter component
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../styles/ProductPage.css";
 import axios from "axios";
@@ -88,7 +88,6 @@ const brandFromURL = queryParams.get("brand");
           .toLowerCase()
       : "";
   };
-
 useEffect(() => {
   const fetchProducts = async () => {
     setLoading(true);
@@ -97,9 +96,7 @@ useEffect(() => {
       let url = `/api/products`;
       const params = [];
 
-      // ... xử lý các bộ lọc khác như category, giá, search
-
-      // Lấy các tham số tìm kiếm từ URL (nếu có)
+      // Xử lý các tham số truy vấn từ URL (search, categoryFromURL, genericFromURL, brandFromURL)
       if (searchFromURL) {
         params.push(`search=${encodeURIComponent(searchFromURL)}`);
       }
@@ -109,7 +106,6 @@ useEffect(() => {
       if (genericFromURL) {
         params.push(`categoryGeneric=${encodeURIComponent(genericFromURL)}`);
       }
-      // (Nếu API hỗ trợ lọc theo brand từ server, bạn có thể thêm)
       if (brandFromURL) {
         params.push(`brand=${encodeURIComponent(brandFromURL)}`);
       }
@@ -157,7 +153,46 @@ useEffect(() => {
         );
       }
 
-      // Xử lý sắp xếp (discountPercentage, priceAsc, priceDesc, ...)
+      // --- Áp dụng bộ lọc từ state filters ---
+
+      // 1. Lọc theo giá
+      if (filters.price) {
+        const { maxPrice, minPrice } = filters.price;
+        if (maxPrice) {
+          fetchedProducts = fetchedProducts.filter(
+            (product) => product.priceAfterDiscount <= maxPrice
+          );
+        }
+        if (minPrice) {
+          fetchedProducts = fetchedProducts.filter(
+            (product) => product.priceAfterDiscount >= minPrice
+          );
+        }
+      }
+
+      // 2. Lọc theo danh mục (categories)
+      const categoryFilterKeys = Object.keys(filters.categories);
+      if (categoryFilterKeys.length > 0) {
+        fetchedProducts = fetchedProducts.filter((product) => {
+          // Nếu sản phẩm không có thuộc tính category thì loại bỏ
+          if (!product.category) return false;
+          // Kiểm tra từng bộ lọc danh mục đang được chọn
+          return categoryFilterKeys.some((categoryName) => {
+            const filterId = filters.categories[categoryName];
+            // filterId có định dạng "Tên danh mục|Tùy chọn con"
+            const parts = filterId.split("|");
+            if (parts.length !== 2) return false;
+            const [filterCategory, filterOption] = parts;
+            // So sánh với dữ liệu sản phẩm (giả sử product.category có thuộc tính name và generic)
+            return (
+              product.category.name === filterCategory &&
+              product.category.generic === filterOption
+            );
+          });
+        });
+      }
+
+      // --- Xử lý sắp xếp ---
       if (sortBy === "discountPercentage") {
         fetchedProducts = fetchedProducts.filter(
           (product) => product.discountPercentage > 0
@@ -188,12 +223,13 @@ useEffect(() => {
 }, [
   categoryFromURL,
   genericFromURL,
-  brandFromURL, // đảm bảo thêm dependency này
+  brandFromURL,
   sortBy,
-  filters,
+  filters, // thêm dependency để chạy lại khi bộ lọc thay đổi
   searchFromURL,
   location.search,
 ]);
+
 
   return (
     <Container>

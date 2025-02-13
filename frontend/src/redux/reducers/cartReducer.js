@@ -84,6 +84,7 @@ export const cartReducer = (state = initialState, action) => {
     }
 
     case CART_ACTIONS.SET_CART: {
+      // Ở đây payload đã chứa các thông tin minimal cần thiết
       const newItems = action.payload.map((item) => ({
         product: item.product,
         quantity: Math.min(item.quantity, item.product.remainingStock),

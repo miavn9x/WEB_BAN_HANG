@@ -5,8 +5,6 @@ import { formatter } from "../../utils/fomater";
 import axios from "axios";
 import "../../styles/Checkout.css";
 import { CiShoppingBasket } from "react-icons/ci";
-
-// Import useDispatch và action cập nhật giỏ hàng từ localStorage (hoặc fetchCart)
 import { useDispatch } from "react-redux";
 import { loadCartFromLocalStorage } from "../../redux/actions/cartActions";
 
@@ -113,16 +111,16 @@ const Checkout = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Cập nhật localStorage: chỉ giữ lại các sản phẩm không được chọn thanh toán
+        // Cập nhật localStorage: sử dụng trường productId thay vì item.product._id
         const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
         const updatedCart = storedCart.filter(
-          (item) => !selectedProductIds.includes(item.product._id)
+          (item) => !selectedProductIds.includes(item.productId)
         );
         localStorage.setItem("cart", JSON.stringify(updatedCart));
 
         // Dispatch action cập nhật Redux store dựa trên localStorage mới
         dispatch(loadCartFromLocalStorage());
-        // (Hoặc thay thế bằng dispatch(fetchCart()) nếu bạn muốn gọi API lấy lại giỏ hàng)
+        // (Hoặc bạn có thể dùng dispatch(fetchCart()) nếu cần)
 
         localStorage.setItem(
           "lastOrderDetails",
@@ -180,7 +178,6 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
             <p>Số điện thoại: {orderData.userInfo?.phone}</p>
             <p>Địa Chỉ: {orderData.userInfo?.address}</p>
             <h6 className="text-center">Chi tiết đơn hàng</h6>
-            {/* Nếu số lượng sản phẩm vượt quá 5, hiển thị container scroll */}
             <div
               style={{
                 maxHeight:
@@ -271,7 +268,6 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                       }}
                     />
                     <span style={{ fontSize: "14px" }}>
-                      {" "}
                       Thanh toán khi giao hàng (COD)
                     </span>
                   </>
@@ -298,7 +294,6 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                       }}
                     />
                     <span style={{ fontSize: "14px" }}>
-                      {" "}
                       Chuyển khoản qua ngân hàng
                     </span>
                   </>
@@ -328,13 +323,12 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                 </div>
               )}
               <hr />
-              <div>Quý khách quyên khoản với nỗi dung mã đơn hàng</div>
+              <div>Quý khách chuyển khoản với nội dung mã đơn hàng</div>
               <hr />
               <div className="d-flex justify-content-between mt-4">
                 <button
-                  type="button" // Thêm thuộc tính này để không submit form khi bấm nút
+                  type="button"
                   className="d-flex"
-                  variant="link"
                   onClick={() => navigate("/gio-hang")}
                   style={{
                     fontSize: "35px",
@@ -342,7 +336,7 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                     backgroundColor: "transparent",
                   }}
                 >
-                  <CiShoppingBasket />{" "}
+                  <CiShoppingBasket />
                   <span style={{ fontSize: "14px", color: "#55555" }}>
                     Quay lại
                   </span>

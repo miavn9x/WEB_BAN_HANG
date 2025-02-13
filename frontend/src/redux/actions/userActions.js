@@ -1,7 +1,5 @@
-// actions/userActions.js;
 import axios from "axios";
 
-// Action để lấy thông tin profile người dùng
 export const fetchUserProfile = () => async (dispatch) => {
   try {
     const token = localStorage.getItem("token");
