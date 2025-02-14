@@ -6,8 +6,8 @@ import "../../../../styles/AddProduct.css";
 const AddProduct = () => {
   const [product, setProduct] = useState({
     name: "",
-    categoryName: "", // Danh mục sản phẩm
-    categoryGeneric: "", // Loại sản phẩm trong danh mục
+    categoryName: "",
+    categoryGeneric: "",
     brand: "",
     description: "",
     originalPrice: "",
@@ -17,6 +17,7 @@ const AddProduct = () => {
     stock: "",
   });
 
+  // Lưu trữ các ảnh được chọn dưới dạng object chứa file và URL để hiển thị preview
   const [selectedImages, setSelectedImages] = useState([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -104,7 +105,7 @@ const AddProduct = () => {
 
   // Mảng thương hiệu được phân nhóm theo danh mục
   const predefinedBrandsByCategory = {
-    'Sữa': [
+    Sữa: [
       "Vinamilk",
       "Dielac",
       "TH True Milk",
@@ -208,17 +209,30 @@ const AddProduct = () => {
     }));
   };
 
+  // Xử lý chọn ảnh: tạo Object URL cho từng file để hiển thị preview
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
+    const files = Array.from(e.target.files).map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
     setSelectedImages((prevImages) => [...prevImages, ...files]);
+  };
+
+  // Xóa ảnh đã chọn và thu hồi Object URL để giải phóng bộ nhớ
+  const handleRemoveImage = (index) => {
+    setSelectedImages((prevImages) => {
+      URL.revokeObjectURL(prevImages[index].url);
+      return prevImages.filter((_, i) => i !== index);
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formData = new FormData();
-    selectedImages.forEach((image) => {
-      formData.append("images", image);
+    // Duyệt qua selectedImages và gửi file gốc lên API
+    selectedImages.forEach((imageObj) => {
+      formData.append("images", imageObj.file);
     });
     Object.keys(product).forEach((key) => {
       formData.append(key, product[key]);
@@ -248,6 +262,8 @@ const AddProduct = () => {
           discountCode: "",
           stock: "",
         });
+        // Xóa hết ảnh đã chọn và thu hồi Object URL
+        selectedImages.forEach((img) => URL.revokeObjectURL(img.url));
         setSelectedImages([]);
         setSelectedBrand("");
       }
@@ -435,6 +451,57 @@ const AddProduct = () => {
                     required
                   />
                 </div>
+                {/* Phần preview hình ảnh được chọn */}
+                {selectedImages.length > 0 && (
+                  <div
+                    className="image-preview-container"
+                    style={{
+                      marginTop: "20px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {selectedImages.map((imageObj, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          position: "relative",
+                          margin: "05px",
+                        }}
+                      >
+                        <img
+                          src={imageObj.url}
+                          alt={`Preview ${index}`}
+                          style={{
+                            width: "70px",
+                            height: "70px",
+                            objectFit: "cover",
+                            border: "1px solid #ddd",
+                            borderRadius: "2px",
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(index)}
+                          style={{
+                            position: "absolute",
+                            top: "5px",
+                            right: "5px",
+                            background: "red",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "50%",
+                            width: "20px",
+                            height: "20px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          X
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div className="form-group">
                   <label>Chọn ảnh sản phẩm</label>
                   <input
@@ -447,7 +514,10 @@ const AddProduct = () => {
               </div>
             </div>
             <div className="text-center">
-              <button type="submit" className="btn btn-success btn-block mt-4">
+              <button
+                type="submit"
+                className="btn btn-secondary btn-block mt-4"
+              >
                 Thêm sản phẩm
               </button>
             </div>

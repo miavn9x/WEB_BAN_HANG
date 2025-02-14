@@ -130,7 +130,7 @@ const PostsManagement = () => {
                   <td>{new Date(post.date).toLocaleString()}</td>
                   <td>
                     <Link
-                      className="btn btn-sm btn-primary me-2"
+                      className="btn btn-sm  me-2 btn-secondary"
                       to={`/admin/add-bai-viet?id=${post._id}`}
                     >
                       Sửa

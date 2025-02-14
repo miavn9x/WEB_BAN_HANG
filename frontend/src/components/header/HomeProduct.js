@@ -33,7 +33,7 @@ const HomeProduct = () => {
         "/api/products?randomDiscount=true&limit=12"
       );
       const filteredProducts = response.data.products.filter(
-        (product) => product.discountPercentage > 6
+        (product) => product.discountPercentage > 14 //% giam gia
       );
       // Random đơn giản:
       const shuffledProducts = filteredProducts.sort(() => Math.random() - 0.5);
@@ -452,7 +452,7 @@ const HomeProduct = () => {
             <div className="custom__cat__row">
               <div className="custom__cat__banner">
                 <img
-                  src="https://theme.hstatic.net/200000381339/1001207774/14/cart_empty_background.png?v=164"
+                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739557196/banner_coll_1_aoko1r.jpg"
                   alt="Giỏ hàng trống"
                   style={{ width: "100%" }}
                 />
@@ -598,6 +598,18 @@ const HomeProduct = () => {
               <img
                 src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_10_cfzlzm.webp"
                 alt="Brand 10"
+              />
+            </SwiperSlide>
+            <SwiperSlide onClick={() => handleBrandClick("Pampers")}>
+              <img
+                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739560221/ship_aamlrw.png"
+                alt="Brand 11"
+              />
+            </SwiperSlide>
+            <SwiperSlide onClick={() => handleBrandClick("Pampers")}>
+              <img
+                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739560221/km_as1ytm.png"
+                alt="Brand 12"
               />
             </SwiperSlide>
           </Swiper>

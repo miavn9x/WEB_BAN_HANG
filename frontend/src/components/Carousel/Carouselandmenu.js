@@ -257,7 +257,7 @@ const CarouselAndMenu = () => {
               </Carousel.Item>
               <Carousel.Item>
                 <img
-                  src="https://cdn1.concung.com/themes/images/2025/01/5/1736149668_image_title_pc.png"
+                  src="https://theme.hstatic.net/200000381339/1001207774/14/slider_6.jpg?v=165"
                   className="d-block w-100"
                   alt="Banner 3"
                 />
