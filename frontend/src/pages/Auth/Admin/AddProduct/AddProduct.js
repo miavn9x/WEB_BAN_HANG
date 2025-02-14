@@ -104,7 +104,7 @@ const AddProduct = () => {
 
   // Mảng thương hiệu được phân nhóm theo danh mục
   const predefinedBrandsByCategory = {
-    Sữa: [
+    'Sữa': [
       "Vinamilk",
       "Dielac",
       "TH True Milk",

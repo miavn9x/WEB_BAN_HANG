@@ -1,63 +1,121 @@
 const express = require("express");
+const Product = require("../models/productModel");
+const multer = require("multer"); // Nhập multer vào
+const path = require("path"); // Để xử lý đường dẫn file
+const fs = require("fs"); // Để xử lý việc lưu trữ file
 const router = express.Router();
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Khởi tạo Gemini AI với API Key
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// Middleware kiểm tra API Key
-router.use((req, res, next) => {
-  if (!process.env.GEMINI_API_KEY) {
-    return res.status(500).json({ error: "API Key chưa được cấu hình" });
-  }
-  next();
+// Cấu hình multer để lưu trữ file vào thư mục tạm thời trên server
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    // Chỉ định thư mục để lưu trữ hình ảnh
+    cb(null, "uploads/"); // Lưu trữ trong thư mục "uploads"
+  },
+  filename: (req, file, cb) => {
+    // Đổi tên file để tránh trùng lặp (thêm timestamp vào tên file)
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname)); // Đảm bảo file có phần mở rộng gốc
+  },
 });
 
-router.post("/analyze-review", async (req, res) => {
+const upload = multer({ storage: storage });
+
+// API AI search để xử lý hình ảnh
+router.post("/ai-search", upload.single("image"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "Không có hình ảnh được tải lên." });
+  }
+
   try {
-    const { text } = req.body;
-
-    // Validate input
-    if (!text || typeof text !== "string") {
-      return res.status(400).json({ error: "Dữ liệu đầu vào không hợp lệ" });
-    }
-
-    // Giới hạn độ dài tối thiểu
-    if (text.trim().length < 3) {
-      return res.status(400).json({ error: "Vui lòng nhập ít nhất 3 ký tự" });
-    }
-
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-    // Prompt tối ưu cho tiếng Việt
-    const prompt = `Phân tích đánh giá sau (trả lời JSON):
-    {
-      "isNegative": boolean,
-      "reasons": string[],
-      "confidence": number
-    }
-    Đánh giá: "${text.substring(0, 1000)}"`;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const responseText = response.text();
-
-    // Xử lý response
-    const cleanText = responseText.replace(/```json|```/g, "").trim();
-    const analysis = JSON.parse(cleanText);
+    const imagePath = path.join(__dirname, "../uploads", req.file.filename);
 
     res.json({
-      isNegative: analysis.isNegative || false,
-      reasons: analysis.reasons || [],
-      confidence: analysis.confidence || 0,
+      message: "Hình ảnh đã được tải lên thành công",
+      imagePath: imagePath,
     });
+  } catch (err) {
+    console.error("Lỗi khi xử lý hình ảnh:", err);
+    return res.status(500).json({ error: "Lỗi xử lý hình ảnh." });
+  }
+});
+
+// Hàm loại bỏ ký tự đặc biệt trong regex
+const escapeRegex = (text) => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+
+// Các route tìm kiếm sản phẩm không thay đổi
+router.post("/search", async (req, res, next) => {
+  try {
+    const {
+      query = "",
+      categoryName,
+      categoryGeneric,
+      minPrice,
+      maxPrice,
+      sortBy = "default",
+      limit = 20,
+    } = req.body;
+
+    let searchQuery = {};
+
+    if (query.trim()) {
+      const safeQuery = escapeRegex(query.trim());
+      searchQuery.$or = [
+        { name: { $regex: safeQuery, $options: "i" } },
+        { brand: { $regex: safeQuery, $options: "i" } },
+        { description: { $regex: safeQuery, $options: "i" } },
+      ];
+    }
+
+    if (categoryName) {
+      searchQuery["category.name"] = {
+        $regex: escapeRegex(categoryName.trim()),
+        $options: "i",
+      };
+    }
+
+    if (categoryGeneric) {
+      const generics =
+        typeof categoryGeneric === "string"
+          ? categoryGeneric.split(",").map((g) => escapeRegex(g.trim()))
+          : categoryGeneric.map((g) => escapeRegex(g.trim()));
+      searchQuery["category.generic"] = { $in: generics };
+    }
+
+    let priceFilter = {};
+    if (!isNaN(parseFloat(minPrice))) {
+      priceFilter.$gte = parseFloat(minPrice);
+    }
+    if (!isNaN(parseFloat(maxPrice))) {
+      priceFilter.$lte = parseFloat(maxPrice);
+    }
+    if (Object.keys(priceFilter).length > 0) {
+      searchQuery.priceAfterDiscount = priceFilter;
+    }
+
+    const sortQuery =
+      sortBy === "priceAsc"
+        ? { priceAfterDiscount: 1 }
+        : sortBy === "priceDesc"
+        ? { priceAfterDiscount: -1 }
+        : sortBy === "discountPercentage"
+        ? { discountPercentage: -1 }
+        : {};
+
+    // Tìm kiếm sản phẩm dựa trên tiêu chí tìm kiếm cơ bản
+    let products = await Product.find(searchQuery)
+      .limit(Math.max(1, parseInt(limit)))
+      .sort(sortQuery);
+
+    // Nếu không tìm thấy sản phẩm nào, thử tìm gần đúng bằng MongoDB Text Search
+    if (products.length === 0 && query.trim()) {
+      products = await Product.find({ $text: { $search: query.trim() } })
+        .limit(Math.max(1, parseInt(limit)))
+        .sort({ score: { $meta: "textScore" } });
+    }
+
+    res.json({ products });
   } catch (error) {
-    console.error("Lỗi AI:", error);
-    res.status(500).json({
-      error: "Lỗi phân tích",
-      details: error.message,
-      action: "keep", // Giữ lại đánh giá nếu có lỗi
-    });
+    next(error);
   }
 });
 

@@ -446,5 +446,88 @@ router.get("/products/:productId", async (req, res) => {
   }
 });
 
+const escapeRegex = (text) => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+
+// Route tìm kiếm sản phẩm
+router.post("/search", async (req, res, next) => {
+  try {
+    const {
+      query = "",
+      categoryName,
+      categoryGeneric,
+      minPrice,
+      maxPrice,
+      sortBy = "default",
+      limit = 20,
+    } = req.body;
+
+    let searchQuery = {};
+
+    // Tìm kiếm theo từ khóa query
+    if (query.trim()) {
+      const safeQuery = escapeRegex(query.trim());
+      searchQuery.$or = [
+        { name: { $regex: safeQuery, $options: "i" } },
+        { brand: { $regex: safeQuery, $options: "i" } },
+        { description: { $regex: safeQuery, $options: "i" } },
+      ];
+    }
+
+    // Các bộ lọc thêm: thể loại, giá cả, v.v.
+    if (categoryName) {
+      searchQuery["category.name"] = {
+        $regex: escapeRegex(categoryName.trim()),
+        $options: "i",
+      };
+    }
+
+    if (categoryGeneric) {
+      const generics =
+        typeof categoryGeneric === "string"
+          ? categoryGeneric.split(",").map((g) => escapeRegex(g.trim()))
+          : categoryGeneric.map((g) => escapeRegex(g.trim()));
+      searchQuery["category.generic"] = { $in: generics };
+    }
+
+    // Bộ lọc giá
+    let priceFilter = {};
+    if (!isNaN(parseFloat(minPrice))) {
+      priceFilter.$gte = parseFloat(minPrice);
+    }
+    if (!isNaN(parseFloat(maxPrice))) {
+      priceFilter.$lte = parseFloat(maxPrice);
+    }
+    if (Object.keys(priceFilter).length > 0) {
+      searchQuery.priceAfterDiscount = priceFilter;
+    }
+
+    const sortQuery =
+      sortBy === "priceAsc"
+        ? { priceAfterDiscount: 1 }
+        : sortBy === "priceDesc"
+        ? { priceAfterDiscount: -1 }
+        : sortBy === "discountPercentage"
+        ? { discountPercentage: -1 }
+        : {};
+
+    // Truy vấn cơ sở dữ liệu với bộ lọc tìm kiếm
+    let products = await Product.find(searchQuery)
+      .limit(Math.max(1, parseInt(limit)))
+      .sort(sortQuery);
+
+    // Nếu không có kết quả, thử sử dụng tìm kiếm văn bản như một phương pháp dự phòng
+    if (products.length === 0 && query.trim()) {
+      products = await Product.find({ $text: { $search: query.trim() } })
+        .limit(Math.max(1, parseInt(limit)))
+        .sort({ score: { $meta: "textScore" } });
+    }
+
+    res.json({ products });
+  } catch (error) {
+    next(error);
+  }
+});
+
+
 
 module.exports = router;

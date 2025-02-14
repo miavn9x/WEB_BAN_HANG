@@ -1,23 +1,27 @@
-// models/SearchHistory.js
 const mongoose = require("mongoose");
 
-const searchHistorySchema = new mongoose.Schema(
+const SearchHistorySchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Người dùng là bắt buộc"],
+      required: true,
+      unique: true, // Mỗi user chỉ có 1 document lưu lịch sử tìm kiếm
     },
-    query: {
-      type: String,
-      required: [true, "Từ khóa tìm kiếm là bắt buộc"],
-    },
-    searchedAt: {
-      type: Date,
-      default: Date.now,
-    },
+    searches: [
+      {
+        query: { type: String, required: true },
+        searchedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model("SearchHistory", searchHistorySchema);
+// Tối ưu hóa truy vấn
+SearchHistorySchema.index({ user: 1 });
+SearchHistorySchema.index({ "searches.searchedAt": -1 });
+
+module.exports = mongoose.model("SearchHistory", SearchHistorySchema);

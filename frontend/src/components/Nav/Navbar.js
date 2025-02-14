@@ -217,21 +217,62 @@ const MyNavbar = () => {
   );
 
   // Xử lý submit form tìm kiếm
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (searchTerm.trim() !== "" && suggestions.length === 0) {
-      setShowSuggestions(true);
-      return;
-    }
+const handleSearchSubmit = (e) => {
+  e.preventDefault();
+
+  if (searchTerm.trim() === "") {
+    setSuggestions([]);
     setShowSuggestions(false);
-    navigate(`/products?search=${encodeURIComponent(searchTerm)}`);
-  };
+    return;
+  }
+
+  setShowSuggestions(false);
+
+  // Gửi request API tìm kiếm sản phẩm
+  axios
+    .post("/api/search", {
+      query: searchTerm,
+      categoryName: "", // Bạn có thể thêm bộ lọc thể loại ở đây nếu cần
+      categoryGeneric: "", // Có thể thêm bộ lọc cho thể loại chung nếu cần
+      minPrice: 0, // Thêm bộ lọc giá thấp nếu cần
+      maxPrice: 1000, // Thêm bộ lọc giá cao nếu cần
+      sortBy: "default", // Mặc định theo thứ tự
+      limit: 10, // Giới hạn 5 kết quả gợi ý
+    })
+    .then((res) => {
+      setSuggestions(res.data.products); // Cập nhật kết quả tìm kiếm vào suggestions
+      setShowSuggestions(true); // Hiển thị gợi ý
+      // Lưu lịch sử tìm kiếm nếu người dùng đã đăng nhập
+      const token = localStorage.getItem("token");
+      if (token) {
+        axios
+          .post(
+            "/api/searchtext",
+            { query: searchTerm },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+          .catch((err) => console.error("Lỗi lưu lịch sử tìm kiếm:", err));
+      }
+    })
+    .catch((err) => {
+      console.error("Lỗi khi gọi API tìm kiếm:", err);
+    });
+};
+
+
+// 
+
 
   // Click vào sản phẩm gợi ý để chuyển đến trang chi tiết
-  const handleSuggestionClick = (productId) => {
-    navigate(`/product/${productId}`);
-    setShowSuggestions(false);
-  };
+const handleSuggestionClick = (productId) => {
+  navigate(`/product/${productId}`);
+  setShowSuggestions(false); // Đóng danh sách gợi ý sau khi chọn
+};
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -424,6 +465,9 @@ const MyNavbar = () => {
                   <div
                     className="search-container flex-grow-1"
                     style={{ position: "relative" }}
+                    onSubmit={handleSearchSubmit}
+                    role="search"
+                    ref={searchRef}
                   >
                     <FormControl
                       type="search"
@@ -436,6 +480,7 @@ const MyNavbar = () => {
                       }}
                       ref={searchRef}
                     />
+
                     <Button
                       variant="danger"
                       type="submit"

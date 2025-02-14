@@ -32,13 +32,13 @@ import { Helmet } from "react-helmet"; // Thêm Helmet để tối ưu SEO
 import Evaluate from "./components/Product/Evaluate";
 import NotificationModal from "./components/Nav/NotificationModal";
 import ProductModals from "./components/Product/ProductModals";
-import Tests from "./components/Carousel/Tests";
 import ScrollToTopButton from "./pages/ScrollToTopButton";
 import { useDispatch } from "react-redux";
 import {
   fetchCart,
   loadCartFromLocalStorage,
 } from "./redux/actions/cartActions";
+import SearchPage from "./components/SearchPage";
 function App() {
   const [userRole, setUserRole] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -128,7 +128,7 @@ function App() {
         <Route path="/test" element={<Evaluate />} />
         <Route path="/1" element={<NotificationModal />} />
         <Route path="/order-history/:orderId" element={<OrderHistory />} />
-        <Route path="/2" element={<Tests />} />
+        <Route path="/2" element={<SearchPage />} />
 
         {/* Protected Routes - User & admin */}
         <Route
