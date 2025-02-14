@@ -8,6 +8,8 @@ const User = require("./models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const app = express();
+const { GoogleGenerativeAI } = require("@google/generative-ai"); // Thêm package mới
+
 const PORT = process.env.PORT || 5001;
 
 // Kết nối MongoDB
@@ -49,8 +51,6 @@ app.use("/api", cartRoutes);
 const postRoutes = require("./routes/routesposts");
 app.use("/api", postRoutes);
 
-// const reviewRouter = require("./routes/reviewRouter");
-// app.use("/api", reviewRouter);
 
 const questionRouter = require("./routes/questionRouter");
 app.use("/api", questionRouter);
@@ -62,7 +62,15 @@ app.use("/api/notifications", notificationRoutes);
 const timerRoutes = require("./routes/timerRoutes");
 app.use("/api", timerRoutes);
 
-// Chạy server
+// Import và sử dụng route AI
+const aiRoutes = require('./routes/aiRoutes');
+app.use('/api/ai', aiRoutes);
+
+
+// lich su xem
+const viewHistoryRoutes = require("./routes/viewHistory");
+app.use("/api/view-history", viewHistoryRoutes);
+
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
 });

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
+import debounce from "lodash.debounce";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import Slider from "react-slick";
@@ -12,21 +13,21 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../redux/actions/cartActions";
 import "../../styles/ProductModals.css";
 import { Helmet } from "react-helmet";
-import Evaluate from "./Evaluate";
+import RatingDisplay from "./RatingDisplay";
 
 const ProductModals = () => {
-  const { id } = useParams(); // Lấy ID sản phẩm từ URL
+  const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const [postContent, setPostContent] = useState(null); // State lưu bài viết của sản phẩm
+  const [postContent, setPostContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const [discountedProducts, setDiscountedProducts] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [cartMessage, setCartMessage] = useState("");
+  const [filter, setFilter] = useState("latest");
 
   const dispatch = useDispatch();
-
   const zoomSliderBig = useRef();
   const zoomSlider = useRef();
 
@@ -35,12 +36,25 @@ const ProductModals = () => {
     ? cartItems.some((item) => item.product._id === product._id)
     : false;
 
+  // useEffect: Lấy thông tin sản phẩm và danh sách sản phẩm giảm giá khi URL thay đổi
   useEffect(() => {
-    const fetchProductDetails = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`/api/products/${id}`);
-        setProduct(response.data.product);
+        // Lấy chi tiết sản phẩm
+        const productResponse = await axios.get(`/api/products/${id}`);
+        setProduct(productResponse.data.product);
+
+        // Lấy danh sách sản phẩm giảm giá
+        const discountedResponse = await axios.get(
+          "/api/products?randomDiscount=true&limit=16"
+        );
+        // Chỉ lấy các sản phẩm có discountPercentage > 1
+        const validDiscountProducts = discountedResponse.data.products.filter(
+          (prod) => prod.discountPercentage > 1
+        );
+        setDiscountedProducts(validDiscountProducts);
+
         setError(null);
       } catch (err) {
         console.error("Error fetching product details:", err);
@@ -50,11 +64,21 @@ const ProductModals = () => {
       }
     };
 
-    const fetchPostContent = async (productId) => {
+    if (id) {
+      fetchData();
+    }
+  }, [id]);
+
+  // useEffect: Lấy nội dung bài viết (nếu có) sau khi sản phẩm đã được load
+  useEffect(() => {
+    const fetchPostContent = async () => {
+      if (!product) return;
       try {
-        const response = await axios.get(`/api/posts/product/${productId}`);
+        const response = await axios.get(`/api/posts/product/${product._id}`);
         if (response.data.posts && response.data.posts.length > 0) {
           setPostContent(response.data.posts[0]);
+        } else {
+          setPostContent(null);
         }
       } catch (err) {
         console.error("Error fetching post content:", err);
@@ -62,36 +86,42 @@ const ProductModals = () => {
       }
     };
 
-    // Hàm fetch sản phẩm giảm giá (nếu có)
-const fetchDiscountedProducts = async () => {
-  try {
-    const response = await axios.get(
-      "/api/products?randomDiscount=true&limit=16"
-    );
-    // Lọc các sản phẩm có discountPercentage > " nhập số % giam giá cần lấy"
-    const productsWithValidDiscount = response.data.products.filter(
-      (product) => product.discountPercentage > 1
-    );
-    setDiscountedProducts(productsWithValidDiscount);
-  } catch (err) {
-    console.error("Error fetching discounted products:", err);
-  }
-};
+    fetchPostContent();
+  }, [product]);
 
-
-    if (id) {
-      fetchProductDetails().then(() => {
-        if (product?._id) {
-          fetchPostContent(product._id);
-        } else {
-          fetchPostContent(id);
+  // Sử dụng debounce để hạn chế gọi API lưu lịch sử xem quá nhiều lần
+  const saveViewHistory = useMemo(
+    () =>
+      debounce(async (productId) => {
+        const token = localStorage.getItem("token");
+        if (token) {
+          try {
+            const res = await axios.post(
+              "/api/view-history",
+              { product: productId },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            console.log("Lịch sử xem được lưu:", res.data);
+          } catch (err) {
+            console.error("Lỗi khi lưu lịch sử xem:", err);
+          }
         }
-      });
-      fetchDiscountedProducts();
-    }
-  }, [id, product?._id]);
+      }, 500),
+    []
+  );
 
-  const settings = {
+  // useEffect: Khi sản phẩm đã load, lưu lịch sử xem
+  useEffect(() => {
+    if (product && product._id) {
+      saveViewHistory(product._id);
+    }
+    return () => {
+      saveViewHistory.cancel();
+    };
+  }, [product, saveViewHistory]);
+
+  // Cấu hình slider cho hình ảnh chính và thumbnails
+  const settingsMain = {
     dots: false,
     infinite: false,
     speed: 700,
@@ -99,7 +129,7 @@ const fetchDiscountedProducts = async () => {
     slidesToScroll: 1,
   };
 
-  const settings1 = {
+  const settingsThumb = {
     dots: false,
     infinite: false,
     speed: 500,
@@ -109,54 +139,25 @@ const fetchDiscountedProducts = async () => {
   };
 
   const goTo = (index) => {
-    zoomSlider.current.slickGoTo(index);
-    zoomSliderBig.current.slickGoTo(index);
+    if (zoomSlider.current && zoomSliderBig.current) {
+      zoomSlider.current.slickGoTo(index);
+      zoomSliderBig.current.slickGoTo(index);
+    }
   };
 
-  // Xử lý loading và lỗi
-  if (loading) {
-    return (
-      <div className="loading-container text-center">
-        <Spinner animation="border" variant="primary" />
-        <div>Đang tải thông tin sản phẩm...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="error-message">{error}</div>;
-  }
-
-  if (!product) {
-    return <div>Không tìm thấy sản phẩm</div>;
-  }
-
-  // Tạo các biến SEO dựa trên thông tin sản phẩm
-  const productUrl = window.location.href; // URL hiện tại của sản phẩm
-  const productTitle = product.name;
-  const productDescription = product.description
-    ? product.description.substring(0, 150) + "..."
-    : "Thông tin sản phẩm của BabyMart.vn";
-  const productImage =
-    product.images && product.images.length > 0
-      ? product.images[0]
-      : "/default-image.jpg";
-
-  // Handle Add to Cart
+  // Xử lý thêm sản phẩm vào giỏ hàng
   const handleAddToCart = async () => {
+    if (isProductInCart) {
+      setCartMessage("Sản phẩm đã có trong giỏ hàng!");
+      setTimeout(() => setCartMessage(""), 3000);
+      return;
+    }
+    if (quantity > product.remainingStock) {
+      setCartMessage("Số lượng vượt quá hàng còn trong kho!");
+      setTimeout(() => setCartMessage(""), 3000);
+      return;
+    }
     try {
-      if (isProductInCart) {
-        setCartMessage("Sản phẩm đã có trong giỏ hàng!");
-        setTimeout(() => setCartMessage(""), 3000);
-        return;
-      }
-
-      if (quantity > product.remainingStock) {
-        setCartMessage("Số lượng vượt quá hàng còn trong kho!");
-        setTimeout(() => setCartMessage(""), 3000);
-        return;
-      }
-
       await dispatch(addToCart(product, Number(quantity)));
       setCartMessage("Đã thêm sản phẩm vào giỏ hàng!");
       setTimeout(() => setCartMessage(""), 3000);
@@ -167,28 +168,59 @@ const fetchDiscountedProducts = async () => {
     }
   };
 
+  // Xử lý chức năng mua ngay
   const handleBuyNow = async () => {
-    try {
-      if (!isProductInCart) {
-        // Nếu sản phẩm chưa có trong giỏ hàng, thêm vào giỏ
-        if (quantity > product.remainingStock) {
-          setCartMessage("số lượng mặt hàng đủ!");
-          setTimeout(() => setCartMessage(""), 3000);
-          return;
-        }
-        await dispatch(addToCart(product, Number(quantity)));
+    if (!isProductInCart) {
+      if (quantity > product.remainingStock) {
+        setCartMessage("Số lượng mặt hàng không đủ!");
+        setTimeout(() => setCartMessage(""), 3000);
+        return;
       }
-      window.location.href = "/gio-hang";
-    } catch (error) {
-      console.error("Lỗi khi mua ngay:", error);
-      setCartMessage("Có lỗi xảy ra khi xử lý đơn hàng!");
-      setTimeout(() => setCartMessage(""), 3000);
+      try {
+        await dispatch(addToCart(product, Number(quantity)));
+      } catch (error) {
+        console.error("Lỗi khi mua ngay:", error);
+        setCartMessage("Có lỗi xảy ra khi xử lý đơn hàng!");
+        setTimeout(() => setCartMessage(""), 3000);
+        return;
+      }
     }
+    window.location.href = "/gio-hang";
   };
+
+  // Nếu đang tải dữ liệu
+  if (loading) {
+    return (
+      <div className="loading-container text-center">
+        <Spinner animation="border" variant="primary" />
+        <div>Đang tải thông tin sản phẩm...</div>
+      </div>
+    );
+  }
+
+  // Nếu có lỗi xảy ra
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
+
+  // Nếu không tìm thấy sản phẩm
+  if (!product) {
+    return <div>Không tìm thấy sản phẩm</div>;
+  }
+
+  // Thiết lập các meta SEO dựa trên thông tin sản phẩm
+  const productUrl = window.location.href;
+  const productTitle = product.name;
+  const productDescription = product.description
+    ? product.description.substring(0, 150) + "..."
+    : "Thông tin sản phẩm của BabyMart.vn";
+  const productImage =
+    product.images && product.images.length > 0
+      ? product.images[0]
+      : "/default-image.jpg";
 
   return (
     <>
-      {/* Thẻ Helmet để tối ưu SEO */}
       <Helmet>
         <title>{productTitle} - BabyMart.vn</title>
         <meta name="description" content={productDescription} />
@@ -203,24 +235,24 @@ const fetchDiscountedProducts = async () => {
 
       <div className="container mt-4">
         <div className="row">
-          {/* Chi tiết sản phẩm chính */}
+          {/* Phần chi tiết sản phẩm chính */}
           <div className="col-lg-9 col-md-8">
             <div className="card mb-4" style={{ maxHeight: "100%" }}>
               <div className="card-body">
                 <div className="row product__modal__content">
-                  {/* Hình ảnh sản phẩm */}
+                  {/* Hình ảnh sản phẩm và thumbnails */}
                   <div className="col-lg-5 col-md-12 col-12 mb-3 mb-md-0">
                     <div className="product__modal__zoom position-relative">
                       {product.discountPercentage > 0 && (
                         <div
-                          className="badge badge-primary  product__discount"
-                          style={{ fontSize: "12px", padding:"8px 5px" }}
+                          className="badge badge-primary product__discount"
+                          style={{ fontSize: "12px", padding: "8px 5px" }}
                         >
                           - {product.discountPercentage} %
                         </div>
                       )}
                       <Slider
-                        {...settings}
+                        {...settingsMain}
                         className="zoomSliderBig"
                         ref={zoomSliderBig}
                       >
@@ -235,10 +267,9 @@ const fetchDiscountedProducts = async () => {
                         ))}
                       </Slider>
                     </div>
-                    {/* Thumbnails */}
                     <div className="thumbnail-container">
                       <Slider
-                        {...settings1}
+                        {...settingsThumb}
                         className="zoomSlider"
                         ref={zoomSlider}
                       >
@@ -256,7 +287,7 @@ const fetchDiscountedProducts = async () => {
                     </div>
                   </div>
 
-                  {/* Chi tiết sản phẩm */}
+                  {/* Thông tin sản phẩm */}
                   <div className="col-lg-7 col-md-12 d-flex flex-column product_name">
                     <p
                       className="product-title fs-5"
@@ -265,23 +296,9 @@ const fetchDiscountedProducts = async () => {
                       {product.name}
                     </p>
                     <div className="d-flex align-items-center pt-2">
-                      <label htmlFor="quantity" className="me-2 ">
-                        Tên Thương Hiệu:
-                      </label>
+                      <label className="me-2">Tên Thương Hiệu:</label>
                       <span>{product.brand}</span>
                     </div>
-
-                    <p className="text-muted">
-                      Đánh giá:{" "}
-                      {[...Array(Math.floor(product.rating))].map((_, i) => (
-                        <i key={i} className="fas fa-star text-warning"></i>
-                      ))}
-                      {product.rating % 1 !== 0 && (
-                        <i className="fas fa-star-half-alt text-warning"></i>
-                      )}{" "}
-                      | {product.reviews.length} đánh giá
-                    </p>
-
                     <div
                       style={{
                         fontSize: "14px",
@@ -292,8 +309,7 @@ const fetchDiscountedProducts = async () => {
                       <p className="text-muted">Chi Tiết Sản Phẩm:</p>
                       <span>{product.description}</span>
                     </div>
-
-                    <div className="product_price w-100 ">
+                    <div className="product_price w-100">
                       {cartMessage && (
                         <div
                           className={`alert ${
@@ -308,17 +324,14 @@ const fetchDiscountedProducts = async () => {
                       )}
                       <div className="quantity-wrapper mb-2">
                         <div className="d-flex align-items-center justify-content-center">
-                          <label htmlFor="quantity" className="me-2">
-                            Số lượng:
-                          </label>
+                          <label className="me-2">Số lượng:</label>
                           <QuantityBox
-                            maxQuantity={product?.remainingStock}
+                            maxQuantity={product.remainingStock}
                             quantity={quantity}
                             setQuantity={setQuantity}
                           />
                         </div>
                       </div>
-
                       <div className="price-wrapper">
                         <div className="d-flex mx-5 justify-content-center">
                           {product.originalPrice && (
@@ -333,7 +346,7 @@ const fetchDiscountedProducts = async () => {
                       </div>
                     </div>
                     <button
-                    style={{padding: "5px "}}
+                      style={{ padding: "5px" }}
                       className={`btn btn-lg mb-2 w-50 ${
                         isProductInCart
                           ? "btn-secondary disabled"
@@ -356,9 +369,15 @@ const fetchDiscountedProducts = async () => {
               </div>
             </div>
 
-            {/* Product Description – Hiển thị nội dung bài viết nếu có */}
+            {/* Hiển thị đánh giá sản phẩm */}
+            <RatingDisplay
+              product={product}
+              filter={filter}
+              setFilter={setFilter}
+            />
+
+            {/* Phần mô tả sản phẩm (nội dung bài viết nếu có) */}
             <div className="product-description">
-              {/* <h2>Mô tả sản phẩm</h2> */}
               {postContent ? (
                 <div>
                   <h4>{postContent.title}</h4>
@@ -378,55 +397,56 @@ const fetchDiscountedProducts = async () => {
                   </div>
                 </div>
               ) : (
-                <p>{""}</p>
+                <p></p>
               )}
             </div>
-            <div>
-              <Evaluate productId={id} />
-            </div>
+
+            {/* Phần đánh giá – nếu có */}
+            <div>{/* <Evaluate productId={id} /> */}</div>
           </div>
 
-          {/* Sidebar – Danh sách sản phẩm giảm giá */}
+          {/* Sidebar: Danh sách sản phẩm đang giảm giá */}
           <div className="col-lg-3 col-md-4 mt-4 mt-md-0">
             <div className="sidebar bg-white p-4 rounded shadow">
               <h5 className="text-center mb-3" style={{ color: "#339" }}>
                 Đang giảm giá
               </h5>
               <ul className="list-group">
-                {discountedProducts.map((product) => (
-                  <li
-                    key={product._id}
-                    className="list-group-item d-flex align-items-center border-0"
-                  >
-                    <Link
-                      to={`/product/${product._id}`}
-                      className="d-flex align-items-center text-decoration-none w-100"
+                {discountedProducts.length > 0 ? (
+                  discountedProducts.map((prod) => (
+                    <li
+                      key={prod._id}
+                      className="list-group-item d-flex align-items-center border-0"
                     >
-                      <img
-                        src={product.images[0] || "https://placehold.co/50x50"}
-                        alt={product.name}
-                        className="rounded"
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          objectFit: "cover",
-                        }}
-                      />
-                      <div className="ms-3">
-                        <span
-                          className="mb-0 text-start"
-                          style={{ color: "#333333" }}
-                        >
-                          {product.name}
-                        </span>
-                        <p className="text-danger mb-0">
-                          {formatter(product.priceAfterDiscount)}
-                        </p>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-                {discountedProducts.length === 0 && (
+                      <Link
+                        to={`/product/${prod._id}`}
+                        className="d-flex align-items-center text-decoration-none w-100"
+                      >
+                        <img
+                          src={prod.images[0] || "https://placehold.co/50x50"}
+                          alt={prod.name}
+                          className="rounded"
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            objectFit: "cover",
+                          }}
+                        />
+                        <div className="ms-3">
+                          <span
+                            className="mb-0 text-start"
+                            style={{ color: "#333333" }}
+                          >
+                            {prod.name}
+                          </span>
+                          <p className="text-danger mb-0">
+                            {formatter(prod.priceAfterDiscount)}
+                          </p>
+                        </div>
+                      </Link>
+                    </li>
+                  ))
+                ) : (
                   <li className="list-group-item border-0 text-muted">
                     Không có sản phẩm nào đang giảm giá.
                   </li>
