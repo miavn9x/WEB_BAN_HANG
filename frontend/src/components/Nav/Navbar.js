@@ -313,7 +313,7 @@ const handleSuggestionClick = (productId) => {
                 />
                 <span className="logo-text navbar-text">
                   <span className="text-danger fs-3 fw-bold me-1">Baby</span>
-                  <span className="text-primary fs-3 fw-bold">Mart</span>
+                  <span className="text-primary fs-3 fw-bold">Chill</span>
                 </span>
               </Navbar.Brand>
             </Col>
@@ -640,13 +640,13 @@ const handleSuggestionClick = (productId) => {
                 onClick={() => handleLinkClick("Khuyến Mãi 1")}
                 className="promotion-dropdown-item"
               >
-                Khuyến mãi 1
+                Mua 1 Được 2
               </NavDropdown.Item>
               <NavDropdown.Item
                 onClick={() => handleLinkClick("Khuyến Mãi 2")}
                 className="promotion-dropdown-item"
               >
-                Khuyến mãi 2
+                Thông Tin Khuyến Mãi
               </NavDropdown.Item>
             </NavDropdown>
           </div>

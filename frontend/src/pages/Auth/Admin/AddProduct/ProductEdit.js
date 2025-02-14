@@ -611,7 +611,7 @@ const ProductEdit = () => {
                           </td>
                           <td className="text-center">
                             <button
-                              className="btn btn-warning btn-sm mx-2"
+                              className="btn btn-secondary btn-sm mx-2"
                               onClick={() => handleEditProduct(product)}
                             >
                               sửa

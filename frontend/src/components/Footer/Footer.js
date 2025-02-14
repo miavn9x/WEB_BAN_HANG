@@ -20,17 +20,17 @@ const Footer = () => {
               <div className="logo d-flex align-items-center">
                 <img
                   src="https://res.cloudinary.com/div27nz1j/image/upload/v1737451253/1_vmcjnj.png"
-                  alt="Logo của Baby Mart"
+                  alt="Logo của Baby chill"
                   width="60"
                   height="auto"
                 />
                 <span className="logo-text ms-2" style={{ fontSize: "16px" }}>
                   <span className="text-danger fw-bold"> Baby </span>
-                  <span className="text-primary fw-bold"> Mart </span>
+                  <span className="text-primary fw-bold"> chill </span>
                 </span>
               </div>
               <p className="pt-1">
-                Siêu thị Baby Mart <br /> Thương hiệu mẹ và bé uy tín và chất
+                Siêu thị Baby chill <br /> Thương hiệu mẹ và bé uy tín và chất
                 lượng, cam kết mang đến trải nghiệm mua sắm tiện lợi, hiện đại
                 và phong phú.
               </p>
@@ -48,8 +48,8 @@ const Footer = () => {
                 </p>
                 <p>
                   <i className="fas fa-envelope"></i> Email:
-                  <a href="mailto:support.babymart@gmail.com" className="ms-1">
-                    support.babymart@gmail.com
+                  <a href="mailto:support.babychill@gmail.com" className="ms-1">
+                    support.babychill@gmail.com
                   </a>
                 </p>
               </address>
