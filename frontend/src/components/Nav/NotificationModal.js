@@ -39,7 +39,7 @@ const NotificationModal = ({ show, handleClose }) => {
       fetchNotifications();
 
       // Polling cập nhật thông báo mỗi 15 giây (tăng khoảng thời gian polling)
-      const intervalId = setInterval(fetchNotifications, 15000);
+      const intervalId = setInterval(fetchNotifications, 1000);
       return () => clearInterval(intervalId);
     }
   }, [show]);

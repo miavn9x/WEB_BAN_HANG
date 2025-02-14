@@ -4,6 +4,8 @@ const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const Product = require("../models/productModel");
 const router = express.Router();
+const authMiddleware = require("../middleware/authMiddleware");
+const User = require("../models/User");
 
 // Cấu hình Multer để lưu trữ tạm thời các tệp trong bộ nhớ
 const storage = multer.memoryStorage();
@@ -19,7 +21,7 @@ cloudinary.config({
 const checkDuplicate = async (name, brand, category) => {
   try {
     const existingProduct = await Product.findOne({ name, brand, category });
-    return existingProduct; 
+    return existingProduct;
   } catch (err) {
     throw new Error("Lỗi kiểm tra trùng lặp");
   }
@@ -72,8 +74,8 @@ router.post("/products", upload.array("images", 20), async (req, res) => {
       priceAfterDiscount,
       discountCode,
       images,
-      stock, 
-      remainingStock: stock, 
+      stock,
+      remainingStock: stock,
     });
 
     await newProduct.save();
@@ -185,7 +187,6 @@ router.get("/products", async (req, res) => {
   }
 });
 
-
 // Route lấy chi tiết sản phẩm theo ID
 router.get("/products/:id", async (req, res) => {
   const productId = req.params.id;
@@ -204,10 +205,11 @@ router.get("/products/:id", async (req, res) => {
     res.status(200).json({ product });
   } catch (error) {
     console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
-    res.status(500).json({ message: "Có lỗi xảy ra khi lấy thông tin sản phẩm." });
+    res
+      .status(500)
+      .json({ message: "Có lỗi xảy ra khi lấy thông tin sản phẩm." });
   }
 });
-
 
 // Route sửa sản phẩm (PUT)
 router.put("/products/:id", upload.array("images", 20), async (req, res) => {
@@ -226,8 +228,9 @@ router.put("/products/:id", upload.array("images", 20), async (req, res) => {
     }
 
     // Extract category data from request body
-    const categoryName = req.body['category[name]'] || req.body.category?.name;
-    const categoryGeneric = req.body['category[generic]'] || req.body.category?.generic;
+    const categoryName = req.body["category[name]"] || req.body.category?.name;
+    const categoryGeneric =
+      req.body["category[generic]"] || req.body.category?.generic;
 
     // Construct updated product data
     const updatedProductData = {
@@ -235,15 +238,17 @@ router.put("/products/:id", upload.array("images", 20), async (req, res) => {
       brand: req.body.brand || existingProduct.brand,
       description: req.body.description || existingProduct.description,
       originalPrice: req.body.originalPrice || existingProduct.originalPrice,
-      discountPercentage: req.body.discountPercentage || existingProduct.discountPercentage,
-      priceAfterDiscount: req.body.priceAfterDiscount || existingProduct.priceAfterDiscount,
+      discountPercentage:
+        req.body.discountPercentage || existingProduct.discountPercentage,
+      priceAfterDiscount:
+        req.body.priceAfterDiscount || existingProduct.priceAfterDiscount,
       discountCode: req.body.discountCode || existingProduct.discountCode,
       remainingStock: req.body.remainingStock || existingProduct.remainingStock,
       stock: req.body.stock || existingProduct.stock,
       category: {
         name: categoryName || existingProduct.category.name,
-        generic: categoryGeneric || existingProduct.category.generic
-      }
+        generic: categoryGeneric || existingProduct.category.generic,
+      },
     };
 
     // Handle image upload
@@ -285,15 +290,14 @@ router.put("/products/:id", upload.array("images", 20), async (req, res) => {
       { new: true }
     );
 
-
     res.status(200).json({
       message: "Sản phẩm đã được cập nhật thành công.",
       product: updatedProduct,
     });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       message: "Có lỗi xảy ra khi cập nhật sản phẩm.",
-      error: error.message 
+      error: error.message,
     });
   }
 });
@@ -369,45 +373,75 @@ router.get("/products/related", async (req, res) => {
     return res.status(200).json({ products });
   } catch (error) {
     console.error("Error fetching related products:", error);
-    return res.status(500).json({ message: "Lỗi server khi lấy sản phẩm liên quan" });
+    return res
+      .status(500)
+      .json({ message: "Lỗi server khi lấy sản phẩm liên quan" });
   }
 });
 
 
 
-// Endpoint để thêm đánh giá cho sản phẩm
-router.post("/products/:productId/reviews", async (req, res) => {
+// Route POST thêm review cho sản phẩm
+router.post("/products/:productId/reviews", authMiddleware, async (req, res) => {
   try {
     const { productId } = req.params;
     const { rating, reviewText } = req.body;
-    // Giả sử bạn có middleware auth để lấy userId
-    const userId = req.user ? req.user._id : null;
+    const userId = req.user._id;
 
+    // Kiểm tra rating hợp lệ (1 - 5)
     if (!rating || rating < 1 || rating > 5) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Số sao không hợp lệ" });
+      return res.status(400).json({ success: false, message: "Số sao không hợp lệ" });
     }
 
-    const product = await Product.findById(productId);
+    // Tìm sản phẩm theo productId và populate reviews.userId để có thông tin người dùng
+    const product = await Product.findById(productId).populate("reviews.userId", "firstName lastName");
     if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Không tìm thấy sản phẩm" });
+      return res.status(404).json({ success: false, message: "Không tìm thấy sản phẩm" });
     }
 
-    product.reviews.push({ userId, rating, reviewText });
-    // Tính lại điểm đánh giá trung bình (nếu cần)
-    const totalRatings = product.reviews.reduce(
-      (sum, review) => sum + review.rating,
-      0
-    );
+    // Lấy thông tin người dùng để kiểm tra (populate chỉ dùng để hiển thị, không lưu tên vào model)
+    const user = await User.findById(userId).select("firstName lastName");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Người dùng không tồn tại" });
+    }
+
+    // Thêm review vào mảng reviews (chỉ lưu userId theo cấu trúc hiện có)
+    product.reviews.push({
+      userId,
+      reviewText,
+      rating,
+    });
+
+    // Tính lại điểm trung bình của sản phẩm
+    const totalRatings = product.reviews.reduce((sum, review) => sum + review.rating, 0);
     product.rating = totalRatings / product.reviews.length;
 
+    // Lưu thay đổi vào CSDL
     await product.save();
-    res.json({ success: true, message: "Đánh giá đã được gửi thành công" });
+
+    // Lấy lại sản phẩm với populate đầy đủ thông tin review
+    const updatedProduct = await Product.findById(productId).populate("reviews.userId", "firstName lastName");
+    return res.json({
+      success: true,
+      product: updatedProduct,
+      message: "Đánh giá đã được gửi thành công",
+    });
   } catch (error) {
     console.error("Error adding review:", error);
+    return res.status(500).json({ success: false, message: "Lỗi server" });
+  }
+});
+
+// Route GET lấy thông tin sản phẩm theo productId
+router.get("/products/:productId", async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.productId).populate("reviews.userId", "firstName lastName");
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy sản phẩm" });
+    }
+    res.json({ success: true, product });
+  } catch (error) {
+    console.error("Error fetching product:", error);
     res.status(500).json({ success: false, message: "Lỗi server" });
   }
 });

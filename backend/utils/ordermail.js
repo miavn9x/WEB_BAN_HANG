@@ -10,7 +10,6 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendOrderConfirmationEmail = async (orderDetails, userEmail) => {
-  // Xác định nhãn thanh toán và trạng thái thanh toán
   const paymentLabel =
     PAYMENT_METHOD_LABELS[orderDetails.paymentMethod] || "Không xác định";
   const paymentStatusLabel =
@@ -18,7 +17,6 @@ const sendOrderConfirmationEmail = async (orderDetails, userEmail) => {
       ? "Chờ xác nhận"
       : orderDetails.paymentStatus;
 
-  // Tạo danh sách sản phẩm với hàng xen kẽ nền cho dễ đọc
   const itemsList = orderDetails.items
     .map((item, index) => {
       const rowBg = index % 2 === 0 ? "#FFF4E6" : "#fff";
@@ -49,7 +47,6 @@ const sendOrderConfirmationEmail = async (orderDetails, userEmail) => {
       `
       : "";
 
-  // Template email với giao diện chuyên nghiệp
   const emailTemplate = `
     <div style="font-family: 'Arial', sans-serif; background-color: #FFF4E6; padding: 30px; border-radius: 10px; max-width: 650px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
       <!-- Header -->
@@ -134,7 +131,6 @@ const sendOrderConfirmationEmail = async (orderDetails, userEmail) => {
     </div>
   `;
 
-  // Thiết lập cấu hình gửi email
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: userEmail,

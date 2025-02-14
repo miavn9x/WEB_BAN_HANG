@@ -43,26 +43,26 @@ const Login = () => {
     setLoading(true);
     setError("");
 
-  try {
-    const response = await axios.post(`/api/auth/login/`, formData);
-    if (response.data.token) {
-      localStorage.setItem("token", response.data.token);
+    try {
+      const response = await axios.post(`/api/auth/login/`, formData);
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
 
-      // Đảm bảo fetchCart hoàn thành trước khi chuyển trang
-      await dispatch(fetchCart()); // Thêm await
+        // Đảm bảo fetchCart hoàn thành trước khi chuyển trang
+        await dispatch(fetchCart()); // Thêm await
 
-      const redirectTo = location.state?.from || "/";
-      navigate(redirectTo, { replace: true }); // Thêm replace: true để tránh history stack
+        const redirectTo = location.state?.from || "/";
+        navigate(redirectTo, { replace: true }); // Thêm replace: true để tránh history stack
+      }
+    } catch (err) {
+      console.error("Chi tiết lỗi:", err.response?.data);
+      setError(
+        err.response?.data?.message ||
+          "Không thể kết nối đến server. Vui lòng thử lại sau."
+      );
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Chi tiết lỗi:", err.response?.data);
-    setError(
-      err.response?.data?.message ||
-        "Không thể kết nối đến server. Vui lòng thử lại sau."
-    );
-  } finally {
-    setLoading(false);
-  }
   };
 
   useEffect(() => {

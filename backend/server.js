@@ -62,14 +62,19 @@ app.use("/api/notifications", notificationRoutes);
 const timerRoutes = require("./routes/timerRoutes");
 app.use("/api", timerRoutes);
 
-// Import và sử dụng route AI
-const aiRoutes = require('./routes/aiRoutes');
-app.use('/api/ai', aiRoutes);
+// // Import và sử dụng route AI
+// const aiRoutes = require('./routes/aiRoutes');
+// app.use('/api/ai', aiRoutes);
 
 
-// lich su xem
-const viewHistoryRoutes = require("./routes/viewHistory");
-app.use("/api/view-history", viewHistoryRoutes);
+// // lich su xem
+// const viewHistoryRoutes = require("./routes/viewHistory");
+// app.use("/api/view-history", viewHistoryRoutes);
+
+// // lich su tim kiem
+// app.use("/search-history", require("./routes/searchHistoryRoutes"));
+
+
 
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
