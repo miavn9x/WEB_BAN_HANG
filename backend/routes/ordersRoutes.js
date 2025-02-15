@@ -5,6 +5,8 @@ const authMiddleware = require("../middleware/authMiddleware");
 const { sendOrderConfirmationEmail } = require("../utils/ordermail");
 const Product = require("../models/productModel");
 const Notification = require("../models/notificationModel");
+const User = require("../models/User");
+
 
 // ✅ API Tạo Đơn Hàng (Đã gộp chính xác)
 router.post("/orders", authMiddleware, async (req, res) => {
@@ -434,7 +436,6 @@ router.post("/payment/refund", authMiddleware, async (req, res) => {
 });
 
 // Cấu hình trạng thái (nếu cần dùng cho giao diện hay xử lý khác)
-
 const statusConfig = {
   "Đang xử lý": { color: "warning", text: "Đang xử lý" },
   "Đã xác nhận": { color: "info", text: "Đã xác nhận" },
@@ -443,6 +444,7 @@ const statusConfig = {
   "Đã hủy": { color: "danger", text: "Đã hủy" },
 };
 
+// API: Thống kê đơn hàng với đầy đủ thông tin chi tiết (bao gồm: sản phẩm & người dùng)
 router.get("/order-stats", authMiddleware, async (req, res) => {
   try {
     const { period = "day" } = req.query; // Mặc định là "day" nếu không có
@@ -476,9 +478,10 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
 
     console.log("🔎 Lấy danh sách đơn hàng với filter:", filter);
 
-    // Tìm tất cả đơn hàng theo filter
+    // Tìm tất cả đơn hàng theo filter, populate thông tin sản phẩm và người dùng
     const orders = await Order.find(filter)
-      .populate("items.product")
+      .populate("items.product") // Lấy đầy đủ chi tiết sản phẩm
+      .populate("userId") // Lấy đầy đủ thông tin người dùng (User model đã loại bỏ password,...)
       .sort({ createdAt: -1 });
 
     // Khởi tạo thống kê đơn hàng (số lượng)
@@ -508,11 +511,14 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
     };
 
     orders.forEach((order) => {
-      // Chuẩn hóa thông tin đơn hàng (theo yêu cầu)
+      // Chuẩn hóa thông tin đơn hàng với đầy đủ chi tiết:
       const formattedOrder = {
         orderId: order.orderId,
-        userInfo: order.userInfo,
+        userInfo: order.userInfo, // Thông tin lúc đặt hàng (snapshot)
+        user: order.userId, // Thông tin chi tiết người dùng (đã populate)
         totalAmount: order.totalAmount,
+        subtotal: order.subtotal,
+        shippingFee: order.shippingFee,
         paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
         formattedOrderDate: new Date(order.createdAt).toLocaleString("vi-VN", {
@@ -529,11 +535,11 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
           price: item.price,
           quantity: item.quantity,
           image: item.image,
-          product: item.product,
+          product: item.product, // Chi tiết sản phẩm đã populate
         })),
       };
 
-      // Phân loại và tính doanh thu (chỉ tính 4 trạng thái)
+      // Phân loại đơn hàng và tính doanh thu theo trạng thái
       if (order.orderStatus === "Đang xử lý") {
         orderStats.processing++;
         categorizedOrders.processing.push(formattedOrder);
@@ -562,7 +568,7 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
     res.status(200).json({
       success: true,
       orderStats,
-      revenueStats, // Trả về doanh thu theo trạng thái
+      revenueStats, // Doanh thu theo từng trạng thái
       categorizedOrders,
       statusConfig,
     });
@@ -572,14 +578,14 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
   }
 });
 
-
+// API: Thống kê bán hàng với thông tin chi tiết sản phẩm
 router.get("/sales-stats", authMiddleware, async (req, res) => {
   try {
     const { period = "all", year } = req.query; // Mặc định lấy toàn bộ dữ liệu
     let startDate = null;
+    const now = new Date();
 
     // Xác định khoảng thời gian lọc
-    const now = new Date();
     if (period === "day") {
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     } else if (period === "week") {
@@ -594,17 +600,18 @@ router.get("/sales-stats", authMiddleware, async (req, res) => {
       startDate = new Date(now.getFullYear(), 0, 1);
     } else if (period === "multi-year" && year) {
       startDate = new Date(year, 0, 1);
-    } // Nếu period là "all", startDate sẽ null và không áp dụng bộ lọc
+    }
+    // Nếu period là "all", startDate vẫn là null và không áp dụng bộ lọc
 
-    // Xây dựng bộ lọc MongoDB
+    // Xây dựng bộ lọc cho MongoDB
     let filter = {};
     if (startDate) {
       filter.orderDate = { $gte: startDate };
     }
 
-    // Thống kê đơn hàng theo thời gian
+    // Thực hiện aggregation thống kê đơn hàng theo thời gian
     const salesAggregation = await Order.aggregate([
-      { $match: filter }, // Lọc theo thời gian nếu có
+      { $match: filter }, // Lọc theo khoảng thời gian nếu có
       { $unwind: "$items" }, // Tách từng sản phẩm trong đơn hàng
       {
         $group: {
@@ -615,43 +622,60 @@ router.get("/sales-stats", authMiddleware, async (req, res) => {
       { $sort: { totalSold: -1 } }, // Sắp xếp theo số lượng bán giảm dần
     ]);
 
-    // Tổng số lượng sản phẩm bán ra trong khoảng thời gian
+    // Tổng số lượng sản phẩm bán ra theo khoảng thời gian
     const totalSoldFiltered = salesAggregation.reduce(
       (acc, curr) => acc + curr.totalSold,
       0
     );
 
-    // Lấy thông tin chi tiết của các sản phẩm bán chạy
     const bestSellingProducts = await Product.populate(salesAggregation, {
       path: "_id",
+      populate: [
+        { path: "similarProducts", model: "Product" },
+        { path: "reviews.userId", model: "User" },
+      ],
     });
 
-    // Chuyển đổi dữ liệu để trả về
+    // Chuyển đổi dữ liệu để trả về với đầy đủ chi tiết sản phẩm
     const bestSelling = bestSellingProducts.map((item) => {
       const product = item._id;
       return {
         productId: product._id,
         name: product.name,
-        totalSold: item.totalSold,
+        category: product.category,
+        brand: product.brand,
+        description: product.description,
+        images: product.images,
+        originalPrice: product.originalPrice,
+        discountPercentage: product.discountPercentage,
+        priceAfterDiscount: product.priceAfterDiscount,
+        discountCode: product.discountCode,
+        rating: product.rating,
+        reviews: product.reviews,
         stock: product.stock,
         remainingStock: product.remainingStock,
+        salesCount: product.salesCount,
+        viewCount: product.viewCount,
+        tags: product.tags,
+        similarProducts: product.similarProducts,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+        totalSold: item.totalSold,
         soldCalculated: product.stock - product.remainingStock, // Số lượng đã bán thực tế
       };
     });
 
-    // Lấy tổng số hàng trong kho và số lượng còn lại (không bị ảnh hưởng bởi khoảng thời gian)
+    // Lấy tổng số hàng trong kho (không phụ thuộc khoảng thời gian)
     const inventoryAggregation = await Product.aggregate([
       {
         $group: {
           _id: null,
-          totalStock: { $sum: "$stock" }, // Tổng số hàng nhập kho
-          totalRemaining: { $sum: "$remainingStock" }, // Tổng số hàng còn lại
-          totalSold: { $sum: { $subtract: ["$stock", "$remainingStock"] } }, // Tổng số hàng đã bán
+          totalStock: { $sum: "$stock" },
+          totalRemaining: { $sum: "$remainingStock" },
+          totalSold: { $sum: { $subtract: ["$stock", "$remainingStock"] } },
         },
       },
     ]);
-
-    // Nếu không có dữ liệu, gán giá trị mặc định
     const totalInventory = inventoryAggregation[0] || {
       totalStock: 0,
       totalRemaining: 0,
@@ -661,8 +685,8 @@ router.get("/sales-stats", authMiddleware, async (req, res) => {
     res.status(200).json({
       success: true,
       totalSoldFiltered, // Tổng số lượng bán theo khoảng thời gian chọn
-      bestSelling,
-      totalInventory, // { totalStock, totalRemaining, totalSold }
+      bestSelling, // Danh sách sản phẩm bán chạy với đầy đủ chi tiết
+      totalInventory, // Thông tin tổng kho: { totalStock, totalRemaining, totalSold }
     });
   } catch (error) {
     console.error("❌ Lỗi khi lấy thống kê bán hàng:", error);
@@ -673,6 +697,7 @@ router.get("/sales-stats", authMiddleware, async (req, res) => {
     });
   }
 });
+
 
 
 

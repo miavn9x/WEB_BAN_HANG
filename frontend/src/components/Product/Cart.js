@@ -270,17 +270,21 @@ const Cart = () => {
                           -
                         </button>
                         <input
-                          type="number"
+                 
                           className="form-control"
-                          style={{ width: "50px" }}
+                          style={{ width: "70px" }}
                           value={item.quantity}
-                          onChange={(e) =>
-                            handleQuantityInputChange(
-                              item.product._id,
-                              e.target.value
-                            )
-                          }
+                          min="0"
+                          max="99"
+                          onChange={(e) => {
+                            let value = parseInt(e.target.value, 10);
+                            if (isNaN(value)) value = 0;
+                            if (value < 0) value = 0;
+                            if (value > 99) value = 99;
+                            handleQuantityInputChange(item.product._id, value);
+                          }}
                         />
+
                         <button
                           className="btn btn-outline-secondary"
                           onClick={() =>
