@@ -1,4 +1,3 @@
-// productModel.js
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
@@ -39,8 +38,26 @@ const productSchema = new mongoose.Schema({
   ],
   stock: { type: Number, required: true, min: 0 }, // Số lượng trong kho
   remainingStock: { type: Number, required: true, min: 0, default: 0 }, // Số lượng còn lại
+
+  // 🔹 Thêm các trường mới để tối ưu đề xuất sản phẩm
+  salesCount: { type: Number, default: 0 }, // 🔥 Theo dõi số lần sản phẩm được bán
+  viewCount: { type: Number, default: 0 }, // 👀 Theo dõi số lần sản phẩm được xem
+  tags: [{ type: String }], // 🏷️ Từ khóa liên quan để tìm kiếm tốt hơn
+
+  similarProducts: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "Product" }, // 🔁 Danh sách sản phẩm tương tự
+  ],
+
+  // 🔄 Thời gian tạo và cập nhật sản phẩm
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+// 🔹 Tự động cập nhật `updatedAt` mỗi khi sản phẩm thay đổi
+productSchema.pre("save", function (next) {
+  this.updatedAt = new Date();
+  next();
 });
 
 const Product = mongoose.model("Product", productSchema);
-
 module.exports = Product;

@@ -31,8 +31,8 @@ const checkDuplicate = async (name, brand, category) => {
 router.post("/products", upload.array("images", 20), async (req, res) => {
   const {
     name,
-    categoryName, // Adjusted to match schema
-    categoryGeneric, // Adjusted to match schema
+    categoryName,
+    categoryGeneric,
     brand,
     description,
     originalPrice,
@@ -40,13 +40,20 @@ router.post("/products", upload.array("images", 20), async (req, res) => {
     priceAfterDiscount,
     discountCode,
     stock,
+    tags, // 📌 Nhận danh sách từ khóa tìm kiếm
   } = req.body;
 
   try {
-    const duplicateProduct = await checkDuplicate(name, brand, categoryName);
+    const duplicateProduct = await checkDuplicate(
+      name,
+      brand,
+      categoryName,
+      categoryGeneric
+    );
     if (duplicateProduct) {
       return res.status(400).json({ message: "Sản phẩm này đã tồn tại." });
     }
+
     const imageUploadPromises = req.files.map((file) => {
       return new Promise((resolve, reject) => {
         cloudinary.uploader
@@ -76,9 +83,14 @@ router.post("/products", upload.array("images", 20), async (req, res) => {
       images,
       stock,
       remainingStock: stock,
+      salesCount: 0, // 📌 Khởi tạo số lượng bán là 0
+      viewCount: 0, // 📌 Khởi tạo số lượt xem là 0
+      tags: tags ? tags.split(",").map((tag) => tag.trim().toLowerCase()) : [], // 📌 Lưu tags
+      similarProducts: [],
     });
 
     await newProduct.save();
+    await updateSimilarProducts(newProduct._id); // 📌 Cập nhật sản phẩm tương tự
 
     res.status(201).json({
       message: "Sản phẩm đã được thêm thành công",
@@ -211,7 +223,7 @@ router.get("/products/:id", async (req, res) => {
   }
 });
 
-// Route sửa sản phẩm (PUT)
+// 📌 Route sửa sản phẩm (PUT)
 router.put("/products/:id", upload.array("images", 20), async (req, res) => {
   const productId = req.params.id;
 
@@ -221,27 +233,23 @@ router.put("/products/:id", upload.array("images", 20), async (req, res) => {
   }
 
   try {
-    // Fetch existing product data
+    // 🔹 1. Kiểm tra sản phẩm có tồn tại không
     const existingProduct = await Product.findById(productId);
     if (!existingProduct) {
       return res.status(404).json({ message: "Không tìm thấy sản phẩm." });
     }
 
-    // Extract category data from request body
+    // 🔹 2. Xử lý dữ liệu từ request
     const categoryName = req.body["category[name]"] || req.body.category?.name;
-    const categoryGeneric =
-      req.body["category[generic]"] || req.body.category?.generic;
+    const categoryGeneric = req.body["category[generic]"] || req.body.category?.generic;
 
-    // Construct updated product data
     const updatedProductData = {
       name: req.body.name || existingProduct.name,
       brand: req.body.brand || existingProduct.brand,
       description: req.body.description || existingProduct.description,
       originalPrice: req.body.originalPrice || existingProduct.originalPrice,
-      discountPercentage:
-        req.body.discountPercentage || existingProduct.discountPercentage,
-      priceAfterDiscount:
-        req.body.priceAfterDiscount || existingProduct.priceAfterDiscount,
+      discountPercentage: req.body.discountPercentage || existingProduct.discountPercentage,
+      priceAfterDiscount: req.body.priceAfterDiscount || existingProduct.priceAfterDiscount,
       discountCode: req.body.discountCode || existingProduct.discountCode,
       remainingStock: req.body.remainingStock || existingProduct.remainingStock,
       stock: req.body.stock || existingProduct.stock,
@@ -249,19 +257,20 @@ router.put("/products/:id", upload.array("images", 20), async (req, res) => {
         name: categoryName || existingProduct.category.name,
         generic: categoryGeneric || existingProduct.category.generic,
       },
+      updatedAt: Date.now(), // 📌 Cập nhật thời gian chỉnh sửa
     };
 
-    // Handle image upload
+    // 🔹 3. Xử lý ảnh: Nếu có ảnh mới, xóa ảnh cũ và upload ảnh mới
     if (req.files && req.files.length > 0) {
       try {
-        // Delete old images from Cloudinary
+        // Xóa ảnh cũ từ Cloudinary
         const deleteImagePromises = existingProduct.images.map((url) => {
           const publicId = url.split("/").pop().split(".")[0];
           return cloudinary.uploader.destroy(`products/${publicId}`);
         });
         await Promise.all(deleteImagePromises);
 
-        // Upload new images to Cloudinary
+        // Upload ảnh mới lên Cloudinary
         const imageUploadPromises = req.files.map((file) => {
           return new Promise((resolve, reject) => {
             cloudinary.uploader
@@ -274,34 +283,27 @@ router.put("/products/:id", upload.array("images", 20), async (req, res) => {
         });
 
         const uploadResults = await Promise.all(imageUploadPromises);
-        updatedProductData.images = uploadResults.map(
-          (result) => result.secure_url
-        );
+        updatedProductData.images = uploadResults.map((result) => result.secure_url);
       } catch (error) {
-        console.error("Error handling images:", error);
+        console.error("❌ Lỗi khi xử lý hình ảnh:", error);
         return res.status(500).json({ message: "Lỗi khi xử lý hình ảnh." });
       }
     }
 
-    // Update the product with new data
-    const updatedProduct = await Product.findByIdAndUpdate(
-      productId,
-      updatedProductData,
-      { new: true }
-    );
+    // 🔹 4. Cập nhật sản phẩm
+    const updatedProduct = await Product.findByIdAndUpdate(productId, updatedProductData, { new: true });
 
     res.status(200).json({
-      message: "Sản phẩm đã được cập nhật thành công.",
+      message: "✅ Sản phẩm đã được cập nhật thành công.",
       product: updatedProduct,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Có lỗi xảy ra khi cập nhật sản phẩm.",
-      error: error.message,
-    });
+    console.error("❌ Lỗi khi cập nhật sản phẩm:", error);
+    res.status(500).json({ message: "Có lỗi xảy ra khi cập nhật sản phẩm." });
   }
 });
-// Route xóa sản phẩm
+
+// 📌 Route xóa sản phẩm (DELETE)
 router.delete("/products/:id", async (req, res) => {
   const productId = req.params.id;
 
@@ -311,17 +313,37 @@ router.delete("/products/:id", async (req, res) => {
   }
 
   try {
-    const deletedProduct = await Product.findByIdAndDelete(productId);
-
-    if (!deletedProduct) {
+    // 🔹 1. Kiểm tra sản phẩm có tồn tại không
+    const existingProduct = await Product.findById(productId);
+    if (!existingProduct) {
       return res.status(404).json({ message: "Không tìm thấy sản phẩm." });
     }
 
-    res
-      .status(200)
-      .json({ message: "Sản phẩm đã được xóa.", product: deletedProduct });
-  } catch (err) {
-    console.error("Lỗi khi xóa sản phẩm:", err);
+    // 🔹 2. Kiểm tra sản phẩm có trong đơn hàng không
+    const ordersWithProduct = await Order.findOne({ "items.product": productId });
+    if (ordersWithProduct) {
+      return res.status(400).json({ message: "Không thể xóa sản phẩm có trong đơn hàng." });
+    }
+
+    // 🔹 3. Xóa ảnh sản phẩm từ Cloudinary
+    if (existingProduct.images.length > 0) {
+      try {
+        const deleteImagePromises = existingProduct.images.map((url) => {
+          const publicId = url.split("/").pop().split(".")[0];
+          return cloudinary.uploader.destroy(`products/${publicId}`);
+        });
+        await Promise.all(deleteImagePromises);
+      } catch (error) {
+        console.error("❌ Lỗi khi xóa ảnh từ Cloudinary:", error);
+      }
+    }
+
+    // 🔹 4. Xóa sản phẩm
+    await Product.findByIdAndDelete(productId);
+
+    res.status(200).json({ message: "✅ Sản phẩm đã được xóa thành công." });
+  } catch (error) {
+    console.error("❌ Lỗi khi xóa sản phẩm:", error);
     res.status(500).json({ message: "Có lỗi xảy ra khi xóa sản phẩm." });
   }
 });

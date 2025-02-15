@@ -1,3 +1,4 @@
+//orderModel.js
 const mongoose = require("mongoose");
 const {
   ORDER_STATUS,
@@ -10,7 +11,7 @@ const orderSchema = new mongoose.Schema(
     orderId: {
       type: String,
       required: true,
-      unique: true,
+      // unique: true,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,

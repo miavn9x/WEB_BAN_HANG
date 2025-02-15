@@ -74,7 +74,13 @@ app.use("/api/view-history", viewHistoryRoutes);
 const searchRoutes = require("./routes/searchRoutes");
 app.use("/api", searchRoutes);  // Sử dụng routes cho API
 
+// Import routes
+const recommendationRoutes = require("./routes/recommendations");
+app.use("/api/recommendations", recommendationRoutes);
 
+
+const inventoryRoutes = require("./routes/inventoryRoutes");
+app.use("/api", inventoryRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);

@@ -15,12 +15,16 @@ const AddProduct = () => {
     priceAfterDiscount: "",
     discountCode: "",
     stock: "",
+    tags: "", // 📌 Thêm trường tags
+    salesCount: 0, // 📌 Mặc định 0
+    viewCount: 0, // 📌 Mặc định 0
   });
 
   // Lưu trữ các ảnh được chọn dưới dạng object chứa file và URL để hiển thị preview
-  const [selectedImages, setSelectedImages] = useState([]);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+    const [selectedImages, setSelectedImages] = useState([]);
+    const [message, setMessage] = useState("");
+    const [error, setError] = useState("");
+    const [selectedBrand, setSelectedBrand] = useState("");
 
   // Các tùy chọn danh mục sản phẩm
   const categoryOptions = {
@@ -146,28 +150,7 @@ const AddProduct = () => {
       "cosmic light",
     ],
   };
-
-  // State lưu lựa chọn thương hiệu từ dropdown (mặc định rỗng)
-  const [selectedBrand, setSelectedBrand] = useState("");
-
-  const handleBrandSelectChange = (e) => {
-    const value = e.target.value;
-    setSelectedBrand(value);
-    if (value !== "other") {
-      // Nếu chọn thương hiệu mặc định, cập nhật luôn giá trị cho product.brand
-      setProduct((prevState) => ({
-        ...prevState,
-        brand: value,
-      }));
-    } else {
-      // Nếu chọn "Khác", reset product.brand để người dùng nhập
-      setProduct((prevState) => ({
-        ...prevState,
-        brand: "",
-      }));
-    }
-  };
-
+  // Xử lý nhập dữ liệu
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProduct((prevState) => {
@@ -175,41 +158,68 @@ const AddProduct = () => {
 
       if (name === "originalPrice" || name === "discountPercentage") {
         let discountPercentage = Number(updatedProduct.discountPercentage) || 0;
-        if (discountPercentage < 0 || discountPercentage >= 100) {
+        if (discountPercentage < 0 || discountPercentage >= 100)
           discountPercentage = 0;
-        }
-
         const originalPrice = Number(updatedProduct.originalPrice) || 0;
         const priceAfterDiscount =
           originalPrice - (originalPrice * discountPercentage) / 100;
-
-        updatedProduct.discountPercentage = discountPercentage.toString();
         updatedProduct.priceAfterDiscount =
           priceAfterDiscount > 0 ? priceAfterDiscount.toFixed() : "";
       }
-
       return updatedProduct;
     });
   };
 
+  // Chọn danh mục sản phẩm
   const handleCategoryChange = (e) => {
-    const categoryName = e.target.value;
     setProduct((prevState) => ({
       ...prevState,
-      categoryName,
-      categoryGeneric: "", // Reset loại sản phẩm khi danh mục thay đổi
+      categoryName: e.target.value,
+      categoryGeneric: "",
     }));
   };
 
+  // Chọn loại sản phẩm
   const handleGenericChange = (e) => {
-    const categoryGeneric = e.target.value;
     setProduct((prevState) => ({
       ...prevState,
-      categoryGeneric,
+      categoryGeneric: e.target.value,
     }));
   };
 
-  // Xử lý chọn ảnh: tạo Object URL cho từng file để hiển thị preview
+  // Chọn thương hiệu
+  const handleBrandSelectChange = (e) => {
+    const value = e.target.value;
+    setSelectedBrand(value);
+    setProduct((prevState) => ({
+      ...prevState,
+      brand: value === "other" ? "" : value,
+    }));
+  };
+
+  // Kiểm tra dữ liệu trước khi gửi
+  const validateForm = () => {
+    if (
+      !product.name ||
+      !product.categoryName ||
+      !product.categoryGeneric ||
+      !product.stock
+    ) {
+      setError("Vui lòng nhập đầy đủ thông tin!");
+      return false;
+    }
+    if (Number(product.stock) <= 0) {
+      setError("Số lượng phải lớn hơn 0!");
+      return false;
+    }
+    if (Number(product.originalPrice) <= 0) {
+      setError("Giá gốc phải lớn hơn 0!");
+      return false;
+    }
+    return true;
+  };
+
+  // Xử lý tải ảnh lên
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files).map((file) => ({
       file,
@@ -218,7 +228,7 @@ const AddProduct = () => {
     setSelectedImages((prevImages) => [...prevImages, ...files]);
   };
 
-  // Xóa ảnh đã chọn và thu hồi Object URL để giải phóng bộ nhớ
+  // Xóa ảnh đã chọn
   const handleRemoveImage = (index) => {
     setSelectedImages((prevImages) => {
       URL.revokeObjectURL(prevImages[index].url);
@@ -226,14 +236,16 @@ const AddProduct = () => {
     });
   };
 
+  // Gửi dữ liệu lên server
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
 
     const formData = new FormData();
-    // Duyệt qua selectedImages và gửi file gốc lên API
     selectedImages.forEach((imageObj) => {
       formData.append("images", imageObj.file);
     });
+
     Object.keys(product).forEach((key) => {
       formData.append(key, product[key]);
     });
@@ -247,7 +259,7 @@ const AddProduct = () => {
         },
       });
 
-      if (response.status === 200 || response.status === 201) {
+      if (response.status === 201) {
         setMessage("Sản phẩm đã được thêm thành công!");
         setError("");
         setProduct({
@@ -261,14 +273,14 @@ const AddProduct = () => {
           priceAfterDiscount: "",
           discountCode: "",
           stock: "",
+          tags: "",
+          salesCount: 0,
+          viewCount: 0,
         });
-        // Xóa hết ảnh đã chọn và thu hồi Object URL
-        selectedImages.forEach((img) => URL.revokeObjectURL(img.url));
         setSelectedImages([]);
         setSelectedBrand("");
       }
     } catch (error) {
-      console.error("Error submitting form", error);
       setMessage("");
       setError(
         error.response?.data?.message || "Có lỗi xảy ra khi thêm sản phẩm."
@@ -276,7 +288,7 @@ const AddProduct = () => {
     }
   };
 
-  // Clear success and error messages after 2 seconds
+  // Tự động xóa thông báo sau 2 giây
   useEffect(() => {
     if (message || error) {
       const timer = setTimeout(() => {
@@ -449,6 +461,16 @@ const AddProduct = () => {
                     value={product.stock}
                     onChange={handleInputChange}
                     required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Tags (từ khóa)</label>
+                  <input
+                    type="text"
+                    name="tags"
+                    className="form-control"
+                    value={product.tags}
+                    onChange={handleInputChange}
                   />
                 </div>
                 {/* Phần preview hình ảnh được chọn */}

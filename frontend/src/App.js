@@ -38,7 +38,9 @@ import {
   fetchCart,
   loadCartFromLocalStorage,
 } from "./redux/actions/cartActions";
-import SearchPage from "./components/SearchPage";
+// import SearchPage from "./components/SearchPage";
+import RecommendationList from "./components/Product/RecommendationList";
+import Dashboard from "./pages/Dashboard";
 function App() {
   const [userRole, setUserRole] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -128,7 +130,8 @@ function App() {
         <Route path="/test" element={<Evaluate />} />
         <Route path="/1" element={<NotificationModal />} />
         <Route path="/order-history/:orderId" element={<OrderHistory />} />
-        <Route path="/2" element={<SearchPage />} />
+        <Route path="/3" element={<Dashboard />} />
+        <Route path="/2" element={<RecommendationList />} />
 
         {/* Protected Routes - User & admin */}
         <Route
