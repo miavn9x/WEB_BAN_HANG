@@ -466,7 +466,6 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
       startDate.setFullYear(startDate.getFullYear() - 1);
       filter = { createdAt: { $gte: startDate } };
     } else if (period === "all") {
-      // "Toàn thời gian" không áp dụng bộ lọc
       filter = {};
     } else {
       return res.status(400).json({
@@ -482,7 +481,7 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
       .populate("items.product")
       .sort({ createdAt: -1 });
 
-    // Khởi tạo các biến thống kê theo trạng thái
+    // Khởi tạo thống kê đơn hàng (số lượng)
     const orderStats = {
       processing: 0, // Đang xử lý
       confirmed: 0, // Đã xác nhận
@@ -491,7 +490,15 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
       canceled: 0, // Đã hủy
     };
 
-    // Lưu danh sách đơn hàng theo từng trạng thái
+    // Khởi tạo thống kê doanh thu (tiền)
+    const revenueStats = {
+      processing: 0,
+      confirmed: 0,
+      shipping: 0,
+      delivered: 0,
+    };
+
+    // Lưu danh sách đơn hàng theo từng trạng thái (nếu cần dùng cho chi tiết)
     const categorizedOrders = {
       processing: [],
       confirmed: [],
@@ -501,6 +508,7 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
     };
 
     orders.forEach((order) => {
+      // Chuẩn hóa thông tin đơn hàng (theo yêu cầu)
       const formattedOrder = {
         orderId: order.orderId,
         userInfo: order.userInfo,
@@ -525,18 +533,23 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
         })),
       };
 
+      // Phân loại và tính doanh thu (chỉ tính 4 trạng thái)
       if (order.orderStatus === "Đang xử lý") {
         orderStats.processing++;
         categorizedOrders.processing.push(formattedOrder);
+        revenueStats.processing += order.totalAmount;
       } else if (order.orderStatus === "Đã xác nhận") {
         orderStats.confirmed++;
         categorizedOrders.confirmed.push(formattedOrder);
+        revenueStats.confirmed += order.totalAmount;
       } else if (order.orderStatus === "Đang giao hàng") {
         orderStats.shipping++;
         categorizedOrders.shipping.push(formattedOrder);
+        revenueStats.shipping += order.totalAmount;
       } else if (order.orderStatus === "Đã giao hàng") {
         orderStats.delivered++;
         categorizedOrders.delivered.push(formattedOrder);
+        revenueStats.delivered += order.totalAmount;
       } else if (order.orderStatus === "Đã hủy") {
         orderStats.canceled++;
         categorizedOrders.canceled.push(formattedOrder);
@@ -544,10 +557,12 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
     });
 
     console.log("📊 Thống kê đơn hàng:", orderStats);
+    console.log("💰 Thống kê doanh thu:", revenueStats);
 
     res.status(200).json({
       success: true,
       orderStats,
+      revenueStats, // Trả về doanh thu theo trạng thái
       categorizedOrders,
       statusConfig,
     });
@@ -556,6 +571,7 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
 
 router.get("/sales-stats", authMiddleware, async (req, res) => {
   try {

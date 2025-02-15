@@ -11,6 +11,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { formatter } from "../../../../utils/fomater";
 
 // Cấu hình trạng thái (dùng cho thống kê đơn hàng)
 const statusConfig = {
@@ -23,12 +24,13 @@ const statusConfig = {
 
 const Dashboard = () => {
   const [orderStats, setOrderStats] = useState([]);
+  const [revenueStats, setRevenueStats] = useState(null);
   const [salesStats, setSalesStats] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState("day");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Hàm lấy thống kê đơn hàng
+  // Hàm lấy thống kê đơn hàng (bao gồm cả doanh thu)
   const fetchOrderStats = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -65,13 +67,17 @@ const Dashboard = () => {
             orders: response.data.orderStats.canceled,
           },
         ]);
+        // Lưu doanh thu cho 4 trạng thái (không tính "Đã hủy")
+        setRevenueStats(response.data.revenueStats);
       } else {
         setOrderStats([]);
+        setRevenueStats(null);
       }
     } catch (error) {
       console.error("❌ Lỗi khi lấy thống kê đơn hàng:", error);
       setError("Không thể tải dữ liệu đơn hàng.");
       setOrderStats([]);
+      setRevenueStats(null);
     } finally {
       setLoading(false);
     }
@@ -127,7 +133,7 @@ const Dashboard = () => {
         }, 0)
       : 0;
 
-  // Tạo dataset cho biểu đồ với thứ tự: "Tổng kho", "Còn lại", "Đã bán", "Bán chạy"
+  // Tạo dataset cho biểu đồ sản phẩm với thứ tự: "Tổng kho", "Còn lại", "Đã bán", "Bán chạy"
   const chartData = [
     { metric: "Tổng kho", value: totalStock },
     { metric: "Còn lại", value: totalRemaining },
@@ -137,6 +143,28 @@ const Dashboard = () => {
 
   // Định nghĩa mảng màu cho từng cột (4 màu riêng)
   const barColors = ["#8884d8", "#82ca9d", "#4F46E5", "#FF6F91"];
+
+  // Tạo dataset cho biểu đồ doanh thu (tiền)
+  const revenueChartData = revenueStats
+    ? [
+        {
+          name: statusConfig["Đang xử lý"].text,
+          revenue: revenueStats.processing,
+        },
+        {
+          name: statusConfig["Đã xác nhận"].text,
+          revenue: revenueStats.confirmed,
+        },
+        {
+          name: statusConfig["Đang giao hàng"].text,
+          revenue: revenueStats.shipping,
+        },
+        {
+          name: statusConfig["Đã giao hàng"].text,
+          revenue: revenueStats.delivered,
+        },
+      ]
+    : [];
 
   return (
     <Container className="py-4">
@@ -176,6 +204,7 @@ const Dashboard = () => {
         </Row>
       )}
 
+      {/* Hàng đầu tiên: Trạng thái đơn hàng và Quản lý sản phẩm */}
       <Row className="mb-4">
         {/* Card thống kê đơn hàng */}
         <Col xs={12} md={6}>
@@ -236,10 +265,53 @@ const Dashboard = () => {
                 <p>Không có dữ liệu sản phẩm.</p>
               )}
             </Card.Body>
+            <Card.Footer className="text-center">
+              <Link to="/admin/add-product ">
+                <Button variant="secondary" className="me-2">
+                  Đăng sản phẩm
+                </Button>
+              </Link>
+              <Link to="/admin/edit-product">
+                <Button variant="primary">Quản lý sản phẩm</Button>
+              </Link>
+            </Card.Footer>
           </Card>
         </Col>
+      </Row>
 
-        
+      {/* Hàng thứ hai: Doanh thu theo trạng thái */}
+      <Row className="mb-4">
+        <Col xs={12} md={6}>
+          <Card>
+            <Card.Header>
+              <h2>💰 Tổng Danh thu tam tính ({selectedPeriod})</h2>
+            </Card.Header>
+            <Card.Body>
+              {loading ? (
+                <p>Đang tải...</p>
+              ) : revenueChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart
+                    data={revenueChartData}
+                    margin={{ top: 20, right: 30, left: 50, bottom: 5 }}
+                  >
+                    <XAxis dataKey="name" />
+                    <YAxis tickFormatter={formatter} />
+                    <Tooltip formatter={formatter} />
+                    <Bar dataKey="revenue" fill="#FF6F91" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p>Không có dữ liệu doanh thu.</p>
+              )}
+            </Card.Body>
+            <Card.Footer className="text-center">
+              <Link to="/admin/quan-ly-don-hang">
+                <Button variant="primary">Quản lý đơn hàng</Button>
+              </Link>
+            </Card.Footer>
+          </Card>
+        </Col>
       </Row>
     </Container>
   );
