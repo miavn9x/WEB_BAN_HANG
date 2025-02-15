@@ -70,15 +70,12 @@ const LoginMenu = ({ onClose }) => {
             </Dropdown.Item>
             <Dropdown.Divider />
             <Dropdown.Item onClick={() => navigate("/admin/order_Dashboard")}>
-              Theo dõi đơn &hàng
+              Quản Lý
             </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/admin/user-management")}>
               Quản lý user
             </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/admin/add-product")}>
-              Đăng sản phẩm
-            </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/admin/add-bai-viet")}>
+               <Dropdown.Item onClick={() => navigate("/admin/add-bai-viet")}>
               Tạo bài viết
             </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/admin/posts-management")}>

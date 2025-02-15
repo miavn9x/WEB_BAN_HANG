@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { formatter } from "../../../../utils/fomater";
+import * as XLSX from "xlsx";
 
 // Cấu hình trạng thái (dùng cho thống kê đơn hàng)
 const statusConfig = {
@@ -23,12 +24,17 @@ const statusConfig = {
 };
 
 const Dashboard = () => {
+  // Dữ liệu hiển thị của dashboard
   const [orderStats, setOrderStats] = useState([]);
   const [revenueStats, setRevenueStats] = useState(null);
   const [salesStats, setSalesStats] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState("day");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // State cho chức năng xuất Excel
+  const [exportTable, setExportTable] = useState(""); // Các giá trị: "order", "sales", "revenue"
+  const [exportPeriod, setExportPeriod] = useState("day");
 
   // Hàm lấy thống kê đơn hàng (bao gồm cả doanh thu)
   const fetchOrderStats = useCallback(async () => {
@@ -111,9 +117,10 @@ const Dashboard = () => {
   useEffect(() => {
     fetchOrderStats();
     fetchSalesStats();
-  }, [fetchOrderStats, fetchSalesStats]);
+    // Không đồng bộ exportPeriod với selectedPeriod, exportPeriod độc lập
+  }, [fetchOrderStats, fetchSalesStats, selectedPeriod]);
 
-  // Tính số liệu dựa trên dữ liệu toàn bộ sản phẩm (toàn thời gian)
+  // Tính số liệu cho bảng "Quản lý sản phẩm"
   const totalStock =
     salesStats && salesStats.totalInventory
       ? salesStats.totalInventory.totalStock
@@ -123,8 +130,6 @@ const Dashboard = () => {
       ? salesStats.totalInventory.totalRemaining
       : 0;
   const totalSoldCalculated = totalStock - totalRemaining;
-
-  // Tính "Bán chạy" dựa trên mảng bestSelling (lấy giá trị lớn nhất của (stock - remainingStock))
   const bestSellingValue =
     salesStats && salesStats.bestSelling && salesStats.bestSelling.length > 0
       ? salesStats.bestSelling.reduce((max, cur) => {
@@ -132,19 +137,15 @@ const Dashboard = () => {
           return sold > max ? sold : max;
         }, 0)
       : 0;
-
-  // Tạo dataset cho biểu đồ sản phẩm với thứ tự: "Tổng kho", "Còn lại", "Đã bán", "Bán chạy"
   const chartData = [
     { metric: "Tổng kho", value: totalStock },
     { metric: "Còn lại", value: totalRemaining },
     { metric: "Đã bán", value: totalSoldCalculated },
     { metric: "Bán chạy", value: bestSellingValue },
   ];
-
-  // Định nghĩa mảng màu cho từng cột (4 màu riêng)
   const barColors = ["#8884d8", "#82ca9d", "#4F46E5", "#FF6F91"];
 
-  // Tạo dataset cho biểu đồ doanh thu (tiền)
+  // Tạo dataset cho bảng "Tổng Danh thu tam tính"
   const revenueChartData = revenueStats
     ? [
         {
@@ -166,6 +167,147 @@ const Dashboard = () => {
       ]
     : [];
 
+  // Hàm xuất dữ liệu ra file Excel theo bảng đã chọn và thời gian đã chọn (exportPeriod)
+  const exportToExcel = async () => {
+    if (!exportTable) {
+      alert("Vui lòng chọn bảng cần xuất.");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    const wb = XLSX.utils.book_new();
+    let ws;
+    let sheetName = "";
+    let fileName = "";
+
+    try {
+      if (exportTable === "order") {
+        // Xuất bảng Trạng thái đơn hàng (xuất 5 trạng thái)
+        const response = await axios.get(
+          `/api/order-stats?period=${exportPeriod}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.data && response.data.orderStats) {
+          const data = [
+            {
+              "Trạng thái": statusConfig["Đang xử lý"].text,
+              "Số lượng": response.data.orderStats.processing,
+            },
+            {
+              "Trạng thái": statusConfig["Đã xác nhận"].text,
+              "Số lượng": response.data.orderStats.confirmed,
+            },
+            {
+              "Trạng thái": statusConfig["Đang giao hàng"].text,
+              "Số lượng": response.data.orderStats.shipping,
+            },
+            {
+              "Trạng thái": statusConfig["Đã giao hàng"].text,
+              "Số lượng": response.data.orderStats.delivered,
+            },
+            {
+              "Trạng thái": statusConfig["Đã hủy"].text,
+              "Số lượng": response.data.orderStats.canceled,
+            },
+          ];
+          ws = XLSX.utils.json_to_sheet(data);
+          sheetName = "OrderStats";
+          fileName = `OrderStats_${exportPeriod}.xlsx`;
+        } else {
+          alert("Không có dữ liệu đơn hàng để xuất.");
+          return;
+        }
+      } else if (exportTable === "revenue") {
+        // Xuất bảng Tổng Danh thu tam tính (4 trạng thái, không bao gồm "Đã hủy")
+        const response = await axios.get(
+          `/api/order-stats?period=${exportPeriod}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.data && response.data.revenueStats) {
+          const data = [
+            {
+              "Trạng thái": statusConfig["Đang xử lý"].text,
+              "Doanh thu": response.data.revenueStats.processing,
+            },
+            {
+              "Trạng thái": statusConfig["Đã xác nhận"].text,
+              "Doanh thu": response.data.revenueStats.confirmed,
+            },
+            {
+              "Trạng thái": statusConfig["Đang giao hàng"].text,
+              "Doanh thu": response.data.revenueStats.shipping,
+            },
+            {
+              "Trạng thái": statusConfig["Đã giao hàng"].text,
+              "Doanh thu": response.data.revenueStats.delivered,
+            },
+          ];
+          ws = XLSX.utils.json_to_sheet(data);
+          sheetName = "RevenueStats";
+          fileName = `RevenueStats_${exportPeriod}.xlsx`;
+        } else {
+          alert("Không có dữ liệu doanh thu để xuất.");
+          return;
+        }
+      } else if (exportTable === "sales") {
+        // Xuất bảng Quản lý sản phẩm dựa trên dữ liệu thống kê bán hàng
+        const response = await axios.get(
+          `/api/sales-stats?period=${exportPeriod}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.data) {
+          const salesData = response.data;
+          const totalStock =
+            salesData.totalInventory && salesData.totalInventory.totalStock
+              ? salesData.totalInventory.totalStock
+              : 0;
+          const totalRemaining =
+            salesData.totalInventory && salesData.totalInventory.totalRemaining
+              ? salesData.totalInventory.totalRemaining
+              : 0;
+          const totalSoldCalculated = totalStock - totalRemaining;
+          const bestSellingValue =
+            salesData.bestSelling && salesData.bestSelling.length > 0
+              ? salesData.bestSelling.reduce((max, cur) => {
+                  const sold = cur.stock - cur.remainingStock;
+                  return sold > max ? sold : max;
+                }, 0)
+              : 0;
+          const data = [
+            { "Chỉ số": "Tổng kho", "Giá trị": totalStock },
+            { "Chỉ số": "Còn lại", "Giá trị": totalRemaining },
+            { "Chỉ số": "Đã bán", "Giá trị": totalSoldCalculated },
+            { "Chỉ số": "Bán chạy", "Giá trị": bestSellingValue },
+          ];
+          ws = XLSX.utils.json_to_sheet(data);
+          sheetName = "SalesStats";
+          fileName = `SalesStats_${exportPeriod}.xlsx`;
+        } else {
+          alert("Không có dữ liệu thống kê bán hàng để xuất.");
+          return;
+        }
+      }
+
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+      XLSX.writeFile(wb, fileName);
+    } catch (err) {
+      console.error("Lỗi khi xuất Excel:", err);
+      alert("Đã xảy ra lỗi khi xuất Excel.");
+    }
+  };
+
   return (
     <Container className="py-4">
       <Row className="mb-4">
@@ -174,7 +316,7 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-      {/* Bộ lọc thời gian */}
+      {/* Bộ lọc thời gian hiển thị dashboard */}
       <Row className="mb-4">
         <Col xs={12} md={4}>
           <Form.Group controlId="selectPeriod">
@@ -192,6 +334,51 @@ const Dashboard = () => {
               <option value="all">Toàn thời gian</option>
             </Form.Control>
           </Form.Group>
+        </Col>
+      </Row>
+
+      {/* Phần điều khiển xuất Excel */}
+      <Row className="mb-4">
+        <Col xs={12} md={3}>
+          <Form.Group controlId="exportTable">
+            <Form.Label>Chọn bảng xuất:</Form.Label>
+            <Form.Control
+              as="select"
+              value={exportTable}
+              onChange={(e) => setExportTable(e.target.value)}
+            >
+              <option value="">-- Chọn bảng --</option>
+              <option value="order">Trạng thái đơn hàng</option>
+              <option value="sales">Quản lý sản phẩm</option>
+              <option value="revenue">Tổng Danh thu tam tính</option>
+            </Form.Control>
+          </Form.Group>
+        </Col>
+        <Col xs={12} md={3}>
+          <Form.Group controlId="exportPeriod">
+            <Form.Label>Xuất theo:</Form.Label>
+            <Form.Control
+              as="select"
+              value={exportPeriod}
+              onChange={(e) => setExportPeriod(e.target.value)}
+              disabled={!exportTable} // Chỉ được chọn khi đã có bảng xuất
+            >
+              <option value="day">Ngày</option>
+              <option value="week">Tuần</option>
+              <option value="month">Tháng</option>
+              <option value="quarter">Quý</option>
+              <option value="year">Năm</option>
+            </Form.Control>
+          </Form.Group>
+        </Col>
+        <Col xs={12} md={3} className="d-flex align-items-end">
+          <Button
+            variant="success"
+            onClick={exportToExcel}
+            disabled={!exportTable}
+          >
+            Xuất Excel
+          </Button>
         </Col>
       </Row>
 
@@ -266,7 +453,7 @@ const Dashboard = () => {
               )}
             </Card.Body>
             <Card.Footer className="text-center">
-              <Link to="/admin/add-product ">
+              <Link to="/admin/add-product">
                 <Button variant="secondary" className="me-2">
                   Đăng sản phẩm
                 </Button>
