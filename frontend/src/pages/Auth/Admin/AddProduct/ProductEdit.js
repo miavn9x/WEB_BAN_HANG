@@ -389,7 +389,7 @@ const ProductEdit = () => {
                   <tr>
                     <th>STT</th>
                     <th>Tên</th>
-                    <th>Danh mục</th>
+                    {/* <th>Danh mục</th> */}
                     <th>Loại sản phẩm</th>
                     <th>Thương hiệu</th>
                     <th>Mô tả</th>
@@ -589,7 +589,7 @@ const ProductEdit = () => {
                           <td>{index + 1}</td>
                           <td>{product.name}</td>
                           <td>{product.category.name}</td>
-                          <td>{product.category.generic}</td>
+                          {/* <td>{product.category.generic}</td> */}
                           <td>{product.brand}</td>
                           <td>{product.description}</td>
                           <td>{product.originalPrice}</td>

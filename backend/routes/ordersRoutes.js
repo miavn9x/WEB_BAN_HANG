@@ -433,45 +433,71 @@ router.post("/payment/refund", authMiddleware, async (req, res) => {
   }
 });
 
+// Cấu hình trạng thái (nếu cần dùng cho giao diện hay xử lý khác)
+
+const statusConfig = {
+  "Đang xử lý": { color: "warning", text: "Đang xử lý" },
+  "Đã xác nhận": { color: "info", text: "Đã xác nhận" },
+  "Đang giao hàng": { color: "primary", text: "Đang giao hàng" },
+  "Đã giao hàng": { color: "success", text: "Đã giao hàng" },
+  "Đã hủy": { color: "danger", text: "Đã hủy" },
+};
 
 router.get("/order-stats", authMiddleware, async (req, res) => {
   try {
-    const { period } = req.query;
+    const { period = "day" } = req.query; // Mặc định là "day" nếu không có
     let startDate = new Date();
+    let filter = {};
 
+    // Xác định khoảng thời gian dựa trên period
     if (period === "day") {
       startDate.setHours(0, 0, 0, 0);
+      filter = { createdAt: { $gte: startDate } };
     } else if (period === "week") {
       startDate.setDate(startDate.getDate() - 7);
+      filter = { createdAt: { $gte: startDate } };
     } else if (period === "month") {
       startDate.setMonth(startDate.getMonth() - 1);
+      filter = { createdAt: { $gte: startDate } };
+    } else if (period === "quarter") {
+      startDate.setMonth(startDate.getMonth() - 3);
+      filter = { createdAt: { $gte: startDate } };
+    } else if (period === "year") {
+      startDate.setFullYear(startDate.getFullYear() - 1);
+      filter = { createdAt: { $gte: startDate } };
+    } else if (period === "all") {
+      // "Toàn thời gian" không áp dụng bộ lọc
+      filter = {};
     } else {
-      return res
-        .status(400)
-        .json({ success: false, message: "Thời gian không hợp lệ!" });
+      return res.status(400).json({
+        success: false,
+        message: "Thời gian không hợp lệ!",
+      });
     }
 
-    console.log("🔎 Lấy danh sách đơn hàng từ:", startDate);
+    console.log("🔎 Lấy danh sách đơn hàng với filter:", filter);
 
-    // ✅ Tìm tất cả đơn hàng trong khoảng thời gian lọc
-    const orders = await Order.find({ createdAt: { $gte: startDate } })
+    // Tìm tất cả đơn hàng theo filter
+    const orders = await Order.find(filter)
       .populate("items.product")
       .sort({ createdAt: -1 });
 
-    // ✅ Chia đơn hàng theo trạng thái
+    // Khởi tạo các biến thống kê theo trạng thái
     const orderStats = {
       processing: 0, // Đang xử lý
       confirmed: 0, // Đã xác nhận
       shipping: 0, // Đang giao hàng
       delivered: 0, // Đã giao hàng
+      canceled: 0, // Đã hủy
     };
 
-    // ✅ Lưu danh sách đơn hàng theo từng trạng thái
+    // Lưu danh sách đơn hàng theo từng trạng thái
     const categorizedOrders = {
       processing: [],
       confirmed: [],
       shipping: [],
       delivered: [],
+      canceled: [],
     };
 
     orders.forEach((order) => {
@@ -511,6 +537,9 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
       } else if (order.orderStatus === "Đã giao hàng") {
         orderStats.delivered++;
         categorizedOrders.delivered.push(formattedOrder);
+      } else if (order.orderStatus === "Đã hủy") {
+        orderStats.canceled++;
+        categorizedOrders.canceled.push(formattedOrder);
       }
     });
 
@@ -520,11 +549,115 @@ router.get("/order-stats", authMiddleware, async (req, res) => {
       success: true,
       orderStats,
       categorizedOrders,
+      statusConfig,
     });
   } catch (error) {
     console.error("❌ Lỗi API order-stats:", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+router.get("/sales-stats", authMiddleware, async (req, res) => {
+  try {
+    const { period = "all", year } = req.query; // Mặc định lấy toàn bộ dữ liệu
+    let startDate = null;
+
+    // Xác định khoảng thời gian lọc
+    const now = new Date();
+    if (period === "day") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    } else if (period === "week") {
+      startDate = new Date();
+      startDate.setDate(now.getDate() - 7);
+    } else if (period === "month") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (period === "quarter") {
+      const quarter = Math.floor(now.getMonth() / 3);
+      startDate = new Date(now.getFullYear(), quarter * 3, 1);
+    } else if (period === "year") {
+      startDate = new Date(now.getFullYear(), 0, 1);
+    } else if (period === "multi-year" && year) {
+      startDate = new Date(year, 0, 1);
+    } // Nếu period là "all", startDate sẽ null và không áp dụng bộ lọc
+
+    // Xây dựng bộ lọc MongoDB
+    let filter = {};
+    if (startDate) {
+      filter.orderDate = { $gte: startDate };
+    }
+
+    // Thống kê đơn hàng theo thời gian
+    const salesAggregation = await Order.aggregate([
+      { $match: filter }, // Lọc theo thời gian nếu có
+      { $unwind: "$items" }, // Tách từng sản phẩm trong đơn hàng
+      {
+        $group: {
+          _id: "$items.product", // Gom nhóm theo sản phẩm
+          totalSold: { $sum: "$items.quantity" }, // Tổng số lượng đã bán
+        },
+      },
+      { $sort: { totalSold: -1 } }, // Sắp xếp theo số lượng bán giảm dần
+    ]);
+
+    // Tổng số lượng sản phẩm bán ra trong khoảng thời gian
+    const totalSoldFiltered = salesAggregation.reduce(
+      (acc, curr) => acc + curr.totalSold,
+      0
+    );
+
+    // Lấy thông tin chi tiết của các sản phẩm bán chạy
+    const bestSellingProducts = await Product.populate(salesAggregation, {
+      path: "_id",
+    });
+
+    // Chuyển đổi dữ liệu để trả về
+    const bestSelling = bestSellingProducts.map((item) => {
+      const product = item._id;
+      return {
+        productId: product._id,
+        name: product.name,
+        totalSold: item.totalSold,
+        stock: product.stock,
+        remainingStock: product.remainingStock,
+        soldCalculated: product.stock - product.remainingStock, // Số lượng đã bán thực tế
+      };
+    });
+
+    // Lấy tổng số hàng trong kho và số lượng còn lại (không bị ảnh hưởng bởi khoảng thời gian)
+    const inventoryAggregation = await Product.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalStock: { $sum: "$stock" }, // Tổng số hàng nhập kho
+          totalRemaining: { $sum: "$remainingStock" }, // Tổng số hàng còn lại
+          totalSold: { $sum: { $subtract: ["$stock", "$remainingStock"] } }, // Tổng số hàng đã bán
+        },
+      },
+    ]);
+
+    // Nếu không có dữ liệu, gán giá trị mặc định
+    const totalInventory = inventoryAggregation[0] || {
+      totalStock: 0,
+      totalRemaining: 0,
+      totalSold: 0,
+    };
+
+    res.status(200).json({
+      success: true,
+      totalSoldFiltered, // Tổng số lượng bán theo khoảng thời gian chọn
+      bestSelling,
+      totalInventory, // { totalStock, totalRemaining, totalSold }
+    });
+  } catch (error) {
+    console.error("❌ Lỗi khi lấy thống kê bán hàng:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi lấy thống kê bán hàng.",
+      error: error.message,
+    });
+  }
+});
+
+
 
 module.exports = router;

@@ -40,7 +40,7 @@ import {
 } from "./redux/actions/cartActions";
 // import SearchPage from "./components/SearchPage";
 import RecommendationList from "./components/Product/RecommendationList";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/Auth/Admin/AdminOrders/Dashboard";
 function App() {
   const [userRole, setUserRole] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -120,18 +120,13 @@ function App() {
         <Route path="/products" element={<ProductPage />} />
         <Route path="/product/:id" element={<ProductModals />} />
         <Route path="/product/:productId" element={<ProductItem />} />
-        <Route path="/gio-hang" element={<Cart />} />
-        <Route path="/thanh-toan" element={<Checkout />} />
-        {/* <Route path="/OrderHistory/:orderId" element={<OrderHistory />} /> */}
         <Route path="/shop-map" element={<StoreLocator />} />
         <Route path="/gioi-thieu" element={<Info />} />
-        <Route path="/PostsList" element={<PostsList />} />
         <Route path="/posts/:id" element={<PostDetail />} />
         <Route path="/test" element={<Evaluate />} />
         <Route path="/1" element={<NotificationModal />} />
-        <Route path="/order-history/:orderId" element={<OrderHistory />} />
-        <Route path="/3" element={<Dashboard />} />
         <Route path="/2" element={<RecommendationList />} />
+        <Route path="/PostsList" element={<PostsList />} />
 
         {/* Protected Routes - User & admin */}
         <Route
@@ -142,6 +137,10 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route path="/gio-hang" element={<Cart />} />
+        <Route path="/thanh-toan" element={<Checkout />} />
+        <Route path="/order-history/:orderId" element={<OrderHistory />} />
+
         <Route
           path="/admin/*"
           element={
@@ -156,6 +155,7 @@ function App() {
                 <Route path="/quan-ly-don-hang" element={<Orders />} />
                 <Route path="/add-bai-viet" element={<MyEditor />} />
                 <Route path="posts-management" element={<PostsManagement />} />
+                <Route path="/order_Dashboard" element={<Dashboard />} />
               </Routes>
             </PrivateRoute>
           }

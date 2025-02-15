@@ -179,7 +179,7 @@ const Orders = () => {
 
   return (
     <Container className="orders-container">
-      <h2 className="my-4 orders-title">Lịch sử đơn hàng</h2>
+      <h2 className="my-4 orders-title">Quản lý đặt hàng</h2>
 
       {/* Khung hiển thị đơn hàng với chiều cao cố định 50vh và thanh cuộn */}
       <div style={{ height: "50vh", overflowY: "auto" }}>

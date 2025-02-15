@@ -69,11 +69,11 @@ const LoginMenu = ({ onClose }) => {
               Giỏ hàng
             </Dropdown.Item>
             <Dropdown.Divider />
+            <Dropdown.Item onClick={() => navigate("/admin/order_Dashboard")}>
+              Theo dõi đơn &hàng
+            </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/admin/user-management")}>
               Quản lý user
-            </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/admin/quan-ly-don-hang")}>
-              Quản lý đơn hàng
             </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/admin/edit-product")}>
               Quản lý sản phẩm
