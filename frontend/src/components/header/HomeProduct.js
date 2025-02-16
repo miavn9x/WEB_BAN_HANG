@@ -457,21 +457,20 @@ const HomeProduct = () => {
                 </Swiper>
               </div>
               <div className="row  d-flex">
-                <div className="col-lg-6 col-md-12 mt-3 pt-4 d-flex">
+                <div className="col-lg-6 col-md-12  pt-4 d-flex justify-content-center align-items-center flex-column">
                   <h4
-                    className="text-center text-lg-start Flash__sale"
+                    className="text-center Flash__sale"
                     style={{ color: "#555", padding: "0px" }}
                   >
-                    Các Loại Sữa:&nbsp;
-
+                    Các Loại Sữa:&nbsp;{" "}
+                    <span className="animated-words mb-2">
+                      <span>cho bé 0-6 tháng</span>
+                      <span>cho bé 6-12 tháng</span>
+                      <span>cho bé 1-3 tuổi</span>
+                      <span>Sữa dinh dưỡng</span>
+                      <span>cho bé 0-6 tháng</span>
+                    </span>
                   </h4>
-                  <span className="animated-words mb-2">
-                    <span>cho bé 0-6 tháng</span>
-                    <span>cho bé 6-12 tháng</span>
-                    <span>cho bé 1-3 tuổi</span>
-                    <span>Sữa dinh dưỡng</span>
-                    <span>cho bé 0-6 tháng</span>
-                  </span>
                 </div>
 
                 <div className="col-lg-3 mb-3 col-md-6 pt-4">
@@ -493,7 +492,7 @@ const HomeProduct = () => {
                     Sữa bột cao cấp
                   </Button>
                 </div>
-                <div className="col-lg-3 mb-3 col-md-6 pt-4">
+                <div className="col-lg-3 mb-3 col-md-6 pt-4 ">
                   <Button
                     style={{ color: "#555", fontSize: "13px" }}
                     className="custom-category-button lead__sale px-3 "

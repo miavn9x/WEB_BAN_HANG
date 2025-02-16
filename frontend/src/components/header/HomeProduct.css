@@ -344,7 +344,7 @@ body {
 .animated-words {
     position: relative;
     display: inline-block;
-    height: 1.6em;
+    height: 24px;
     vertical-align: bottom;
     overflow: hidden;
 }
