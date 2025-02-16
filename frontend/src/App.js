@@ -41,6 +41,7 @@ import {
 // import SearchPage from "./components/SearchPage";
 import RecommendationList from "./components/Product/RecommendationList";
 import Dashboard from "./pages/Auth/Admin/AdminOrders/Dashboard";
+import RecommendationTest from "./pages/RecommendationTest";
 function App() {
   const [userRole, setUserRole] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -127,6 +128,7 @@ function App() {
         <Route path="/1" element={<NotificationModal />} />
         <Route path="/2" element={<RecommendationList />} />
         <Route path="/PostsList" element={<PostsList />} />
+        <Route path="/3" element={<RecommendationTest />} />
 
         {/* Protected Routes - User & admin */}
         <Route

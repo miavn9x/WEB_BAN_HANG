@@ -9,12 +9,12 @@ const SearchHistory = require("../models/SearchHistory");
 const Cart = require("../models/cartModel");
 
 const groupConfig = {
-  cart: { enabled: true, weight: 1.5, slice: 10 }, // Group 1: Giỏ hàng
-  search: { enabled: true, weight: 1.0, slice: 10 }, // Group 2: Tìm kiếm
-  view: { enabled: true, weight: 1.0, slice: 10 }, // Group 3: Lịch sử xem
-  order: { enabled: true, weight: 1.0, slice: 10 }, // Group 4: Lịch sử thanh toán
-  sale: { enabled: true, weight: 1.0, slice: 10 }, // Group 5: Sản phẩm Sale >10%
-  revenue: { enabled: true, weight: 1.2, slice: 10 }, // Group 6: Sản phẩm doanh thu cao
+  cart: { enabled: true, weight: 1.5, slice: 10 },
+  search: { enabled: true, weight: 1.0, slice: 10 },
+  view: { enabled: true, weight: 1.0, slice: 10 },
+  order: { enabled: true, weight: 1.0, slice: 10 },
+  sale: { enabled: true, weight: 1.0, slice: 0 },
+  revenue: { enabled: true, weight: 1.2, slice: 0 },
 };
 
 // -------------------- Group 1: Giỏ hàng --------------------
@@ -116,7 +116,8 @@ async function getViewHistoryScores(userId) {
 // -------------------- Group 4: Lịch sử thanh toán --------------------
 async function getOrderScores(userId) {
   const scores = {};
-  const orders = await Order.find({ userId }).populate("items.product");
+  // Sửa truy vấn: sử dụng trường 'userId' để lấy đơn hàng của user hiện tại
+  const orders = await Order.find({ userId: userId }).populate("items.product");
   const purchasedProducts = orders.flatMap((order) =>
     order.items.map((item) => item.product)
   );
@@ -213,7 +214,6 @@ async function getGroupRecommendations(userId) {
     });
     recommendedCart.sort((a, b) => b.score - a.score);
     recommendedCart = recommendedCart.slice(0, groupConfig.cart.slice);
-    // Gán nhãn nhóm cho sản phẩm Group 1
     recommendedCart.forEach((p) => (p.group = 1));
   }
 
@@ -315,7 +315,6 @@ async function getGroupRecommendations(userId) {
   // --- Group 5: Sản phẩm Sale >10% ---
   let recommendedSale = [];
   if (groupConfig.sale.enabled) {
-    // Tăng limit truy vấn để lấy nhiều sản phẩm sale hơn (ví dụ 50)
     recommendedSale = await Product.find({
       discountPercentage: { $gt: 10 },
     })
@@ -407,7 +406,7 @@ async function getGroupRecommendations(userId) {
     ...recommendedHighRevenue,
   ];
 
-  // Sắp xếp lại theo thứ tự nhóm (tăng dần) và nếu cùng nhóm thì theo score giảm dần
+  // Sắp xếp theo nhóm (nếu cần) và theo score
   allProducts.sort((a, b) => {
     if (a.group !== b.group) return a.group - b.group;
     return b.score - a.score;
@@ -420,16 +419,18 @@ async function getGroupRecommendations(userId) {
     recommendedOrder,
     recommendedSale,
     recommendedHighRevenue,
-    allProducts, // mảng đã được sắp xếp theo nhóm
+    allProducts,
   };
 }
 
 // -------------------- Route chính --------------------
 router.get("/", authMiddleware, async (req, res) => {
-  const userId = req.user.id;
+  // (Tùy chọn) Dùng req.user._id thay vì req.user.id nếu cần
+  const userId = req.user._id;
   try {
     const recommendations = await getGroupRecommendations(userId);
-    res.status(200).json({ recommendations: recommendations.allProducts });
+    // Trả về toàn bộ object recommendations để client có thể render theo từng nhóm
+    res.status(200).json({ recommendations });
   } catch (error) {
     res.status(500).json({ message: "Lỗi khi lấy danh sách đề xuất." });
   }
