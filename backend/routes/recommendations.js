@@ -9,12 +9,12 @@ const SearchHistory = require("../models/SearchHistory");
 const Cart = require("../models/cartModel");
 
 const groupConfig = {
-  cart: { enabled: true, weight: 1.5, slice: 10 },
-  search: { enabled: true, weight: 1.0, slice: 10 },
-  view: { enabled: true, weight: 1.0, slice: 10 },
-  order: { enabled: true, weight: 1.0, slice: 10 },
-  sale: { enabled: true, weight: 1.0, slice: 0 },
-  revenue: { enabled: true, weight: 1.2, slice: 0 },
+  cart: { enabled: true, weight: 1.5, slice: 15 },
+  search: { enabled: true, weight: 1.0, slice: 15 },
+  view: { enabled: true, weight: 1.0, slice: 15 },
+  order: { enabled: true, weight: 1.0, slice: 15 },
+  sale: { enabled: true, weight: 1.0, slice: 15 },
+  revenue: { enabled: true, weight: 1.2, slice: 15 },
 };
 
 // -------------------- Group 1: Giỏ hàng --------------------
@@ -116,7 +116,6 @@ async function getViewHistoryScores(userId) {
 // -------------------- Group 4: Lịch sử thanh toán --------------------
 async function getOrderScores(userId) {
   const scores = {};
-  // Sửa truy vấn: sử dụng trường 'userId' để lấy đơn hàng của user hiện tại
   const orders = await Order.find({ userId: userId }).populate("items.product");
   const purchasedProducts = orders.flatMap((order) =>
     order.items.map((item) => item.product)
@@ -140,7 +139,7 @@ async function getOrderScores(userId) {
 
 // -------------------- Hàm gợi ý tổng hợp --------------------
 async function getGroupRecommendations(userId) {
-  // Thu thập dữ liệu từ các nguồn cùng lúc
+  // Thu thập dữ liệu từ 4 nguồn chính cùng lúc
   const [cartData, searchScores, viewScores, orderData] = await Promise.all([
     getCartScores(userId),
     getSearchScores(userId),
@@ -178,7 +177,7 @@ async function getGroupRecommendations(userId) {
     });
     recommendedCart = Object.values(mapCart);
 
-    // FILTER: Loại bỏ các sản phẩm đã có trong giỏ hàng
+    // Loại bỏ các sản phẩm đã có trong giỏ hàng
     if (
       cartData.cart &&
       cartData.cart.items &&
@@ -192,6 +191,7 @@ async function getGroupRecommendations(userId) {
       );
     }
 
+    // So sánh giá của sản phẩm trong giỏ để điều chỉnh điểm
     if (
       cartData.cart &&
       cartData.cart.items &&
@@ -312,71 +312,88 @@ async function getGroupRecommendations(userId) {
     recommendedOrder = recommendedOrder.slice(0, groupConfig.order.slice);
   }
 
-  // --- Group 5: Sản phẩm Sale >10% ---
-  let recommendedSale = [];
-  if (groupConfig.sale.enabled) {
-    recommendedSale = await Product.find({
-      discountPercentage: { $gt: 10 },
-    })
-      .sort({ discountPercentage: -1 })
-      .limit(50)
-      .lean();
-    recommendedSale.forEach((p) => {
-      p.score = p.discountPercentage * groupConfig.sale.weight;
-      p.group = 5;
-    });
-    recommendedSale = recommendedSale.slice(0, groupConfig.sale.slice);
-  }
+  // -------------------- Tính số lượng nguồn dữ liệu chính --------------------
+  const primaryGroups = [
+    recommendedCart,
+    recommendedSearch,
+    recommendedView,
+    recommendedOrder,
+  ];
+  let primaryDataCount = primaryGroups.reduce(
+    (acc, group) => acc + (group && group.length > 0 ? 1 : 0),
+    0
+  );
 
-  // --- Group 6: Sản phẩm doanh thu cao ---
+  // -------------------- Áp dụng điều kiện hiển thị Sale và Doanh thu cao --------------------
+  // Nếu số nguồn dữ liệu chính nhỏ hơn 3, hiển thị thêm nhóm Sale (Group 5) và Doanh thu cao (Group 6)
+  // Ngược lại (>=3), ẩn 2 nhóm này.
+  let recommendedSale = [];
   let recommendedHighRevenue = [];
-  if (groupConfig.revenue.enabled) {
-    try {
-      const startOfMonth = new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        1
-      );
-      const monthlySalesAggregation = await Order.aggregate([
-        { $match: { createdAt: { $gte: startOfMonth } } },
-        { $unwind: "$items" },
-        {
-          $group: {
-            _id: "$items.product",
-            totalSold: { $sum: "$items.quantity" },
+  if (primaryDataCount < 3) {
+    // --- Group 5: Sản phẩm Sale >10% ---
+    if (groupConfig.sale.enabled) {
+      recommendedSale = await Product.find({
+        discountPercentage: { $gt: 10 },
+      })
+        .sort({ discountPercentage: -1 })
+        .limit(50)
+        .lean();
+      recommendedSale.forEach((p) => {
+        p.score = p.discountPercentage * groupConfig.sale.weight;
+        p.group = 5;
+      });
+      recommendedSale = recommendedSale.slice(0, groupConfig.sale.slice);
+    }
+
+    // --- Group 6: Sản phẩm doanh thu cao ---
+    if (groupConfig.revenue.enabled) {
+      try {
+        const startOfMonth = new Date(
+          new Date().getFullYear(),
+          new Date().getMonth(),
+          1
+        );
+        const monthlySalesAggregation = await Order.aggregate([
+          { $match: { createdAt: { $gte: startOfMonth } } },
+          { $unwind: "$items" },
+          {
+            $group: {
+              _id: "$items.product",
+              totalSold: { $sum: "$items.quantity" },
+            },
           },
-        },
-        { $sort: { totalSold: -1 } },
-      ]);
-      const totalSoldOverall = monthlySalesAggregation.reduce(
-        (acc, curr) => acc + curr.totalSold,
-        0
-      );
-      const highRevenueAgg = monthlySalesAggregation.filter(
-        (item) => item.totalSold / totalSoldOverall > 0.1
-      );
-      const productsArr = await Promise.all(
-        highRevenueAgg.map((agg) => Product.findById(agg._id).lean())
-      );
-      productsArr.forEach((product, idx) => {
-        if (product) {
-          recommendedHighRevenue.push({
-            ...product,
-            totalSold: highRevenueAgg[idx].totalSold,
-          });
-        }
-      });
-      recommendedHighRevenue.sort((a, b) => b.totalSold - a.totalSold);
-      recommendedHighRevenue.forEach((p) => {
-        p.score = (p.totalSold || 0) * groupConfig.revenue.weight;
-        p.group = 6;
-      });
-      recommendedHighRevenue = recommendedHighRevenue.slice(
-        0,
-        groupConfig.revenue.slice
-      );
-    } catch (error) {
-      // Nếu có lỗi, không in ra thông báo log
+          { $sort: { totalSold: -1 } },
+        ]);
+        const totalSoldOverall = monthlySalesAggregation.reduce(
+          (acc, curr) => acc + curr.totalSold,
+          0
+        );
+        const highRevenueAgg = monthlySalesAggregation.filter(
+          (item) => item.totalSold / totalSoldOverall > 0.1
+        );
+        const productsArr = await Promise.all(
+          highRevenueAgg.map((agg) => Product.findById(agg._id).lean())
+        );
+        productsArr.forEach((product, idx) => {
+          if (product) {
+            recommendedHighRevenue.push({
+              ...product,
+              totalSold: highRevenueAgg[idx].totalSold,
+            });
+          }
+        });
+        recommendedHighRevenue.sort((a, b) => b.totalSold - a.totalSold);
+        recommendedHighRevenue.forEach((p) => {
+          p.score = (p.totalSold || 0) * groupConfig.revenue.weight;
+          p.group = 6;
+        });
+        recommendedHighRevenue = recommendedHighRevenue.slice(
+          0,
+          groupConfig.revenue.slice
+        );
+      } catch (error) {
+        // Nếu có lỗi, bỏ qua
+      }
     }
   }
 
@@ -406,7 +423,20 @@ async function getGroupRecommendations(userId) {
     ...recommendedHighRevenue,
   ];
 
-  // Sắp xếp theo nhóm (nếu cần) và theo score
+  // -------------------- Điều kiện bổ sung: Điều chỉnh điểm cho sản phẩm --------------------
+  allProducts.forEach((p) => {
+    // Nếu sản phẩm hết hàng, giảm điểm mạnh để ưu tiên các sản phẩm còn hàng
+    if (p.inStock !== undefined && p.inStock <= 0) {
+      p.score -= 50;
+    }
+    // Nếu rating thấp (< 3), giảm điểm
+    if (p.rating && p.rating < 3) {
+      p.score -= 10;
+    }
+    // Có thể bổ sung thêm điều kiện điều chỉnh điểm theo khoảng giá trung bình từ lịch sử mua hàng...
+  });
+
+  // Sắp xếp cuối cùng theo nhóm (nếu cần) và theo điểm số
   allProducts.sort((a, b) => {
     if (a.group !== b.group) return a.group - b.group;
     return b.score - a.score;
@@ -425,11 +455,9 @@ async function getGroupRecommendations(userId) {
 
 // -------------------- Route chính --------------------
 router.get("/", authMiddleware, async (req, res) => {
-  // (Tùy chọn) Dùng req.user._id thay vì req.user.id nếu cần
   const userId = req.user._id;
   try {
     const recommendations = await getGroupRecommendations(userId);
-    // Trả về toàn bộ object recommendations để client có thể render theo từng nhóm
     res.status(200).json({ recommendations });
   } catch (error) {
     res.status(500).json({ message: "Lỗi khi lấy danh sách đề xuất." });

@@ -4,7 +4,11 @@ import { Helmet } from "react-helmet";
 import "../../styles/post-detail.css";
 
 const PostDetail = () => {
-  const { id } = useParams();
+  // Nhận tham số URL chứa cả slug và id, ví dụ: "ten-bai-viet-607c191e810c19729de860ea"
+  const { slug } = useParams();
+  // Nếu slug không chứa dấu gạch ngang, postId sẽ là toàn bộ chuỗi
+  const postId = slug.substring(slug.lastIndexOf("-") + 1);
+
   const [post, setPost] = useState(null);
   const [loadingPost, setLoadingPost] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -12,7 +16,7 @@ const PostDetail = () => {
 
   // Fetch bài viết theo id
   useEffect(() => {
-    fetch(`/api/posts/${id}`)
+    fetch(`/api/posts/${postId}`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Post data:", data);
@@ -23,7 +27,7 @@ const PostDetail = () => {
         console.error("Error fetching post:", err);
         setLoadingPost(false);
       });
-  }, [id]);
+  }, [postId]);
 
   // Fetch sản phẩm liên quan
   useEffect(() => {
@@ -74,16 +78,19 @@ const PostDetail = () => {
   if (!post) return <p>Bài viết không tồn tại.</p>;
 
   // SEO Meta Tags
-  const postUrl = window.location.href; // Lấy URL bài viết hiện tại
-  const postTitle = post.title;
+  const postUrl = window.location.href;
+  const postTitle = post.title || "No title";
   const postDescription =
-    post.description || post.content.substring(0, 150) + "...";
-  const postImage = post.image || "/default-image.jpg"; // Thêm hình ảnh mặc định nếu không có
+    post.description ||
+    (post.content
+      ? post.content.substring(0, 150) + "..."
+      : "No description available");
+  const postImage = post.image || "/default-image.jpg";
 
   return (
     <div className="post-detail container my-4">
       <Helmet>
-        <title>{postTitle} - BabyMart.vn</title>
+        <title>{`${postTitle} - BabyMart.vn`}</title>
         <meta name="description" content={postDescription} />
         <meta property="og:title" content={postTitle} />
         <meta property="og:description" content={postDescription} />
@@ -94,16 +101,20 @@ const PostDetail = () => {
         <meta name="twitter:image" content={postImage} />
       </Helmet>
 
-      <Link to="/PostsList" className="btn btn-secondary mb-3">
+      <Link to="/posts-list" className="btn btn-secondary mb-3">
         Quay lại danh sách
       </Link>
       <div className="row">
         <div className="col-12 col-md-9">
           <h1 className="mb-4">{post.title}</h1>
-          <div
-            className="post-content"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
+          {post.content ? (
+            <div
+              className="post-content"
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
+          ) : (
+            <p>Không có nội dung để hiển thị.</p>
+          )}
           {post.tags && Array.isArray(post.tags) && post.tags.length > 0 && (
             <div className="mt-4">
               <h5>Thẻ:</h5>

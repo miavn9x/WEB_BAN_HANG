@@ -41,7 +41,6 @@ import {
 // import SearchPage from "./components/SearchPage";
 import RecommendationList from "./components/Product/RecommendationList";
 import Dashboard from "./pages/Auth/Admin/AdminOrders/Dashboard";
-import RecommendationTest from "./pages/RecommendationTest";
 function App() {
   const [userRole, setUserRole] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -112,23 +111,25 @@ function App() {
       </Helmet>
 
       <Routes>
+        <Route path="/test" element={<Evaluate />} />
+        <Route path="/1" element={<NotificationModal />} />
+        <Route path="/2" element={<RecommendationList />} />
         {/* Public Routes */}
+
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/products" element={<ProductPage />} />
-        <Route path="/product/:id" element={<ProductModals />} />
+        <Route path="/product/:slug" element={<ProductModals />} />
         <Route path="/product/:productId" element={<ProductItem />} />
         <Route path="/shop-map" element={<StoreLocator />} />
         <Route path="/gioi-thieu" element={<Info />} />
-        <Route path="/posts/:id" element={<PostDetail />} />
-        <Route path="/test" element={<Evaluate />} />
-        <Route path="/1" element={<NotificationModal />} />
-        <Route path="/2" element={<RecommendationList />} />
-        <Route path="/PostsList" element={<PostsList />} />
-        <Route path="/3" element={<RecommendationTest />} />
+
+        <Route path="/posts/:slug" element={<PostDetail />} />
+        <Route path="/posts-list" element={<PostsList />} />
+        <Route path="/posts-management" element={<PostsManagement />} />
 
         {/* Protected Routes - User & admin */}
         <Route
@@ -156,7 +157,9 @@ function App() {
                 <Route path="edit-product" element={<ProductEdit />} />
                 <Route path="/quan-ly-don-hang" element={<Orders />} />
                 <Route path="/add-bai-viet" element={<MyEditor />} />
+
                 <Route path="posts-management" element={<PostsManagement />} />
+
                 <Route path="/order_Dashboard" element={<Dashboard />} />
               </Routes>
             </PrivateRoute>

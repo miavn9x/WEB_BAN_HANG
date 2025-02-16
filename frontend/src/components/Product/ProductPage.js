@@ -10,7 +10,7 @@ import {
 } from "react-bootstrap";
 import { CiFilter } from "react-icons/ci";
 import { useLocation, useNavigate } from "react-router-dom";
-import Filter from "../Filter/Filter"; // Import Filter component
+import Filter from "../Filter/Filter"; // Component bộ lọc
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../styles/ProductPage.css";
 import axios from "axios";
@@ -18,13 +18,15 @@ import ProductItem from "./ProductItem"; // Component hiển thị sản phẩm
 import Fuse from "fuse.js";
 
 const ProductPage = () => {
+  // Khi trang load, cuộn lên đầu trang
   useEffect(() => {
-    // hàm mạc đinh mơ trang hiên trên
     window.scrollTo(0, 0);
   }, []);
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Lấy tham số từ URL
   const urlParams = new URLSearchParams(location.search);
   const discountParam = urlParams.get("showDiscount");
   const showDiscount = location.state?.showDiscount || discountParam === "true";
@@ -39,14 +41,18 @@ const ProductPage = () => {
   const searchFromURL = queryParams.get("search");
   const brandFromURL = queryParams.get("brand");
 
+  // State cho modal bộ lọc và các bộ lọc
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({
     price: null,
     categories: {},
   });
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Các hàm xử lý modal và bộ lọc
   const handleCloseFilter = () => setShowFilter(false);
   const handleShowFilter = () => setShowFilter(true);
   const handleFilterChange = (filterData) => {
@@ -67,10 +73,10 @@ const ProductPage = () => {
       }
       return prevFilters;
     });
-
-    // Reset the page and reload products
+    // Reset trang và load lại sản phẩm
     navigate("/products");
   };
+
   const clearFilters = () => {
     setFilters({
       price: null,
@@ -80,6 +86,7 @@ const ProductPage = () => {
     navigate("/products");
   };
 
+  // Hàm normalize chuỗi để hỗ trợ tìm kiếm không dấu
   const normalizeString = (str) => {
     return str
       ? str
@@ -88,6 +95,8 @@ const ProductPage = () => {
           .toLowerCase()
       : "";
   };
+
+  // Fetch sản phẩm từ API
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
@@ -96,7 +105,7 @@ const ProductPage = () => {
         let url = `/api/products`;
         const params = [];
 
-        // Xử lý các tham số truy vấn từ URL (search, categoryFromURL, genericFromURL, brandFromURL)
+        // Xử lý các tham số truy vấn từ URL
         if (searchFromURL) {
           params.push(`search=${encodeURIComponent(searchFromURL)}`);
         }
@@ -109,7 +118,6 @@ const ProductPage = () => {
         if (brandFromURL) {
           params.push(`brand=${encodeURIComponent(brandFromURL)}`);
         }
-
         if (params.length > 0) {
           url = `${url}?${params.join("&")}`;
         }
@@ -153,9 +161,7 @@ const ProductPage = () => {
           );
         }
 
-        // --- Áp dụng bộ lọc từ state filters ---
-
-        // 1. Lọc theo giá
+        // Áp dụng bộ lọc từ state filters
         if (filters.price) {
           const { maxPrice, minPrice } = filters.price;
           if (maxPrice) {
@@ -170,20 +176,15 @@ const ProductPage = () => {
           }
         }
 
-        // 2. Lọc theo danh mục (categories)
         const categoryFilterKeys = Object.keys(filters.categories);
         if (categoryFilterKeys.length > 0) {
           fetchedProducts = fetchedProducts.filter((product) => {
-            // Nếu sản phẩm không có thuộc tính category thì loại bỏ
             if (!product.category) return false;
-            // Kiểm tra từng bộ lọc danh mục đang được chọn
             return categoryFilterKeys.some((categoryName) => {
               const filterId = filters.categories[categoryName];
-              // filterId có định dạng "Tên danh mục|Tùy chọn con"
               const parts = filterId.split("|");
               if (parts.length !== 2) return false;
               const [filterCategory, filterOption] = parts;
-              // So sánh với dữ liệu sản phẩm (giả sử product.category có thuộc tính name và generic)
               return (
                 product.category.name === filterCategory &&
                 product.category.generic === filterOption
@@ -192,7 +193,7 @@ const ProductPage = () => {
           });
         }
 
-        // --- Xử lý sắp xếp ---
+        // Xử lý sắp xếp
         if (sortBy === "discountPercentage") {
           fetchedProducts = fetchedProducts.filter(
             (product) => product.discountPercentage > 0
@@ -225,7 +226,7 @@ const ProductPage = () => {
     genericFromURL,
     brandFromURL,
     sortBy,
-    filters, // thêm dependency để chạy lại khi bộ lọc thay đổi
+    filters,
     searchFromURL,
     location.search,
   ]);
@@ -251,7 +252,7 @@ const ProductPage = () => {
           <Row className="product-row">
             <div className="filter-header">
               <div className="filter-controls">
-                <div className="d-flex justify-content-between ">
+                <div className="d-flex justify-content-between">
                   {/* Nút Bộ Lọc (chỉ hiển thị trên mobile) */}
                   <div className="d-block d-xl-none mx-3">
                     <span className="loc">
@@ -260,11 +261,11 @@ const ProductPage = () => {
                         className="filter-button d-flex"
                       >
                         <CiFilter className="me-1" />
-                        Tìm kiếm nhanh{" "}
+                        Tìm kiếm nhanh
                       </button>
                     </span>
                   </div>
-                  <div className="sort-wrapper d-flex align-items-center ms-auto  mx-3">
+                  <div className="sort-wrapper d-flex align-items-center ms-auto mx-3">
                     <span className="sort-label me-2 d-none d-lg-block">
                       Sắp xếp theo:
                     </span>

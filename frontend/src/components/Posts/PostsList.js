@@ -3,12 +3,31 @@ import { Link } from "react-router-dom";
 import { Container, Row, Col, Card } from "react-bootstrap";
 import { Helmet } from "react-helmet";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../../styles/PostsList.css"; // Import file CSS dành riêng cho trang này
+import "../../styles/PostsList.css";
+
+// Hàm chuyển đổi tiêu đề bài viết thành slug
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize("NFD") // Tách dấu khỏi ký tự
+    .replace(/[\u0300-\u036f]/g, "") // Loại bỏ các dấu kết hợp
+    .replace(/đ/g, "d") // Chuyển 'đ' thành 'd'
+    .trim()
+    .replace(/\s+/g, "-") // Thay khoảng trắng bằng dấu gạch ngang
+    .replace(/[^\w-]+/g, "") // Loại bỏ ký tự không hợp lệ
+    .replace(/--+/g, "-") // Loại bỏ dấu gạch ngang thừa
+    .replace(/^-+/, "") // Loại bỏ dấu gạch ngang ở đầu chuỗi
+    .replace(/-+$/, ""); // Loại bỏ dấu gạch ngang ở cuối chuỗi
+}
 
 // Component hiển thị mỗi bài viết nổi bật (TIN NỔI BẬT)
 const SidebarPostItem = ({ post }) => (
   <Col lg={12} className="sidebar-col mb-4">
-    <Link to={`/posts/${post._id}`} className="posts-list-sidebar-link">
+    <Link
+      to={`/posts/${slugify(post.title)}-${post._id}`}
+      className="posts-list-sidebar-link"
+    >
       <div className="posts-list-sidebar-item">
         {post.imageUrl && (
           <img src={post.imageUrl} alt={post.title} className="img-fluid" />
@@ -62,7 +81,7 @@ const PostsList = () => {
   return (
     <div className="posts-list-page">
       <Helmet>
-        <title>{pageTitle} - BabyMart.vn</title>
+        <title>{`${pageTitle} - BabyMart.vn`}</title>
         <meta name="description" content={pageDescription} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
@@ -73,9 +92,7 @@ const PostsList = () => {
       <Container>
         {/* Tiêu đề trang */}
         <Row className="my-4">
-          <Col>
-            {/* <h3 className="posts-list-title">{pageTitle}</h3> */}
-          </Col>
+          <Col>{/* <h3 className="posts-list-title">{pageTitle}</h3> */}</Col>
         </Row>
 
         <Row>
@@ -89,7 +106,10 @@ const PostsList = () => {
               ) : (
                 posts.map((post) => (
                   <Col lg={4} className="posts-list-col mb-4" key={post._id}>
-                    <Link to={`/posts/${post._id}`} className="posts-list-link">
+                    <Link
+                      to={`/posts/${slugify(post.title)}-${post._id}`}
+                      className="posts-list-link"
+                    >
                       <Card className="posts-list-card">
                         {post.imageUrl && (
                           <Card.Img
@@ -118,6 +138,7 @@ const PostsList = () => {
             <Row>
               {highlightPosts.length === 0 ? (
                 <Col>
+                  <p>Không có tin nổi bật.</p>
                 </Col>
               ) : (
                 highlightPosts.map((post) => (

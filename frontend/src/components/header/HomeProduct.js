@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import ProductItem from "../Product/ProductItem";
+import useRecommendations from "../../hooks/useRecommendations"; // Import hook gợi ý sản phẩm
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./HomeProduct.css";
 import { Button } from "@mui/material";
@@ -12,11 +13,32 @@ import "swiper/css/autoplay";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Card, Col, Row } from "react-bootstrap";
 
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize("NFD") // Tách dấu khỏi ký tự
+    .replace(/[\u0300-\u036f]/g, "") // Loại bỏ các dấu kết hợp
+    .replace(/đ/g, "d") // Chuyển 'đ' thành 'd'
+    .trim()
+    .replace(/\s+/g, "-") // Thay khoảng trắng bằng dấu gạch ngang
+    .replace(/[^\w-]+/g, "") // Loại bỏ ký tự không hợp lệ
+    .replace(/--+/g, "-") // Loại bỏ dấu gạch ngang thừa
+    .replace(/^-+/, "") // Loại bỏ dấu gạch ngang ở đầu chuỗi
+    .replace(/-+$/, ""); // Loại bỏ dấu gạch ngang ở cuối chuỗi
+}
+
+
 
 const HomeProduct = () => {
+  
   const navigate = useNavigate();
-
-  // --- Phần đồng hồ đếm ngược và flash sale ---
+  // --- PHẦN GỢI Ý SẢN PHẨM ĐỀ XUẤT CHO BẠN ---
+  // Sử dụng hook useRecommendations để lấy dữ liệu gợi ý
+  const recommendationsData = useRecommendations();
+  const recommendedProducts = recommendationsData?.allProducts || [];
+  
+  // --- PHẦN FLASH SALE & ĐỒNG HỒ ĐẾM NGƯỢC ---
   const [timeState, setTimeState] = useState({
     hours: 0,
     minutes: 0,
@@ -30,10 +52,10 @@ const HomeProduct = () => {
   const fetchDiscountedProducts = useCallback(async () => {
     try {
       const response = await axios.get(
-        "/api/products?randomDiscount=true&limit=12"
+        "/api/products?randomDiscount=true&limit=18"
       );
       const filteredProducts = response.data.products.filter(
-        (product) => product.discountPercentage > 14 //% giam gia
+        (product) => product.discountPercentage > 14 // % giảm giá
       );
       // Random đơn giản:
       const shuffledProducts = filteredProducts.sort(() => Math.random() - 0.5);
@@ -109,14 +131,14 @@ const HomeProduct = () => {
     });
   };
 
-  // --- Phần tải sản phẩm chung ---
+  // --- PHẦN TẢI SẢN PHẨM CHUNG ---
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("/api/products?limit=12");
+        const response = await axios.get("/api/products?limit=18");
         setProducts(response.data.products);
         setLoading(false);
       } catch (error) {
@@ -135,7 +157,6 @@ const HomeProduct = () => {
     }
     return newArray;
   };
-
 
   const [threeHourTargetTime, setThreeHourTargetTime] = useState(null);
   const [randomizedCombinedProducts, setRandomizedCombinedProducts] = useState(
@@ -184,7 +205,7 @@ const HomeProduct = () => {
     }
   }, [products, getCombinedProducts]);
 
-  // --- Phần tải bài viết ---
+  // --- PHẦN TẢI BÀI VIẾT ---
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
 
@@ -208,10 +229,10 @@ const HomeProduct = () => {
   const limitedPosts = posts.slice(0, 12);
 
   const handleClick = () => {
-    navigate("/PostsList");
+    navigate("/posts-list");
   };
 
-  // --- Xử lý click cho thương hiệu ---
+  // --- XỬ LÝ CLICK CHO THƯƠNG HIỆU ---
   const handleBrandClick = (brandName) => {
     const normalizedBrand = brandName.trim().toLowerCase();
     navigate(`/products?brand=${encodeURIComponent(normalizedBrand)}`, {
@@ -222,7 +243,7 @@ const HomeProduct = () => {
   return (
     <>
       <div>
-        {/* --- Phần Flash sale --- */}
+        {/* --- PHẦN FLASH SALE --- */}
         <div className="home__product bg-pink py-5 d-flex justify-content-center">
           <div className="container content__wrapper">
             <div className="row mb-3">
@@ -316,7 +337,7 @@ const HomeProduct = () => {
               )}
             </div>
             {timeState.currentPhase === "main" && (
-              <div className="footer text-center mt-4">
+              <div className="footer text-center  mt-4 pt-4">
                 <Button
                   className="common-view-all-btn"
                   onClick={() =>
@@ -329,9 +350,49 @@ const HomeProduct = () => {
             )}
           </div>
         </div>
-
-        {/* --- Phần sản phẩm theo danh mục Sữa --- */}
-        <div className="custom__cat__container py-2 my-4 container">
+        {/* --- PHẦN SẢN PHẨM ĐỀ XUẤT CHO BẠN --- */}
+        <div
+          className="home__product bg-none py-5 d-flex justify-content-center"
+          style={{
+            backgroundColor: "transparent !important",
+            background: "none !important",
+          }}
+        >
+          <div className="container content__wrapper">
+            <div className="row mb-3">
+              <div className="col-12 text-center text-md-start">
+                <h4 className="Flash__sale fs-5">Sản phẩm đề xuất cho bạn</h4>
+              </div>
+            </div>
+            <div className="row">
+              {recommendedProducts.length > 0 ? (
+                recommendedProducts.map((product) => (
+                  <div
+                    key={product._id}
+                    className="col-6 col-md-3 col-lg-2 py-2 g-2"
+                  >
+                    <ProductItem product={product} />
+                  </div>
+                ))
+              ) : (
+                <div className="col-12 text-center py-4">
+                  <i className="fas fa-box-open fa-3x text-muted mb-3"></i>
+                  <p className="text-muted">Không có gợi ý nào</p>
+                </div>
+              )}
+            </div>
+            <div className="footer text-center  mt-4 pt-4">
+              <Button
+                className="common-view-all-btn"
+                onClick={() => navigate("/products?recommended=true")}
+              >
+                Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
+              </Button>
+            </div>
+          </div>
+        </div>
+        {/* --- PHẦN SẢN PHẨM THEO DANH MỤC "SỮA" --- */}
+        <div className="custom__cat__container py-2 my-2 container">
           <div className="d-flex text-center">
             <div className="container">
               <div className="container" style={{ height: "200px" }}>
@@ -395,13 +456,25 @@ const HomeProduct = () => {
                   </SwiperSlide>
                 </Swiper>
               </div>
-              <div className="row align-items-center text-center d-flex">
-                <div className="col-lg-4 col-md-12 mb-3">
-                  <h4 className="Flash__sale" style={{ color: "#555" }}>
-                    Các Loại Sữa
+              <div className="row  d-flex">
+                <div className="col-lg-6 col-md-12 mt-3 pt-4 d-flex">
+                  <h4
+                    className="text-center text-lg-start Flash__sale"
+                    style={{ color: "#555", padding: "0px" }}
+                  >
+                    Các Loại Sữa:&nbsp;
+
                   </h4>
+                  <span className="animated-words mb-2">
+                    <span>cho bé 0-6 tháng</span>
+                    <span>cho bé 6-12 tháng</span>
+                    <span>cho bé 1-3 tuổi</span>
+                    <span>Sữa dinh dưỡng</span>
+                    <span>cho bé 0-6 tháng</span>
+                  </span>
                 </div>
-                <div className="col-lg-4 mb-3 col-md-6">
+
+                <div className="col-lg-3 mb-3 col-md-6 pt-4">
                   <Button
                     style={{ color: "#555", fontSize: "13px" }}
                     className="custom-category-button lead__sale px-3"
@@ -420,10 +493,10 @@ const HomeProduct = () => {
                     Sữa bột cao cấp
                   </Button>
                 </div>
-                <div className="col-lg-4 mb-3 col-md-6">
+                <div className="col-lg-3 mb-3 col-md-6 pt-4">
                   <Button
                     style={{ color: "#555", fontSize: "13px" }}
-                    className="custom-category-button lead__sale px-3"
+                    className="custom-category-button lead__sale px-3 "
                     onClick={() =>
                       handleViewCategory("categoryName", "Sữa dinh dưỡng")
                     }
@@ -443,7 +516,7 @@ const HomeProduct = () => {
             </div>
           </div>
 
-          {/* Hiển thị sản phẩm đã random dựa theo API /timer/three-hour */}
+          {/* Hiển thị sản phẩm đã random theo API /timer/three-hour */}
           {loading ? (
             <div className="custom__cat__loading text-center py-4">
               <p>Đang tải sản phẩm...</p>
@@ -470,9 +543,9 @@ const HomeProduct = () => {
           )}
         </div>
 
-        {/* --- Sản phẩm cho danh mục "Bỉm & tã em bé" --- */}
+        {/* --- PHẦN SẢN PHẨM THEO DANH MỤC "Bỉm & tã em bé" --- */}
         <div
-          className="home__product bg-none py-5 d-flex justify-content-center"
+          className="custom__cat__container py-2 my-2 container"
           style={{
             backgroundColor: "transparent !important",
             background: "none !important",
@@ -480,7 +553,7 @@ const HomeProduct = () => {
         >
           <div className="container content__wrapper">
             <div className="row mb-3">
-              <div className="col-12 text-center text-md-start">
+              <div className="col-12 text-center text-md-start pt-4">
                 <h4 className="Flash__sale fs-5">Bỉm & tã em bé</h4>
               </div>
             </div>
@@ -516,7 +589,7 @@ const HomeProduct = () => {
                 </div>
               )}
             </div>
-            <div className="footer text-center mt-4">
+            <div className="footer text-center  mt-4 pt-4">
               <Button
                 className="common-view-all-btn"
                 onClick={() =>
@@ -529,141 +602,145 @@ const HomeProduct = () => {
               </Button>
             </div>
           </div>
-        </div>
 
-        {/* --- Phần thương hiệu nổi bật --- */}
-        <div className="container py-2 my-4">
-          <span className="Flash__sale fs-5">THƯƠNG HIỆU NỔI BẬT </span>
-          <br />
-          <Swiper
-            spaceBetween={10}
-            pagination={{ clickable: true }}
-            autoplay={{
-              delay: 3000,
-              disableOnInteraction: false,
-            }}
-            modules={[Pagination, Autoplay]}
-            className="mySwiper"
-            breakpoints={{
-              320: { slidesPerView: 2 },
-              480: { slidesPerView: 3 },
-              768: { slidesPerView: 4 },
-              1024: { slidesPerView: 5 },
-              1200: { slidesPerView: 6 },
-            }}
-          >
-            <SwiperSlide onClick={() => handleBrandClick("cosmic light")}>
-              <img
-                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739172432/brand_1_gp8jdq.webp"
-                alt="Brand 1"
-              />
-            </SwiperSlide>
-            <SwiperSlide onClick={() => handleBrandClick("aptamil")}>
-              <img
-                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_6_unpnuu.webp"
-                alt="Brand 6"
-              />
-            </SwiperSlide>
-            <SwiperSlide onClick={() => handleBrandClick("arifood")}>
-              <img
-                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_2_hayrt8.webp"
-                alt="Brand 2"
-              />
-            </SwiperSlide>
-            <SwiperSlide onClick={() => handleBrandClick("blackmores")}>
-              <img
-                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_7_rsbgoe.webp"
-                alt="Brand 7"
-              />
-            </SwiperSlide>
-            <SwiperSlide onClick={() => handleBrandClick("blackmores")}>
-              <img
-                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_3_vsl8yu.webp"
-                alt="Brand 3"
-              />
-            </SwiperSlide>
-            <SwiperSlide onClick={() => handleBrandClick("hikid")}>
-              <img
-                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_8_bfeshq.webp"
-                alt="Brand 8"
-              />
-            </SwiperSlide>
-            <SwiperSlide onClick={() => handleBrandClick("aribaly")}>
-              <img
-                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_9_jczh9e.webp"
-                alt="Brand 9"
-              />
-            </SwiperSlide>
-            <SwiperSlide onClick={() => handleBrandClick("Pampers")}>
-              <img
-                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_10_cfzlzm.webp"
-                alt="Brand 10"
-              />
-            </SwiperSlide>
-            <SwiperSlide onClick={() => handleBrandClick("Pampers")}>
-              <img
-                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739560221/ship_aamlrw.png"
-                alt="Brand 11"
-              />
-            </SwiperSlide>
-            <SwiperSlide onClick={() => handleBrandClick("Pampers")}>
-              <img
-                src="https://res.cloudinary.com/div27nz1j/image/upload/v1739560221/km_as1ytm.png"
-                alt="Brand 12"
-              />
-            </SwiperSlide>
-          </Swiper>
-        </div>
+          {/* --- PHẦN THƯƠNG HIỆU NỔI BẬT --- */}
+          <div className="container py-4  my-4">
+            <div>
+              <span className="Flash__sale fs-5 py-2 text__box__border ">
+                THƯƠNG HIỆU NỔI BẬT{" "}
+              </span>
+            </div>
+            <br />
+            <Swiper
+              spaceBetween={10}
+              pagination={{ clickable: true }}
+              autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
+              }}
+              modules={[Pagination, Autoplay]}
+              className="mySwiper"
+              breakpoints={{
+                320: { slidesPerView: 2 },
+                480: { slidesPerView: 3 },
+                768: { slidesPerView: 4 },
+                1024: { slidesPerView: 5 },
+                1200: { slidesPerView: 6 },
+              }}
+            >
+              <SwiperSlide onClick={() => handleBrandClick("cosmic light")}>
+                <img
+                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739172432/brand_1_gp8jdq.webp"
+                  alt="Brand 1"
+                />
+              </SwiperSlide>
+              <SwiperSlide onClick={() => handleBrandClick("aptamil")}>
+                <img
+                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_6_unpnuu.webp"
+                  alt="Brand 6"
+                />
+              </SwiperSlide>
+              <SwiperSlide onClick={() => handleBrandClick("arifood")}>
+                <img
+                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_2_hayrt8.webp"
+                  alt="Brand 2"
+                />
+              </SwiperSlide>
+              <SwiperSlide onClick={() => handleBrandClick("blackmores")}>
+                <img
+                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_7_rsbgoe.webp"
+                  alt="Brand 7"
+                />
+              </SwiperSlide>
+              <SwiperSlide onClick={() => handleBrandClick("blackmores")}>
+                <img
+                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_3_vsl8yu.webp"
+                  alt="Brand 3"
+                />
+              </SwiperSlide>
+              <SwiperSlide onClick={() => handleBrandClick("hikid")}>
+                <img
+                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_8_bfeshq.webp"
+                  alt="Brand 8"
+                />
+              </SwiperSlide>
+              <SwiperSlide onClick={() => handleBrandClick("aribaly")}>
+                <img
+                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_9_jczh9e.webp"
+                  alt="Brand 9"
+                />
+              </SwiperSlide>
+              <SwiperSlide onClick={() => handleBrandClick("Pampers")}>
+                <img
+                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_10_cfzlzm.webp"
+                  alt="Brand 10"
+                />
+              </SwiperSlide>
+              <SwiperSlide onClick={() => handleBrandClick("Pampers")}>
+                <img
+                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739560221/ship_aamlrw.png"
+                  alt="Brand 11"
+                />
+              </SwiperSlide>
+              <SwiperSlide onClick={() => handleBrandClick("Pampers")}>
+                <img
+                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739560221/km_as1ytm.png"
+                  alt="Brand 12"
+                />
+              </SwiperSlide>
+            </Swiper>
+          </div>
 
-        {/* --- Phần bài viết --- */}
-        <div className="quick__post-container">
-          <div className="container py-2 my-4">
-            <Row>
-              <div className="row mb-3">
-                <span className="Flash__sale mx-2 fs-5">Bài viết</span>
-              </div>
-              {limitedPosts.length === 0 ? (
-                <Col>
-                  <p>Không có bài viết nào.</p>
-                </Col>
-              ) : (
-                limitedPosts.map((post) => (
-                  <Col
-                    xs={6}
-                    sm={4}
-                    md={3}
-                    lg={3}
-                    className="mb-4"
-                    key={post._id}
-                  >
-                    <Link
-                      to={`/posts/${post._id}`}
-                      className="quick__post-link"
-                    >
-                      <Card className="quick__post-card">
-                        {post.imageUrl && (
-                          <Card.Img
-                            variant="top"
-                            src={post.imageUrl}
-                            className="quick__post-card-img"
-                            loading="lazy"
-                          />
-                        )}
-                        <Card.Body className="quick__post-card-body">
-                          <Card.Title className="quick__post-card-title">
-                            {post.title}
-                          </Card.Title>
-                        </Card.Body>
-                      </Card>
-                    </Link>
+          {/* --- PHẦN BÀI VIẾT --- */}
+          <div className="quick__post-container">
+            <div className="container py-2 ">
+              <Row>
+                <div className="row mb-3">
+                  <span className="Flash__sale mx-2 fs-5">Bài viết</span>
+                </div>
+                {limitedPosts.length === 0 ? (
+                  <Col>
+                    <p>Không có bài viết nào.</p>
                   </Col>
-                ))
-              )}
-            </Row>
-            <div className="footer text-center mt-4">
-              <Button className="common-view-all-btn" onClick={handleClick}>
-                Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
-              </Button>
+                ) : (
+                  limitedPosts.map((post) => (
+                    <Col
+                      xs={6}
+                      sm={4}
+                      md={3}
+                      lg={3}
+                      className="mb-4"
+                      key={post._id}
+                    >
+                      <Link
+                        to={`/posts/${slugify(post.title)}-${post._id}`}
+                        className="quick__post-link"
+                      >
+                        <Card className="quick__post-card">
+                          {post.imageUrl && (
+                            <Card.Img
+                              variant="top"
+                              src={post.imageUrl}
+                              className="quick__post-card-img"
+                              loading="lazy"
+                            />
+                          )}
+                          <Card.Body className="quick__post-card-body">
+                            <Card.Title className="quick__post-card-title">
+                              {post.title}
+                            </Card.Title>
+                          </Card.Body>
+                        </Card>
+                      </Link>
+                    </Col>
+                  ))
+                )}
+              </Row>
+              <div className=" text-center mt-5">
+                <Button className="common-view-all-btn" onClick={handleClick}>
+                  Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
+                </Button>
+              </div>
             </div>
           </div>
         </div>

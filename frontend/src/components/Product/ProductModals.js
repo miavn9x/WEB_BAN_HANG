@@ -5,7 +5,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import Slider from "react-slick";
 import InnerImageZoom from "react-inner-image-zoom";
 import QuantityBox from "./QuantityBox";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom"; // Import useNavigate
 import axios from "axios";
 import { Spinner } from "react-bootstrap";
 import { formatter } from "../../utils/fomater";
@@ -15,8 +15,29 @@ import "../../styles/ProductModals.css";
 import { Helmet } from "react-helmet";
 import RatingDisplay from "./RatingDisplay";
 
+// Hàm chuyển đổi tên sản phẩm thành slug chuyên nghiệp
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize("NFD") // Tách dấu khỏi ký tự
+    .replace(/[\u0300-\u036f]/g, "") // Loại bỏ các dấu kết hợp
+    .replace(/đ/g, "d") // Chuyển 'đ' thành 'd'
+    .trim()
+    .replace(/\s+/g, "-") // Thay khoảng trắng bằng dấu gạch ngang
+    .replace(/[^\w-]+/g, "") // Loại bỏ ký tự không hợp lệ
+    .replace(/--+/g, "-") // Loại bỏ dấu gạch ngang thừa
+    .replace(/^-+/, "") // Loại bỏ dấu gạch ngang ở đầu chuỗi
+    .replace(/-+$/, ""); // Loại bỏ dấu gạch ngang ở cuối chuỗi
+}
+
 const ProductModals = () => {
-  const { id } = useParams();
+  // Nhận tham số URL với tên 'slug' (trong route định nghĩa: /product/:slug)
+  const { slug } = useParams();
+  const navigate = useNavigate(); // Khai báo navigate
+  // Tách ID từ slug: lấy phần sau dấu gạch ngang cuối cùng
+  const productId = slug.substring(slug.lastIndexOf("-") + 1);
+
   const [product, setProduct] = useState(null);
   const [postContent, setPostContent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,13 +57,13 @@ const ProductModals = () => {
     ? cartItems.some((item) => item.product._id === product._id)
     : false;
 
-  // useEffect: Lấy thông tin sản phẩm và danh sách sản phẩm giảm giá khi URL thay đổi
+  // Fetch thông tin sản phẩm và danh sách sản phẩm giảm giá khi URL thay đổi
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Lấy chi tiết sản phẩm
-        const productResponse = await axios.get(`/api/products/${id}`);
+        // Lấy chi tiết sản phẩm theo productId (đã tách từ slug)
+        const productResponse = await axios.get(`/api/products/${productId}`);
         setProduct(productResponse.data.product);
 
         // Lấy danh sách sản phẩm giảm giá
@@ -64,12 +85,12 @@ const ProductModals = () => {
       }
     };
 
-    if (id) {
+    if (productId) {
       fetchData();
     }
-  }, [id]);
+  }, [productId]);
 
-  // useEffect: Lấy nội dung bài viết (nếu có) sau khi sản phẩm đã được load
+  // Fetch nội dung bài viết (nếu có) sau khi sản phẩm được load
   useEffect(() => {
     const fetchPostContent = async () => {
       if (!product) return;
@@ -110,7 +131,7 @@ const ProductModals = () => {
     []
   );
 
-  // useEffect: Khi sản phẩm đã load, lưu lịch sử xem
+  // Khi sản phẩm đã load, lưu lịch sử xem
   useEffect(() => {
     if (product && product._id) {
       saveViewHistory(product._id);
@@ -188,7 +209,6 @@ const ProductModals = () => {
     window.location.href = "/gio-hang";
   };
 
-  // Nếu đang tải dữ liệu
   if (loading) {
     return (
       <div className="loading-container text-center">
@@ -198,17 +218,15 @@ const ProductModals = () => {
     );
   }
 
-  // Nếu có lỗi xảy ra
   if (error) {
     return <div className="error-message">{error}</div>;
   }
 
-  // Nếu không tìm thấy sản phẩm
   if (!product) {
     return <div>Không tìm thấy sản phẩm</div>;
   }
 
-  // Thiết lập các meta SEO dựa trên thông tin sản phẩm
+  // Thiết lập meta SEO dựa trên thông tin sản phẩm
   const productUrl = window.location.href;
   const productTitle = product.name;
   const productDescription = product.description
@@ -222,7 +240,7 @@ const ProductModals = () => {
   return (
     <>
       <Helmet>
-        <title>{productTitle} - BabyMart.vn</title>
+        <title>{`${productTitle} - BabyMart.vn`}</title>
         <meta name="description" content={productDescription} />
         <meta property="og:title" content={productTitle} />
         <meta property="og:description" content={productDescription} />
@@ -292,6 +310,11 @@ const ProductModals = () => {
                     <p
                       className="product-title fs-5"
                       style={{ color: "#333333" }}
+                      onClick={() =>
+                        navigate(
+                          `/product/${slugify(product.name)}-${product._id}`
+                        )
+                      }
                     >
                       {product.name}
                     </p>
@@ -419,7 +442,7 @@ const ProductModals = () => {
                       className="list-group-item d-flex align-items-center border-0"
                     >
                       <Link
-                        to={`/product/${prod._id}`}
+                        to={`/product/${slugify(prod.name)}-${prod._id}`}
                         className="d-flex align-items-center text-decoration-none w-100"
                       >
                         <img

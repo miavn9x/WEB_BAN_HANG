@@ -1,17 +1,14 @@
 .scroll-to-top {
     position: fixed;
     bottom: 100px;
-    right: 40px;
+    right: 35px;
     z-index: 1000;
 }
-
-/* Nút cuộn: hình tròn với background tối và icon màu trắng */
 .scroll-button {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     background-color: #FF6F91;
-    /* Màu nền tối */
     border: none;
     display: flex;
     align-items: center;
@@ -26,10 +23,7 @@
     opacity: 1;
     transform: scale(1.1);
 }
-
-/* Định dạng icon: màu trắng và kích thước phù hợp */
 .scroll-button .icon {
     color: #fff;
-    /* Icon màu trắng */
     font-size: 20px;
 }

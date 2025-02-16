@@ -3,10 +3,26 @@ import { Rating } from "@mui/material";
 import { MdOutlineZoomOutMap } from "react-icons/md";
 import { FaCartPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux"; // Thêm useDispatch và useSelector
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../redux/actions/cartActions";
 import "../../styles/ProductItem.css";
 import { formatter } from "../../utils/fomater";
+
+// Hàm chuyển đổi tên sản phẩm thành slug chuyên nghiệp
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize("NFD") // Tách dấu khỏi ký tự
+    .replace(/[\u0300-\u036f]/g, "") // Loại bỏ các dấu kết hợp
+    .replace(/đ/g, "d") // Chuyển 'đ' thành 'd'
+    .trim()
+    .replace(/\s+/g, "-") // Thay khoảng trắng bằng dấu gạch ngang
+    .replace(/[^\w-]+/g, "") // Loại bỏ ký tự không hợp lệ
+    .replace(/--+/g, "-") // Loại bỏ dấu gạch ngang thừa
+    .replace(/^-+/, "") // Loại bỏ dấu gạch ngang ở đầu chuỗi
+    .replace(/-+$/, ""); // Loại bỏ dấu gạch ngang ở cuối chuỗi
+}
 
 const ProductItem = ({ product }) => {
   const [notification, setNotification] = useState("");
@@ -15,36 +31,33 @@ const ProductItem = ({ product }) => {
 
   // Lấy danh sách giỏ hàng từ Redux store
   const cartItems = useSelector((state) => state.cart.items);
-
   // Kiểm tra sản phẩm đã có trong giỏ hàng chưa
   const isProductInCart = cartItems.some(
     (item) => item.product._id === product._id
   );
 
   const viewProductDetail = () => {
-    navigate(`/product/${product._id}`);
+    // Tạo slug từ tên sản phẩm
+    const productSlug = slugify(product.name);
+    // Sử dụng URL dạng: /product/ten-san-pham-<id>
+    navigate(`/product/${productSlug}-${product._id}`);
   };
 
-  // Xử lý thêm vào giỏ hàng
+  // Xử lý thêm sản phẩm vào giỏ hàng
   const handleAddToCart = async (e) => {
     e.stopPropagation(); // Ngăn chặn sự kiện click lan tỏa
 
     try {
-      // Kiểm tra sản phẩm đã có trong giỏ hàng
       if (isProductInCart) {
         setNotification("Sản phẩm đã có trong giỏ hàng!");
         setTimeout(() => setNotification(""), 3000);
         return;
       }
-
-      // Kiểm tra còn hàng không
       if (product.remainingStock <= 0) {
         setNotification("Sản phẩm đã hết hàng!");
         setTimeout(() => setNotification(""), 3000);
         return;
       }
-
-      // Thêm vào giỏ hàng với số lượng mặc định là 1
       await dispatch(addToCart(product, 1));
       setNotification("Đã thêm sản phẩm vào giỏ hàng!");
       setTimeout(() => setNotification(""), 3000);
