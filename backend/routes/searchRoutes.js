@@ -51,7 +51,7 @@ router.post("/searchtext", authMiddleware, async (req, res) => {
 
 
 // Route lấy lịch sử tìm kiếm của người dùng
-router.get("/history", authMiddleware, async (req, res) => {
+router.get("/searchtext", authMiddleware, async (req, res) => {
   try {
     const userId = req.user._id;
     const history = await SearchHistory.findOne({ user: userId });

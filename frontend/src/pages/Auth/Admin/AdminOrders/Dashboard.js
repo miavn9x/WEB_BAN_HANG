@@ -646,7 +646,7 @@ const Dashboard = () => {
     <Container className="py-4">
       <Row className="mb-4">
         <Col>
-          <h1 className="mb-3 text-center">📊 Bảng điều khiển quản lý</h1>
+          <h1 className="mb-3 text-center">📊 Trang quản lý </h1>
         </Col>
       </Row>
 
@@ -979,7 +979,7 @@ const Dashboard = () => {
         <Col xs={12} md={6}>
           <Card>
             <Card.Header>
-              <h2>💰 Tổng Danh thu tam tính ({selectedPeriod})</h2>
+              <h2>💰 Danh thu tam tính ({selectedPeriod})</h2>
             </Card.Header>
             <Card.Body>
               {loading ? (
@@ -1040,7 +1040,7 @@ const Dashboard = () => {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 150px; /* Bạn có thể điều chỉnh giá trị này */
+        max-width: 50px; /* Bạn có thể điều chỉnh giá trị này */
       }
     `}</style>
     </Container>

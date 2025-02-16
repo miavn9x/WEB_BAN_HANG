@@ -684,9 +684,9 @@ router.get("/sales-stats", authMiddleware, async (req, res) => {
 
     res.status(200).json({
       success: true,
-      totalSoldFiltered, // Tổng số lượng bán theo khoảng thời gian chọn
-      bestSelling, // Danh sách sản phẩm bán chạy với đầy đủ chi tiết
-      totalInventory, // Thông tin tổng kho: { totalStock, totalRemaining, totalSold }
+      totalSoldFiltered, 
+      bestSelling, 
+      totalInventory, 
     });
   } catch (error) {
     console.error("❌ Lỗi khi lấy thống kê bán hàng:", error);
