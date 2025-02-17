@@ -29,7 +29,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 
 const userRoutes = require("./routes/userRoutes"); // Import routes
-
+app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api", userRoutes);
 
 //product routes

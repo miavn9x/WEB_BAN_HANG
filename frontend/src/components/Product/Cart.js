@@ -37,11 +37,7 @@ const Cart = () => {
   const [userCoupons, setUserCoupons] = useState([]);
   const [selectedCoupon, setSelectedCoupon] = useState("");
   const [showCouponDropdown, setShowCouponDropdown] = useState(false);
-
-  // State cho ghi chú đơn hàng
   const [orderNote, setOrderNote] = useState("");
-
-  // Khi component mount, lấy thông tin người dùng (nếu có token)
   useEffect(() => {
     dispatch(fetchUserProfile());
   }, [dispatch]);
@@ -116,8 +112,6 @@ const Cart = () => {
   };
 
   const effectiveSubtotal = calculateSubtotal();
-
-  // Hàm tính phí vận chuyển dựa trên mã giảm giá đã chọn
   const getShippingFee = () => {
     if (effectiveSubtotal === 0) return 0;
     const hasFreeShipCoupon =

@@ -107,7 +107,6 @@ const Checkout = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Xoá sản phẩm đã đặt hàng khỏi giỏ trên server
         const selectedProductIds = orderData.items.map(
           (item) => item.product._id
         );
@@ -116,15 +115,29 @@ const Checkout = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Cập nhật giỏ hàng trên localStorage
         const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
         const updatedCart = storedCart.filter(
           (item) => !selectedProductIds.includes(item.productId)
         );
         localStorage.setItem("cart", JSON.stringify(updatedCart));
 
-        // Cập nhật Redux store dựa trên localStorage mới
         dispatch(loadCartFromLocalStorage());
+if (orderData.coupon) {
+  try {
+    await axios.patch(
+      "/api/users/update-coupons", // Đảm bảo đường dẫn đúng
+      {
+        coupon: orderData.coupon.normalize("NFC"), // Chuẩn hóa trước khi gửi
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+  } catch (error) {
+    console.error("Failed to update coupons:", error);
+  }
+}
+
 
         const successMessage = `Đặt hàng thành công!
 Mã đơn hàng: ${orderId}
