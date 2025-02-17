@@ -22,21 +22,27 @@ const UserSchema = new mongoose.Schema(
     role: { type: String, enum: ["user", "admin"], default: "user" },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
+    coupons: {
+      type: [String], // Mảng các mã giảm giá
+      default: [], // Mặc định là mảng rỗng
+    },
   },
   { timestamps: true }
 );
 
+// Mã băm mật khẩu trước khi lưu vào DB
 UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next(); 
+  if (!this.isModified("password")) return next();
   try {
     const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt); 
+    this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
     next(error);
   }
 });
 
+// So sánh mật khẩu
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   try {
     return await bcrypt.compare(candidatePassword, this.password);
@@ -45,14 +51,16 @@ UserSchema.methods.comparePassword = async function (candidatePassword) {
   }
 };
 
+// Tạo JWT token cho user
 UserSchema.methods.generateAuthToken = function () {
   return jwt.sign(
-    { userId: this._id, role: this.role }, 
+    { userId: this._id, role: this.role },
     process.env.JWT_SECRET || "your-secret-key",
-    { expiresIn: "10h" } 
+    { expiresIn: "10h" }
   );
 };
 
+// Chuyển đổi đối tượng user khi trả về client (loại bỏ mật khẩu, token)
 UserSchema.methods.toJSON = function () {
   const userObject = this.toObject();
   delete userObject.password;

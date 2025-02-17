@@ -16,7 +16,7 @@ const Checkout = () => {
   const orderData = location.state?.orderData || {};
   const dispatch = useDispatch();
 
-  // Hàm tạo mã đơn hàng duy nhất
+  // Tạo mã đơn hàng duy nhất
   const generateOrderId = () => {
     const timestamp = new Date().getTime();
     const randomString = Math.random().toString(36).substring(2, 10);
@@ -32,10 +32,14 @@ const Checkout = () => {
     setPaymentMethod(event.target.value);
   };
 
-  // Tính tổng số lượng các sản phẩm trong đơn hàng
+  // Tính tổng số lượng sản phẩm
   const totalQuantity =
     orderData.items && orderData.items.length > 0
       ? orderData.items.reduce((sum, item) => sum + item.quantity, 0)
+      : 0;
+  const discountAmount =
+    orderData.coupon && orderData.subtotal && orderData.shippingFee
+      ? orderData.subtotal + orderData.shippingFee - orderData.totalAmount
       : 0;
 
   const handleCompleteOrder = async (event) => {
@@ -77,6 +81,7 @@ const Checkout = () => {
         totalAmount: orderData.totalAmount || 0,
         subtotal: orderData.subtotal || 0,
         shippingFee: orderData.shippingFee || 0,
+        coupon: orderData.coupon || "",
         paymentMethod: paymentMethod || "cod",
         paymentStatus:
           paymentMethod === "cod" ? "Chưa thanh toán" : "Chờ xác nhận",
@@ -102,7 +107,7 @@ const Checkout = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Xoá trên server những sản phẩm được chọn thanh toán
+        // Xoá sản phẩm đã đặt hàng khỏi giỏ trên server
         const selectedProductIds = orderData.items.map(
           (item) => item.product._id
         );
@@ -111,27 +116,15 @@ const Checkout = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Cập nhật localStorage: sử dụng trường productId thay vì item.product._id
+        // Cập nhật giỏ hàng trên localStorage
         const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
         const updatedCart = storedCart.filter(
           (item) => !selectedProductIds.includes(item.productId)
         );
         localStorage.setItem("cart", JSON.stringify(updatedCart));
 
-        // Dispatch action cập nhật Redux store dựa trên localStorage mới
+        // Cập nhật Redux store dựa trên localStorage mới
         dispatch(loadCartFromLocalStorage());
-
-        // localStorage.setItem(
-        //   "lastOrderDetails",
-        //   JSON.stringify({
-        //     orderId,
-        //     orderDetails: {
-        //       ...orderDetails,
-        //       order: data.order,
-        //       formattedOrderDate: formattedDate,
-        //     },
-        //   })
-        // );
 
         const successMessage = `Đặt hàng thành công!
 Mã đơn hàng: ${orderId}
@@ -222,6 +215,40 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                 <span>Phí vận chuyển:</span>
                 <span>{formatter(orderData.shippingFee)}</span>
               </div>
+              {orderData.note && (
+                <div className="d-flex justify-content-between mt-2">
+                  <span>Ghi chú:</span>
+                  <span>{orderData.note}</span>
+                </div>
+              )}
+
+              {orderData.coupon && (
+                <>
+                  <div className="d-flex justify-content-between">
+                    <span>Mã giảm giá:</span>
+                    <span>{orderData.coupon}</span>
+                  </div>
+                  <div className="d-flex justify-content-between">
+                    <span>Giảm giá:</span>
+                    <span className="text-danger">
+                      {formatter(discountAmount)}
+                    </span>
+                  </div>
+                  <div
+                    className="coupon-conditions"
+                    style={{ fontSize: "12px", color: "#555" }}
+                  >
+                    {orderData.coupon.includes("25K") &&
+                      " (Áp dụng cho đơn từ 300,000đ)"}
+                    {orderData.coupon.includes("30K") &&
+                      " (Áp dụng cho đơn từ 500,000đ)"}
+                    {orderData.coupon.includes("70K") &&
+                      " (Áp dụng cho đơn từ 2,000,000đ)"}
+                    {orderData.coupon.includes("FREESHIP") &&
+                      " (Miễn phí vận chuyển đơn từ 1,000,000đ)"}
+                  </div>
+                </>
+              )}
               <div className="d-flex justify-content-between mt-2">
                 <strong>Tổng cộng:</strong>
                 <strong className="text-danger">

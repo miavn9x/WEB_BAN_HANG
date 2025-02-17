@@ -1040,7 +1040,7 @@ const Dashboard = () => {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 50px; /* Bạn có thể điều chỉnh giá trị này */
+        max-width: 50px;
       }
     `}</style>
     </Container>

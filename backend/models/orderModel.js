@@ -11,7 +11,6 @@ const orderSchema = new mongoose.Schema(
     orderId: {
       type: String,
       required: true,
-      // unique: true,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -74,6 +73,11 @@ const orderSchema = new mongoose.Schema(
       },
     },
     rated: { type: Boolean, default: false },
+    customerNote: { type: String },
+    discountCode: { type: String },
+    serviceFee: { type: Number, default: 0 },
+    estimatedDeliveryDate: { type: Date },
+    shippingMethod: { type: String },
   },
   {
     timestamps: true,

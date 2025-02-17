@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Button, Image } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import styles from "../../styles/Salecart.css";
 
 function Salecart() {
-  // Dữ liệu cho các coupon
+  const [userCoupons, setUserCoupons] = useState([]); // Lưu trữ danh sách mã đã nhận của người dùng
+  const [loading, setLoading] = useState(true); // Trạng thái tải
+
   const coupons = [
     {
       image:
@@ -22,24 +24,98 @@ function Salecart() {
       image:
         "https://res.cloudinary.com/div27nz1j/image/upload/v1739776309/coupon_1_img_medium_pmyslz.webp",
       code: "Giảm 70K",
-      description: "Đơn hàng trên 1.000.000",
+      description: "Đơn hàng trên 2.000.000",
     },
     {
       image:
-        "https://storage.googleapis.com/a1aa/image/J7KfN8TvAxO6yP4LVaLq8XWXh5s5RamXA-S86mOlsZ4.jpg",
+        "https://res.cloudinary.com/div27nz1j/image/upload/v1739779804/Screenshot_2025-02-17_150919_xoigyz.png",
       code: "FREESHIP",
       description: "Đơn online trên 1.000.000",
     },
   ];
+
+  // Lấy danh sách mã giảm giá người dùng đã nhận từ server
+  useEffect(() => {
+    const fetchUserCoupons = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/coupons/my-coupons", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          setUserCoupons(data.coupons);
+        } else {
+          alert(data.message || "Lỗi khi lấy danh sách mã giảm giá");
+        }
+      } catch (error) {
+        console.error("Lỗi:", error);
+        alert("Không thể kết nối đến server!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserCoupons();
+  }, []);
+
+  // Hàm xử lý khi người dùng nhấn nhận mã
+  const handleClaimCoupon = async (couponCode) => {
+    if (userCoupons.includes(couponCode)) {
+      alert("Bạn đã nhận mã này, không thể nhận thêm mã.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token"); // Lấy token từ localStorage
+      if (!token) {
+        alert("Bạn chưa đăng nhập!");
+        return;
+      }
+
+      const response = await fetch("/api/coupons/apply", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Thêm token vào headers
+        },
+        body: JSON.stringify({ couponCode }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        // Cập nhật lại danh sách mã sau khi nhận thành công
+        setUserCoupons((prevCoupons) => [...prevCoupons, couponCode]);
+        alert(`Nhận mã ${couponCode} thành công!`);
+      } else {
+        alert(data.message || "Có lỗi xảy ra!");
+      }
+    } catch (error) {
+      console.error("Lỗi:", error);
+      alert("Không thể kết nối đến server!");
+    }
+  };
+
+  if (loading) {
+    return <div>Đang tải...</div>;
+  }
 
   return (
     <Container className="py-5">
       <Row>
         {coupons.map((coupon, idx) => (
           <Col key={idx} xs={12} sm={6} md={6} lg={3}>
-            {/* Áp dụng lớp CSS từ module */}
             <Card className={`${styles.couponCard} mb-4`}>
-              {/* Sử dụng flex-row để hình ảnh luôn nằm bên trái */}
               <Card.Body className="d-flex flex-row align-items-center">
                 <Image
                   src={coupon.image}
@@ -52,9 +128,14 @@ function Salecart() {
                 <div className="text-left ms-3">
                   <Card.Title className="text-danger">{coupon.code}</Card.Title>
                   <Card.Text>{coupon.description}</Card.Text>
-                  {/* Chỉnh sửa nút "Nhận" luôn căn giữa */}
                   <div className="d-flex justify-content-center mt-3">
-                    <Button variant="danger">Nhận</Button>
+                    <Button
+                      variant="danger"
+                      onClick={() => handleClaimCoupon(coupon.code)}
+                      disabled={userCoupons.includes(coupon.code)} // Disable nút khi đã nhận mã
+                    >
+                      {userCoupons.includes(coupon.code) ? "Đã nhận" : "Nhận"}
+                    </Button>
                   </div>
                 </div>
               </Card.Body>

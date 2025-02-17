@@ -27,12 +27,7 @@ export const addToCart = (product, quantity) => async (dispatch) => {
       payload: { product, quantity: Number(quantity) },
     });
 
-    // Lấy state giỏ hàng mới nhất và lưu minimal data vào localStorage
-    // Giả sử bạn có thể lấy state hiện tại sau khi dispatch (hoặc bạn tính toán lại từ Redux store)
-    // Ở đây, ta sẽ lấy lại cart từ localStorage của Redux (nếu đã được load)
-    // Nếu bạn dùng Redux Persist, bạn có thể cấu hình transform thay vì làm thủ công.
-    // Ví dụ đơn giản: Cập nhật localStorage ngay với item vừa thêm:
-    const minimalItem = { productId: product._id, quantity: Number(quantity) };
+     const minimalItem = { productId: product._id, quantity: Number(quantity) };
     let storedCart = JSON.parse(localStorage.getItem("cart")) || [];
     // Kiểm tra nếu sản phẩm đã có trong localStorage
     const idx = storedCart.findIndex((item) => item.productId === product._id);

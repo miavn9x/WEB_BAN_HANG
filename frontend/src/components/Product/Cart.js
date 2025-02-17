@@ -33,12 +33,20 @@ const Cart = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
+  // State cho mã giảm giá
+  const [userCoupons, setUserCoupons] = useState([]);
+  const [selectedCoupon, setSelectedCoupon] = useState("");
+  const [showCouponDropdown, setShowCouponDropdown] = useState(false);
+
+  // State cho ghi chú đơn hàng
+  const [orderNote, setOrderNote] = useState("");
+
   // Khi component mount, lấy thông tin người dùng (nếu có token)
   useEffect(() => {
     dispatch(fetchUserProfile());
   }, [dispatch]);
 
-  // Cập nhật thông tin người dùng khi userProfile thay đổi
+  // Cập nhật thông tin người dùng và danh sách mã giảm giá khi userProfile thay đổi
   useEffect(() => {
     if (userProfile) {
       setEditableUserInfo({
@@ -47,8 +55,10 @@ const Cart = () => {
         phone: userProfile.phone || "",
         address: userProfile.address || "",
       });
+      if (userProfile.coupons && Array.isArray(userProfile.coupons)) {
+        setUserCoupons(userProfile.coupons);
+      }
     } else {
-      // Nếu userProfile null (đã logout) thì xoá thông tin giao diện của người dùng
       setEditableUserInfo({
         fullName: "",
         email: "",
@@ -58,37 +68,34 @@ const Cart = () => {
     }
   }, [userProfile]);
 
-  // Lấy lại giỏ hàng dựa trên token thay vì phụ thuộc vào userProfile
+  // Lấy lại giỏ hàng dựa trên token (không phụ thuộc vào userProfile)
   useEffect(() => {
     const updateCart = async () => {
-      setIsLoading(true); // Hiển thị loading khi đang fetch
+      setIsLoading(true); // Hiển thị loading khi fetch
       const token = localStorage.getItem("token");
       if (token) {
-        await dispatch(fetchCart()); // Nếu có token (người dùng đã đăng nhập) thì lấy giỏ hàng từ API
+        await dispatch(fetchCart());
       } else {
-        // Nếu không có token (đăng xuất) thì xoá giỏ hàng trong Redux
         dispatch({ type: CART_ACTIONS.CLEAR_CART });
-        localStorage.removeItem("cart"); // Xoá giỏ hàng trong localStorage
+        localStorage.removeItem("cart");
       }
       setIsLoading(false);
     };
-
     updateCart();
-  }, [dispatch]); // Chỉ chạy 1 lần khi component mount
+  }, [dispatch]);
 
   // Mảng lưu các product _id của sản phẩm được chọn thanh toán
   const [selectedItems, setSelectedItems] = useState([]);
 
   // Hàm toggle chọn/hủy chọn tất cả các sản phẩm
   const toggleSelectAll = () => {
-    // Lấy danh sách các product id từ cartItems (đảm bảo item.product tồn tại)
     const allProductIds = cartItems
       .filter((item) => item.product)
       .map((item) => item.product._id);
     if (selectedItems.length === allProductIds.length) {
-      setSelectedItems([]); // Nếu đã chọn hết, thì hủy chọn tất cả
+      setSelectedItems([]); // Hủy chọn tất cả
     } else {
-      setSelectedItems(allProductIds); // Nếu chưa chọn hết, chọn tất cả
+      setSelectedItems(allProductIds); // Chọn tất cả
     }
   };
 
@@ -106,6 +113,41 @@ const Cart = () => {
       }
       return total;
     }, 0);
+  };
+
+  const effectiveSubtotal = calculateSubtotal();
+
+  // Hàm tính phí vận chuyển dựa trên mã giảm giá đã chọn
+  const getShippingFee = () => {
+    if (effectiveSubtotal === 0) return 0;
+    const hasFreeShipCoupon =
+      selectedCoupon && /freeship/gi.test(selectedCoupon);
+    return hasFreeShipCoupon && effectiveSubtotal >= 1000000 ? 0 : 25000;
+  };
+
+  // Hàm tính chiết khấu dựa trên mã giảm giá đã chọn
+  const getDiscount = () => {
+    if (effectiveSubtotal === 0) return 0;
+    if (!selectedCoupon) return 0;
+    const discount25K = /25k/gi.test(selectedCoupon);
+    const discount30K = /30k/gi.test(selectedCoupon);
+    const discount70K = /70k/gi.test(selectedCoupon);
+    const freeShip = /freeship/gi.test(selectedCoupon);
+    if (freeShip) return 0;
+    if (discount25K && effectiveSubtotal >= 300000) {
+      return 25000;
+    } else if (discount30K && effectiveSubtotal >= 500000) {
+      return 30000;
+    } else if (discount70K && effectiveSubtotal >= 2000000) {
+      return 70000;
+    }
+    return 0;
+  };
+
+  // Hàm tính tổng tiền thanh toán
+  const calculateTotalAmount = () => {
+    if (effectiveSubtotal === 0) return 0;
+    return effectiveSubtotal + getShippingFee() - getDiscount();
   };
 
   const handleRemoveFromCart = (productId) => {
@@ -149,24 +191,20 @@ const Cart = () => {
     });
   };
 
-  // Khi bấm nút THANH TOÁN, kiểm tra và chuyển sang trang thanh toán
+  // Khi bấm nút THANH TOÁN, kiểm tra các điều kiện và chuyển sang trang thanh toán
   const handleProceedToCheckout = () => {
     if (!selectedItems.length) {
       alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
       return;
     }
-
     if (!editableUserInfo.address.trim()) {
       alert("Vui lòng nhập địa chỉ giao hàng để tiếp tục!");
       return;
     }
-
     // Lọc ra các sản phẩm được chọn
     const selectedProducts = cartItems.filter((item) =>
       selectedItems.includes(item.product._id)
     );
-
-    // Tạo đối tượng orderData để truyền sang trang Checkout
     const orderData = {
       userInfo: editableUserInfo,
       items: selectedProducts.map((item) => ({
@@ -179,11 +217,13 @@ const Cart = () => {
         },
         quantity: item.quantity,
       })),
-      shippingFee: 25000,
-      subtotal: calculateSubtotal(),
-      totalAmount: calculateSubtotal() + 25000,
+      shippingFee: getShippingFee(),
+      subtotal: effectiveSubtotal,
+      totalAmount: calculateTotalAmount(),
+      coupon: selectedCoupon,
+      note: orderNote, // Ghi chú đơn hàng được chuyển qua trang thanh toán
     };
-
+    // Chuyển sang trang thanh toán với đối tượng orderData
     navigate("/thanh-toan", { state: { orderData } });
   };
 
@@ -192,8 +232,7 @@ const Cart = () => {
       <div className="cart-title text-center my-4">
         {/* <h2>Giỏ Hàng</h2> */}
       </div>
-
-      {/* Loading Spinner - Centered on Screen */}
+      {/* Loading Spinner */}
       {isLoading && (
         <div className="loading-overlay d-flex justify-content-center align-items-center">
           <div className="spinner-border text-primary" role="status">
@@ -201,7 +240,6 @@ const Cart = () => {
           </div>
         </div>
       )}
-
       <div className="row">
         <div className="col-md-8">
           {!isLoading && !cartItems.length ? (
@@ -217,7 +255,6 @@ const Cart = () => {
             </p>
           ) : (
             <>
-              {/* Bao bọc danh sách sản phẩm trong container với chiều cao cố định (50vh) */}
               <div
                 style={{
                   height: "50vh",
@@ -270,7 +307,6 @@ const Cart = () => {
                           -
                         </button>
                         <input
-                 
                           className="form-control"
                           style={{ width: "70px" }}
                           value={item.quantity}
@@ -284,7 +320,6 @@ const Cart = () => {
                             handleQuantityInputChange(item.product._id, value);
                           }}
                         />
-
                         <button
                           className="btn btn-outline-secondary"
                           onClick={() =>
@@ -304,7 +339,6 @@ const Cart = () => {
                   ) : null
                 )}
               </div>
-              {/* Container cho nút chọn tất cả/hủy chọn luôn nằm ở dưới cùng */}
               <div className="select-all-container text-end">
                 {!isLoading && cartItems.length > 0 && (
                   <button
@@ -321,7 +355,6 @@ const Cart = () => {
             </>
           )}
         </div>
-
         <div className="col-md-4">
           <div className="user-info border p-4 rounded">
             <div className="mb-3">
@@ -381,19 +414,90 @@ const Cart = () => {
               />
             </div>
           </div>
-
           <div className="total-info text-end mt-4">
-            <div>Tổng cộng: {formatter(calculateSubtotal())}</div>
+            <div>Tổng cộng: {formatter(effectiveSubtotal)}</div>
             <div>
               Phí vận chuyển:{" "}
-              <span style={{ color: "blue" }}>{formatter(25000)}</span>
+              <span style={{ color: "blue" }}>
+                {formatter(getShippingFee())}
+              </span>
+            </div>
+            <div className="discount-info text-danger mt-2">
+              Đã giảm: {formatter(getDiscount())}
             </div>
             <div className="total-price fw-bold">
               Thành tiền:{" "}
               <span className="text-danger">
-                {formatter(calculateSubtotal() + 25000)}
+                {formatter(calculateTotalAmount())}
               </span>
             </div>
+            <div className="coupon-code-section mt-2">
+              <label style={{ fontWeight: "bold" }}>Mã giảm giá: </label>
+              {selectedCoupon ? (
+                <>
+                  <span className="ms-2">{selectedCoupon}</span>
+                  <button
+                    className="btn btn-link ms-2"
+                    onClick={() => setShowCouponDropdown(true)}
+                  >
+                    Thay đổi
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="btn btn-outline-secondary ms-2"
+                  onClick={() => setShowCouponDropdown(true)}
+                  disabled={userCoupons.length === 0}
+                >
+                  {userCoupons.length === 0 ? "Không có mã" : "Chọn mã"}
+                </button>
+              )}
+            </div>
+            {selectedCoupon && (
+              <div className="coupon-conditions">
+                {selectedCoupon.includes("25K") &&
+                  " (Áp dụng cho đơn từ 300,000đ)"}
+                {selectedCoupon.includes("30K") &&
+                  " (Áp dụng cho đơn từ 500,000đ)"}
+                {selectedCoupon.includes("70K") &&
+                  " (Áp dụng cho đơn từ 2,000,000đ)"}
+                {selectedCoupon.includes("FREESHIP") &&
+                  " (Miễn phí vận chuyển đơn từ 1,000,000đ)"}
+              </div>
+            )}
+            {showCouponDropdown && (
+              <div className="coupon-dropdown mt-2">
+                {userCoupons.map((coupon, index) => (
+                  <div
+                    key={index}
+                    className="coupon-option p-2 border mb-1"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      setSelectedCoupon(coupon);
+                      setShowCouponDropdown(false);
+                    }}
+                  >
+                    {coupon}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Ô ghi chú đơn hàng */}
+            <div className="order-note mt-3">
+              <label htmlFor="orderNote" className="form-label">
+                Ghi chú đơn hàng:
+              </label>
+              <textarea
+                id="orderNote"
+                className="form-control"
+                rows="3"
+                value={orderNote}
+                onChange={(e) => setOrderNote(e.target.value)}
+                placeholder="Nhập ghi chú đơn hàng (ví dụ: giao hàng giờ hành chính, để hàng ở cửa, v.v.)"
+              ></textarea>
+            </div>
+
             <button
               className="btn btn-secondary w-100 mt-3"
               onClick={handleProceedToCheckout}

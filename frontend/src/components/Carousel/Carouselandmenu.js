@@ -25,6 +25,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import "../../styles/Carouselandmenu.css";
 import HomeProduct from "../header/HomeProduct";
+import Salecart from "../Product/Salecart";
 
 // Component danh mục sản phẩm (hỗ trợ menu con)
 const CategoryMenu = ({ categories }) => {
@@ -304,9 +305,10 @@ const CarouselAndMenu = () => {
             </Row>
           </Col>
         </Row>
-        
       </Container>
-      
+
+        <Salecart />
+
       <div>
         <HomeProduct />
       </div>

@@ -78,9 +78,14 @@ app.use("/api", searchRoutes);  // Sử dụng routes cho API
 const recommendationRoutes = require("./routes/recommendations");
 app.use("/api/recommendations", recommendationRoutes);
 
-
+//đề xuat
 const inventoryRoutes = require("./routes/inventoryRoutes");
 app.use("/api", inventoryRoutes);
+
+//giam giá
+const couponRoutes = require("./routes/couponRoutes");
+app.use("/api/coupons", couponRoutes);
+
 
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
