@@ -197,32 +197,36 @@ router.delete("/users/:id", adminMiddleware, async (req, res) => {
 
 
 // routes/user.js
+// routes/user.js
 router.patch("/update-coupons", authMiddleware, async (req, res) => {
   try {
-    const { coupon } = req.body;
+    const { couponCode } = req.body; // Nhận couponCode từ body
     const user = await User.findById(req.user._id);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Chuẩn hóa Unicode sang dạng NFC
-    const normalizedCoupon = coupon.normalize("NFC");
+    // Chuẩn hóa coupon code
+    const normalizedCoupon = couponCode.normalize("NFC");
 
-    // Tìm index của coupon đã chuẩn hóa
+    // Tìm coupon theo couponCode đã chuẩn hóa
     const couponIndex = user.coupons.findIndex(
-      (c) => c.normalize("NFC") === normalizedCoupon
+      c => c.couponCode.normalize("NFC") === normalizedCoupon
     );
 
     if (couponIndex === -1) {
       return res.status(400).json({ message: "Coupon not found" });
     }
 
-    // Xóa coupon khỏi mảng
+    // Xóa coupon
     user.coupons.splice(couponIndex, 1);
     await user.save();
 
-    res.json({ success: true, message: "Coupon removed successfully" });
+    res.json({ 
+      success: true,
+      message: "Coupon đã được xóa thành công"
+    });
   } catch (error) {
     console.error("Error updating coupons:", error);
     res.status(500).json({ message: "Internal server error" });

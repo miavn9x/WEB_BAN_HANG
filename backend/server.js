@@ -21,6 +21,40 @@ mongoose
   .then(() => console.log("Kết nối MongoDB thành công!"))
   .catch((err) => console.log("Lỗi kết nối MongoDB:", err));
 
+
+
+const cron = require("node-cron");
+
+// Lên lịch cron job chạy mỗi ngày lúc nửa đêm
+
+
+cron.schedule("0 0 * * *", async () => {
+  try {
+    const now = new Date();
+    console.log(
+      `[${new Date().toISOString()}] Bắt đầu dọn dẹp coupon hết hạn...`
+    );
+
+    const result = await User.updateMany(
+      {}, // Điều kiện (tất cả user)
+      {
+        $pull: {
+          coupons: {
+            expiryDate: { $lte: now }, // Điều kiện xóa coupon
+          },
+        },
+      }, // Toán tử update
+      { multi: true } // Tùy chọn: áp dụng cho nhiều document
+    );
+
+    console.log(`Đã xóa ${result.modifiedCount} coupon hết hạn`);
+  } catch (error) {
+    console.error("Lỗi cron job:", error);
+  }
+});
+
+
+
 // Middleware
 app.use(cors());
 app.use(express.json());

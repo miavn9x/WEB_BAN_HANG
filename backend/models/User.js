@@ -1,4 +1,3 @@
-// models/User.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken"); // Import jwt để tạo token
@@ -22,10 +21,13 @@ const UserSchema = new mongoose.Schema(
     role: { type: String, enum: ["user", "admin"], default: "user" },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
-    coupons: {
-      type: [String], // Mảng các mã giảm giá
-      default: [], // Mặc định là mảng rỗng
-    },
+    coupons: [
+      {
+        couponCode: { type: String, required: true }, // Mã giảm giá
+        expiryDate: { type: Date, required: true },
+        createdAt: { type: Date, default: Date.now }, // Ngày hết hạn
+      },
+    ],
   },
   { timestamps: true }
 );

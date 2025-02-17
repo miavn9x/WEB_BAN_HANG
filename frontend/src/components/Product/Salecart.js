@@ -54,7 +54,11 @@ function Salecart() {
 
         const data = await response.json();
         if (response.ok) {
-          setUserCoupons(data.coupons);
+          // Lọc các mã giảm giá còn hiệu lực
+          const validCoupons = data.coupons.filter(
+            (coupon) => new Date(coupon.expiryDate) > new Date()
+          );
+          setUserCoupons(validCoupons);
         } else {
           alert(data.message || "Lỗi khi lấy danh sách mã giảm giá");
         }
@@ -71,13 +75,13 @@ function Salecart() {
 
   // Hàm xử lý khi người dùng nhấn nhận mã
   const handleClaimCoupon = async (couponCode) => {
-    if (userCoupons.includes(couponCode)) {
+    if (userCoupons.some((coupon) => coupon.couponCode === couponCode)) {
       alert("Bạn đã nhận mã này, không thể nhận thêm mã.");
       return;
     }
 
     try {
-      const token = localStorage.getItem("token"); // Lấy token từ localStorage
+      const token = localStorage.getItem("token");
       if (!token) {
         alert("Bạn chưa đăng nhập!");
         return;
@@ -95,7 +99,7 @@ function Salecart() {
       const data = await response.json();
       if (response.ok) {
         // Cập nhật lại danh sách mã sau khi nhận thành công
-        setUserCoupons((prevCoupons) => [...prevCoupons, couponCode]);
+        setUserCoupons((prevCoupons) => [...prevCoupons, { couponCode }]);
         alert(`Nhận mã ${couponCode} thành công!`);
       } else {
         alert(data.message || "Có lỗi xảy ra!");
@@ -132,9 +136,22 @@ function Salecart() {
                     <Button
                       variant="danger"
                       onClick={() => handleClaimCoupon(coupon.code)}
-                      disabled={userCoupons.includes(coupon.code)} // Disable nút khi đã nhận mã
+                      disabled={userCoupons.some(
+                        (coupon) => coupon.couponCode === coupon.code
+                      )} // Disable nút khi đã nhận mã
+                      style={{
+                        opacity: userCoupons.some(
+                          (coupon) => coupon.couponCode === coupon.code
+                        )
+                          ? 0.5
+                          : 1, // Làm mờ nút khi đã nhận mã
+                      }}
                     >
-                      {userCoupons.includes(coupon.code) ? "Đã nhận" : "Nhận"}
+                      {userCoupons.some(
+                        (coupon) => coupon.couponCode === coupon.code
+                      )
+                        ? "Đã nhận"
+                        : "Nhận"}
                     </Button>
                   </div>
                 </div>

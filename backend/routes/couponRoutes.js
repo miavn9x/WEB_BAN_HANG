@@ -1,53 +1,57 @@
-// routes/coupons.js
+// File: routes/user.js
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../middleware/authMiddleware");
 const User = require("../models/User");
-const authMiddleware = require("../middleware/authMiddleware"); // Middleware xác thực
 
-// API: Lưu mã giảm giá vào user
+// Áp dụng coupon
 router.post("/apply", authMiddleware, async (req, res) => {
-  const { couponCode } = req.body;
-  const userId = req.user._id; // Lấy userId từ token
-
-  if (!couponCode) {
-    return res.status(400).json({ message: "Thiếu mã giảm giá" });
-  }
-
   try {
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "Không tìm thấy user" });
+    const { couponCode } = req.body;
+    const user = await User.findById(req.user._id);
 
-    // Kiểm tra nếu mã giảm giá đã tồn tại trong danh sách coupons của user
-    if (user.coupons.includes(couponCode)) {
-      return res.status(400).json({ message: "Mã này đã được sử dụng" });
+    if (!user) return res.status(404).json({ message: "User không tồn tại" });
+    if (!couponCode)
+      return res.status(400).json({ message: "Thiếu mã giảm giá" });
+
+    // Kiểm tra trùng lặp
+    const existingCoupon = user.coupons.find(
+      (c) => c.couponCode.normalize("NFC") === couponCode.normalize("NFC")
+    );
+
+    if (existingCoupon) {
+      return res.status(400).json({ message: "Mã đã được sử dụng" });
     }
 
-    // Thêm mã giảm giá vào danh sách của user
-    user.coupons.push(couponCode);
-    await user.save();
+    // Thêm coupon mới
+    user.coupons.push({
+      couponCode,
+      expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // +7 ngày
+    });
 
+    await user.save();
     res.json({
-      message: `Mã ${couponCode} đã được lưu thành công`,
+      success: true,
+      message: `Áp dụng mã ${couponCode} thành công`,
       coupons: user.coupons,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Lỗi apply coupon:", error);
     res.status(500).json({ message: "Lỗi server" });
   }
 });
 
-// API: Lấy danh sách mã giảm giá của user
+// Lấy danh sách coupon của user
 router.get("/my-coupons", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select("coupons");
-    if (!user) return res.status(404).json({ message: "Không tìm thấy user" });
+    if (!user) return res.status(404).json({ message: "User không tồn tại" });
 
     res.json({ coupons: user.coupons });
   } catch (error) {
-    console.error(error);
+    console.error("Lỗi lấy coupon:", error);
     res.status(500).json({ message: "Lỗi server" });
   }
 });
-
 
 module.exports = router;

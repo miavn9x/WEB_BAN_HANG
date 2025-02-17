@@ -13,7 +13,6 @@ import { fetchUserProfile } from "../../redux/actions/userActions";
 import { useNavigate } from "react-router-dom";
 import { CART_ACTIONS } from "../../redux/constants/actionTypes";
 
-// Selector để lấy danh sách sản phẩm trong giỏ
 const selectCartItems = createSelector(
   (state) => state.cart.items,
   (cartItems) => (Array.isArray(cartItems) ? cartItems : [])
@@ -33,16 +32,18 @@ const Cart = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  // State cho mã giảm giá
+  // State cho coupon
+  // selectedCoupon sẽ lưu cả đối tượng coupon (bao gồm couponCode, expiryDate,…)
   const [userCoupons, setUserCoupons] = useState([]);
-  const [selectedCoupon, setSelectedCoupon] = useState("");
+  const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [showCouponDropdown, setShowCouponDropdown] = useState(false);
   const [orderNote, setOrderNote] = useState("");
+
   useEffect(() => {
     dispatch(fetchUserProfile());
   }, [dispatch]);
 
-  // Cập nhật thông tin người dùng và danh sách mã giảm giá khi userProfile thay đổi
+  // Khi userProfile thay đổi, cập nhật thông tin người dùng và lọc các coupon chưa hết hạn (ví dụ: thời hạn > hiện tại)
   useEffect(() => {
     if (userProfile) {
       setEditableUserInfo({
@@ -52,7 +53,10 @@ const Cart = () => {
         address: userProfile.address || "",
       });
       if (userProfile.coupons && Array.isArray(userProfile.coupons)) {
-        setUserCoupons(userProfile.coupons);
+        const validCoupons = userProfile.coupons.filter(
+          (coupon) => new Date(coupon.expiryDate) >= new Date()
+        );
+        setUserCoupons(validCoupons);
       }
     } else {
       setEditableUserInfo({
@@ -64,10 +68,10 @@ const Cart = () => {
     }
   }, [userProfile]);
 
-  // Lấy lại giỏ hàng dựa trên token (không phụ thuộc vào userProfile)
+  // Fetch giỏ hàng
   useEffect(() => {
     const updateCart = async () => {
-      setIsLoading(true); // Hiển thị loading khi fetch
+      setIsLoading(true);
       const token = localStorage.getItem("token");
       if (token) {
         await dispatch(fetchCart());
@@ -80,18 +84,17 @@ const Cart = () => {
     updateCart();
   }, [dispatch]);
 
-  // Mảng lưu các product _id của sản phẩm được chọn thanh toán
+  // Mảng lưu các product _id được chọn thanh toán
   const [selectedItems, setSelectedItems] = useState([]);
 
-  // Hàm toggle chọn/hủy chọn tất cả các sản phẩm
   const toggleSelectAll = () => {
     const allProductIds = cartItems
       .filter((item) => item.product)
       .map((item) => item.product._id);
     if (selectedItems.length === allProductIds.length) {
-      setSelectedItems([]); // Hủy chọn tất cả
+      setSelectedItems([]);
     } else {
-      setSelectedItems(allProductIds); // Chọn tất cả
+      setSelectedItems(allProductIds);
     }
   };
 
@@ -112,33 +115,34 @@ const Cart = () => {
   };
 
   const effectiveSubtotal = calculateSubtotal();
+
+  // Nếu coupon FREESHIP và tổng trên ngưỡng, phí ship = 0
   const getShippingFee = () => {
     if (effectiveSubtotal === 0) return 0;
-    const hasFreeShipCoupon =
-      selectedCoupon && /freeship/gi.test(selectedCoupon);
+    const couponCode = selectedCoupon?.couponCode || "";
+    const hasFreeShipCoupon = couponCode && /FREESHIP/gi.test(couponCode);
     return hasFreeShipCoupon && effectiveSubtotal >= 1000000 ? 0 : 25000;
   };
 
-  // Hàm tính chiết khấu dựa trên mã giảm giá đã chọn
+  // Tính giảm giá dựa trên coupon được chọn
   const getDiscount = () => {
     if (effectiveSubtotal === 0) return 0;
     if (!selectedCoupon) return 0;
-    const discount25K = /25k/gi.test(selectedCoupon);
-    const discount30K = /30k/gi.test(selectedCoupon);
-    const discount70K = /70k/gi.test(selectedCoupon);
-    const freeShip = /freeship/gi.test(selectedCoupon);
-    if (freeShip) return 0;
-    if (discount25K && effectiveSubtotal >= 300000) {
+    // Nếu coupon đã hết hạn, không giảm giá
+    if (new Date(selectedCoupon.expiryDate) < new Date()) return 0;
+    const couponCode = selectedCoupon.couponCode;
+    if (/FREESHIP/gi.test(couponCode)) return 0;
+    if (/25K/gi.test(couponCode) && effectiveSubtotal >= 300000) {
       return 25000;
-    } else if (discount30K && effectiveSubtotal >= 500000) {
+    } else if (/30K/gi.test(couponCode) && effectiveSubtotal >= 500000) {
       return 30000;
-    } else if (discount70K && effectiveSubtotal >= 2000000) {
+    } else if (/70K/gi.test(couponCode) && effectiveSubtotal >= 2000000) {
       return 70000;
     }
     return 0;
   };
 
-  // Hàm tính tổng tiền thanh toán
+  // Tổng tiền thanh toán
   const calculateTotalAmount = () => {
     if (effectiveSubtotal === 0) return 0;
     return effectiveSubtotal + getShippingFee() - getDiscount();
@@ -174,7 +178,7 @@ const Cart = () => {
     }));
   };
 
-  // Khi người dùng tích checkbox, cập nhật mảng selectedItems
+  // Khi checkbox của sản phẩm được thay đổi
   const handleSelectItem = (productId, isSelected) => {
     setSelectedItems((prevSelectedItems) => {
       if (isSelected) {
@@ -185,7 +189,6 @@ const Cart = () => {
     });
   };
 
-  // Khi bấm nút THANH TOÁN, kiểm tra các điều kiện và chuyển sang trang thanh toán
   const handleProceedToCheckout = () => {
     if (!selectedItems.length) {
       alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
@@ -214,19 +217,15 @@ const Cart = () => {
       shippingFee: getShippingFee(),
       subtotal: effectiveSubtotal,
       totalAmount: calculateTotalAmount(),
-      coupon: selectedCoupon,
-      note: orderNote, // Ghi chú đơn hàng được chuyển qua trang thanh toán
+      coupon: selectedCoupon, // lưu cả coupon object
+      note: orderNote,
     };
-    // Chuyển sang trang thanh toán với đối tượng orderData
     navigate("/thanh-toan", { state: { orderData } });
   };
 
   return (
     <div className="container">
-      <div className="cart-title text-center my-4">
-        {/* <h2>Giỏ Hàng</h2> */}
-      </div>
-      {/* Loading Spinner */}
+      <div className="cart-title text-center my-4"></div>
       {isLoading && (
         <div className="loading-overlay d-flex justify-content-center align-items-center">
           <div className="spinner-border text-primary" role="status">
@@ -429,7 +428,7 @@ const Cart = () => {
               <label style={{ fontWeight: "bold" }}>Mã giảm giá: </label>
               {selectedCoupon ? (
                 <>
-                  <span className="ms-2">{selectedCoupon}</span>
+                  <span className="ms-2">{selectedCoupon.couponCode}</span>
                   <button
                     className="btn btn-link ms-2"
                     onClick={() => setShowCouponDropdown(true)}
@@ -449,21 +448,21 @@ const Cart = () => {
             </div>
             {selectedCoupon && (
               <div className="coupon-conditions">
-                {selectedCoupon.includes("25K") &&
+                {selectedCoupon.couponCode.includes("25K") &&
                   " (Áp dụng cho đơn từ 300,000đ)"}
-                {selectedCoupon.includes("30K") &&
+                {selectedCoupon.couponCode.includes("30K") &&
                   " (Áp dụng cho đơn từ 500,000đ)"}
-                {selectedCoupon.includes("70K") &&
+                {selectedCoupon.couponCode.includes("70K") &&
                   " (Áp dụng cho đơn từ 2,000,000đ)"}
-                {selectedCoupon.includes("FREESHIP") &&
+                {selectedCoupon.couponCode.includes("FREESHIP") &&
                   " (Miễn phí vận chuyển đơn từ 1,000,000đ)"}
               </div>
             )}
             {showCouponDropdown && (
               <div className="coupon-dropdown mt-2">
-                {userCoupons.map((coupon, index) => (
+                {userCoupons.map((coupon) => (
                   <div
-                    key={index}
+                    key={coupon._id}
                     className="coupon-option p-2 border mb-1"
                     style={{ cursor: "pointer" }}
                     onClick={() => {
@@ -471,13 +470,16 @@ const Cart = () => {
                       setShowCouponDropdown(false);
                     }}
                   >
-                    {coupon}
+                    <div>{coupon.couponCode}</div>
+                    <div style={{ fontSize: "12px", color: "#555" }}>
+                      HSD: {new Date(coupon.expiryDate).toLocaleDateString()}
+                    </div>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Ô ghi chú đơn hàng */}
+            {/* Ghi chú đơn hàng */}
             <div className="order-note mt-3">
               <label htmlFor="orderNote" className="form-label">
                 Ghi chú đơn hàng:

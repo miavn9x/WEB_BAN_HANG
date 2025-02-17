@@ -16,7 +16,7 @@ const Checkout = () => {
   const orderData = location.state?.orderData || {};
   const dispatch = useDispatch();
 
-  // Tạo mã đơn hàng duy nhất
+  // Hàm sinh mã đơn hàng duy nhất
   const generateOrderId = () => {
     const timestamp = new Date().getTime();
     const randomString = Math.random().toString(36).substring(2, 10);
@@ -37,6 +37,14 @@ const Checkout = () => {
     orderData.items && orderData.items.length > 0
       ? orderData.items.reduce((sum, item) => sum + item.quantity, 0)
       : 0;
+
+  // Nếu coupon là object thì sử dụng coupon.couponCode, ngược lại là string
+  const couponCode =
+    orderData.coupon && typeof orderData.coupon === "object"
+      ? orderData.coupon.couponCode
+      : orderData.coupon || "";
+
+  // Tính giảm giá dựa trên coupon (giá trị giảm bằng chênh lệch giữa subtotal + shippingFee và totalAmount)
   const discountAmount =
     orderData.coupon && orderData.subtotal && orderData.shippingFee
       ? orderData.subtotal + orderData.shippingFee - orderData.totalAmount
@@ -50,14 +58,15 @@ const Checkout = () => {
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Vui lòng đăng nhập để đặt hàng!");
-        navigate("/login");
-        return;
-      }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Vui lòng đăng nhập để đặt hàng!");
+      navigate("/login");
+      return;
+    }
 
+    try {
+      // Lấy thời gian đặt hàng theo định dạng "vi-VN"
       const currentDate = new Date();
       const formattedDate = currentDate.toLocaleString("vi-VN", {
         year: "numeric",
@@ -81,7 +90,7 @@ const Checkout = () => {
         totalAmount: orderData.totalAmount || 0,
         subtotal: orderData.subtotal || 0,
         shippingFee: orderData.shippingFee || 0,
-        coupon: orderData.coupon || "",
+        coupon: couponCode, // sử dụng couponCode đã chuyển đổi
         paymentMethod: paymentMethod || "cod",
         paymentStatus:
           paymentMethod === "cod" ? "Chưa thanh toán" : "Chờ xác nhận",
@@ -107,6 +116,7 @@ const Checkout = () => {
       const data = await response.json();
 
       if (data.success) {
+        // Xóa các sản phẩm đã thanh toán khỏi giỏ hàng
         const selectedProductIds = orderData.items.map(
           (item) => item.product._id
         );
@@ -120,24 +130,25 @@ const Checkout = () => {
           (item) => !selectedProductIds.includes(item.productId)
         );
         localStorage.setItem("cart", JSON.stringify(updatedCart));
-
         dispatch(loadCartFromLocalStorage());
-if (orderData.coupon) {
-  try {
-    await axios.patch(
-      "/api/users/update-coupons", // Đảm bảo đường dẫn đúng
-      {
-        coupon: orderData.coupon.normalize("NFC"), // Chuẩn hóa trước khi gửi
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-  } catch (error) {
-    console.error("Failed to update coupons:", error);
-  }
-}
 
+        // Nếu có coupon, cập nhật lại coupon cho user
+        // Thay đổi phần gọi API
+        if (orderData.coupon) {
+          try {
+            await axios.patch(
+              "/api/users/update-coupons",
+              {
+                couponCode: couponCode.normalize("NFC"), // Gửi đúng trường couponCode
+              },
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+          } catch (error) {
+            console.error("Failed to update coupons:", error);
+          }
+        }
 
         const successMessage = `Đặt hàng thành công!
 Mã đơn hàng: ${orderId}
@@ -181,7 +192,7 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
             <h5>Thông tin khách hàng</h5>
             <p>Họ và Tên: {orderData.userInfo?.fullName}</p>
             <p>Số điện thoại: {orderData.userInfo?.phone}</p>
-            <p>Địa Chỉ: {orderData.userInfo?.address}</p>
+            <p>Địa chỉ: {orderData.userInfo?.address}</p>
             <h6 className="text-center">Chi tiết đơn hàng</h6>
             <div
               style={{
@@ -234,12 +245,11 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                   <span>{orderData.note}</span>
                 </div>
               )}
-
-              {orderData.coupon && (
+              {couponCode && (
                 <>
                   <div className="d-flex justify-content-between">
                     <span>Mã giảm giá:</span>
-                    <span>{orderData.coupon}</span>
+                    <span>{couponCode}</span>
                   </div>
                   <div className="d-flex justify-content-between">
                     <span>Giảm giá:</span>
@@ -251,13 +261,13 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                     className="coupon-conditions"
                     style={{ fontSize: "12px", color: "#555" }}
                   >
-                    {orderData.coupon.includes("25K") &&
+                    {couponCode.includes("25K") &&
                       " (Áp dụng cho đơn từ 300,000đ)"}
-                    {orderData.coupon.includes("30K") &&
+                    {couponCode.includes("30K") &&
                       " (Áp dụng cho đơn từ 500,000đ)"}
-                    {orderData.coupon.includes("70K") &&
+                    {couponCode.includes("70K") &&
                       " (Áp dụng cho đơn từ 2,000,000đ)"}
-                    {orderData.coupon.includes("FREESHIP") &&
+                    {couponCode.includes("FREESHIP") &&
                       " (Miễn phí vận chuyển đơn từ 1,000,000đ)"}
                   </div>
                 </>
@@ -367,12 +377,13 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
               <div className="d-flex justify-content-between mt-4">
                 <button
                   type="button"
-                  className="d-flex"
+                  className="d-flex align-items-center"
                   onClick={() => navigate("/gio-hang")}
                   style={{
                     fontSize: "35px",
                     color: "#FF6F91",
                     backgroundColor: "transparent",
+                    border: "none",
                   }}
                 >
                   <CiShoppingBasket />
@@ -380,7 +391,6 @@ ${paymentMethod === "bank" ? "\nVui lòng hoàn tất thanh toán!" : ""}`;
                     Quay lại
                   </span>
                 </button>
-
                 <Button className="ms-auto btn-secondary" type="submit">
                   Hoàn tất đơn hàng
                 </Button>
