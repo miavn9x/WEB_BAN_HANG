@@ -11,6 +11,7 @@ import {
 import axios from "axios";
 import { formatter } from "../../../../utils/fomater";
 import "../../../../styles/Orders.css";
+import { ButtonBase } from "@mui/material";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -179,6 +180,9 @@ const Orders = () => {
 
   return (
     <Container className="orders-container">
+<ButtonBase href="/admin/order_Dashboard" className="mt-2" style={{ color: "#323d42" }}>
+          Quay lại:  trang quản lý
+        </ButtonBase>
       <h2 className="my-4 orders-title">Quản lý đặt hàng</h2>
 
       {/* Khung hiển thị đơn hàng với chiều cao cố định 50vh và thanh cuộn */}

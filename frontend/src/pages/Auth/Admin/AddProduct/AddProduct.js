@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../../../styles/AddProduct.css";
+import { ButtonBase } from "@mui/material";
 
 const AddProduct = () => {
   const [product, setProduct] = useState({
@@ -15,16 +16,16 @@ const AddProduct = () => {
     priceAfterDiscount: "",
     discountCode: "",
     stock: "",
-    tags: "", // 📌 Thêm trường tags
-    salesCount: 0, // 📌 Mặc định 0
-    viewCount: 0, // 📌 Mặc định 0
+    // Đã loại bỏ trường tags
+    salesCount: 0, // Mặc định 0
+    viewCount: 0, // Mặc định 0
   });
 
   // Lưu trữ các ảnh được chọn dưới dạng object chứa file và URL để hiển thị preview
-    const [selectedImages, setSelectedImages] = useState([]);
-    const [message, setMessage] = useState("");
-    const [error, setError] = useState("");
-    const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState("");
 
   // Các tùy chọn danh mục sản phẩm
   const categoryOptions = {
@@ -150,6 +151,7 @@ const AddProduct = () => {
       "cosmic light",
     ],
   };
+
   // Xử lý nhập dữ liệu
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -273,7 +275,7 @@ const AddProduct = () => {
           priceAfterDiscount: "",
           discountCode: "",
           stock: "",
-          tags: "",
+          // Đã loại bỏ trường tags
           salesCount: 0,
           viewCount: 0,
         });
@@ -303,6 +305,10 @@ const AddProduct = () => {
     <div className="container add-product-container">
       <div className="row">
         <div className="col-sm-12">
+   <ButtonBase href="/admin/order_Dashboard" className="mt-2" style={{ color: "#323d42" }}>
+             Quay lại:  trang quản lý
+           </ButtonBase>
+
           <h4 className="text-center mb-4 text-uppercase mt-5">
             Thêm Sản Phẩm Mới
           </h4>
@@ -463,16 +469,8 @@ const AddProduct = () => {
                     required
                   />
                 </div>
-                <div className="form-group">
-                  <label>Tags (từ khóa)</label>
-                  <input
-                    type="text"
-                    name="tags"
-                    className="form-control"
-                    value={product.tags}
-                    onChange={handleInputChange}
-                  />
-                </div>
+                {/* Đã loại bỏ phần nhập Tags */}
+
                 {/* Phần preview hình ảnh được chọn */}
                 {selectedImages.length > 0 && (
                   <div

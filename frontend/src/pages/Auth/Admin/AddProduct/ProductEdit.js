@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import "../../../../styles/ProductEdit.css"; // Đảm bảo file CSS tồn tại để định dạng giao diện
+import { ButtonBase } from "@mui/material";
 
 const ProductEdit = () => {
   const [products, setProducts] = useState([]);
@@ -333,6 +334,9 @@ const ProductEdit = () => {
   return (
     <div>
       <div className="product-management-wrapper">
+        <ButtonBase href="/admin/order_Dashboard" className="mt-2" style={{ color: "#323d42" }}>
+          Quay lại:  trang quản lý
+        </ButtonBase>
         <h3 className="text-center p-2">Quản lý sản phẩm</h3>
         {errorMessage && (
           <div className="alert alert-danger">{errorMessage}</div>

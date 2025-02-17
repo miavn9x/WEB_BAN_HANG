@@ -304,6 +304,7 @@ const CarouselAndMenu = () => {
             </Row>
           </Col>
         </Row>
+        
       </Container>
       
       <div>

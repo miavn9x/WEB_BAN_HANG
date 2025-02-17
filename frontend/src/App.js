@@ -41,6 +41,7 @@ import {
 // import SearchPage from "./components/SearchPage";
 import RecommendationList from "./components/Product/RecommendationList";
 import Dashboard from "./pages/Auth/Admin/AdminOrders/Dashboard";
+import Salecart from "./components/Product/Salecart";
 function App() {
   const [userRole, setUserRole] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -143,6 +144,7 @@ function App() {
         <Route path="/gio-hang" element={<Cart />} />
         <Route path="/thanh-toan" element={<Checkout />} />
         <Route path="/order-history/:orderId" element={<OrderHistory />} />
+        <Route path="/sale" element={<Salecart />} />
 
         <Route
           path="/admin/*"
