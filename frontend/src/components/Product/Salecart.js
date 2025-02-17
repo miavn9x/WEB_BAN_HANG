@@ -115,7 +115,7 @@ function Salecart() {
   }
 
   return (
-    <Container className="py-5">
+    <Container>
       <Row>
         {coupons.map((coupon, idx) => (
           <Col key={idx} xs={12} sm={6} md={6} lg={3}>

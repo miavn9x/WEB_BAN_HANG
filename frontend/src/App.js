@@ -158,8 +158,7 @@ function App() {
                 <Route path="add-product" element={<AddProduct />} />
                 <Route path="edit-product" element={<ProductEdit />} />
                 <Route path="/quan-ly-don-hang" element={<Orders />} />
-                <Route path="/add-bai-viet" element={<MyEditor />} />
-
+                <Route path="add-bai-viet/:slugId" element={<MyEditor />} />
                 <Route path="posts-management" element={<PostsManagement />} />
 
                 <Route path="/order_Dashboard" element={<Dashboard />} />

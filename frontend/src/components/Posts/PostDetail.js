@@ -3,6 +3,22 @@ import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import "../../styles/post-detail.css";
 
+
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize("NFD") // Tách dấu khỏi ký tự
+    .replace(/[\u0300-\u036f]/g, "") // Loại bỏ các dấu kết hợp
+    .replace(/đ/g, "d") // Chuyển 'đ' thành 'd'
+    .trim()
+    .replace(/\s+/g, "-") // Thay khoảng trắng bằng dấu gạch ngang
+    .replace(/[^\w-]+/g, "") // Loại bỏ ký tự không hợp lệ
+    .replace(/--+/g, "-") // Loại bỏ dấu gạch ngang thừa
+    .replace(/^-+/, "") // Loại bỏ dấu gạch ngang ở đầu chuỗi
+    .replace(/-+$/, ""); // Loại bỏ dấu gạch ngang ở cuối chuỗi
+}
+
 const PostDetail = () => {
   // Nhận tham số URL chứa cả slug và id, ví dụ: "ten-bai-viet-607c191e810c19729de860ea"
   const { slug } = useParams();
@@ -144,7 +160,7 @@ const PostDetail = () => {
               {relatedProducts.map((product) => (
                 <Link
                   key={product._id}
-                  to={`/product/${product._id}`}
+                  to={`/product/${slugify(product.name)}-${product._id}`}
                   className="list-group-item list-group-item-action d-flex align-items-center"
                 >
                   {product.images?.[0] && (

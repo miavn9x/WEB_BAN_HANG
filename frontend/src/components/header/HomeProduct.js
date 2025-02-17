@@ -675,18 +675,7 @@ const HomeProduct = () => {
                   alt="Brand 10"
                 />
               </SwiperSlide>
-              <SwiperSlide onClick={() => handleBrandClick("Pampers")}>
-                <img
-                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739560221/ship_aamlrw.png"
-                  alt="Brand 11"
-                />
-              </SwiperSlide>
-              <SwiperSlide onClick={() => handleBrandClick("Pampers")}>
-                <img
-                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739560221/km_as1ytm.png"
-                  alt="Brand 12"
-                />
-              </SwiperSlide>
+
             </Swiper>
           </div>
 

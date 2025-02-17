@@ -150,10 +150,11 @@ const PostsManagement = () => {
                       className="btn btn-sm me-2 btn-secondary"
                       to={`/admin/add-bai-viet/${slugify(post.title)}-${
                         post._id
-                      }`}
+                      }?id=${post._id}`}
                     >
                       Sửa
                     </Link>
+
                     <button
                       className="btn btn-sm btn-danger"
                       onClick={() => handleDelete(post._id)}

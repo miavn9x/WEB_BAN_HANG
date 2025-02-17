@@ -75,7 +75,9 @@ const LoginMenu = ({ onClose }) => {
             <Dropdown.Item onClick={() => navigate("/admin/user-management")}>
               Quản lý user
             </Dropdown.Item>
-               <Dropdown.Item onClick={() => navigate("/admin/add-bai-viet")}>
+            <Dropdown.Item
+              onClick={() => navigate("/admin/add-bai-viet/:slugId")}
+            >
               Tạo bài viết
             </Dropdown.Item>
             <Dropdown.Item onClick={() => navigate("/admin/posts-management")}>

@@ -30,8 +30,9 @@ const MyEditor = () => {
   const [editorKey, setEditorKey] = useState(0);
 
   // Lấy query param (nếu có id => đang chỉnh sửa)
-  const [searchParams] = useSearchParams();
-  const postId = searchParams.get("id");
+const [searchParams] = useSearchParams();
+const postId = searchParams.get("id");
+
   const navigate = useNavigate();
 const fileInputRef = useRef(null);
   // Gợi ý cho thẻ tags
