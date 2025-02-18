@@ -7,6 +7,7 @@ import {
   Row,
   Col,
   Badge,
+  Spinner,
 } from "react-bootstrap";
 import axios from "axios";
 import { formatter } from "../../../../utils/fomater";
@@ -16,6 +17,7 @@ import { ButtonBase } from "@mui/material";
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [updating, setUpdating] = useState(false);
@@ -23,6 +25,8 @@ const Orders = () => {
     orderStatus: "",
     paymentStatus: "",
   });
+  // Thêm state cho ghi chú của khách hàng
+  const [newCustomerNote, setNewCustomerNote] = useState("");
 
   // Phân trang
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,7 +53,7 @@ const Orders = () => {
       setCurrentPage(1);
     } catch (err) {
       console.error("Error fetching orders:", err);
-      alert("Không thể tải danh sách đơn hàng.");
+      setError("Không thể tải danh sách đơn hàng.");
     } finally {
       setLoading(false);
     }
@@ -61,6 +65,8 @@ const Orders = () => {
       orderStatus: order.orderStatus,
       paymentStatus: order.paymentStatus,
     });
+    // Gán giá trị ghi chú của khách hàng (nếu có)
+    setNewCustomerNote(order.customerNote || "");
     setShowModal(true);
   };
 
@@ -113,6 +119,8 @@ const Orders = () => {
         {
           orderStatus: newStatus.orderStatus,
           paymentStatus: newStatus.paymentStatus,
+          // Gửi luôn ghi chú của khách hàng (có thể cập nhật nếu admin cần)
+          customerNote: newCustomerNote,
         },
         {
           headers: {
@@ -165,7 +173,23 @@ const Orders = () => {
     return <Badge bg={config.color}>{config.text}</Badge>;
   };
 
-  if (loading) return <div>Đang tải...</div>;
+  // Nếu đang tải, hiển thị spinner tương tự như trang trước
+  if (loading) {
+    return (
+      <div className="loading-container text-center my-5">
+        <Spinner
+          animation="border"
+          variant="success"
+          className="loading-spinner"
+        />
+        <div>Đang tải đơn hàng...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="error-message text-center my-5">{error}</div>;
+  }
 
   // Phân trang: Tính toán các đơn hàng hiển thị theo trang hiện tại
   const indexOfLastOrder = currentPage * ordersPerPage;
@@ -191,38 +215,42 @@ const Orders = () => {
 
       {/* Khung hiển thị đơn hàng với chiều cao cố định 50vh và thanh cuộn */}
       <div style={{ height: "50vh", overflowY: "auto" }}>
-        <Table responsive striped bordered hover className="orders-table">
-          <thead>
-            <tr>
-              <th>Mã đơn hàng</th>
-              <th>Ngày đặt</th>
-              <th>Tổng tiền</th>
-              <th>Trạng thái đơn hàng</th>
-              <th>Trạng thái thanh toán</th>
-              <th>Chi tiết</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentOrders.map((order) => (
-              <tr key={order._id}>
-                <td>{order.orderId}</td>
-                <td>{order.formattedOrderDate}</td>
-                <td>{formatter(order.totalAmount)}</td>
-                <td>{getOrderStatusBadge(order.orderStatus)}</td>
-                <td>{getPaymentStatusBadge(order.paymentStatus)}</td>
-                <td>
-                  <Button
-                    variant="info"
-                    size="sm"
-                    onClick={() => handleShowDetails(order)}
-                  >
-                    Xem chi tiết
-                  </Button>
-                </td>
+        {currentOrders && currentOrders.length > 0 ? (
+          <Table responsive striped bordered hover className="orders-table">
+            <thead>
+              <tr>
+                <th>Mã đơn hàng</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái đơn hàng</th>
+                <th>Trạng thái thanh toán</th>
+                <th>Chi tiết</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {currentOrders.map((order) => (
+                <tr key={order._id}>
+                  <td>{order.orderId}</td>
+                  <td>{order.formattedOrderDate}</td>
+                  <td>{formatter(order.totalAmount)}</td>
+                  <td>{getOrderStatusBadge(order.orderStatus)}</td>
+                  <td>{getPaymentStatusBadge(order.paymentStatus)}</td>
+                  <td>
+                    <Button
+                      variant="info"
+                      size="sm"
+                      onClick={() => handleShowDetails(order)}
+                    >
+                      Xem chi tiết
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        ) : (
+          <div className="text-center my-4">Không có đơn hàng nào</div>
+        )}
       </div>
 
       {/* Bộ nút phân trang */}
@@ -342,11 +370,6 @@ const Orders = () => {
                     {selectedOrder.shippingMethod}
                   </p>
                 )}
-                {selectedOrder.customerNote && (
-                  <p>
-                    <strong>Ghi chú:</strong> {selectedOrder.customerNote}
-                  </p>
-                )}
               </Col>
               {/* Thông tin người mua và sản phẩm */}
               <Col md={6}>
@@ -375,6 +398,15 @@ const Orders = () => {
                     <p>
                       <strong>Giá:</strong> {formatter(item.price)}
                     </p>
+                    <p>
+                      <strong>Ghi chú của khách hàng:</strong>
+                    </p>
+                    <textarea
+                      className="form-control"
+                      rows={3}
+                      value={newCustomerNote}
+                      onChange={(e) => setNewCustomerNote(e.target.value)}
+                    />
                     {item.image && (
                       <img
                         src={item.image}

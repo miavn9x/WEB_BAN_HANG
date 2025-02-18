@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
+import { Spinner } from "react-bootstrap";
 import "../../styles/post-detail.css";
-
 
 function slugify(text) {
   return text
@@ -22,7 +22,6 @@ function slugify(text) {
 const PostDetail = () => {
   // Nhận tham số URL chứa cả slug và id, ví dụ: "ten-bai-viet-607c191e810c19729de860ea"
   const { slug } = useParams();
-  // Nếu slug không chứa dấu gạch ngang, postId sẽ là toàn bộ chuỗi
   const postId = slug.substring(slug.lastIndexOf("-") + 1);
 
   const [post, setPost] = useState(null);
@@ -90,7 +89,19 @@ const PostDetail = () => {
     }
   }, [post]);
 
-  if (loadingPost) return <p>Đang tải bài viết...</p>;
+  if (loadingPost) {
+    return (
+      <div className="loading-container text-center my-5">
+        <Spinner
+          animation="border"
+          variant="success"
+          className="loading-spinner"
+        />
+        <div>Đang tải bài viết...</div>
+      </div>
+    );
+  }
+
   if (!post) return <p>Bài viết không tồn tại.</p>;
 
   // SEO Meta Tags

@@ -10,16 +10,22 @@
     margin-bottom: 20px;
 }
 
+/* Liên kết bài viết */
 .posts-list-link {
     text-decoration: none;
     color: inherit;
 }
 
+/* Card bài viết */
 .posts-list-card {
     border: none;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* Giúp card có chiều cao đồng đều */
 }
 
 .posts-list-card:hover {
@@ -27,24 +33,40 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
+/* Ảnh bài viết: cố định kích thước */
 .posts-list-card-img {
     width: 100%;
     height: 200px;
+    /* Chiều cao cố định; bạn có thể điều chỉnh nếu cần */
     object-fit: cover;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
 }
 
+/* Nội dung card */
+.posts-list-card-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 15px;
+}
+
+/* Tiêu đề bài viết: chữ to hơn và hiển thị tối đa 2 dòng */
 .posts-list-card-title {
-    font-size: 0.7rem;
-    font-weight: 500;
-    color: #555;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0;
+    line-height: 1.2;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     --webkit-line-clamp: 2;
+    /* Giới hạn 2 dòng */
     overflow: hidden;
 }
 
+/* Sidebar TIN NỔI BẬT */
 .posts-list-sidebar-title {
     margin-bottom: 15px;
     color: #222;
@@ -59,6 +81,8 @@
     border: 1px solid #eee;
     border-radius: 5px;
     transition: box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .posts-list-sidebar-item:hover {
@@ -75,14 +99,17 @@
     color: inherit;
 }
 
+/* Ảnh trong sidebar: cố định kích thước */
 .posts-list-sidebar-item img {
     width: 100%;
+    height: 150px;
+    object-fit: cover;
     border-radius: 5px;
     margin-bottom: 5px;
 }
 
 .sidebar-text {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     color: #666;
     line-height: 1.4;
     display: -webkit-box;
@@ -93,7 +120,18 @@
 }
 
 /* ====== Responsive ====== */
-/* Cho màn hình từ 431px đến 768px: hiển thị 2 bài/ hàng */
+
+@media (max-width: 991px) {
+    .posts-list-col {
+        flex: 0 0 33.33% !important;
+        max-width: 33.33% !important;
+    }
+
+    .sidebar-col {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+}
 @media (max-width: 768px) and (min-width: 431px) {
     .posts-list-col {
         flex: 0 0 50% !important;
@@ -106,7 +144,7 @@
     }
 }
 
-/* Cho màn hình ≤430px: hiển thị 1 bài/tin trên 1 hàng */
+/* Màn hình ≤430px: hiển thị 1 bài/tin trên 1 hàng */
 @media (max-width: 430px) {
 
     .posts-list-col,
@@ -116,3 +154,29 @@
     }
 }
 
+
+
+/* loading thoi gian chờ */
+.loading-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 9999;
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #FF6F91;
+    border-radius: 50%;
+    animation: spin 10s linear infinite;
+}

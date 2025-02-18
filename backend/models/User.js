@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken"); // Import jwt để tạo token
+const jwt = require("jsonwebtoken");
 
 const UserSchema = new mongoose.Schema(
   {
@@ -23,14 +23,22 @@ const UserSchema = new mongoose.Schema(
     resetPasswordExpires: Date,
     coupons: [
       {
-        couponCode: { type: String, required: true }, // Mã giảm giá
+        couponCode: { type: String, required: true },
         expiryDate: { type: Date, required: true },
-        createdAt: { type: Date, default: Date.now }, // Ngày hết hạn
+        createdAt: { type: Date, default: Date.now },
       },
     ],
   },
   { timestamps: true }
 );
+
+// Virtual field để lấy tên đầy đủ (tùy chọn)
+UserSchema.virtual("name").get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
+
+// Đưa virtual vào JSON
+UserSchema.set("toJSON", { virtuals: true });
 
 // Mã băm mật khẩu trước khi lưu vào DB
 UserSchema.pre("save", async function (next) {
@@ -62,7 +70,7 @@ UserSchema.methods.generateAuthToken = function () {
   );
 };
 
-// Chuyển đổi đối tượng user khi trả về client (loại bỏ mật khẩu, token)
+// Chuyển đổi đối tượng user khi trả về client
 UserSchema.methods.toJSON = function () {
   const userObject = this.toObject();
   delete userObject.password;

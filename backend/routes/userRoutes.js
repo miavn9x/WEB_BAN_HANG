@@ -64,6 +64,8 @@ router.put("/users/:id", adminMiddleware, async (req, res) => {
 });
 
 
+
+
 // API lấy thông tin người dùng
 router.get("/profile", authMiddleware, async (req, res) => {
   try {
@@ -196,7 +198,7 @@ router.delete("/users/:id", adminMiddleware, async (req, res) => {
 });
 
 
-// routes/user.js
+
 // routes/user.js
 router.patch("/update-coupons", authMiddleware, async (req, res) => {
   try {

@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Container, Table, Modal, Button, Row, Col } from "react-bootstrap";
+import {
+  Container,
+  Table,
+  Modal,
+  Button,
+  Row,
+  Col,
+  Spinner,
+} from "react-bootstrap";
 import { formatter } from "../../utils/fomater";
 import OrderRating from "./OrderRating";
 import "../../../src/styles/OrderHistory.css";
@@ -73,7 +81,18 @@ const OrderHistory = () => {
     setCurrentPage(page);
   };
 
-  if (loading) return <div>Đang tải...</div>;
+  if (loading) {
+    return (
+      <div className="loading-container text-center my-5">
+        <Spinner
+          animation="border"
+          variant="success"
+          className="loading-spinner"
+        />
+        <div>Đang tải lịch sử đơn hàng...</div>
+      </div>
+    );
+  }
 
   return (
     <Container className="order-history-container">

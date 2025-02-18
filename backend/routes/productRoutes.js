@@ -189,7 +189,7 @@ router.get("/products", async (req, res) => {
 });
 
 
-// Route lấy chi tiết sản phẩm theo ID
+// routes/product.js
 router.get("/products/:id", async (req, res) => {
   const productId = req.params.id;
 
@@ -199,7 +199,12 @@ router.get("/products/:id", async (req, res) => {
   }
 
   try {
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId)
+      .populate({
+        path: "reviews.userId", // Đảm bảo đúng tên trường "userId" trong reviews
+        select: "firstName lastName" // Chỉ lấy các trường cần thiết từ user
+      });
+      
     if (!product) {
       return res.status(404).json({ message: "Không tìm thấy sản phẩm." });
     }
@@ -210,6 +215,7 @@ router.get("/products/:id", async (req, res) => {
     res.status(500).json({ message: "Có lỗi xảy ra khi lấy thông tin sản phẩm." });
   }
 });
+
 
 
 // Route sửa sản phẩm (PUT)
@@ -377,43 +383,78 @@ router.get("/products/related", async (req, res) => {
 });
 
 
+// // routes/product.js
+// router.get("/products/:id", async (req, res) => {
+//   try {
+//     const product = await Product.findById(req.params.id)
+//       .populate({
+//         path: "reviews.userId",
+//         select: "firstName lastName", // hoặc dùng "name" nếu dùng virtual
+//       });
+//     if (!product) {
+//       return res.status(404).json({ message: "Sản phẩm không tồn tại" });
+//     }
+//     res.json(product);
+//   } catch (error) {
+//     console.error("Lỗi khi lấy sản phẩm:", error);
+//     res.status(500).json({ message: "Lỗi server" });
+//   }
+// });
 
-// Endpoint để thêm đánh giá cho sản phẩm
-router.post("/products/:productId/reviews", async (req, res) => {
-  try {
-    const { productId } = req.params;
-    const { rating, reviewText } = req.body;
-    // Giả sử bạn có middleware auth để lấy userId
-    const userId = req.user ? req.user._id : null;
 
-    if (!rating || rating < 1 || rating > 5) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Số sao không hợp lệ" });
+// Endpoint thêm review cho sản phẩm
+router.post(
+  "/products/:productId/reviews",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { productId } = req.params;
+      const { rating, reviewText } = req.body;
+      // authMiddleware cần gán req.user
+      const userId = req.user ? req.user._id : null;
+
+      if (!userId) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Bạn cần đăng nhập để đánh giá" });
+      }
+
+      if (!rating || rating < 1 || rating > 5) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Số sao không hợp lệ" });
+      }
+
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Không tìm thấy sản phẩm" });
+      }
+
+      product.reviews.push({ userId, rating, reviewText });
+      // Tính lại điểm đánh giá trung bình
+      const totalRatings = product.reviews.reduce(
+        (sum, review) => sum + review.rating,
+        0
+      );
+      product.rating = totalRatings / product.reviews.length;
+
+      await product.save();
+      res.json({ success: true, message: "Đánh giá đã được gửi thành công" });
+    } catch (error) {
+      console.error("Error adding review:", error);
+      res.status(500).json({ success: false, message: "Lỗi server" });
     }
-
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Không tìm thấy sản phẩm" });
-    }
-
-    product.reviews.push({ userId, rating, reviewText });
-    // Tính lại điểm đánh giá trung bình (nếu cần)
-    const totalRatings = product.reviews.reduce(
-      (sum, review) => sum + review.rating,
-      0
-    );
-    product.rating = totalRatings / product.reviews.length;
-
-    await product.save();
-    res.json({ success: true, message: "Đánh giá đã được gửi thành công" });
-  } catch (error) {
-    console.error("Error adding review:", error);
-    res.status(500).json({ success: false, message: "Lỗi server" });
   }
-});
+);
+
+
+module.exports = router;
+
+
+
+
 // Route GET lấy thông tin sản phẩm theo productId
 router.get("/products/:productId", async (req, res) => {
   try {

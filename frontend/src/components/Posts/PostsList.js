@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Container, Row, Col, Card } from "react-bootstrap";
+import { Container, Row, Col, Card, Spinner } from "react-bootstrap";
 import { Helmet } from "react-helmet";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../styles/PostsList.css";
@@ -75,9 +75,6 @@ const PostsList = () => {
   const pageDescription =
     "Xem danh sách bài viết mới nhất và nổi bật trên trang của chúng tôi.";
 
-  if (loading) return <p>Đang tải danh sách bài viết...</p>;
-  if (error) return <p>{error}</p>;
-
   return (
     <div className="posts-list-page">
       <Helmet>
@@ -92,44 +89,60 @@ const PostsList = () => {
       <Container>
         {/* Tiêu đề trang */}
         <Row className="my-4">
-          <Col>{/* <h3 className="posts-list-title">{pageTitle}</h3> */}</Col>
+          <Col>
+            {/* Bạn có thể thêm tiêu đề trang ở đây nếu cần */}
+          </Col>
         </Row>
 
         <Row>
           {/* Cột chính chứa danh sách bài viết */}
           <Col xs={12} lg={9}>
-            <Row>
-              {posts.length === 0 ? (
-                <Col>
-                  <p>Không có bài viết nào.</p>
-                </Col>
-              ) : (
-                posts.map((post) => (
-                  <Col lg={4} className="posts-list-col mb-4" key={post._id}>
-                    <Link
-                      to={`/posts/${slugify(post.title)}-${post._id}`}
-                      className="posts-list-link"
-                    >
-                      <Card className="posts-list-card">
-                        {post.imageUrl && (
-                          <Card.Img
-                            variant="top"
-                            src={post.imageUrl}
-                            className="posts-list-card-img"
-                            loading="lazy" // Lazy load hình ảnh
-                          />
-                        )}
-                        <Card.Body>
-                          <Card.Title className="posts-list-card-title">
-                            {post.title}
-                          </Card.Title>
-                        </Card.Body>
-                      </Card>
-                    </Link>
-                  </Col>
-                ))
+            <div className="posts__container">
+              {loading && (
+                <div className="loading-container text-center">
+                  <Spinner
+                    animation="border"
+                    variant="success"
+                    className="loading-spinner"
+                  />
+                  <div>Đang tải danh sách bài viết...</div>
+                </div>
               )}
-            </Row>
+
+              {error && <div className="error-message">{error}</div>}
+
+              {posts && posts.length > 0 ? (
+                <Row>
+                  {posts.map((post) => (
+                    <Col lg={4} className="posts-list-col mb-4" key={post._id}>
+                      <Link
+                        to={`/posts/${slugify(post.title)}-${post._id}`}
+                        className="posts-list-link"
+                      >
+                        <Card className="posts-list-card">
+                          {post.imageUrl && (
+                            <Card.Img
+                              variant="top"
+                              src={post.imageUrl}
+                              className="posts-list-card-img"
+                              loading="lazy" // Lazy load hình ảnh
+                            />
+                          )}
+                          <Card.Body>
+                            <Card.Title className="posts-list-card-title">
+                              {post.title}
+                            </Card.Title>
+                          </Card.Body>
+                        </Card>
+                      </Link>
+                    </Col>
+                  ))}
+                </Row>
+              ) : (
+                !loading &&
+                !error && <div>Không có bài viết nào.</div>
+              )}
+            </div>
           </Col>
 
           {/* Cột sidebar TIN NỔI BẬT */}

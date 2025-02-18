@@ -12,7 +12,7 @@ function Salecart() {
       image:
         "https://res.cloudinary.com/div27nz1j/image/upload/v1739776309/coupon_1_img_medium_pmyslz.webp",
       code: "Giảm 25K",
-      description: "Tất cả đơn hàng trên 300K",
+      description: "Đơn hàng trên 300K",
     },
     {
       image:

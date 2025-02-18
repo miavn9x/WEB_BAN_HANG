@@ -117,15 +117,6 @@ const RatingDisplay = ({ product, filter, setFilter }) => {
             >
               Mới nhất
             </Button>
-            {/* <Button
-              className={`${styles.btnCustom} ms-2 ${
-                filter === "mostBought" ? styles.btnCustomActive : ""
-              }`}
-              variant="secondary"
-              onClick={() => setFilter("mostBought")}
-            >
-              Đã mua nhiều lần
-            </Button> */}
             <Row className="mt-3">
               <Col className="text-center">
                 {[5, 4, 3, 2, 1].map((star) => (
@@ -148,7 +139,6 @@ const RatingDisplay = ({ product, filter, setFilter }) => {
           <Row className="mt-4">
             <Col className="text-center">
               <Spinner animation="border" variant="primary" />
-              <p>Đang phân tích đánh giá...</p>
             </Col>
           </Row>
         )}
@@ -162,12 +152,15 @@ const RatingDisplay = ({ product, filter, setFilter }) => {
                     <div className="d-flex flex-column flex-md-row">
                       <div className="me-md-3 text-md-start text-center">
                         <span className="fw-bold d-block">
-                          {review.userId?.name || "Người dùng ẩn danh"}
+                          {review.userId?.firstName && review.userId?.lastName
+                            ? `${review.userId.firstName} ${review.userId.lastName}`
+                            : "Người dùng ẩn danh"}
                         </span>
                         <div className={styles.ratingStars}>
                           {renderStars(review.rating)}
                         </div>
                       </div>
+
                       <div className="flex-grow-1 text-md-start text-center mt-2 mt-md-0">
                         <p className="mb-0">{review.reviewText}</p>
                       </div>
@@ -178,13 +171,12 @@ const RatingDisplay = ({ product, filter, setFilter }) => {
             ))
           ) : !loading ? (
             <Col xs={12}>
-              <p className="text-muted"></p>
+              <p className="text-muted">Không có đánh giá nào.</p>
             </Col>
           ) : null}
         </Row>
       </Card>
       <Card>
-
         <Evaluate productId={product._id} />
       </Card>
     </>

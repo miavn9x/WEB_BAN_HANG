@@ -1,4 +1,3 @@
-//orderModel.js
 const mongoose = require("mongoose");
 const {
   ORDER_STATUS,

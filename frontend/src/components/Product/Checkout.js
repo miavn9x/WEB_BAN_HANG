@@ -78,31 +78,34 @@ const Checkout = () => {
         hour12: false,
       });
 
-      const orderDetails = {
-        orderId,
-        items: orderData.items.map((item) => ({
-          product: item.product?._id || "Không xác định",
-          quantity: item.quantity || 1,
-          price: item.product?.priceAfterDiscount || 0,
-          name: item.product?.name || "Sản phẩm không có tên",
-          image: item.product?.images?.[0] || "",
-        })),
-        totalAmount: orderData.totalAmount || 0,
-        subtotal: orderData.subtotal || 0,
-        shippingFee: orderData.shippingFee || 0,
-        coupon: couponCode, // sử dụng couponCode đã chuyển đổi
-        paymentMethod: paymentMethod || "cod",
-        paymentStatus:
-          paymentMethod === "cod" ? "Chưa thanh toán" : "Chờ xác nhận",
-        userInfo: {
-          fullName: orderData.userInfo?.fullName || "Không có tên",
-          phone: orderData.userInfo?.phone || "Không có số điện thoại",
-          address: orderData.userInfo?.address || "Không có địa chỉ",
-          email: orderData.userInfo?.email || "Không có email",
-        },
-        orderStatus: "Đang xử lý",
-        orderDate: new Date(),
-      };
+    const orderDetails = {
+      orderId,
+      items: orderData.items.map((item) => ({
+        product: item.product?._id || "Không xác định",
+        quantity: item.quantity || 1,
+        price: item.product?.priceAfterDiscount || 0,
+        name: item.product?.name || "Sản phẩm không có tên",
+        image: item.product?.images?.[0] || "",
+      })),
+      totalAmount: orderData.totalAmount || 0,
+      subtotal: orderData.subtotal || 0,
+      shippingFee: orderData.shippingFee || 0,
+      coupon: couponCode,
+      paymentMethod: paymentMethod || "cod",
+      paymentStatus:
+        paymentMethod === "cod" ? "Chưa thanh toán" : "Chờ xác nhận",
+      userInfo: {
+        fullName: orderData.userInfo?.fullName || "Không có tên",
+        phone: orderData.userInfo?.phone || "Không có số điện thoại",
+        address: orderData.userInfo?.address || "Không có địa chỉ",
+        email: orderData.userInfo?.email || "Không có email",
+      },
+      orderStatus: "Đang xử lý",
+      orderDate: new Date(),
+      // Thêm dòng sau để truyền ghi chú của khách hàng
+      customerNote: orderData.note || "",
+    };
+
 
       const response = await fetch("/api/orders", {
         method: "POST",

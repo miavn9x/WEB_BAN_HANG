@@ -130,7 +130,7 @@ function App() {
 
         <Route path="/posts/:slug" element={<PostDetail />} />
         <Route path="/posts-list" element={<PostsList />} />
-        <Route path="/posts-management" element={<PostsManagement />} />
+        {/* <Route path="/posts-management" element={<PostsManagement />} /> */}
 
         {/* Protected Routes - User & admin */}
         <Route

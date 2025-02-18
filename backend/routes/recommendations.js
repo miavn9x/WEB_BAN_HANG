@@ -13,8 +13,8 @@ const groupConfig = {
   search: { enabled: true, weight: 1.0, slice: 15 },
   view: { enabled: true, weight: 1.0, slice: 15 },
   order: { enabled: true, weight: 1.0, slice: 15 },
-  sale: { enabled: true, weight: 1.0, slice: 3 },
-  revenue: { enabled: true, weight: 1.2, slice: 3 },
+  sale: { enabled: true, weight: 1.0, slice: 0 },
+  revenue: { enabled: true, weight: 1.2, slice: 0 },
 };
 
 // -------------------- Group 1: Giỏ hàng --------------------

@@ -86,10 +86,6 @@ const postRoutes = require("./routes/routesposts");
 app.use("/api", postRoutes);
 
 
-// Định nghĩa các route API (tạo route cho các yêu cầu từ frontend)
-
-
-
 const notificationRoutes = require("./routes/notificationRoutes");
 app.use("/api/notifications", notificationRoutes);
 
@@ -107,8 +103,7 @@ app.use("/api/view-history", viewHistoryRoutes);
 
 // lich su tim kiem
 const searchRoutes = require("./routes/searchRoutes");
-app.use("/api", searchRoutes);  // Sử dụng routes cho API
-
+app.use("/api", searchRoutes);  
 // Import routes
 const recommendationRoutes = require("./routes/recommendations");
 app.use("/api/recommendations", recommendationRoutes);

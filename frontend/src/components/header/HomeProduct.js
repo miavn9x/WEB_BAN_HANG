@@ -11,8 +11,9 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/autoplay";
 import { Autoplay, Pagination } from "swiper/modules";
-import { Card, Col, Row } from "react-bootstrap";
+import { Card, Col, Row, Spinner } from "react-bootstrap";
 
+// Hàm slugify để tạo url thân thiện
 function slugify(text) {
   return text
     .toString()
@@ -28,16 +29,13 @@ function slugify(text) {
     .replace(/-+$/, ""); // Loại bỏ dấu gạch ngang ở cuối chuỗi
 }
 
-
-
 const HomeProduct = () => {
-  
   const navigate = useNavigate();
+
   // --- PHẦN GỢI Ý SẢN PHẨM ĐỀ XUẤT CHO BẠN ---
-  // Sử dụng hook useRecommendations để lấy dữ liệu gợi ý
   const recommendationsData = useRecommendations();
   const recommendedProducts = recommendationsData?.allProducts || [];
-  
+
   // --- PHẦN FLASH SALE & ĐỒNG HỒ ĐẾM NGƯỢC ---
   const [timeState, setTimeState] = useState({
     hours: 0,
@@ -55,7 +53,7 @@ const HomeProduct = () => {
         "/api/products?randomDiscount=true&limit=12"
       );
       const filteredProducts = response.data.products.filter(
-        (product) => product.discountPercentage > 14 // % giảm giá
+        (product) => product.discountPercentage > 14 // % giảm giá tối thiểu
       );
       // Random đơn giản:
       const shuffledProducts = filteredProducts.sort(() => Math.random() - 0.5);
@@ -133,17 +131,19 @@ const HomeProduct = () => {
 
   // --- PHẦN TẢI SẢN PHẨM CHUNG ---
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get("/api/products?limit=12");
         setProducts(response.data.products);
-        setLoading(false);
+        setProductsLoading(false);
       } catch (error) {
         console.error("Lỗi khi tải sản phẩm:", error);
-        setLoading(false);
+        setProductsError("Lỗi khi tải sản phẩm.");
+        setProductsLoading(false);
       }
     };
     fetchProducts();
@@ -190,14 +190,12 @@ const HomeProduct = () => {
     }
   }, [threeHourTargetTime, getCombinedProducts]);
 
-  // Gọi API /timer/three-hour ngay khi mount và định kỳ (mỗi 30 giây)
   useEffect(() => {
     fetchThreeHourTimer();
     const threeHourInterval = setInterval(fetchThreeHourTimer, 30000);
     return () => clearInterval(threeHourInterval);
   }, [fetchThreeHourTimer]);
 
-  // Cập nhật randomizedCombinedProducts ngay khi danh sách products thay đổi (nếu cần)
   useEffect(() => {
     const combined = getCombinedProducts();
     if (combined.length > 0) {
@@ -207,24 +205,22 @@ const HomeProduct = () => {
 
   // --- PHẦN TẢI BÀI VIẾT ---
   const [posts, setPosts] = useState([]);
-  const [error, setError] = useState(null);
+  const [postsLoading, setPostsLoading] = useState(true);
+  const [postsError, setPostsError] = useState(null);
 
   useEffect(() => {
     fetch("/api/posts")
       .then((res) => res.json())
       .then((data) => {
         setPosts(data.posts);
-        setLoading(false);
+        setPostsLoading(false);
       })
       .catch((err) => {
         console.error("Error fetching posts:", err);
-        setError("Có lỗi xảy ra khi tải bài viết.");
-        setLoading(false);
+        setPostsError("Có lỗi xảy ra khi tải bài viết.");
+        setPostsLoading(false);
       });
   }, []);
-
-  if (loading) return <p>Đang tải bài viết...</p>;
-  if (error) return <p>{error}</p>;
 
   const limitedPosts = posts.slice(0, 12);
 
@@ -337,7 +333,7 @@ const HomeProduct = () => {
               )}
             </div>
             {timeState.currentPhase === "main" && (
-              <div className="footer text-center  mt-4 pt-4">
+              <div className="footer text-center mt-4 pt-4">
                 <Button
                   className="common-view-all-btn"
                   onClick={() =>
@@ -350,47 +346,43 @@ const HomeProduct = () => {
             )}
           </div>
         </div>
-        {/* --- PHẦN SẢN PHẨM ĐỀ XUẤT CHO BẠN --- */}
-        <div
-          className="home__product bg-none py-5 d-flex justify-content-center"
-          style={{
-            backgroundColor: "transparent !important",
-            background: "none !important",
-          }}
-        >
-          <div className="container content__wrapper">
-            <div className="row mb-3">
-              <div className="col-12 text-center text-md-start">
-                <h4 className="Flash__sale fs-5">Sản phẩm đề xuất cho bạn</h4>
+
+        {recommendedProducts.length >= 6 && (
+          <div
+            className="home__product bg-none py-5 d-flex justify-content-center"
+            style={{
+              backgroundColor: "transparent !important",
+              background: "none !important",
+            }}
+          >
+            <div className="container content__wrapper">
+              <div className="row mb-3">
+                <div className="col-12 text-center text-md-start">
+                  <h4 className="Flash__sale fs-5">Sản phẩm đề xuất cho bạn</h4>
+                </div>
               </div>
-            </div>
-            <div className="row">
-              {recommendedProducts.length > 0 ? (
-                recommendedProducts.map((product) => (
+              <div className="row">
+                {recommendedProducts.map((product) => (
                   <div
                     key={product._id}
                     className="col-6 col-md-3 col-lg-2 py-2 g-2"
                   >
                     <ProductItem product={product} />
                   </div>
-                ))
-              ) : (
-                <div className="col-12 text-center py-4">
-                  <i className="fas fa-box-open fa-3x text-muted mb-3"></i>
-                  <p className="text-muted">Không có gợi ý nào</p>
-                </div>
-              )}
-            </div>
-            <div className="footer text-center  mt-4 pt-4">
-              <Button
-                className="common-view-all-btn"
-                onClick={() => navigate("/products?recommended=true")}
-              >
-                Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
-              </Button>
+                ))}
+              </div>
+              <div className="footer text-center mt-4 pt-4">
+                <Button
+                  className="common-view-all-btn"
+                  onClick={() => navigate("/products?recommended=true")}
+                >
+                  Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
         {/* --- PHẦN SẢN PHẨM THEO DANH MỤC "SỮA" --- */}
         <div className="custom__cat__container py-2 my-2 container">
           <div className="d-flex text-center">
@@ -418,7 +410,6 @@ const HomeProduct = () => {
                       alt="Brand 2"
                     />
                   </SwiperSlide>
-
                   <SwiperSlide>
                     <img
                       src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869251/section_hot_banner_auqels.webp"
@@ -439,8 +430,8 @@ const HomeProduct = () => {
                   </SwiperSlide>
                 </Swiper>
               </div>
-              <div className="row  d-flex">
-                <div className="col-lg-6 col-md-12  pt-4 d-flex justify-content-center align-items-center flex-column">
+              <div className="row d-flex">
+                <div className="col-lg-6 col-md-12 pt-4 d-flex justify-content-center align-items-center flex-column">
                   <h4
                     className="text-center Flash__sale"
                     style={{ color: "#555", padding: "0px" }}
@@ -475,10 +466,10 @@ const HomeProduct = () => {
                     Sữa bột cao cấp
                   </Button>
                 </div>
-                <div className="col-lg-3 mb-3 col-md-6 pt-4 ">
+                <div className="col-lg-3 mb-3 col-md-6 pt-4">
                   <Button
                     style={{ color: "#555", fontSize: "13px" }}
-                    className="custom-category-button lead__sale px-3 "
+                    className="custom-category-button lead__sale px-3"
                     onClick={() =>
                       handleViewCategory("categoryName", "Sữa dinh dưỡng")
                     }
@@ -499,7 +490,7 @@ const HomeProduct = () => {
           </div>
 
           {/* Hiển thị sản phẩm đã random theo API /timer/three-hour */}
-          {loading ? (
+          {productsLoading ? (
             <div className="custom__cat__loading text-center py-4">
               <p>Đang tải sản phẩm...</p>
             </div>
@@ -571,7 +562,7 @@ const HomeProduct = () => {
                 </div>
               )}
             </div>
-            <div className="footer text-center  mt-4 pt-4">
+            <div className="footer text-center mt-4 pt-4">
               <Button
                 className="common-view-all-btn"
                 onClick={() =>
@@ -586,7 +577,7 @@ const HomeProduct = () => {
           </div>
 
           {/* --- PHẦN THƯƠNG HIỆU NỔI BẬT --- */}
-          <div className="container py-4  my-4">
+          <div className="container py-4 my-4">
             <div>
               <span className="Flash__sale fs-5 py-2 text__box__border ">
                 THƯƠNG HIỆU NỔI BẬT{" "}
@@ -668,7 +659,16 @@ const HomeProduct = () => {
                 <div className="row mb-3">
                   <span className="Flash__sale mx-2 fs-5">Bài viết</span>
                 </div>
-                {limitedPosts.length === 0 ? (
+                {postsLoading ? (
+                  <Col className="text-center">
+                    <Spinner animation="border" variant="primary" />
+                    <p>Đang tải bài viết...</p>
+                  </Col>
+                ) : postsError ? (
+                  <Col>
+                    <p className="error-message">{postsError}</p>
+                  </Col>
+                ) : limitedPosts.length === 0 ? (
                   <Col>
                     <p>Không có bài viết nào.</p>
                   </Col>
@@ -713,6 +713,32 @@ const HomeProduct = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* --- NEW SECTION: TẤT CẢ SẢN PHẨM --- */}
+        <div className="products__container my-4">
+          {productsLoading && (
+            <div className="loading-container text-center">
+              <Spinner
+                animation="border"
+                variant="success"
+                className="loading-spinner"
+              />
+              <div>Đang tải sản phẩm...</div>
+            </div>
+          )}
+
+          {productsError && (
+            <div className="error-message">{productsError}</div>
+          )}
+
+          {products && products.length > 0 ? (
+            products.map((product) => (
+              <ProductItem key={product._id} product={product} />
+            ))
+          ) : !productsLoading && !productsError ? (
+            <div className="text-center">Không có sản phẩm nào</div>
+          ) : null}
         </div>
       </div>
     </>

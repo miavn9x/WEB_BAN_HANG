@@ -9,6 +9,8 @@ const User = require("../models/User");
 
 
 // ✅ API Tạo Đơn Hàng (Đã gộp chính xác)
+
+
 router.post("/orders", authMiddleware, async (req, res) => {
   try {
     const {
@@ -19,10 +21,11 @@ router.post("/orders", authMiddleware, async (req, res) => {
       shippingFee,
       paymentMethod,
       userInfo,
+      customerNote, // nhận customerNote từ req.body
     } = req.body;
     const userId = req.user._id;
 
-    // ✅ Kiểm tra dữ liệu đầu vào
+    // Kiểm tra dữ liệu đầu vào
     if (
       !orderId ||
       !items?.length ||
@@ -36,7 +39,7 @@ router.post("/orders", authMiddleware, async (req, res) => {
         .json({ success: false, message: "Thiếu thông tin đơn hàng!" });
     }
 
-    // ✅ Định dạng ngày đơn hàng
+    // Định dạng ngày đơn hàng
     const orderDate = new Date();
     const formattedDate = orderDate.toLocaleString("vi-VN", {
       year: "numeric",
@@ -48,11 +51,11 @@ router.post("/orders", authMiddleware, async (req, res) => {
       hour12: false,
     });
 
-    // ✅ Xác định trạng thái thanh toán ban đầu
+    // Xác định trạng thái thanh toán ban đầu
     const initialPaymentStatus =
       paymentMethod === "cod" ? "Chưa thanh toán" : "Chờ xác nhận";
 
-    // ✅ Tạo đơn hàng mới
+    // Tạo đơn hàng mới và truyền luôn customerNote
     const newOrder = new Order({
       orderId,
       userId,
@@ -65,15 +68,16 @@ router.post("/orders", authMiddleware, async (req, res) => {
       userInfo,
       orderStatus: "Đang xử lý",
       orderDate,
+      customerNote, // Lưu ghi chú khách hàng
     });
 
-    // ✅ Lưu đơn hàng vào cơ sở dữ liệu
+    // Lưu đơn hàng vào cơ sở dữ liệu
     const savedOrder = await newOrder.save();
     const populatedOrder = await Order.findById(savedOrder._id).populate(
       "items.product"
     );
 
-    // ✅ Gửi email xác nhận đơn hàng (không làm gián đoạn API nếu có lỗi)
+    // Gửi email xác nhận đơn hàng (không làm gián đoạn API nếu có lỗi)
     try {
       await sendOrderConfirmationEmail(
         {
@@ -87,7 +91,6 @@ router.post("/orders", authMiddleware, async (req, res) => {
       console.error("❌ Lỗi khi gửi email xác nhận:", emailError);
     }
 
-    // ✅ Trả về phản hồi thành công
     res.status(201).json({
       success: true,
       message: "Đặt hàng thành công!",
@@ -105,6 +108,9 @@ router.post("/orders", authMiddleware, async (req, res) => {
     });
   }
 });
+
+
+
 
 // Route lấy lịch sử đơn hàng
 router.get("/ordershistory", authMiddleware, async (req, res) => {
