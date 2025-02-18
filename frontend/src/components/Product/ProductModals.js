@@ -5,7 +5,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import Slider from "react-slick";
 import InnerImageZoom from "react-inner-image-zoom";
 import QuantityBox from "./QuantityBox";
-import { Link, useParams, useNavigate } from "react-router-dom"; // Import useNavigate
+import { Link, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Spinner } from "react-bootstrap";
 import { formatter } from "../../utils/fomater";
@@ -20,23 +20,24 @@ function slugify(text) {
   return text
     .toString()
     .toLowerCase()
-    .normalize("NFD") // Tách dấu khỏi ký tự
-    .replace(/[\u0300-\u036f]/g, "") // Loại bỏ các dấu kết hợp
-    .replace(/đ/g, "d") // Chuyển 'đ' thành 'd'
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
     .trim()
-    .replace(/\s+/g, "-") // Thay khoảng trắng bằng dấu gạch ngang
-    .replace(/[^\w-]+/g, "") // Loại bỏ ký tự không hợp lệ
-    .replace(/--+/g, "-") // Loại bỏ dấu gạch ngang thừa
-    .replace(/^-+/, "") // Loại bỏ dấu gạch ngang ở đầu chuỗi
-    .replace(/-+$/, ""); // Loại bỏ dấu gạch ngang ở cuối chuỗi
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "")
+    .replace(/--+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
 }
 
 const ProductModals = () => {
-  // Nhận tham số URL với tên 'slug' (trong route định nghĩa: /product/:slug)
+  // Lấy slug từ URL: định nghĩa route là /product/:slug
   const { slug } = useParams();
-  const navigate = useNavigate(); // Khai báo navigate
-  // Tách ID từ slug: lấy phần sau dấu gạch ngang cuối cùng
-  const productId = slug.substring(slug.lastIndexOf("-") + 1);
+  const navigate = useNavigate();
+
+  // Tách productId từ slug (chuỗi sau dấu gạch ngang cuối cùng)
+  const productIdFromSlug = slug.substring(slug.lastIndexOf("-") + 1);
 
   const [product, setProduct] = useState(null);
   const [postContent, setPostContent] = useState(null);
@@ -62,15 +63,17 @@ const ProductModals = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Lấy chi tiết sản phẩm theo productId (đã tách từ slug)
-        const productResponse = await axios.get(`/api/products/${productId}`);
+        // Lấy chi tiết sản phẩm theo productId (từ slug)
+        const productResponse = await axios.get(
+          `/api/products/${productIdFromSlug}`
+        );
+        // Giả sử backend trả về { product: { ... } }
         setProduct(productResponse.data.product);
 
         // Lấy danh sách sản phẩm giảm giá
         const discountedResponse = await axios.get(
           "/api/products?randomDiscount=true&limit=16"
         );
-        // Chỉ lấy các sản phẩm có discountPercentage > 1
         const validDiscountProducts = discountedResponse.data.products.filter(
           (prod) => prod.discountPercentage > 1
         );
@@ -85,10 +88,10 @@ const ProductModals = () => {
       }
     };
 
-    if (productId) {
+    if (productIdFromSlug) {
       fetchData();
     }
-  }, [productId]);
+  }, [productIdFromSlug]);
 
   // Fetch nội dung bài viết (nếu có) sau khi sản phẩm được load
   useEffect(() => {
@@ -131,7 +134,6 @@ const ProductModals = () => {
     []
   );
 
-  // Khi sản phẩm đã load, lưu lịch sử xem
   useEffect(() => {
     if (product && product._id) {
       saveViewHistory(product._id);
@@ -142,13 +144,14 @@ const ProductModals = () => {
   }, [product, saveViewHistory]);
 
   // Cấu hình slider cho hình ảnh chính và thumbnails
-  const settingsMain = {
-    dots: false,
-    infinite: false,
-    speed: 700,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-  };
+const settingsMain = {
+  dots: false,
+  infinite: false,
+  speed: 700,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+  initialSlide: 0, // Thêm dòng này để tránh nhảy trang
+};
 
   const settingsThumb = {
     dots: false,
@@ -392,12 +395,16 @@ const ProductModals = () => {
               </div>
             </div>
 
-            {/* Hiển thị đánh giá sản phẩm */}
+            {/* Hiển thị đánh giá & trò chuyện sản phẩm */}
             <RatingDisplay
               product={product}
               filter={filter}
               setFilter={setFilter}
             />
+          
+
+            {/* Render Evaluate, truyền _id sản phẩm đã load từ backend */}
+      
 
             {/* Phần mô tả sản phẩm (nội dung bài viết nếu có) */}
             <div className="product-description">
@@ -423,9 +430,6 @@ const ProductModals = () => {
                 <p></p>
               )}
             </div>
-
-            {/* Phần đánh giá – nếu có */}
-            <div>{/* <Evaluate productId={id} /> */}</div>
           </div>
 
           {/* Sidebar: Danh sách sản phẩm đang giảm giá */}

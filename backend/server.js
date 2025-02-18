@@ -86,9 +86,6 @@ const postRoutes = require("./routes/routesposts");
 app.use("/api", postRoutes);
 
 
-const messageRoutes = require("./routes/messageRoutes");
-app.use("/api", messageRoutes);
-
 // Định nghĩa các route API (tạo route cho các yêu cầu từ frontend)
 
 
@@ -124,6 +121,9 @@ app.use("/api", inventoryRoutes);
 const couponRoutes = require("./routes/couponRoutes");
 app.use("/api/coupons", couponRoutes);
 
+
+const chatRoutes = require("./routes/chatRoutes");
+app.use("/api/chats", chatRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);

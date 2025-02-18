@@ -41,133 +41,60 @@
 }
 
 /* ------------------  / Hỏi – Đáp ------------------ */
-
-.customQuestionBox {
-    background-color: #ffffff;
-    border-radius: 10px;
-    padding: 20px 10px;
-    margin: 20px 0;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Input gửi tin nhắn */
-.customQuestionInputGroup {
+.messageItem {
     display: flex;
-    align-items: center;
-    border: 1px solid #ced4da;
-    border-radius: 20px;
-    padding: 5px 10px;
-    margin-top: 10px;
-    background-color: #ffffff;
+    width: 100%;
+    margin-bottom: 10px;
 }
 
-.customQuestionInput {
-    flex-grow: 1;
-    border: none;
-    outline: none;
-    padding: 10px;
-    border-radius: 20px;
-}
-
-.customQuestionInput::placeholder {
-    color: #adb5bd;
-}
-
-.customQuestionInputGroup i {
-    color: #adb5bd;
-    margin-left: 10px;
-}
-
-.messagesArea {
-    max-height: 400px;
-    overflow-y: auto;
-    padding: 10px;
-}
-
-
-.chatMessage {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
-    position: relative;
-    transition: background-color 0.2s ease-in-out;
-}
-
-.chatMessage:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-.chatRow {
-    display: flex;
-    align-items: flex-end;
-    margin-bottom: 5px;
-}
-
-.chatRow.sender {
+.outgoing {
     justify-content: flex-end;
 }
 
-.chatRow.receiver {
+.incoming {
     justify-content: flex-start;
 }
 
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #f8d7da;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.messageContent {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    word-wrap: break-word;
+    position: relative;
+}
+
+.messageContent strong {
+    display: block;
     font-size: 1rem;
-    color: #ff007f;
-    margin: 0 10px;
-}
-
-.chatBubbleUser {
-    background-color: #d1e7dd;
-    border-radius: 15px;
-    padding: 10px;
-    width: 100%;
-    text-align: left;
-    position: relative;
-    align-self: flex-end;
-}
-
-.chatBubbleOther {
-    background-color: #f8d7da;
-    border-radius: 15px;
-    padding: 10px;
-    width: 100%;
-    text-align: left;
-    position: relative;
-    align-self: flex-start;
-}
-
-.chatSenderName {
-    font-weight: bold;
+    color: #5A5A5A;
     margin-bottom: 5px;
+    font-weight: 600;
 }
 
-.inlineReply {
-    background-color: rgba(0, 0, 0, 0.05);
-    border-left: 3px solid #ff007f;
-    padding: 5px 10px;
-    font-size: 0.9rem;
-    margin-bottom: 5px;
-    border-radius: 5px;
-    color: #555;
+.messageContent p {
+    margin: 0;
+    color: #444;
+    font-size: 0.95rem;
 }
 
-.replyButton {
-    font-size: 13px;
-    color: #004ea2;
-    cursor: pointer;
-    position: absolute;
-    bottom: 20px;
-    right: 5px;
-    padding: 2px 5px;
-    border-radius: 3px;
+.messageContent small {
+    display: block;
+    margin-top: 5px;
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.outgoing .messageContent {
+    background-color: #FADCD9;
+    color: #333;
+    text-align: right;
+}
+
+.incoming .messageContent {
+    background-color: #D0E8F2;
+    color: #333;
+    text-align: left;
+    border: 1px solid #ccc;
 }
 
 .chatTimestamp {
@@ -177,4 +104,3 @@
     bottom: 2px;
     right: 5px;
 }
-

@@ -92,98 +92,102 @@ const RatingDisplay = ({ product, filter, setFilter }) => {
   }, [product?.reviews, filter]);
 
   return (
-    <Card className={`p-4 ${styles.ratingBox}`}>
-      <Card.Title className="fw-bold">Đánh Giá</Card.Title>
-      <Row className="align-items-center">
-        <Col md={4} className="text-center text-md-start">
-          <div className={styles.ratingValue}>
-            {(product?.rating || 5.0).toFixed(1)}/5.0
-          </div>
-          <div className={styles.ratingStars}>
-            {renderStars(product?.rating || 5.0)}
-          </div>
-          <div className={styles.ratingCount}>
-            Có <strong>{product?.reviews?.length || 0}</strong> lượt đánh giá
-          </div>
-        </Col>
-        <Col md={6} className="text-center">
-          <Button
-            className={`${styles.btnCustom} ${
-              filter === "latest" ? styles.btnCustomActive : ""
-            }`}
-            variant="primary"
-            onClick={() => setFilter("latest")}
-          >
-            Mới nhất
-          </Button>
-          <Button
-            className={`${styles.btnCustom} ms-2 ${
-              filter === "mostBought" ? styles.btnCustomActive : ""
-            }`}
-            variant="secondary"
-            onClick={() => setFilter("mostBought")}
-          >
-            Đã mua nhiều lần
-          </Button>
-          <Row className="mt-3">
-            <Col className="text-center">
-              {[5, 4, 3, 2, 1].map((star) => (
-                <Button
-                  key={star}
-                  className={`${styles.btnCustom} ms-2 ${
-                    filter === star ? styles.btnCustomActive : ""
-                  }`}
-                  variant="outline-primary"
-                  onClick={() => setFilter(star)}
-                >
-                  {star} <i className="fas fa-star" />
-                </Button>
-              ))}
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-
-      {loading && (
-        <Row className="mt-4">
-          <Col className="text-center">
-            <Spinner animation="border" variant="primary" />
-            <p>Đang phân tích đánh giá...</p>
+    <>
+      <Card className={`p-4 ${styles.ratingBox}`}>
+        <Card.Title className="fw-bold">Đánh Giá</Card.Title>
+        <Row className="align-items-center">
+          <Col md={4} className="text-center text-md-start">
+            <div className={styles.ratingValue}>
+              {(product?.rating || 5.0).toFixed(1)}/5.0
+            </div>
+            <div className={styles.ratingStars}>
+              {renderStars(product?.rating || 5.0)}
+            </div>
+            <div className={styles.ratingCount}>
+              Có <strong>{product?.reviews?.length || 0}</strong> lượt đánh giá
+            </div>
+          </Col>
+          <Col md={6} className="text-center">
+            <Button
+              className={`${styles.btnCustom} ${
+                filter === "latest" ? styles.btnCustomActive : ""
+              }`}
+              variant="primary"
+              onClick={() => setFilter("latest")}
+            >
+              Mới nhất
+            </Button>
+            {/* <Button
+              className={`${styles.btnCustom} ms-2 ${
+                filter === "mostBought" ? styles.btnCustomActive : ""
+              }`}
+              variant="secondary"
+              onClick={() => setFilter("mostBought")}
+            >
+              Đã mua nhiều lần
+            </Button> */}
+            <Row className="mt-3">
+              <Col className="text-center">
+                {[5, 4, 3, 2, 1].map((star) => (
+                  <Button
+                    key={star}
+                    className={`${styles.btnCustom} ms-2 ${
+                      filter === star ? styles.btnCustomActive : ""
+                    }`}
+                    variant="outline-primary"
+                    onClick={() => setFilter(star)}
+                  >
+                    {star} <i className="fas fa-star" />
+                  </Button>
+                ))}
+              </Col>
+            </Row>
           </Col>
         </Row>
-      )}
+        {loading && (
+          <Row className="mt-4">
+            <Col className="text-center">
+              <Spinner animation="border" variant="primary" />
+              <p>Đang phân tích đánh giá...</p>
+            </Col>
+          </Row>
+        )}
 
-      <Row className="mt-4">
-        {!loading && filteredReviews.length > 0 ? (
-          filteredReviews.map((review, index) => (
-            <Col xs={12} key={index}>
-              <Card className="border rounded bg-white mb-3">
-                <Card.Body className="p-3">
-                  <div className="d-flex flex-column flex-md-row">
-                    <div className="me-md-3 text-md-start text-center">
-                      <span className="fw-bold d-block">
-                        {review.userId?.name || "Người dùng ẩn danh"}
-                      </span>
-                      <div className={styles.ratingStars}>
-                        {renderStars(review.rating)}
+        <Row className="mt-4">
+          {!loading && filteredReviews.length > 0 ? (
+            filteredReviews.map((review, index) => (
+              <Col xs={12} key={index}>
+                <Card className="border rounded bg-white mb-3">
+                  <Card.Body className="p-3">
+                    <div className="d-flex flex-column flex-md-row">
+                      <div className="me-md-3 text-md-start text-center">
+                        <span className="fw-bold d-block">
+                          {review.userId?.name || "Người dùng ẩn danh"}
+                        </span>
+                        <div className={styles.ratingStars}>
+                          {renderStars(review.rating)}
+                        </div>
+                      </div>
+                      <div className="flex-grow-1 text-md-start text-center mt-2 mt-md-0">
+                        <p className="mb-0">{review.reviewText}</p>
                       </div>
                     </div>
-                    <div className="flex-grow-1 text-md-start text-center mt-2 mt-md-0">
-                      <p className="mb-0">{review.reviewText}</p>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))
+          ) : !loading ? (
+            <Col xs={12}>
+              <p className="text-muted"></p>
             </Col>
-          ))
-        ) : !loading ? (
-          <Col xs={12}>
-            <p className="text-muted"></p>
-          </Col>
-        ) : null}
-      </Row>
-      <Evaluate/>
-    </Card>
+          ) : null}
+        </Row>
+      </Card>
+      <Card>
+
+        <Evaluate productId={product._id} />
+      </Card>
+    </>
   );
 };
 

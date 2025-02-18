@@ -1,25 +1,19 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
-import {
-  Container,
-  Card,
-  InputGroup,
-  FormControl,
-  Button,
-} from "react-bootstrap";
+import { Container, Card, InputGroup, FormControl } from "react-bootstrap";
 import styles from "../../styles/Evaluate.module.css";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode"; // Sử dụng default export
 
-// Hàm lấy thông tin người dùng từ token
+// Hàm lấy thông tin người dùng từ token (token có payload: { userId, role })
 const getCurrentUser = () => {
   const token = localStorage.getItem("token");
   if (token) {
     try {
       const decodedToken = jwtDecode(token);
-      return decodedToken.user; // Trả về thông tin người dùng từ token
+      return decodedToken; // decodedToken chứa { userId, role }
     } catch (err) {
       console.error("Token không hợp lệ:", err);
-      localStorage.removeItem("token"); // Xóa token nếu không hợp lệ
+      localStorage.removeItem("token");
       return null;
     }
   }
@@ -27,84 +21,95 @@ const getCurrentUser = () => {
 };
 
 const Evaluate = ({ productId }) => {
-  const [messages, setMessages] = useState([]);
+  const [chat, setChat] = useState(null); // Lưu đối tượng chat (bao gồm mảng messages)
   const [newMessageText, setNewMessageText] = useState("");
-  const [replyTo, setReplyTo] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const messagesEndRef = useRef(null);
 
-  // Kiểm tra và cập nhật lại currentUser mỗi khi component render
+  // Sử dụng ref cho khung chat để cuộn nội bộ
+  const chatBoxRef = useRef(null);
+
+  // Lấy thông tin người dùng khi component mount
   useEffect(() => {
     const user = getCurrentUser();
-    console.log("Current User:", user); // Kiểm tra thông tin người dùng
-    setCurrentUser(user); // Cập nhật trạng thái currentUser
-  }, []); // Chỉ chạy một lần khi component mount
+    console.log("Current User:", user);
+    setCurrentUser(user);
+  }, []);
 
-  // Fetch messages for the product when the component mounts or the current user changes
-  const fetchMessages = useCallback(() => {
-    if (currentUser) {
+  // Hàm fetch cuộc trò chuyện dựa trên productId và userId
+  const fetchChat = useCallback(() => {
+    if (currentUser && productId) {
       axios
-        .get(`/api/messages/${currentUser.userId}/${productId}`)
-        .then((res) => setMessages(res.data))
-        .catch((err) => console.error("Error fetching messages:", err));
+        .get("/api/chats/private", {
+          params: {
+            productId,
+            userId: currentUser.userId,
+          },
+        })
+        .then((res) => {
+          setChat(res.data);
+        })
+        .catch((err) => console.error("Error fetching chat:", err));
     }
   }, [productId, currentUser]);
 
+  // Fetch chat khi currentUser thay đổi và tự động refresh mỗi 2 giây
   useEffect(() => {
     if (currentUser) {
-      fetchMessages();
-      const interval = setInterval(fetchMessages, 2000); // Lấy tin nhắn mới mỗi 2 giây
-      return () => clearInterval(interval); // Dọn dẹp khi component bị unmount
+      fetchChat();
+      const interval = setInterval(fetchChat, 2000);
+      return () => clearInterval(interval);
     }
-  }, [currentUser, fetchMessages]);
+  }, [currentUser, fetchChat]);
 
+  // Hàm tự động cuộn xuống cuối khung chat (chỉ cuộn khung chat, không cuộn cả trang)
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatBoxRef.current) {
+      const { scrollHeight, scrollTop, clientHeight } = chatBoxRef.current;
+      const isNearBottom = scrollHeight - scrollTop <= clientHeight + 100;
+      if (isNearBottom) {
+        chatBoxRef.current.scrollTo({
+          top: scrollHeight,
+          behavior: "smooth",
+        });
+      }
+    }
   };
 
   useEffect(() => {
-    scrollToBottom(); // Tự động cuộn xuống khi có tin nhắn mới
-  }, [messages]);
+    scrollToBottom();
+  }, [chat]);
 
-  // Handle message submit
+  // Xử lý gửi tin nhắn
   const handleSubmit = async () => {
     if (!currentUser) {
       console.error("Không tìm thấy người dùng. Vui lòng đăng nhập.");
       return;
     }
-
     const text = newMessageText.trim();
     if (!text) return;
-    setNewMessageText(""); // Clear input field after submitting
+    setNewMessageText(""); // Xóa nội dung input sau khi gửi
 
     const payload = {
       productId,
-      text,
-      replyTo: replyTo ? replyTo._id : null,
+      userId: currentUser.userId,
+      sender: currentUser.userId,
+      message: text,
     };
 
     try {
-      const res = await axios.post("/api/messages", payload, {
+      const res = await axios.post("/api/chats/private", payload, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setMessages((prev) => [
-        ...prev,
-        res.data.productMessages[res.data.productMessages.length - 1]
-          .messages[0],
-      ]);
-      setReplyTo(null); // Clear reply state
+      // Backend trả về đối tượng chat đã được cập nhật
+      setChat(res.data);
     } catch (err) {
       console.error("Error sending message:", err);
     }
   };
 
-  const handleReply = (message) => {
-    setReplyTo(message); // Set reply message
-  };
-
-  // Kiểm tra nếu chưa đăng nhập
+  // Nếu chưa đăng nhập
   if (!currentUser) {
     return (
       <Container>
@@ -114,68 +119,63 @@ const Evaluate = ({ productId }) => {
   }
 
   return (
-    <Container className="mt-4">
-      <Card className={styles.customMessageBox}>
-        <Card.Header className={styles.customMessageHeader}>
-          <h5>Trò chuyện sản phẩm</h5>
-        </Card.Header>
-        <Card.Body>
-          <div className={styles.messagesArea}>
-            {messages.map((message) => (
-              <div key={message._id} className={styles.messageItem}>
-                <div className={styles.messageContent}>
-                  <strong>
-                    {message.userId.firstName} {message.userId.lastName}
-                  </strong>
-                  <p>{message.text}</p>
-                  {message.replyTo && (
-                    <div className={styles.replySnippet}>
-                      Trả lời: <em>{message.replyTo.text}</em>
-                    </div>
-                  )}
-                  <small>{new Date(message.createdAt).toLocaleString()}</small>
-                </div>
-                <Button
-                  variant="link"
-                  size="sm"
-                  onClick={() => handleReply(message)}
+    <Card className={styles.customMessageBox}>
+      <Card.Header className={styles.customMessageHeader}>
+        <h5>Trò chuyện sản phẩm</h5>
+      </Card.Header>
+      <Card.Body>
+        {/* Khung tin nhắn: đặt chiều cao cố định và overflow để chỉ cuộn khung chat */}
+        <div
+          className={styles.messagesArea}
+          ref={chatBoxRef}
+          style={{ maxHeight: "480px", overflowY: "auto" }}
+        >
+          {chat && chat.messages && chat.messages.length > 0 ? (
+            chat.messages.map((msg) => {
+              // Kiểm tra tin nhắn gửi đi (outgoing) nếu sender của tin nhắn khớp với currentUser
+              const isOutgoing =
+                currentUser &&
+                ((msg.sender && msg.sender._id === currentUser.userId) ||
+                  msg.sender === currentUser.userId);
+
+              return (
+                <div
+                  key={msg._id}
+                  className={`${styles.messageItem} ${
+                    isOutgoing ? styles.outgoing : styles.incoming
+                  }`}
                 >
-                  Trả lời
-                </Button>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-          <InputGroup className={styles.inputArea}>
-            <FormControl
-              placeholder={replyTo ? "Nhập câu trả lời..." : "Nhập tin nhắn..."}
-              value={newMessageText}
-              onChange={(e) => setNewMessageText(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") handleSubmit();
-              }}
-            />
-            <InputGroup.Text
-              onClick={handleSubmit}
-              style={{ cursor: "pointer" }}
-            >
-              Gửi
-            </InputGroup.Text>
-          </InputGroup>
-          {replyTo && (
-            <div className={styles.replyInfo}>
-              Đang trả lời tin nhắn của:{" "}
-              <strong>
-                {replyTo.userId.firstName} {replyTo.userId.lastName}
-              </strong>
-              <Button variant="link" size="sm" onClick={() => setReplyTo(null)}>
-                Hủy
-              </Button>
-            </div>
+                  <div className={styles.messageContent}>
+                    <strong>
+                      {msg.sender && msg.sender.firstName
+                        ? `${msg.sender.firstName} ${msg.sender.lastName}`
+                        : "Người dùng"}
+                    </strong>
+                    <p>{msg.message}</p>
+                    <small>{new Date(msg.createdAt).toLocaleString()}</small>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <p>Chưa có tin nhắn nào.</p>
           )}
-        </Card.Body>
-      </Card>
-    </Container>
+        </div>
+        <InputGroup className={styles.inputArea}>
+          <FormControl
+            placeholder="Nhập tin nhắn..."
+            value={newMessageText}
+            onChange={(e) => setNewMessageText(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") handleSubmit();
+            }}
+          />
+          <InputGroup.Text onClick={handleSubmit} style={{ cursor: "pointer" }}>
+            Gửi
+          </InputGroup.Text>
+        </InputGroup>
+      </Card.Body>
+    </Card>
   );
 };
 
