@@ -86,8 +86,12 @@ const postRoutes = require("./routes/routesposts");
 app.use("/api", postRoutes);
 
 
-const questionRouter = require("./routes/questionRouter");
-app.use("/api", questionRouter);
+const messageRoutes = require("./routes/messageRoutes");
+app.use("/api", messageRoutes);
+
+// Định nghĩa các route API (tạo route cho các yêu cầu từ frontend)
+
+
 
 const notificationRoutes = require("./routes/notificationRoutes");
 app.use("/api/notifications", notificationRoutes);

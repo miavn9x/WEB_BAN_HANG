@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Row, Col, Button, Spinner } from "react-bootstrap";
 import axios from "axios";
 import styles from "../../styles/Evaluate.module.css";
+// import Evaluate from "./Evaluate";
 
 // Hàm tiện ích render sao theo rating
 const renderStars = (rating) => {
@@ -28,67 +29,67 @@ const RatingDisplay = ({ product, filter, setFilter }) => {
   const [filteredReviews, setFilteredReviews] = useState([]);
   const [loading, setLoading] = useState(false);
 
-useEffect(() => {
-  const abortController = new AbortController();
+  useEffect(() => {
+    const abortController = new AbortController();
 
-  const fetchFilteredReviews = async () => {
-    setLoading(true);
-    try {
-      const validReviews = (product?.reviews || []).filter(
-        (review) =>
-          review?.rating > 2 &&
-          typeof review.reviewText === "string" &&
-          review.reviewText.trim().length >= 3
-      );
+    const fetchFilteredReviews = async () => {
+      setLoading(true);
+      try {
+        const validReviews = (product?.reviews || []).filter(
+          (review) =>
+            review?.rating > 2 &&
+            typeof review.reviewText === "string" &&
+            review.reviewText.trim().length >= 3
+        );
 
-      // Sắp xếp và lọc
-      let processedReviews = [...validReviews];
-      if (filter === "latest") {
-        processedReviews.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        // Sắp xếp và lọc
+        let processedReviews = [...validReviews];
+        if (filter === "latest") {
+          processedReviews.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          );
+        } else if (typeof filter === "number") {
+          processedReviews = processedReviews.filter(
+            (review) => Math.round(review.rating) === filter
+          );
+        }
+
+        // Gọi API phân tích
+        const analysisResults = await Promise.allSettled(
+          processedReviews.map(async (review) => {
+            try {
+              const response = await axios.post(
+                "/api/ai/analyze-review",
+                { text: review.reviewText },
+                {
+                  timeout: 1000,
+                  signal: abortController.signal,
+                }
+              );
+              return response.data.isNegative ? null : review;
+            } catch (error) {
+              console.error("Lỗi phân tích:", review._id, error.response?.data);
+              return review; // Giữ lại nếu có lỗi
+            }
+          })
         );
-      } else if (typeof filter === "number") {
-        processedReviews = processedReviews.filter(
-          (review) => Math.round(review.rating) === filter
-        );
+
+        // Lọc kết quả
+        const finalReviews = analysisResults
+          .filter((result) => result.status === "fulfilled" && result.value)
+          .map((result) => result.value);
+
+        setFilteredReviews(finalReviews);
+      } catch (error) {
+        console.error("Lỗi hệ thống:", error);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // Gọi API phân tích
-      const analysisResults = await Promise.allSettled(
-        processedReviews.map(async (review) => {
-          try {
-            const response = await axios.post(
-              "/api/ai/analyze-review",
-              { text: review.reviewText },
-              {
-                timeout: 10000,
-                signal: abortController.signal,
-              }
-            );
-            return response.data.isNegative ? null : review;
-          } catch (error) {
-            console.error("Lỗi phân tích:", review._id, error.response?.data);
-            return review; // Giữ lại nếu có lỗi
-          }
-        })
-      );
-
-      // Lọc kết quả
-      const finalReviews = analysisResults
-        .filter((result) => result.status === "fulfilled" && result.value)
-        .map((result) => result.value);
-
-      setFilteredReviews(finalReviews);
-    } catch (error) {
-      console.error("Lỗi hệ thống:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchFilteredReviews();
-  return () => abortController.abort();
-}, [product?.reviews, filter]);
+    fetchFilteredReviews();
+    return () => abortController.abort();
+  }, [product?.reviews, filter]);
 
   return (
     <Card className={`p-4 ${styles.ratingBox}`}>
@@ -181,6 +182,7 @@ useEffect(() => {
           </Col>
         ) : null}
       </Row>
+      {/* <Evaluate/> */}
     </Card>
   );
 };

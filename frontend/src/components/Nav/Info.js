@@ -5,14 +5,14 @@ import { Container, Row, Col, ListGroup, Card } from "react-bootstrap";
 import "../../styles/Info.css"; // Thêm tệp CSS riêng biệt
 
 const Info = () => {
-  const pageTitle = "Giới thiệu về Baby Mart - Cửa hàng mẹ và bé uy tín";
+  const pageTitle = "Giới thiệu về Baby chill - Cửa hàng mẹ và bé uy tín";
   const pageDescription =
-    "Baby Mart là cửa hàng chuyên cung cấp sản phẩm an toàn, chất lượng cao cho mẹ và bé. Sữa, bỉm, đồ chơi giáo dục, chăm sóc sức khỏe - tất cả đều có tại Baby Mart!";
-  const pageUrl = "https://babymart.com/gioi-thieu";
-  const logoUrl = "https://babymart.com/logo.png"; // Cập nhật link logo thật của bạn
+    "Baby chill là cửa hàng chuyên cung cấp sản phẩm an toàn, chất lượng cao cho mẹ và bé. Sữa, bỉm, đồ chơi giáo dục, chăm sóc sức khỏe - tất cả đều có tại Baby chill!";
+  const pageUrl = "https://babychill.com/gioi-thieu";
+  const logoUrl = "https://babychill.com/logo.png"; // Cập nhật link logo thật của bạn
 
   return (
-    <Container className="baby-mart-container my-5">
+    <Container className="baby-chill-container my-5">
       {/* 🛠 SEO Optimization */}
       <Helmet>
         <title>{pageTitle}</title>
@@ -32,7 +32,7 @@ const Info = () => {
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Store",
-            name: "Baby Mart",
+            name: "Baby chill",
             url: pageUrl,
             logo: logoUrl,
             description: pageDescription,
@@ -52,8 +52,8 @@ const Info = () => {
       </Helmet>
 
       {/* 🏪 Header Section */}
-      <header className="text-center mb-5 baby-mart-header">
-        <h1 className="display-4 text-primary">Chào mừng đến với Baby Mart</h1>
+      <header className="text-center mb-5 baby-chill-header">
+        <h1 className="display-4 text-primary">Chào mừng đến với Baby chill</h1>
         <p className="lead text-muted">
           Điểm đến tin cậy cho mẹ và bé - Sản phẩm chất lượng cao, an toàn và
           tiện lợi.
@@ -61,18 +61,18 @@ const Info = () => {
       </header>
 
       {/* 📌 Giới thiệu */}
-      <section className="mb-5 baby-mart-about">
-        <h2 className="text-center mb-4">Giới thiệu về Baby Mart</h2>
+      <section className="mb-5 baby-chill-about">
+        <h2 className="text-center mb-4">Giới thiệu về Baby chill</h2>
         <p className="text-justify">
-          Baby Mart chuyên cung cấp các sản phẩm cao cấp cho mẹ và bé từ sơ sinh
+          Baby chill chuyên cung cấp các sản phẩm cao cấp cho mẹ và bé từ sơ sinh
           đến trưởng thành. Tất cả sản phẩm đều được chọn lọc kỹ lưỡng từ các
           thương hiệu uy tín.
         </p>
       </section>
 
-      {/* ⭐ Lý do chọn Baby Mart */}
-      <section className="mb-5 baby-mart-reasons">
-        <h2 className="text-center mb-4">Lý do chọn Baby Mart</h2>
+      {/* ⭐ Lý do chọn Baby chill */}
+      <section className="mb-5 baby-chill-reasons">
+        <h2 className="text-center mb-4">Lý do chọn Baby chill</h2>
         <Row>
           <Col md={6} className="mb-4">
             <ListGroup>
@@ -101,9 +101,9 @@ const Info = () => {
         </Row>
       </section>
 
-      {/* 🛒 Sản phẩm tại Baby Mart */}
-      <section className="mb-5 baby-mart-products">
-        <h2 className="text-center mb-4">Sản phẩm tại Baby Mart</h2>
+      {/* 🛒 Sản phẩm tại Baby chill */}
+      <section className="mb-5 baby-chill-products">
+        <h2 className="text-center mb-4">Sản phẩm tại Baby chill</h2>
         <Row>
           <Col md={6} className="mb-4">
             <ListGroup>
@@ -133,8 +133,8 @@ const Info = () => {
       </section>
 
       {/* 📞 Thông tin liên hệ */}
-      <section className="mb-5 baby-mart-contact">
-        <h2 className="text-center mb-4">Liên hệ Baby Mart</h2>
+      <section className="mb-5 baby-chill-contact">
+        <h2 className="text-center mb-4">Liên hệ Baby chill</h2>
         <ListGroup className="text-center">
           <ListGroup.Item>
             <strong>📍 Địa chỉ:</strong>{" "}
@@ -146,16 +146,16 @@ const Info = () => {
           </ListGroup.Item>
           <ListGroup.Item>
             <strong>📧 Email:</strong>{" "}
-            <a href="mailto:support@babymart.com">support@babymart.com</a>
+            <a href="mailto:support@babychill.com">support@babychill.com</a>
           </ListGroup.Item>
         </ListGroup>
       </section>
 
       {/* 📌 Footer */}
-      <footer className="text-center py-4 baby-mart-footer">
+      <footer className="text-center py-4 baby-chill-footer">
         <Card className="text-muted">
           <Card.Body>
-            &copy; 2025 Baby Mart. Tất cả quyền được bảo lưu.
+            &copy; 2025 Baby chill. Tất cả quyền được bảo lưu.
           </Card.Body>
         </Card>
       </footer>

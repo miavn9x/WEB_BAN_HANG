@@ -39,7 +39,7 @@ import {
   loadCartFromLocalStorage,
 } from "./redux/actions/cartActions";
 // import SearchPage from "./components/SearchPage";
-import RecommendationList from "./components/Product/RecommendationList";
+// import RecommendationList from "./components/Product/RecommendationList";
 import Dashboard from "./pages/Auth/Admin/AdminOrders/Dashboard";
 import Salecart from "./components/Product/Salecart";
 function App() {
@@ -114,7 +114,7 @@ function App() {
       <Routes>
         <Route path="/test" element={<Evaluate />} />
         <Route path="/1" element={<NotificationModal />} />
-        <Route path="/2" element={<RecommendationList />} />
+        {/* <Route path="/2" element={<RecommendationList />} /> */}
         {/* Public Routes */}
 
         <Route path="/" element={<Home />} />
@@ -160,7 +160,6 @@ function App() {
                 <Route path="/quan-ly-don-hang" element={<Orders />} />
                 <Route path="add-bai-viet/:slugId" element={<MyEditor />} />
                 <Route path="posts-management" element={<PostsManagement />} />
-
                 <Route path="/order_Dashboard" element={<Dashboard />} />
               </Routes>
             </PrivateRoute>
