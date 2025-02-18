@@ -41,6 +41,7 @@
 }
 
 /* ------------------  / Hỏi – Đáp ------------------ */
+
 .messageItem {
     display: flex;
     width: 100%;
@@ -60,28 +61,6 @@
     padding: 10px;
     border-radius: 10px;
     word-wrap: break-word;
-    position: relative;
-}
-
-.messageContent strong {
-    display: block;
-    font-size: 1rem;
-    color: #5A5A5A;
-    margin-bottom: 5px;
-    font-weight: 600;
-}
-
-.messageContent p {
-    margin: 0;
-    color: #444;
-    font-size: 0.95rem;
-}
-
-.messageContent small {
-    display: block;
-    margin-top: 5px;
-    color: #888;
-    font-size: 0.8rem;
 }
 
 .outgoing .messageContent {
@@ -97,10 +76,50 @@
     border: 1px solid #ccc;
 }
 
+
+
 .chatTimestamp {
     font-size: 0.8rem;
     color: #777;
     position: absolute;
     bottom: 2px;
     right: 5px;
+}
+
+/* Style cho box chứa tin nhắn reply (trong danh sách tin nhắn) */
+.replyBox {
+    padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.05);
+    border-left: 3px solid #ccc;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* Style cho nút "Trả lời" ở dưới mỗi tin nhắn */
+.replyButton {
+    font-size: 0.85rem;
+    color: #007bff;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+/* Style cho preview tin nhắn đang được trả lời, hiển thị bên trên ô nhập */
+.replyPreview {
+    background: #f0f8ff;
+    padding: 8px 12px;
+    border-left: 4px solid #007bff;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Nút hủy bỏ reply */
+.cancelReply {
+    margin-left: 10px;
+    color: #ff4d4f;
+    cursor: pointer;
+    font-weight: bold;
 }

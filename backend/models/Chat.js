@@ -16,6 +16,18 @@ const chatMessageSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  // Thêm trường replyTo lưu thông tin của tin nhắn gốc (nếu có)
+  replyTo: {
+    type: {
+      sender: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      message: String,
+      createdAt: Date,
+    },
+    default: null,
+  },
 });
 
 // Định nghĩa schema cho cuộc trò chuyện
