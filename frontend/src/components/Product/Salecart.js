@@ -129,8 +129,8 @@ function Salecart() {
                   height={80}
                   className="mb-0"
                 />
-                <div className="text-left ms-3">
-                  <Card.Title className="text-danger">{coupon.code}</Card.Title>
+                <div className="text-center ms-3">
+                  <Card.Title className="text-danger fs-6" >{coupon.code}</Card.Title>
                   <Card.Text>{coupon.description}</Card.Text>
                   <div className="d-flex justify-content-center mt-3">
                     <Button
@@ -140,6 +140,7 @@ function Salecart() {
                         (coupon) => coupon.couponCode === coupon.code
                       )} // Disable nút khi đã nhận mã
                       style={{
+                        
                         opacity: userCoupons.some(
                           (coupon) => coupon.couponCode === coupon.code
                         )

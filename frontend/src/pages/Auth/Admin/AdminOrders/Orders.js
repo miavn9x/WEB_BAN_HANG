@@ -180,9 +180,13 @@ const Orders = () => {
 
   return (
     <Container className="orders-container">
-<ButtonBase href="/admin/order_Dashboard" className="mt-2" style={{ color: "#323d42" }}>
-          Quay lại:  trang quản lý
-        </ButtonBase>
+      <ButtonBase
+        href="/admin/order_Dashboard"
+        className="mt-2"
+        style={{ color: "#323d42" }}
+      >
+        Quay lại: trang quản lý
+      </ButtonBase>
       <h2 className="my-4 orders-title">Quản lý đặt hàng</h2>
 
       {/* Khung hiển thị đơn hàng với chiều cao cố định 50vh và thanh cuộn */}
@@ -223,7 +227,7 @@ const Orders = () => {
 
       {/* Bộ nút phân trang */}
       {totalPages > 1 && (
-        <div className=" d-flex justify-content-center align-items-center mt-3 flex-nowrap">
+        <div className="d-flex justify-content-center align-items-center mt-3 flex-nowrap">
           <button
             className="btn btn-secondary btn-sm me-2"
             onClick={() => handlePageChange(currentPage - 1)}
@@ -257,11 +261,17 @@ const Orders = () => {
         <Modal.Body>
           {selectedOrder && (
             <Row>
+              {/* Thông tin đơn hàng */}
               <Col md={6}>
                 <h5>Thông tin đơn hàng</h5>
-                <p>Ngày đặt: {selectedOrder.formattedOrderDate}</p>
                 <p>
-                  Trạng thái đơn hàng:
+                  <strong>Mã đơn hàng:</strong> {selectedOrder.orderId}
+                </p>
+                <p>
+                  <strong>Ngày đặt:</strong> {selectedOrder.formattedOrderDate}
+                </p>
+                <p>
+                  <strong>Trạng thái đơn hàng:</strong>{" "}
                   <select
                     value={newStatus.orderStatus}
                     onChange={(e) =>
@@ -279,7 +289,7 @@ const Orders = () => {
                   </select>
                 </p>
                 <p>
-                  Trạng thái thanh toán:
+                  <strong>Trạng thái thanh toán:</strong>{" "}
                   <select
                     value={newStatus.paymentStatus}
                     onChange={(e) =>
@@ -290,11 +300,90 @@ const Orders = () => {
                     }
                   >
                     <option value="Chưa thanh toán">Chưa thanh toán</option>
-                    <option value="Đợi xác nhận">Đợi xác nhận</option>
+                    {/* <option value="Đợi xác nhận">Đợi xác nhận</option> */}
                     <option value="Đã thanh toán">Đã thanh toán</option>
                     <option value="Hoàn tiền">Hoàn tiền</option>
                   </select>
                 </p>
+                <p>
+                  <strong>Tổng tiền:</strong>{" "}
+                  {formatter(selectedOrder.totalAmount)}
+                </p>
+                <p>
+                  <strong>Phương thức thanh toán:</strong>{" "}
+                  {selectedOrder.paymentMethod}
+                </p>
+                <p>
+                  <strong>Phí giao hàng:</strong>{" "}
+                  {formatter(selectedOrder.shippingFee)}
+                </p>
+                {selectedOrder.discountCode && (
+                  <p>
+                    <strong>Mã giảm giá:</strong> {selectedOrder.discountCode}
+                  </p>
+                )}
+                {selectedOrder.serviceFee ? (
+                  <p>
+                    <strong>Phí dịch vụ:</strong>{" "}
+                    {formatter(selectedOrder.serviceFee)}
+                  </p>
+                ) : null}
+                {selectedOrder.estimatedDeliveryDate && (
+                  <p>
+                    <strong>Ngày giao dự kiến:</strong>{" "}
+                    {new Date(
+                      selectedOrder.estimatedDeliveryDate
+                    ).toLocaleString("vi-VN")}
+                  </p>
+                )}
+                {selectedOrder.shippingMethod && (
+                  <p>
+                    <strong>Phương thức vận chuyển:</strong>{" "}
+                    {selectedOrder.shippingMethod}
+                  </p>
+                )}
+                {selectedOrder.customerNote && (
+                  <p>
+                    <strong>Ghi chú:</strong> {selectedOrder.customerNote}
+                  </p>
+                )}
+              </Col>
+              {/* Thông tin người mua và sản phẩm */}
+              <Col md={6}>
+                <h5>Thông tin người mua</h5>
+                <p>
+                  <strong>Họ và tên:</strong> {selectedOrder.userInfo.fullName}
+                </p>
+                <p>
+                  <strong>Số điện thoại:</strong> {selectedOrder.userInfo.phone}
+                </p>
+                <p>
+                  <strong>Email:</strong> {selectedOrder.userInfo.email}
+                </p>
+                <p>
+                  <strong>Địa chỉ:</strong> {selectedOrder.userInfo.address}
+                </p>
+                <h5 className="mt-3">Danh sách sản phẩm</h5>
+                {selectedOrder.items.map((item, index) => (
+                  <div key={index} className="mb-2 border-bottom pb-2">
+                    <p>
+                      <strong>Tên sản phẩm:</strong> {item.name}
+                    </p>
+                    <p>
+                      <strong>Số lượng:</strong> {item.quantity}
+                    </p>
+                    <p>
+                      <strong>Giá:</strong> {formatter(item.price)}
+                    </p>
+                    {item.image && (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{ width: "50px", height: "50px" }}
+                      />
+                    )}
+                  </div>
+                ))}
               </Col>
             </Row>
           )}

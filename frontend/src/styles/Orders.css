@@ -79,3 +79,7 @@
     border-color: #FFF8DC !important;
     color: #fff;
 }
+.css-hlbajn-MuiRating-label {
+    font-size: 30px;
+    cursor: inherit;
+}

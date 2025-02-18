@@ -52,7 +52,7 @@ const HomeProduct = () => {
   const fetchDiscountedProducts = useCallback(async () => {
     try {
       const response = await axios.get(
-        "/api/products?randomDiscount=true&limit=18"
+        "/api/products?randomDiscount=true&limit=12"
       );
       const filteredProducts = response.data.products.filter(
         (product) => product.discountPercentage > 14 // % giảm giá
@@ -138,7 +138,7 @@ const HomeProduct = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("/api/products?limit=18");
+        const response = await axios.get("/api/products?limit=12");
         setProducts(response.data.products);
         setLoading(false);
       } catch (error) {
@@ -408,50 +408,33 @@ const HomeProduct = () => {
                 >
                   <SwiperSlide>
                     <img
-                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739172432/brand_1_gp8jdq.webp"
+                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869250/Neocare_wz0hac.jpg"
                       alt="Brand 1"
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
-                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_6_unpnuu.webp"
-                      alt="Brand 6"
-                    />
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <img
-                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_2_hayrt8.webp"
+                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869251/1719561306_ifukka.png"
                       alt="Brand 2"
                     />
                   </SwiperSlide>
+
                   <SwiperSlide>
                     <img
-                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_7_rsbgoe.webp"
-                      alt="Brand 7"
-                    />
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <img
-                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_3_vsl8yu.webp"
+                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869251/section_hot_banner_auqels.webp"
                       alt="Brand 3"
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
-                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_8_bfeshq.webp"
-                      alt="Brand 8"
+                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869250/Neocare_wz0hac.jpg"
+                      alt="Brand 4"
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
-                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_9_jczh9e.webp"
-                      alt="Brand 9"
-                    />
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <img
-                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_10_cfzlzm.webp"
-                      alt="Brand 10"
+                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869523/Delimax_vkt3gc.jpg"
+                      alt="Brand 5"
                     />
                   </SwiperSlide>
                 </Swiper>
@@ -675,7 +658,6 @@ const HomeProduct = () => {
                   alt="Brand 10"
                 />
               </SwiperSlide>
-
             </Swiper>
           </div>
 

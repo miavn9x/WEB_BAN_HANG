@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Row, Col, Button, Spinner } from "react-bootstrap";
 import axios from "axios";
 import styles from "../../styles/Evaluate.module.css";
-// import Evaluate from "./Evaluate";
+import Evaluate from "./Evaluate";
 
 // Hàm tiện ích render sao theo rating
 const renderStars = (rating) => {
@@ -182,7 +182,7 @@ const RatingDisplay = ({ product, filter, setFilter }) => {
           </Col>
         ) : null}
       </Row>
-      {/* <Evaluate/> */}
+      <Evaluate/>
     </Card>
   );
 };
