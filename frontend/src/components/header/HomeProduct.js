@@ -13,7 +13,6 @@ import "swiper/css/autoplay";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Card, Col, Row, Spinner } from "react-bootstrap";
 
-// Hàm slugify để tạo url thân thiện
 function slugify(text) {
   return text
     .toString()
@@ -53,7 +52,7 @@ const HomeProduct = () => {
         "/api/products?randomDiscount=true&limit=12"
       );
       const filteredProducts = response.data.products.filter(
-        (product) => product.discountPercentage > 14 // % giảm giá tối thiểu
+        (product) => product.discountPercentage > 14 // % giảm giá
       );
       // Random đơn giản:
       const shuffledProducts = filteredProducts.sort(() => Math.random() - 0.5);
@@ -131,19 +130,17 @@ const HomeProduct = () => {
 
   // --- PHẦN TẢI SẢN PHẨM CHUNG ---
   const [products, setProducts] = useState([]);
-  const [productsLoading, setProductsLoading] = useState(true);
-  const [productsError, setProductsError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get("/api/products?limit=12");
         setProducts(response.data.products);
-        setProductsLoading(false);
+        setLoading(false);
       } catch (error) {
         console.error("Lỗi khi tải sản phẩm:", error);
-        setProductsError("Lỗi khi tải sản phẩm.");
-        setProductsLoading(false);
+        setLoading(false);
       }
     };
     fetchProducts();
@@ -190,12 +187,14 @@ const HomeProduct = () => {
     }
   }, [threeHourTargetTime, getCombinedProducts]);
 
+  // Gọi API /timer/three-hour ngay khi mount và định kỳ (mỗi 30 giây)
   useEffect(() => {
     fetchThreeHourTimer();
     const threeHourInterval = setInterval(fetchThreeHourTimer, 30000);
     return () => clearInterval(threeHourInterval);
   }, [fetchThreeHourTimer]);
 
+  // Cập nhật randomizedCombinedProducts ngay khi danh sách products thay đổi (nếu cần)
   useEffect(() => {
     const combined = getCombinedProducts();
     if (combined.length > 0) {
@@ -205,22 +204,34 @@ const HomeProduct = () => {
 
   // --- PHẦN TẢI BÀI VIẾT ---
   const [posts, setPosts] = useState([]);
-  const [postsLoading, setPostsLoading] = useState(true);
-  const [postsError, setPostsError] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetch("/api/posts")
       .then((res) => res.json())
       .then((data) => {
         setPosts(data.posts);
-        setPostsLoading(false);
+        setLoading(false);
       })
       .catch((err) => {
         console.error("Error fetching posts:", err);
-        setPostsError("Có lỗi xảy ra khi tải bài viết.");
-        setPostsLoading(false);
+        setError("Có lỗi xảy ra khi tải bài viết.");
+        setLoading(false);
       });
   }, []);
+
+  if (loading)
+    return (
+      <div className="loading-container text-center my-5">
+        <Spinner
+          animation="border"
+          variant="success"
+          className="loading-spinner"
+        />
+        <div>Đang tải bài viết...</div>
+      </div>
+    );
+  if (error) return <p>{error}</p>;
 
   const limitedPosts = posts.slice(0, 12);
 
@@ -333,7 +344,7 @@ const HomeProduct = () => {
               )}
             </div>
             {timeState.currentPhase === "main" && (
-              <div className="footer text-center mt-4 pt-4">
+              <div className="footer text-center  mt-4 pt-4">
                 <Button
                   className="common-view-all-btn"
                   onClick={() =>
@@ -346,7 +357,6 @@ const HomeProduct = () => {
             )}
           </div>
         </div>
-
         {recommendedProducts.length >= 6 && (
           <div
             className="home__product bg-none py-5 d-flex justify-content-center"
@@ -387,12 +397,12 @@ const HomeProduct = () => {
         <div className="custom__cat__container py-2 my-2 container">
           <div className="d-flex text-center">
             <div className="container">
-              <div className="container" style={{ height: "200px" }}>
+              <div className="responsive-swiper-container">
                 <Swiper
                   direction={"vertical"}
                   pagination={{ clickable: true }}
                   autoplay={{
-                    delay: 3000,
+                    delay: 5000,
                     disableOnInteraction: false,
                   }}
                   modules={[Pagination, Autoplay]}
@@ -402,36 +412,62 @@ const HomeProduct = () => {
                     <img
                       src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869250/Neocare_wz0hac.jpg"
                       alt="Brand 1"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
                       src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869251/1719561306_ifukka.png"
                       alt="Brand 2"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
                       src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869251/section_hot_banner_auqels.webp"
                       alt="Brand 3"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
                       src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869250/Neocare_wz0hac.jpg"
                       alt="Brand 4"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
                       src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869523/Delimax_vkt3gc.jpg"
                       alt="Brand 5"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
                     />
                   </SwiperSlide>
                 </Swiper>
               </div>
-              <div className="row d-flex">
-                <div className="col-lg-6 col-md-12 pt-4 d-flex justify-content-center align-items-center flex-column">
+
+              <div className="row  d-flex">
+                <div className="col-lg-6 col-md-12  pt-4 d-flex justify-content-center align-items-center flex-column">
                   <h4
                     className="text-center Flash__sale"
                     style={{ color: "#555", padding: "0px" }}
@@ -466,10 +502,10 @@ const HomeProduct = () => {
                     Sữa bột cao cấp
                   </Button>
                 </div>
-                <div className="col-lg-3 mb-3 col-md-6 pt-4">
+                <div className="col-lg-3 mb-3 col-md-6 pt-4 ">
                   <Button
                     style={{ color: "#555", fontSize: "13px" }}
-                    className="custom-category-button lead__sale px-3"
+                    className="custom-category-button lead__sale px-3 "
                     onClick={() =>
                       handleViewCategory("categoryName", "Sữa dinh dưỡng")
                     }
@@ -490,7 +526,7 @@ const HomeProduct = () => {
           </div>
 
           {/* Hiển thị sản phẩm đã random theo API /timer/three-hour */}
-          {productsLoading ? (
+          {loading ? (
             <div className="custom__cat__loading text-center py-4">
               <p>Đang tải sản phẩm...</p>
             </div>
@@ -562,7 +598,7 @@ const HomeProduct = () => {
                 </div>
               )}
             </div>
-            <div className="footer text-center mt-4 pt-4">
+            <div className="footer text-center  mt-4 pt-4">
               <Button
                 className="common-view-all-btn"
                 onClick={() =>
@@ -577,7 +613,7 @@ const HomeProduct = () => {
           </div>
 
           {/* --- PHẦN THƯƠNG HIỆU NỔI BẬT --- */}
-          <div className="container py-4 my-4">
+          <div className="container py-4  my-4">
             <div>
               <span className="Flash__sale fs-5 py-2 text__box__border ">
                 THƯƠNG HIỆU NỔI BẬT{" "}
@@ -654,21 +690,12 @@ const HomeProduct = () => {
 
           {/* --- PHẦN BÀI VIẾT --- */}
           <div className="quick__post-container">
-            <div className="container py-2 ">
+            <div className="container">
               <Row>
                 <div className="row mb-3">
                   <span className="Flash__sale mx-2 fs-5">Bài viết</span>
                 </div>
-                {postsLoading ? (
-                  <Col className="text-center">
-                    <Spinner animation="border" variant="primary" />
-                    <p>Đang tải bài viết...</p>
-                  </Col>
-                ) : postsError ? (
-                  <Col>
-                    <p className="error-message">{postsError}</p>
-                  </Col>
-                ) : limitedPosts.length === 0 ? (
+                {limitedPosts.length === 0 ? (
                   <Col>
                     <p>Không có bài viết nào.</p>
                   </Col>
@@ -679,7 +706,7 @@ const HomeProduct = () => {
                       sm={4}
                       md={3}
                       lg={3}
-                      className="mb-4"
+                      className="mb-3"
                       key={post._id}
                     >
                       <Link
@@ -713,32 +740,6 @@ const HomeProduct = () => {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* --- NEW SECTION: TẤT CẢ SẢN PHẨM --- */}
-        <div className="products__container my-4">
-          {productsLoading && (
-            <div className="loading-container text-center">
-              <Spinner
-                animation="border"
-                variant="success"
-                className="loading-spinner"
-              />
-              <div>Đang tải sản phẩm...</div>
-            </div>
-          )}
-
-          {productsError && (
-            <div className="error-message">{productsError}</div>
-          )}
-
-          {products && products.length > 0 ? (
-            products.map((product) => (
-              <ProductItem key={product._id} product={product} />
-            ))
-          ) : !productsLoading && !productsError ? (
-            <div className="text-center">Không có sản phẩm nào</div>
-          ) : null}
         </div>
       </div>
     </>

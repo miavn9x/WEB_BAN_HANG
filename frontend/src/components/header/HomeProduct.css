@@ -369,3 +369,32 @@ body {
         transform: translateY(-400%);
     }
 }
+
+.responsive-swiper-container {
+    height: 220px;
+}
+
+@media (max-width: 1200px) {
+    .responsive-swiper-container {
+        height: 190px;
+    }
+}
+
+@media (max-width: 992px) {
+    .responsive-swiper-container {
+        height: 170px;
+    }
+}
+
+@media (max-width: 768px) {
+    .responsive-swiper-container {
+        height: 140px;
+    }
+}
+
+@media (max-width: 576px) {
+    .responsive-swiper-container {
+        height: 100px;
+    }
+}
+
