@@ -3,18 +3,19 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
+const dotenv = require("dotenv");
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 5001;
+
+// Các package, model và route
 const authRoutes = require("./routes/routesauth");
 const User = require("./models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const app = express();
-const { GoogleGenerativeAI } = require("@google/generative-ai"); // Thêm package mới
-const path = require("path");
-const dotenv = require("dotenv");
-
-dotenv.config();
-
-const PORT = process.env.PORT || 5001;
+const { GoogleGenerativeAI } = require("@google/generative-ai"); // Package mới
 
 // Kết nối MongoDB
 mongoose
@@ -26,26 +27,22 @@ mongoose
   .catch((err) => console.log("Lỗi kết nối MongoDB:", err));
 
 const cron = require("node-cron");
-
-// Lên lịch cron job chạy mỗi ngày lúc nửa đêm
-
+// Lên lịch cron job chạy mỗi ngày lúc nửa đêm để dọn dẹp coupon hết hạn
 cron.schedule("0 0 * * *", async () => {
   try {
     const now = new Date();
-    console.log(
-      `[${new Date().toISOString()}] Bắt đầu dọn dẹp coupon hết hạn...`
-    );
+    console.log(`[${now.toISOString()}] Bắt đầu dọn dẹp coupon hết hạn...`);
 
     const result = await User.updateMany(
-      {}, // Điều kiện (tất cả user)
+      {}, // Áp dụng cho tất cả user
       {
         $pull: {
           coupons: {
-            expiryDate: { $lte: now }, // Điều kiện xóa coupon
+            expiryDate: { $lte: now }, // Xóa các coupon có ngày hết hạn nhỏ hơn hoặc bằng hiện tại
           },
         },
-      }, // Toán tử update
-      { multi: true } // Tùy chọn: áp dụng cho nhiều document
+      },
+      { multi: true }
     );
 
     console.log(`Đã xóa ${result.modifiedCount} coupon hết hạn`);
@@ -58,34 +55,23 @@ cron.schedule("0 0 * * *", async () => {
 app.use(cors());
 app.use(express.json());
 
-if (process.env.NODE_ENV === "development") {
-  app.use(express.static(path.join(__dirname, "../frontend/build")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "frontend", "build", "index.html"));
-  });
-}
-
-// Routes
+// Các route API
 app.use("/api/auth", authRoutes);
 
-const userRoutes = require("./routes/userRoutes"); // Import routes
-app.use("/api/users", require("./routes/userRoutes"));
+const userRoutes = require("./routes/userRoutes");
+app.use("/api/users", userRoutes);
 app.use("/api", userRoutes);
 
-//product routes
 const productRoutes = require("./routes/productRoutes");
 app.use("/api", productRoutes);
-//so luong san pham
+
 const ordersRoute = require("./routes/ordersRoutes");
 app.use("/api", ordersRoute);
 
-// product display routes
 const productDisplayRoutes = require("./routes/productDisplayRoutes");
 app.use("/api/products", productDisplayRoutes);
 
-// cart
-const cartRoutes = require("./routes/cartRoutes"); // Import cart.js
-// Sử dụng router cho giỏ hàng
+const cartRoutes = require("./routes/cartRoutes");
 app.use("/api", cartRoutes);
 
 const postRoutes = require("./routes/routesposts");
@@ -94,35 +80,40 @@ app.use("/api", postRoutes);
 const notificationRoutes = require("./routes/notificationRoutes");
 app.use("/api/notifications", notificationRoutes);
 
-// Thêm Timer Routes (đường dẫn sẽ là /api/timer)
 const timerRoutes = require("./routes/timerRoutes");
 app.use("/api", timerRoutes);
 
-// Import và sử dụng route AI
 const aiRoutes = require("./routes/aiRoutes");
 app.use("/api", aiRoutes);
 
-// lich su xem
 const viewHistoryRoutes = require("./routes/viewHistory");
 app.use("/api/view-history", viewHistoryRoutes);
 
-// lich su tim kiem
 const searchRoutes = require("./routes/searchRoutes");
 app.use("/api", searchRoutes);
-// Import routes
+
 const recommendationRoutes = require("./routes/recommendations");
 app.use("/api/recommendations", recommendationRoutes);
 
-//đề xuat
 const inventoryRoutes = require("./routes/inventoryRoutes");
 app.use("/api", inventoryRoutes);
 
-//giam giá
 const couponRoutes = require("./routes/couponRoutes");
 app.use("/api/coupons", couponRoutes);
 
 const chatRoutes = require("./routes/chatRoutes");
 app.use("/api/chats", chatRoutes);
+
+// Serve static files nếu đang ở môi trường production
+if (process.env.NODE_ENV === "production") {
+  // Đường dẫn tới thư mục build của React (frontend)
+  app.use(express.static(path.join(__dirname, "../frontend/build")));
+
+  // Các request không khớp API sẽ trả về file index.html của React
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../frontend/build", "index.html"));
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);

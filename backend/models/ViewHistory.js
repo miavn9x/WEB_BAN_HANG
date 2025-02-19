@@ -6,7 +6,7 @@ const viewHistorySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true, // 1 user chỉ có 1 document
+      unique: true, // Đã tạo index duy nhất cho trường này
     },
     products: [
       {
@@ -27,8 +27,9 @@ const viewHistorySchema = new mongoose.Schema(
   }
 );
 
-// Indexes tối ưu hiệu suất
-viewHistorySchema.index({ user: 1 });
+// Xóa bỏ dòng tạo index duplicate cho trường user
+// viewHistorySchema.index({ user: 1 });
+
 viewHistorySchema.index({ "products.viewedAt": -1 });
 
 module.exports = mongoose.model("ViewHistory", viewHistorySchema);
