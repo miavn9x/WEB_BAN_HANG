@@ -9,6 +9,10 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const app = express();
 const { GoogleGenerativeAI } = require("@google/generative-ai"); // Thêm package mới
+const path = require("path");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const PORT = process.env.PORT || 5001;
 
@@ -21,12 +25,9 @@ mongoose
   .then(() => console.log("Kết nối MongoDB thành công!"))
   .catch((err) => console.log("Lỗi kết nối MongoDB:", err));
 
-
-
 const cron = require("node-cron");
 
 // Lên lịch cron job chạy mỗi ngày lúc nửa đêm
-
 
 cron.schedule("0 0 * * *", async () => {
   try {
@@ -53,11 +54,16 @@ cron.schedule("0 0 * * *", async () => {
   }
 });
 
-
-
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/build")));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "frontend", "build", "index.html"));
+  });
+}
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -85,7 +91,6 @@ app.use("/api", cartRoutes);
 const postRoutes = require("./routes/routesposts");
 app.use("/api", postRoutes);
 
-
 const notificationRoutes = require("./routes/notificationRoutes");
 app.use("/api/notifications", notificationRoutes);
 
@@ -103,7 +108,7 @@ app.use("/api/view-history", viewHistoryRoutes);
 
 // lich su tim kiem
 const searchRoutes = require("./routes/searchRoutes");
-app.use("/api", searchRoutes);  
+app.use("/api", searchRoutes);
 // Import routes
 const recommendationRoutes = require("./routes/recommendations");
 app.use("/api/recommendations", recommendationRoutes);
@@ -115,7 +120,6 @@ app.use("/api", inventoryRoutes);
 //giam giá
 const couponRoutes = require("./routes/couponRoutes");
 app.use("/api/coupons", couponRoutes);
-
 
 const chatRoutes = require("./routes/chatRoutes");
 app.use("/api/chats", chatRoutes);
