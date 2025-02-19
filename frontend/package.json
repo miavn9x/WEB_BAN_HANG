@@ -18,6 +18,7 @@
     "@reduxjs/toolkit": "^2.5.0",
     "@tinymce/tinymce-react": "^5.1.1",
     "axios": "^1.7.9",
+    "backend": "file:../backend",
     "bootstrap": "^5.3.3",
     "cra-template": "1.2.0",
     "crypto-js": "^4.2.0",
@@ -46,15 +47,14 @@
     "swiper": "^11.2.1",
     "xlsx": "^0.18.5"
   },
- "scripts": {
-  "start": "react-scripts start",
-  "build": "react-scripts build",
-  "test": "react-scripts test",
-  "eject": "react-scripts eject",
-  "predeploy": "npm run build",
-  "deploy": "gh-pages -d build"
-}
-,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -90,5 +90,4 @@
   "keywords": [],
   "author": "",
   "license": "ISC"
-
 }
