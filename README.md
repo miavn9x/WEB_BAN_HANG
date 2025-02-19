@@ -37,14 +37,14 @@ cd Do_An_Du_Thi_Web_Desige
 2. **Cài đặt các dependencies**
 
 ```bash
-npm install   # Nếu dùng React/Vite
+npm install
 
 ```
 
 3. **Chạy dự án**
 
 ```bash
-npm start  # Nếu dùng React/Vite
+npm start
 
 ```
 
