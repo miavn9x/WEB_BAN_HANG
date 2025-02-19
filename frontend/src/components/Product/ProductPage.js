@@ -52,6 +52,35 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ------ Phân trang ------
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 30;
+
+  // Tính số trang dựa trên tổng số sản phẩm
+  const totalPages = Math.ceil(products.length / productsPerPage);
+
+  // Hàm xử lý chuyển trang
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  // Reset trang về 1 khi các bộ lọc, tìm kiếm hay sắp xếp thay đổi
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    filters,
+    sortBy,
+    searchFromURL,
+    categoryFromURL,
+    genericFromURL,
+    brandFromURL,
+  ]);
+
+  // ------------------------
+
   // Các hàm xử lý modal và bộ lọc
   const handleCloseFilter = () => setShowFilter(false);
   const handleShowFilter = () => setShowFilter(true);
@@ -231,6 +260,14 @@ const ProductPage = () => {
     location.search,
   ]);
 
+  // Lấy danh sách sản phẩm cho trang hiện tại
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = products.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
+
   return (
     <Container>
       <Row>
@@ -307,7 +344,7 @@ const ProductPage = () => {
             </div>
           </Row>
 
-          <Row>
+          <Row >
             <div className="products__container">
               {loading && (
                 <div className="loading-container text-center">
@@ -322,8 +359,8 @@ const ProductPage = () => {
 
               {error && <div className="error-message">{error}</div>}
 
-              {products && products.length > 0 ? (
-                products.map((product) => (
+              {currentProducts && currentProducts.length > 0 ? (
+                currentProducts.map((product) => (
                   <ProductItem key={product._id} product={product} />
                 ))
               ) : !loading && !error ? (
@@ -331,6 +368,29 @@ const ProductPage = () => {
               ) : null}
             </div>
           </Row>
+
+          {/* Phân trang */}
+          {!loading && !error && totalPages > 1 && (
+            <div className="d-flex justify-content-center align-items-center mt-3 flex-nowrap">
+              <button
+                className="btn btn-secondary btn-sm me-2"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1 || loading}
+              >
+                &laquo; Trước
+              </button>
+              <span>
+                Trang {currentPage} của {totalPages}
+              </span>
+              <button
+                className="btn btn-secondary btn-sm ms-2"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages || loading}
+              >
+                Sau &raquo;
+              </button>
+            </div>
+          )}
         </Col>
       </Row>
 
