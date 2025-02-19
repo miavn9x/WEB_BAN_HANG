@@ -375,7 +375,7 @@ const handleSuggestionClick = (productId) => {
                     <FaShoppingCart
                       size={20}
                       style={{
-                        color: totalItemsInCart > 0 ? "#ff69b4" : "#000000",
+                        color: totalItemsInCart > 0 ? "#ff69b4" : "#575757",
                       }}
                     />
                     {isLoggedIn && totalItemsInCart > 0 && (
@@ -577,7 +577,7 @@ const handleSuggestionClick = (productId) => {
                   <FaShoppingCart
                     size={20}
                     style={{
-                      color: totalItemsInCart > 0 ? "#ff69b4" : "#000000",
+                      color: totalItemsInCart > 0 ? "#ff69b4" : "#575757",
                     }}
                   />
                   {isLoggedIn && totalItemsInCart > 0 && (
