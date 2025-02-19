@@ -6,11 +6,11 @@
 
 ## Công nghệ sử dụng
 
-**Front-end**: HTML, CSS, JavaScript, Bootstrap/React (nếu có)
+**Front-end**: HTML, CSS, JavaScript, Bootstrap/React
 
-**Back-end**: PHP/Laravel (nếu có)
+**Back-end**: Nodejs and Express
 
-**Database**: MySQL/MongoDB
+**Database**: MongoDB
 
 ## Cấu trúc thư mục
 
