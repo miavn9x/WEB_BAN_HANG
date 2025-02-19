@@ -44,7 +44,7 @@ npm install   # Nếu dùng React/Vite
 3. **Chạy dự án**
 
 ```bash
-npm run dev  # Nếu dùng React/Vite
+npm start  # Nếu dùng React/Vite
 
 ```
 
