@@ -38,14 +38,14 @@ cd Do_An_Du_Thi_Web_Desige
 
 ```bash
 npm install   # Nếu dùng React/Vite
-composer install  # Nếu dùng Laravel
+
 ```
 
 3. **Chạy dự án**
 
 ```bash
 npm run dev  # Nếu dùng React/Vite
-php artisan serve  # Nếu dùng Laravel
+
 ```
 
 Liên hệ
