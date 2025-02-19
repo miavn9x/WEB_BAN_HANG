@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "npx cross-env NODE_ENV=production node server.js",
+    "start": "node server.js",
     "build": "npm install --prefix ../backend && npm install --prefix ../frontend && npm run build  --prefix ../frontend"
   },
   "keywords": [],
