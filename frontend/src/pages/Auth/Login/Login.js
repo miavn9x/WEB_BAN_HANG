@@ -52,7 +52,7 @@ const Login = () => {
         await dispatch(fetchCart()); // Thêm await
 
         const redirectTo = location.state?.from || "/";
-        navigate(redirectTo, { replace: true }); // Thêm replace: true để tránh history stack
+        navigate(redirectTo, { replace: true }); 
       }
     } catch (err) {
       console.error("Chi tiết lỗi:", err.response?.data);

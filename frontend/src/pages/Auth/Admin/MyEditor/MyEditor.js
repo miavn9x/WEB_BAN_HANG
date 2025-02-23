@@ -6,6 +6,7 @@ import { WithContext as ReactTags } from "react-tag-input";
 import Select from "react-select";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import "../../../../styles/MyEditor.css"; // Import file CSS tùy chỉnh
+import { ButtonBase } from "@mui/material";
 
 const MyEditor = () => {
   // Các state quản lý dữ liệu bài viết
@@ -367,19 +368,18 @@ useEffect(() => {
       </Helmet>
 
       <div className="row">
+        <div className="mb-3">
+          <ButtonBase
+            href="/admin/order_Dashboard"
+            className="mt-2"
+            style={{ color: "#323d42" }}
+          >
+            Quay lại: trang quản lý
+          </ButtonBase>
+        </div>
         <h3 className="text-center my-3 py-4">
           {postId ? "Chỉnh Sửa Bài Viết" : "Tạo Bài Viết Mới"}
         </h3>
-        {/* Nút "Quay lại" */}
-        <div className="mb-3">
-          <span
-            type="button"
-            className="btn"
-            onClick={() => navigate("/admin/posts-management")}
-          >
-            <u className="fs-5"> Quay lại</u>
-          </span>
-        </div>
 
         {/* Phần nhập nội dung bài viết */}
         <div className="col-md-9">

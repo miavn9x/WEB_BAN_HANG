@@ -27,9 +27,6 @@ const viewHistorySchema = new mongoose.Schema(
   }
 );
 
-// Xóa bỏ dòng tạo index duplicate cho trường user
-// viewHistorySchema.index({ user: 1 });
-
 viewHistorySchema.index({ "products.viewedAt": -1 });
 
 module.exports = mongoose.model("ViewHistory", viewHistorySchema);

@@ -82,7 +82,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
         lastName: user.lastName,
         phone: user.phone,
         email: user.email,
-        coupons: user.coupons, // Thêm trường coupons
+        coupons: user.coupons, 
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },

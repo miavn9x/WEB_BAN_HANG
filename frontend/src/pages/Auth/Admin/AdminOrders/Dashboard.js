@@ -979,7 +979,7 @@ const Dashboard = () => {
         <Col xs={12} md={6}>
           <Card>
             <Card.Header>
-              <h2>💰 Danh thu tam tính ({selectedPeriod})</h2>
+              <h2>💰 Danh thu tạm tính ({selectedPeriod})</h2>
             </Card.Header>
             <Card.Body>
               {loading ? (
@@ -1018,13 +1018,6 @@ const Dashboard = () => {
                 <p>Không có dữ liệu doanh thu.</p>
               )}
             </Card.Body>
-            <Card.Footer className="text-center">
-              <Link to="/admin/quan-ly-don-hang">
-                <Button variant="primary btn-secondary">
-                  Quản lý đơn hàng
-                </Button>
-              </Link>
-            </Card.Footer>
           </Card>
         </Col>
 
@@ -1032,7 +1025,26 @@ const Dashboard = () => {
           {renderTop20BestSellingTable()}
         </Col>
       </Row>
-
+      <Row className="mb-4">
+        <Col>
+          <Card>
+            <Card.Header>
+              <h2 className="text-center">Quản lý User và bài viết</h2>
+            </Card.Header>
+            <Card.Body className="d-flex justify-content-center gap-3">
+              <Button href="/admin/user-management" variant="primary">
+                Quản lý User
+              </Button>
+              <Button href="/admin/add-bai-viet/:slugId" variant="success">
+                Tạo bài viết
+              </Button>
+              <Button href="/admin/posts-management" variant="warning">
+                Quản lý bài viết
+              </Button>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
       <style>{`
     
    

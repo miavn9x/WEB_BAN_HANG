@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/PostsManagement.css";
+import { ButtonBase } from "@mui/material";
 
 // Hàm chuyển đổi tiêu đề bài viết thành slug
 function slugify(text) {
@@ -106,6 +107,15 @@ const PostsManagement = () => {
 
   return (
     <div className="posts-management container">
+      <div className="mb-3">
+        <ButtonBase
+          href="/admin/order_Dashboard"
+          className="mt-2"
+          style={{ color: "#323d42" }}
+        >
+          Quay lại: trang quản lý
+        </ButtonBase>
+      </div>
       <h4 className="my-3">Quản Lý Bài Viết</h4>
       {/* Bọc bảng trong div.table-responsive để bảng hiển thị tốt trên thiết bị nhỏ */}
       <div style={{ height: "50vh", overflowY: "auto" }}>

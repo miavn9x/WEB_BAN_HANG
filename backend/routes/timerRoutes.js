@@ -6,8 +6,8 @@ const convertToMilliseconds = (hours = 0, minutes = 0, seconds = 0) =>
   (hours * 3600 + minutes * 60 + seconds) * 1000;
 
 // Các hằng số cho API ban đầu
-const MAIN_PHASE_DURATION = convertToMilliseconds(1, 0, 0); // 1 phút (ví dụ)
-const RESET_PHASE_DURATION = convertToMilliseconds(0, 1, 0); // 30 giây (ví dụ)
+const MAIN_PHASE_DURATION = convertToMilliseconds(0, 1, 0); // 1 phút (ví dụ)
+const RESET_PHASE_DURATION = convertToMilliseconds(0, 0, 30); // 30 giây (ví dụ)
 
 // API cho timer với 2 pha: main và reset
 router.get("/timer", (req, res) => {

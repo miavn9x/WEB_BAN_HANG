@@ -20,8 +20,7 @@ const SearchHistorySchema = new mongoose.Schema(
   }
 );
 
-// Xóa bỏ dòng tạo index duplicate cho trường user
-// SearchHistorySchema.index({ user: 1 });
+
 
 SearchHistorySchema.index({ "searches.searchedAt": -1 });
 
