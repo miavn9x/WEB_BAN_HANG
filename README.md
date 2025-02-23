@@ -1,5 +1,5 @@
 # Do An Du Thi Web Design
-
+demo: https://do-an-du-thi-web-desige.onrender.com
 ## Giới thiệu
 
 Đây là đồ án dự thi thiết kế web với mục tiêu xây dựng một trang web chuyên nghiệp, đáp ứng các yêu cầu về giao diện và chức năng. Dự án sử dụng công nghệ hiện đại và tuân theo các nguyên tắc thiết kế web tốt nhất.
@@ -37,14 +37,14 @@ cd Do_An_Du_Thi_Web_Desige
 2. **Cài đặt các dependencies**
 
 ```bash
-npm install   # Nếu dùng React/Vite
+npm install
 
 ```
 
 3. **Chạy dự án**
 
 ```bash
-npm run dev  # Nếu dùng React/Vite
+npm start
 
 ```
 
