@@ -904,7 +904,7 @@ const Dashboard = () => {
               )}
             </Card.Body>
             <Card.Footer className="text-center">
-              <Link to="/admin/quan-ly-don-hang">
+              <Link to="/quan-ly-don-hang">
                 <Button variant="primary btn-secondary">
                   Quản lý đơn hàng
                 </Button>
@@ -960,12 +960,12 @@ const Dashboard = () => {
               )}
             </Card.Body>
             <Card.Footer className="text-center">
-              <Link to="/admin/add-product">
+              <Link to="/add-product">
                 <Button variant="secondary" className="me-4 btn-secondary">
                   Đăng sản phẩm
                 </Button>
               </Link>
-              <Link to="/admin/edit-product">
+              <Link to="/edit-product">
                 <Button variant="primary btn-secondary">
                   Quản lý sản phẩm
                 </Button>
@@ -1035,10 +1035,10 @@ const Dashboard = () => {
               <Button href="/admin/user-management" variant="primary">
                 Quản lý User
               </Button>
-              <Button href="/admin/add-bai-viet/:slugId" variant="success">
+              <Button href="/posts/create" variant="success">
                 Tạo bài viết
               </Button>
-              <Button href="/admin/posts-management" variant="warning">
+              <Button href="/posts/management" variant="warning">
                 Quản lý bài viết
               </Button>
             </Card.Body>

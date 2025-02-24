@@ -4,7 +4,14 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const adminMiddleware = require("../middleware/adminMiddleware");
-const authMiddleware = require("../middleware/authMiddleware"); // Thêm dòng này
+const authMiddleware = require("../middleware/authMiddleware"); 
+const roleMiddleware = require("../middleware/roleMiddleware");
+
+
+// Route chỉ admin và accountant mới được truy cập
+router.get("/admin-or-accountant-route", authMiddleware, roleMiddleware("admin", "accountant"), (req, res) => {
+  res.json({ message: "Bạn có quyền truy cập route này." });
+});
 
 // API lấy thông tin người dùng
 router.get("/users", adminMiddleware, async (req, res) => {

@@ -1,4 +1,3 @@
-// routes/posts.js
 const express = require("express");
 const Post = require("../models/modelsPost");
 const Product = require("../models/productModel");
@@ -18,8 +17,8 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 }).single("image");
 
-// API upload ảnh (không thay đổi)
-router.post("/upload", (req, res) => {
+// API upload ảnh
+router.post("/posts/upload", (req, res) => {
   upload(req, res, (err) => {
     if (err) {
       return res.status(400).json({ error: err.message });
@@ -44,11 +43,24 @@ router.post("/upload", (req, res) => {
   });
 });
 
+// --- Định nghĩa các route tĩnh trước ---
+// Ví dụ: trả về trang tạo bài viết
+router.get("/posts/create", (req, res) => {
+  // Nếu đây là API cho giao diện admin, bạn có thể trả về dữ liệu hoặc render view
+  res.status(200).json({ message: "Endpoint tạo bài viết." });
+});
+
+// Ví dụ: trả về danh sách bài viết để quản lý
+router.get("/posts/management", (req, res) => {
+  // Trả về dữ liệu hoặc giao diện quản lý bài viết
+  res.status(200).json({ message: "Endpoint quản lý bài viết." });
+});
+
+// --- Sau đó định nghĩa các route khác ---
 // API tạo bài viết (POST)
 router.post("/posts", async (req, res) => {
   const { title, content, tags, productId, imageUrl } = req.body;
 
-  // Kiểm tra bắt buộc title và content
   if (!title || !content) {
     return res.status(400).json({ error: "Title and content are required." });
   }
@@ -60,7 +72,7 @@ router.post("/posts", async (req, res) => {
         return res.status(404).json({ error: "Product not found." });
       }
     }
-        const parsedTags = Array.isArray(tags)
+    const parsedTags = Array.isArray(tags)
       ? tags.map((tag) => tag.text || tag)
       : [];
 
@@ -80,15 +92,12 @@ router.post("/posts", async (req, res) => {
   }
 });
 
-
 // API cập nhật bài viết (PUT)
 router.put("/posts/:id", async (req, res) => {
   const { id } = req.params;
   const { title, content, tags, productId, imageUrl } = req.body;
   if (!title || !content) {
-    return res
-      .status(400)
-      .json({ error: "Title and content are required." });
+    return res.status(400).json({ error: "Title and content are required." });
   }
 
   try {
@@ -104,7 +113,6 @@ router.put("/posts/:id", async (req, res) => {
       ? tags.map((tag) => tag.text || tag)
       : [];
 
-    // Cập nhật bài viết
     const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ error: "Post not found." });
@@ -113,7 +121,7 @@ router.put("/posts/:id", async (req, res) => {
     post.title = title;
     post.content = content;
     post.tags = parsedTags;
-    post.productId = validProductId; // Nếu không có productId, trường này sẽ được lưu là null
+    post.productId = validProductId;
     post.imageUrl = imageUrl;
 
     await post.save();
@@ -151,6 +159,8 @@ router.get("/posts", async (req, res) => {
 });
 
 // API lấy chi tiết bài viết (GET)
+// Route động để lấy bài viết theo ID. Vì các route tĩnh đã được định nghĩa ở trên,
+// khi URL là /posts/create hoặc /posts/management, route này sẽ không bị trigger.
 router.get("/posts/:id", async (req, res) => {
   try {
     const postId = req.params.id;
@@ -165,8 +175,7 @@ router.get("/posts/:id", async (req, res) => {
   }
 });
 
-
-// Lấy bài viết theo productId
+// API lấy bài viết theo productId
 router.get("/posts/product/:productId", async (req, res) => {
   const { productId } = req.params;
 
@@ -177,7 +186,9 @@ router.get("/posts/product/:productId", async (req, res) => {
   try {
     const posts = await Post.find({ productId });
     if (!posts || posts.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy bài viết cho sản phẩm này." });
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy bài viết cho sản phẩm này." });
     }
     res.status(200).json({ posts });
   } catch (error) {
@@ -185,6 +196,5 @@ router.get("/posts/product/:productId", async (req, res) => {
     res.status(500).json({ message: "Có lỗi xảy ra khi lấy bài viết." });
   }
 });
-
 
 module.exports = router;

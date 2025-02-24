@@ -147,7 +147,7 @@ const AccountList = () => {
 
       {!loading && (
         <>
-          {/* Bọc bảng trong container có chiều cao 100vh */}
+          {/* Bọc bảng trong container có chiều cao cố định */}
           <div style={{ height: "50vh", overflowY: "auto" }}>
             <div className="table-responsive">
               <Table striped bordered hover>
@@ -228,6 +228,9 @@ const AccountList = () => {
                           >
                             <option value="user">User</option>
                             <option value="admin">Admin</option>
+                            <option value="posts">Posts</option>
+                            <option value="warehouse">Warehouse</option>
+                            <option value="accountant">Accountant</option>
                           </select>
                         ) : (
                           account.role

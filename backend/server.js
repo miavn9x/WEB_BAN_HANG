@@ -55,7 +55,7 @@ const cartRoutes = require("./routes/cartRoutes");
 const postRoutes = require("./routes/routesposts");
 const notificationRoutes = require("./routes/notificationRoutes");
 const timerRoutes = require("./routes/timerRoutes");
-const aiRoutes = require("./routes/aiRoutes");
+// const aiRoutes = require("./routes/aiRoutes");  // Bỏ dòng này nếu không cần
 const viewHistoryRoutes = require("./routes/viewHistory");
 const searchRoutes = require("./routes/searchRoutes");
 const recommendationRoutes = require("./routes/recommendations");
@@ -63,15 +63,12 @@ const inventoryRoutes = require("./routes/inventoryRoutes");
 const couponRoutes = require("./routes/couponRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 
+const aiRoutes = require("./routes/ai"); // Sử dụng routes/ai.js
+
 // Sử dụng routes
 app.use("/api/auth", authRoutes);
-
-// Nếu bạn cần đường dẫn /api/users
 app.use("/api/users", userRoutes);
-
-// Dòng này có thể bị trùng với dòng trên (tùy logic dự án):
 app.use("/api", userRoutes);
-
 app.use("/api", productRoutes);
 app.use("/api", ordersRoute);
 app.use("/api/products", productDisplayRoutes);
@@ -86,6 +83,7 @@ app.use("/api/recommendations", recommendationRoutes);
 app.use("/api", inventoryRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/chats", chatRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Serve static files nếu đang ở môi trường production
 if (process.env.NODE_ENV === "production") {

@@ -4,15 +4,16 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../../../styles/Login.css";
 import { jwtDecode } from "jwt-decode";
-import { fetchCart } from "../../../redux/actions/cartActions"; // Thêm import
+import { fetchCart } from "../../../redux/actions/cartActions";
 import { useDispatch } from "react-redux";
+
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const dispatch = useDispatch(); // Thêm hook dispatch
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -49,10 +50,10 @@ const Login = () => {
         localStorage.setItem("token", response.data.token);
 
         // Đảm bảo fetchCart hoàn thành trước khi chuyển trang
-        await dispatch(fetchCart()); // Thêm await
+        await dispatch(fetchCart());
 
         const redirectTo = location.state?.from || "/";
-        navigate(redirectTo, { replace: true }); 
+        navigate(redirectTo, { replace: true });
       }
     } catch (err) {
       console.error("Chi tiết lỗi:", err.response?.data);

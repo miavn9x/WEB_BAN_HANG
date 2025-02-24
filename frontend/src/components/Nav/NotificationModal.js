@@ -12,7 +12,7 @@ const NotificationModal = ({ show, handleClose }) => {
 
   // Lấy thông báo trực tiếp từ API và lưu vào state
   const fetchNotifications = async () => {
-    const token = localStorage.getItem("token"); // Token dùng để xác thực
+    const token = localStorage.getItem("token");
     if (!token) {
       setNotifications([]);
       return;
@@ -38,8 +38,8 @@ const NotificationModal = ({ show, handleClose }) => {
       }
       fetchNotifications();
 
-      // Polling cập nhật thông báo mỗi 15 giây (tăng khoảng thời gian polling)
-      const intervalId = setInterval(fetchNotifications, 1000);
+      // Polling cập nhật thông báo mỗi 15 giây
+      const intervalId = setInterval(fetchNotifications, 15000);
       return () => clearInterval(intervalId);
     }
   }, [show]);
@@ -50,6 +50,7 @@ const NotificationModal = ({ show, handleClose }) => {
       if (a.read === b.read) {
         return new Date(b.createdAt) - new Date(a.createdAt);
       }
+      // Cho thông báo chưa đọc (false) lên đầu
       return a.read - b.read;
     });
   }, [notifications]);

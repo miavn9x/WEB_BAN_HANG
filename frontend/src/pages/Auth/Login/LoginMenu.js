@@ -1,39 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { Dropdown } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
-import { jwtDecode } from "jwt-decode"; // Lưu ý: jwt-decode xuất theo kiểu default
+import { jwtDecode } from "jwt-decode";
 import "../../../styles/LoginMenu.css";
-import { logoutUser } from "../../../redux/actions/authActions"; // Thêm import
-// In LoginMenu.js
+import { logoutUser } from "../../../redux/actions/authActions";
 import { useDispatch } from "react-redux";
-// Other imports...
 
 const LoginMenu = ({ onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [userRole, setUserRole] = useState("");
-  const dispatch = useDispatch(); // Thêm hook dispatch
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       navigate("/login");
       return;
     }
-
     try {
       const decodedToken = jwtDecode(token);
-
-      // Kiểm tra xem token có hết hạn không
       if (decodedToken.exp * 1000 < Date.now()) {
-        // Nếu token hết hạn, chỉ xóa token và giỏ hàng (không xóa toàn bộ dữ liệu)
         localStorage.removeItem("token");
         localStorage.removeItem("cart");
         navigate("/login");
         return;
       }
-
       setUserRole(decodedToken.role);
     } catch (error) {
       console.error("Lỗi giải mã token:", error);
@@ -44,7 +36,6 @@ const LoginMenu = ({ onClose }) => {
   }, [navigate]);
 
   const handleLogout = () => {
-    // Chỉ xóa token và giỏ hàng khỏi localStorage, không xóa toàn bộ dữ liệu
     localStorage.removeItem("token");
     localStorage.removeItem("cart");
     dispatch(logoutUser());
@@ -57,46 +48,57 @@ const LoginMenu = ({ onClose }) => {
         <button className="close-button d-lg-block d-lg-none" onClick={onClose}>
           ✖
         </button>
-        {userRole === "admin" ? (
+        {/* Menu chung cho mọi user */}
+        <Dropdown.Item onClick={() => navigate("/thong-tin-ca-nhan")}>
+          Thông tin tài khoản
+        </Dropdown.Item>
+        <Dropdown.Item onClick={() => navigate("/order-history")}>
+          Lịch sử mua hàng
+        </Dropdown.Item>
+        <Dropdown.Item onClick={() => navigate("/gio-hang")}>
+          Giỏ hàng
+        </Dropdown.Item>
+        <Dropdown.Divider />
+
+        {userRole === "admin" && (
           <>
-            <Dropdown.Item onClick={() => navigate("/thong-tin-ca-nhan")}>
-              Thông tin tài khoản
-            </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/order-history/:orderId")}>
-              Lịch sử mua hàng
-            </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/gio-hang")}>
-              Giỏ hàng
-            </Dropdown.Item>
-            <Dropdown.Divider />
-            <Dropdown.Item onClick={() => navigate("/admin/order_Dashboard")}>
-              Quản Lý
-            </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/admin/user-management")}>
-              Quản lý user
-            </Dropdown.Item>
-            <Dropdown.Item
-              onClick={() => navigate("/admin/add-bai-viet/:slugId")}
-            >
-              Tạo bài viết
-            </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/admin/posts-management")}>
-              Quản lý bài viết
-            </Dropdown.Item>
-          </>
-        ) : (
-          <>
-            <Dropdown.Item onClick={() => navigate("/thong-tin-ca-nhan")}>
-              Thông tin tài khoản
-            </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/order-history/:orderId")}>
-              Lịch sử mua hàng
-            </Dropdown.Item>
-            <Dropdown.Item onClick={() => navigate("/gio-hang")}>
-              Giỏ hàng
+            {/* Admin: truy cập toàn bộ */}
+            <Dropdown.Item onClick={() => navigate("/admin/management")}>
+              Quản Lý Admin
             </Dropdown.Item>
           </>
         )}
+
+        {userRole === "posts" && (
+          <>
+            {/* Posts: chỉ truy cập trang đăng/sửa bài viết */}
+            <Dropdown.Item onClick={() => navigate("/posts/create")}>
+              Tạo bài viết
+            </Dropdown.Item>
+            <Dropdown.Item onClick={() => navigate("/posts/management")}>
+              Quản lý bài viết
+            </Dropdown.Item>
+          </>
+        )}
+
+        {userRole === "warehouse" && (
+          <>
+            {/* Warehouse: chỉ truy cập trang đăng/sửa sản phẩm */}
+            <Dropdown.Item onClick={() => navigate("/product-warehouse")}>
+              Quản lý kho
+            </Dropdown.Item>
+          </>
+        )}
+
+        {userRole === "accountant" && (
+          <>
+            {/* Accountant: chỉ truy cập trang đơn hàng */}
+            <Dropdown.Item onClick={() => navigate("/DashboardAccountant")}>
+              Kế toán
+            </Dropdown.Item>
+          </>
+        )}
+
         <Dropdown.Divider />
         <div
           className="menu-item"

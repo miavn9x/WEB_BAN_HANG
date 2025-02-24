@@ -1,0 +1,44 @@
+.chat-toggle-container {
+    position: fixed;
+    bottom: 86px;
+    /* Khoảng cách từ dưới trang */
+    right: 26px;
+    /* Khoảng cách từ bên phải */
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+}
+
+.chat-main-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.chat-main-icon {
+    width: 50px;
+    /* Kích thước icon chat chính */
+    object-fit: contain;
+}
+
+/* Menu chứa 2 icon được hiển thị theo hàng ngang */
+.chat-menu {
+    display: flex;
+    flex-direction: row;
+ 
+    /* Khoảng cách giữa menu và icon chat chính */
+}
+
+.chat-menu-item {
+    width: 70px;
+    /* Kích thước 100px cho icon Zalo và Facebook */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-menu-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}

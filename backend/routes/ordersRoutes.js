@@ -312,24 +312,16 @@ router.post("/orders/:orderId/cancel", authMiddleware, async (req, res) => {
     }
 
     console.log("Order found:", order);
-    const cancelableStatuses = [
-      ORDER_STATUS.PROCESSING,
-      ORDER_STATUS.CONFIRMED,
-    ];
-    if (!cancelableStatuses.includes(order.orderStatus)) {
+    
+    // Chỉ cho phép hủy nếu đơn hàng đang ở trạng thái "Đang xử lý" và thanh toán "Chưa thanh toán"
+    if (order.orderStatus !== ORDER_STATUS.PROCESSING || order.paymentStatus !== PAYMENT_STATUS.PENDING) {
       let message;
-      switch (order.orderStatus) {
-        case ORDER_STATUS.SHIPPING:
-          message = "Không thể hủy đơn hàng đang trong quá trình giao hàng!";
-          break;
-        case ORDER_STATUS.DELIVERED:
-          message = "Không thể hủy đơn hàng đã giao thành công!";
-          break;
-        case ORDER_STATUS.CANCELLED:
-          message = "Đơn hàng này đã được hủy trước đó!";
-          break;
-        default:
-          message = "Không thể hủy đơn hàng ở trạng thái hiện tại!";
+      if (order.orderStatus !== ORDER_STATUS.PROCESSING) {
+        message = "Chỉ cho phép hủy khi đơn hàng đang ở trạng thái 'Đang xử lý'.";
+      } else if (order.paymentStatus !== PAYMENT_STATUS.PENDING) {
+        message = "Chỉ cho phép hủy khi đơn hàng chưa thanh toán.";
+      } else {
+        message = "Không thể hủy đơn hàng ở trạng thái hiện tại!";
       }
 
       return res.status(400).json({
@@ -365,6 +357,7 @@ router.post("/orders/:orderId/cancel", authMiddleware, async (req, res) => {
     });
   }
 });
+
 
 // Trong file routes/orderRoutes.js (hoặc file chứa các route đơn hàng)
 router.put("/orders/:orderId/rate", authMiddleware, async (req, res) => {

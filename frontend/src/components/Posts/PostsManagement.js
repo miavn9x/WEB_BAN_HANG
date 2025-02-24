@@ -158,7 +158,7 @@ const PostsManagement = () => {
                   <td>
                     <Link
                       className="btn btn-sm me-2 btn-secondary"
-                      to={`/admin/add-bai-viet/${slugify(post.title)}-${
+                      to={`/posts/management/${slugify(post.title)}-${
                         post._id
                       }?id=${post._id}`}
                     >

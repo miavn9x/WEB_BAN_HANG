@@ -18,7 +18,12 @@ const UserSchema = new mongoose.Schema(
       lowercase: true,
     },
     password: { type: String, required: [true, "Vui lòng nhập mật khẩu"] },
-    role: { type: String, enum: ["user", "admin"], default: "user" },
+    // Cập nhật enum cho role bao gồm: user, admin, posts, warehouse, accountant
+    role: {
+      type: String,
+      enum: ["user", "admin", "posts", "warehouse", "accountant"],
+      default: "user",
+    },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
     coupons: [
@@ -32,7 +37,7 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Virtual field để lấy tên đầy đủ (tùy chọn)
+// Virtual field để lấy tên đầy đủ
 UserSchema.virtual("name").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
@@ -70,7 +75,7 @@ UserSchema.methods.generateAuthToken = function () {
   );
 };
 
-// Chuyển đổi đối tượng user khi trả về client
+// Loại bỏ các trường nhạy cảm khi trả về client
 UserSchema.methods.toJSON = function () {
   const userObject = this.toObject();
   delete userObject.password;

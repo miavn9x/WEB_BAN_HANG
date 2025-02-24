@@ -327,7 +327,7 @@ useEffect(() => {
       if (response.ok) {
         console.log(postId ? "Post updated:" : "Post created:", data);
         if (postId) {
-          navigate("/admin/posts-management");
+          navigate("/posts/management");
         } else {
           localStorage.removeItem("draftPost");
           setTitle("");
@@ -407,12 +407,12 @@ useEffect(() => {
                 apiKey="8t813kgqzmwjgis1zt15s0ez32c6qagtx9ikfwwfusk0nj9j"
                 value={content}
                 init={{
-                  height: 600,
+                  height: 1200,
                   menubar: false,
                   plugins:
-                    "advlist autolink lists link image charmap anchor table emoticons wordcount media code",
+                    "anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount",
                   toolbar:
-                    "undo redo | formatselect | bold italic | bullist numlist outdent indent | link image table emoticons | wordcount | media code",
+                    "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat",
                 }}
                 onEditorChange={handleEditorChange}
               />

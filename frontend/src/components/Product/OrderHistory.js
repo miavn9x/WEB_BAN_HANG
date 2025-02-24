@@ -8,6 +8,7 @@ import {
   Col,
   Spinner,
 } from "react-bootstrap";
+import axios from "axios";
 import { formatter } from "../../utils/fomater";
 import OrderRating from "./OrderRating";
 import "../../../src/styles/OrderHistory.css";
@@ -24,32 +25,38 @@ const OrderHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(orders.length / itemsPerPage);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
+  // Hàm lấy đơn hàng
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Vui lòng đăng nhập!");
-      }
-      const response = await fetch("/api/ordershistory", {
+      if (!token) throw new Error("Vui lòng đăng nhập!");
+      const res = await axios.get("/api/ordershistory", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await response.json();
-      if (data.success) {
-        setOrders(data.orders);
+      if (res.data.success) {
+        // Sắp xếp đơn hàng theo ngày tạo (mới nhất lên đầu)
+        const sortedOrders = res.data.orders.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setOrders(sortedOrders);
+        setCurrentPage(1);
       } else {
-        throw new Error(data.message);
+        throw new Error(res.data.message);
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error fetching orders:", error);
       alert(error.message);
     } finally {
       setLoading(false);
     }
   };
+
+  // Gọi API khi component mount và đặt polling sau đó
+  useEffect(() => {
+    fetchOrders();
+    const intervalId = setInterval(fetchOrders, 1000); // polling mỗi 1 giây
+    return () => clearInterval(intervalId);
+  }, []);
 
   // Lấy danh sách đơn hàng của trang hiện tại
   const currentOrders = orders.slice(
@@ -75,7 +82,43 @@ const OrderHistory = () => {
     setShowRating(false);
   };
 
-  // Xử lý chuyển trang
+  const handleCancelOrder = async () => {
+    if (
+      !window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này?") ||
+      !selectedOrder
+    )
+      return;
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Vui lòng đăng nhập!");
+
+      // Gọi API hủy đơn hàng (POST /api/orders/:orderId/cancel)
+      const res = await axios.post(
+        `/api/orders/${selectedOrder.orderId}/cancel`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.success) {
+        const updatedOrder = { ...selectedOrder, orderStatus: "Đã hủy" };
+        setSelectedOrder(updatedOrder);
+        setOrders(
+          orders.map((order) =>
+            order.orderId === updatedOrder.orderId ? updatedOrder : order
+          )
+        );
+        alert("Đơn hàng đã bị hủy thành công!");
+      } else {
+        alert(res.data.message || "Có lỗi xảy ra khi hủy đơn hàng");
+      }
+    } catch (error) {
+      console.error("Error canceling order:", error);
+      alert("Có lỗi xảy ra, vui lòng thử lại sau.");
+    }
+  };
+
   const handlePageChange = (page) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
@@ -97,52 +140,52 @@ const OrderHistory = () => {
   return (
     <Container className="order-history-container">
       <h2 className="my-4 order-history-title">Lịch sử đơn hàng</h2>
-
-      {/* Bọc bảng đơn hàng trong div với chiều cao 50vh */}
       <div style={{ height: "50vh", overflowY: "auto" }}>
-        <Table
-          responsive
-          striped
-          bordered
-          hover
-          className="order-history-table"
-        >
-          <thead>
-            <tr>
-              <th>Mã đơn hàng</th>
-              <th>Ngày đặt</th>
-              <th>Tổng tiền</th>
-              <th>Phương thức thanh toán</th>
-              <th>Chi tiết</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentOrders.map((order) => (
-              <tr key={order.orderId}>
-                <td>{order.orderId}</td>
-                <td>{order.formattedOrderDate}</td>
-                <td>{formatter(order.totalAmount)}</td>
-                <td>
-                  {order.paymentMethod === "cod"
-                    ? "Thanh toán khi nhận hàng"
-                    : "Chuyển khoản ngân hàng"}
-                </td>
-                <td>
-                  <Button
-                    variant="info"
-                    size="sm"
-                    onClick={() => handleShowDetails(order)}
-                  >
-                    Xem chi tiết
-                  </Button>
-                </td>
+        {orders.length > 0 ? (
+          <Table
+            responsive
+            striped
+            bordered
+            hover
+            className="order-history-table"
+          >
+            <thead>
+              <tr>
+                <th>Mã đơn hàng</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Phương thức thanh toán</th>
+                <th>Chi tiết</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {currentOrders.map((order) => (
+                <tr key={order.orderId}>
+                  <td>{order.orderId}</td>
+                  <td>{order.formattedOrderDate}</td>
+                  <td>{formatter(order.totalAmount)}</td>
+                  <td>
+                    {order.paymentMethod === "cod"
+                      ? "Thanh toán khi nhận hàng"
+                      : "Chuyển khoản ngân hàng"}
+                  </td>
+                  <td>
+                    <Button
+                      variant="info"
+                      size="sm"
+                      onClick={() => handleShowDetails(order)}
+                    >
+                      Xem chi tiết
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        ) : (
+          <div className="text-center my-4">Không có đơn hàng nào</div>
+        )}
       </div>
-
-      {/* Pagination controls */}
       {totalPages > 1 && (
         <div className="d-flex justify-content-center align-items-center mt-3 flex-nowrap">
           <Button
@@ -150,7 +193,7 @@ const OrderHistory = () => {
             size="sm"
             className="me-2"
             onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1 || loading}
+            disabled={currentPage === 1}
           >
             &laquo; Trước
           </Button>
@@ -162,14 +205,12 @@ const OrderHistory = () => {
             size="sm"
             className="ms-2"
             onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages || loading}
+            disabled={currentPage === totalPages}
           >
             Sau &raquo;
           </Button>
         </div>
       )}
-
-      {/* Modal Chi tiết đơn hàng */}
       <Modal
         show={showModal}
         onHide={() => setShowModal(false)}
@@ -241,10 +282,7 @@ const OrderHistory = () => {
                             <img
                               src={item.image}
                               alt={item.name}
-                              style={{
-                                width: "50px",
-                                marginRight: "10px",
-                              }}
+                              style={{ width: "50px", marginRight: "10px" }}
                             />
                             {item.name.length > 10
                               ? item.name.substring(0, 10) + "..."
@@ -283,27 +321,25 @@ const OrderHistory = () => {
                   </tfoot>
                 </Table>
               </div>
-              {/* Hiển thị nút đánh giá nếu đơn hàng đã giao, đã thanh toán, chưa được rated */}
+              {/* Hiển thị nút đánh giá nếu đơn hàng đã giao, thanh toán và chưa được đánh giá */}
               {selectedOrder.orderStatus === "Đã giao hàng" &&
                 selectedOrder.paymentStatus === "Đã thanh toán" &&
                 !selectedOrder.rated &&
                 !showRating && (
                   <div className="mt-3 text-end">
                     <Button
-                      variant="primary btn-secondary"
+                      variant="primary"
                       onClick={() => setShowRating(true)}
                     >
                       Đánh giá
                     </Button>
                   </div>
                 )}
-              {/* Nếu đã đánh giá, hiển thị thông báo */}
               {selectedOrder.rated && (
                 <div className="mt-3 text-center">
                   <strong>Đơn hàng đã được đánh giá.</strong>
                 </div>
               )}
-              {/* Khi người dùng nhấn đánh giá, hiển thị form đánh giá cho toàn bộ sản phẩm */}
               {showRating &&
                 selectedOrder &&
                 selectedOrder.items.length > 0 && (
@@ -318,6 +354,17 @@ const OrderHistory = () => {
                       onSuccess={handleRatingSuccess}
                     />
                   </>
+                )}
+              {/* Nút hủy đơn hàng chỉ hiển thị khi:
+                  - orderStatus === "Đang xử lý" AND 
+                  - paymentStatus === "Chưa thanh toán" */}
+              {selectedOrder.orderStatus === "Đang xử lý" &&
+                selectedOrder.paymentStatus === "Chưa thanh toán" && (
+                  <div className="mt-3 text-end">
+                    <Button variant="danger" onClick={handleCancelOrder}>
+                      Hủy đơn hàng
+                    </Button>
+                  </div>
                 )}
             </>
           )}

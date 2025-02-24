@@ -21,12 +21,9 @@ const authMiddleware = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-
     req.user = decoded;
-
     next();
   } catch (err) {
-    // console.error("Lỗi xác thực token:", err);
     res.status(401).json({
       message: "Token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.",
     });

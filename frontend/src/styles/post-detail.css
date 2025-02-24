@@ -6,7 +6,6 @@
 
 .post-image-container {
     width: 100%;
-    max-width: 800px;
     margin: 0 auto 20px;
     text-align: center;
 }
@@ -20,11 +19,7 @@
 }
 
 /* Định dạng nội dung bài viết */
-.post-content {
-    font-size: 1rem;
-    line-height: 1.6;
-    word-wrap: break-word;
-}
+
 
 /* Sản phẩm liên quan */
 .related-product-img {

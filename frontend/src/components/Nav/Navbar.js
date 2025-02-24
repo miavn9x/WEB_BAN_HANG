@@ -100,7 +100,7 @@ const MyNavbar = () => {
   // Quản lý trạng thái đăng nhập (dựa trên token)
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
 
-  // Lắng nghe sự thay đổi của localStorage (chỉ hỗ trợ khi đăng xuất từ các tab khác)
+  // Lắng nghe sự thay đổi của localStorage (hỗ trợ đăng xuất từ các tab khác)
   useEffect(() => {
     const handleStorageChange = () => {
       setIsLoggedIn(!!localStorage.getItem("token"));
@@ -109,7 +109,7 @@ const MyNavbar = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // Hàm lấy thông báo từ API (với kiểm tra token)
+  // Hàm lấy thông báo từ API và chỉ đếm những thông báo chưa đọc
   const fetchNotifications = () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -125,7 +125,9 @@ const MyNavbar = () => {
       })
       .then((res) => {
         const notifications = res.data.notifications || [];
-        setNotificationCount(notifications.length);
+        // Chỉ đếm các thông báo chưa đọc (có nền màu hồng)
+        const unreadNotifications = notifications.filter((noti) => !noti.read);
+        setNotificationCount(unreadNotifications.length);
       })
       .catch((err) => {
         console.error("Error fetching notifications:", err);
@@ -133,7 +135,7 @@ const MyNavbar = () => {
       });
   };
 
-  // Polling: cập nhật thông báo mỗi 10 giây để giảm tải (10000ms)
+  // Polling: cập nhật thông báo mỗi 10 giây
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 1000);
@@ -217,62 +219,54 @@ const MyNavbar = () => {
   );
 
   // Xử lý submit form tìm kiếm
-const handleSearchSubmit = (e) => {
-  e.preventDefault();
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
 
-  if (searchTerm.trim() === "") {
-    setSuggestions([]);
+    if (searchTerm.trim() === "") {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
     setShowSuggestions(false);
-    return;
-  }
 
-  setShowSuggestions(false);
+    // Gửi request API tìm kiếm sản phẩm
+    axios
+      .post("/api/search", {
+        query: searchTerm,
+        categoryName: "",
+        categoryGeneric: "",
+        minPrice: 0,
+        maxPrice: 1000,
+        sortBy: "default",
+        limit: 10,
+      })
+      .then((res) => {
+        setSuggestions(res.data.products);
+        setShowSuggestions(true);
+        // Lưu lịch sử tìm kiếm nếu người dùng đã đăng nhập
+        const token = localStorage.getItem("token");
+        if (token) {
+          axios
+            .post(
+              "/api/searchtext",
+              { query: searchTerm },
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            )
+            .catch((err) => console.error("Lỗi lưu lịch sử tìm kiếm:", err));
+        }
+      })
+      .catch((err) => {
+        console.error("Lỗi khi gọi API tìm kiếm:", err);
+      });
+  };
 
-  // Gửi request API tìm kiếm sản phẩm
-  axios
-    .post("/api/search", {
-      query: searchTerm,
-      categoryName: "", // Bạn có thể thêm bộ lọc thể loại ở đây nếu cần
-      categoryGeneric: "", // Có thể thêm bộ lọc cho thể loại chung nếu cần
-      minPrice: 0, // Thêm bộ lọc giá thấp nếu cần
-      maxPrice: 1000, // Thêm bộ lọc giá cao nếu cần
-      sortBy: "default", // Mặc định theo thứ tự
-      limit: 10, // Giới hạn 5 kết quả gợi ý
-    })
-    .then((res) => {
-      setSuggestions(res.data.products); // Cập nhật kết quả tìm kiếm vào suggestions
-      setShowSuggestions(true); // Hiển thị gợi ý
-      // Lưu lịch sử tìm kiếm nếu người dùng đã đăng nhập
-      const token = localStorage.getItem("token");
-      if (token) {
-        axios
-          .post(
-            "/api/searchtext",
-            { query: searchTerm },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          )
-          .catch((err) => console.error("Lỗi lưu lịch sử tìm kiếm:", err));
-      }
-    })
-    .catch((err) => {
-      console.error("Lỗi khi gọi API tìm kiếm:", err);
-    });
-};
-
-
-// 
-
-
-  // Click vào sản phẩm gợi ý để chuyển đến trang chi tiết
-const handleSuggestionClick = (productId) => {
-  navigate(`/product/${productId}`);
-  setShowSuggestions(false); // Đóng danh sách gợi ý sau khi chọn
-};
-
+  const handleSuggestionClick = (productId) => {
+    navigate(`/product/${productId}`);
+    setShowSuggestions(false);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -366,7 +360,6 @@ const handleSuggestionClick = (productId) => {
                     )}
                   </Nav.Link>
 
-                  {/* Chỉ hiển thị cart badge nếu người dùng đăng nhập */}
                   <Nav.Link
                     onClick={() => handleLinkClick("/gio-hang")}
                     className="p-1 ms-2 position-relative icon-wrapper"
@@ -568,7 +561,6 @@ const handleSuggestionClick = (productId) => {
                   )}
                 </Nav.Link>
 
-                {/* Chỉ hiển thị cart badge nếu người dùng đăng nhập */}
                 <Nav.Link
                   onClick={() => handleLinkClick("/gio-hang")}
                   className="position-relative"

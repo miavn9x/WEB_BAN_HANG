@@ -1,7 +1,7 @@
 // middleware/auth.js
 const jwt = require("jsonwebtoken");
 
-// Create a token with user ID and role
+// Tạo token với userId và role
 const generateToken = (userId, role) => {
   return jwt.sign(
     { userId, role },
@@ -11,3 +11,4 @@ const generateToken = (userId, role) => {
 };
 
 module.exports = { generateToken };
+

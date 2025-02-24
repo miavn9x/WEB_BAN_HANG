@@ -28,7 +28,7 @@ import PostDetail from "./components/Posts/PostDetail";
 import PostsList from "./components/Posts/PostsList";
 import AutoLogout from "./pages/Auth/Login/AutoLogout";
 import PostsManagement from "./components/Posts/PostsManagement";
-import { Helmet } from "react-helmet"; // Thêm Helmet để tối ưu SEO
+import { Helmet } from "react-helmet";
 import Evaluate from "./components/Product/Evaluate";
 import NotificationModal from "./components/Nav/NotificationModal";
 import ProductModals from "./components/Product/ProductModals";
@@ -38,23 +38,23 @@ import {
   fetchCart,
   loadCartFromLocalStorage,
 } from "./redux/actions/cartActions";
-// import SearchPage from "./components/SearchPage";
-// import RecommendationList from "./components/Product/RecommendationList";
 import Dashboard from "./pages/Auth/Admin/AdminOrders/Dashboard";
 import Salecart from "./components/Product/Salecart";
+import Dashboardwarehouse from "./pages/Auth/Admin/AdminOrders/Dashboardwarehouse";
+import DashboardAccountant from "./pages/Auth/Admin/AdminOrders/DashboardAccountant";
+import ChatButton from "./components/Carousel/ChatButton";
+
 function App() {
   const [userRole, setUserRole] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
   const dispatch = useDispatch();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (token) {
-      dispatch(fetchCart()); // Fetch từ server nếu đã login
+      dispatch(fetchCart());
     } else {
-      dispatch(loadCartFromLocalStorage()); // Load từ localStorage nếu là khách
+      dispatch(loadCartFromLocalStorage());
     }
   }, [dispatch]);
 
@@ -73,17 +73,16 @@ function App() {
         }
       }
     };
-
     checkAuth();
   }, []);
 
   return (
     <BrowserRouter>
       <AutoLogout />
+      <ChatButton />
       <ScrollToTopButton />
       <Header userRole={userRole} isAuthenticated={isAuthenticated} />
 
-      {/* Thêm SEO Meta Tags */}
       <Helmet>
         <title>Chuỗi hệ thống siêu thị mẹ và bé - Babychill.vn</title>
         <meta
@@ -112,11 +111,9 @@ function App() {
       </Helmet>
 
       <Routes>
+        {/* Public Routes */}
         <Route path="/test" element={<Evaluate />} />
         <Route path="/1" element={<NotificationModal />} />
-        {/* <Route path="/2" element={<RecommendationList />} /> */}
-        {/* Public Routes */}
-
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -127,12 +124,10 @@ function App() {
         <Route path="/product/:productId" element={<ProductItem />} />
         <Route path="/shop-map" element={<StoreLocator />} />
         <Route path="/gioi-thieu" element={<Info />} />
-
         <Route path="/posts/:slug" element={<PostDetail />} />
         <Route path="/posts-list" element={<PostsList />} />
-        {/* <Route path="/posts-management" element={<PostsManagement />} /> */}
 
-        {/* Protected Routes - User & admin */}
+        {/* Protected Routes cho người dùng đã đăng nhập */}
         <Route
           path="/thong-tin-ca-nhan"
           element={
@@ -141,32 +136,163 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route path="/gio-hang" element={<Cart />} />
-        <Route path="/thanh-toan" element={<Checkout />} />
-        <Route path="/order-history/:orderId" element={<OrderHistory />} />
-        <Route path="/sale" element={<Salecart />} />
-
         <Route
-          path="/admin/*"
+          path="/gio-hang"
           element={
-            <PrivateRoute
-              isAuthenticated={isAuthenticated}
-              requiredRole="admin"
-            >
-              <Routes>
-                <Route path="user-management" element={<AccountList />} />
-                <Route path="add-product" element={<AddProduct />} />
-                <Route path="edit-product" element={<ProductEdit />} />
-                <Route path="/quan-ly-don-hang" element={<Orders />} />
-                <Route path="add-bai-viet/:slugId" element={<MyEditor />} />
-                <Route path="posts-management" element={<PostsManagement />} />
-                <Route path="/order_Dashboard" element={<Dashboard />} />
-              </Routes>
+            <PrivateRoute isAuthenticated={isAuthenticated}>
+              <Cart />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/thanh-toan"
+          element={
+            <PrivateRoute isAuthenticated={isAuthenticated}>
+              <Checkout />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/order-history/:orderId"
+          element={
+            <PrivateRoute isAuthenticated={isAuthenticated}>
+              <OrderHistory />
             </PrivateRoute>
           }
         />
 
-        {/* Error Routes */}
+        <Route path="/sale" element={<Salecart />} />
+
+        {/* Routes dành cho Admin */}
+        <Route
+          path="/admin/user-management"
+          element={
+            <PrivateRoute
+              isAuthenticated={isAuthenticated}
+              requiredRoles={["admin"]}
+            >
+              <AccountList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/management"
+          element={
+            <PrivateRoute
+              isAuthenticated={isAuthenticated}
+              requiredRoles={["admin"]}
+            >
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Routes dành cho Warehouse (đăng/sửa sản phẩm) */}
+        <Route
+          path="/add-product"
+          element={
+            <PrivateRoute
+              isAuthenticated={isAuthenticated}
+              requiredRoles={["admin", "warehouse"]}
+            >
+              <AddProduct />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/edit-product"
+          element={
+            <PrivateRoute
+              isAuthenticated={isAuthenticated}
+              requiredRoles={["admin", "warehouse"]}
+            >
+              <ProductEdit />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/product-warehouse"
+          element={
+            <PrivateRoute
+              isAuthenticated={isAuthenticated}
+              requiredRoles={["admin", "warehouse"]}
+            >
+              <Dashboardwarehouse />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Routes dành cho Accountant (quản lý đơn hàng, xác nhận đơn hàng) */}
+        <Route
+          path="/DashboardAccountant"
+          element={
+            <PrivateRoute
+              isAuthenticated={isAuthenticated}
+              requiredRoles={["admin", "accountant"]}
+            >
+              <DashboardAccountant />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/quan-ly-don-hang"
+          element={
+            <PrivateRoute
+              isAuthenticated={isAuthenticated}
+              requiredRoles={["admin", "accountant"]}
+            >
+              <Orders />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/order_Dashboard"
+          element={
+            <PrivateRoute
+              isAuthenticated={isAuthenticated}
+              requiredRoles={["admin", "accountant"]}
+            >
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Routes dành cho Posts (đăng bài, sửa bài viết) */}
+        <Route
+          path="/posts/create"
+          element={
+            <PrivateRoute
+              isAuthenticated={isAuthenticated}
+              requiredRoles={["admin", "posts"]}
+            >
+              <MyEditor />
+            </PrivateRoute>
+          }
+        />
+        {/* Route dành cho chỉnh sửa bài viết */}
+        <Route
+          path="/posts/management/:slugId"
+          element={
+            <PrivateRoute
+              isAuthenticated={isAuthenticated}
+              requiredRoles={["admin", "posts"]}
+            >
+              <MyEditor />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/posts/management"
+          element={
+            <PrivateRoute
+              isAuthenticated={isAuthenticated}
+              requiredRoles={["admin", "posts"]}
+            >
+              <PostsManagement />
+            </PrivateRoute>
+          }
+        />
+
         <Route path="/Error403" element={<Error403 />} />
         <Route path="*" element={<Navigate to="/Error403" replace />} />
       </Routes>
