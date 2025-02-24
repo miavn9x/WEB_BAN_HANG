@@ -43,6 +43,7 @@ import Salecart from "./components/Product/Salecart";
 import Dashboardwarehouse from "./pages/Auth/Admin/AdminOrders/Dashboardwarehouse";
 import DashboardAccountant from "./pages/Auth/Admin/AdminOrders/DashboardAccountant";
 import ChatButton from "./components/Carousel/ChatButton";
+import AdsBanner from "./components/Product/AdsBanner";
 
 function App() {
   const [userRole, setUserRole] = useState(null);
@@ -81,6 +82,7 @@ function App() {
       <AutoLogout />
       <ChatButton />
       <ScrollToTopButton />
+      <AdsBanner imageUrl="https://res.cloudinary.com/div27nz1j/image/upload/v1740391271/e1c95a7e024623979c_kzrsze.png" />
       <Header userRole={userRole} isAuthenticated={isAuthenticated} />
 
       <Helmet>
