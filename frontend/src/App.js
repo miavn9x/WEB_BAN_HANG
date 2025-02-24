@@ -82,9 +82,13 @@ function App() {
       <AutoLogout />
       <ChatButton />
       <ScrollToTopButton />
-      <AdsBanner imageUrl="https://res.cloudinary.com/div27nz1j/image/upload/v1740391271/e1c95a7e024623979c_kzrsze.png" />
-      <Header userRole={userRole} isAuthenticated={isAuthenticated} />
+      <AdsBanner
+        imageUrl="https://res.cloudinary.com/div27nz1j/image/upload/v1740391271/e1c95a7e024623979c_kzrsze.png"
+        redirectUrl="http://localhost:3000/posts/quy-dinh-chung-ve-mua-hang-tai-baby-chill-67a4709e8cb516e37058c69a"
+        bannerId="baby-chill-ads"
+      />
 
+      <Header userRole={userRole} isAuthenticated={isAuthenticated} />
       <Helmet>
         <title>Chuỗi hệ thống siêu thị mẹ và bé - Babychill.vn</title>
         <meta
@@ -111,7 +115,6 @@ function App() {
         />
         <meta name="twitter:image" content="/path/to/your/image.jpg" />
       </Helmet>
-
       <Routes>
         {/* Public Routes */}
         <Route path="/test" element={<Evaluate />} />
@@ -298,7 +301,6 @@ function App() {
         <Route path="/Error403" element={<Error403 />} />
         <Route path="*" element={<Navigate to="/Error403" replace />} />
       </Routes>
-
       <Footer />
     </BrowserRouter>
   );
