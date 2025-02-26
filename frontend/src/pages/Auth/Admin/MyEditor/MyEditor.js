@@ -404,7 +404,7 @@ useEffect(() => {
               </label>
               <Editor
                 key={editorKey}
-                apiKey="8t813kgqzmwjgis1zt15s0ez32c6qagtx9ikfwwfusk0nj9j"
+                apiKey="process.env.REACT_APP_TINYMCE_API_KEY"
                 value={content}
                 init={{
                   height: 1200,
