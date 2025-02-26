@@ -158,7 +158,7 @@ function App() {
           }
         />
         <Route
-          path="/order-history/:orderId"
+          path="/order-history"
           element={
             <PrivateRoute isAuthenticated={isAuthenticated}>
               <OrderHistory />
