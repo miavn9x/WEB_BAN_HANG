@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
@@ -104,7 +104,7 @@ const LoginMenu = ({ onClose }) => {
           className="menu-item"
           onClick={handleLogout}
           style={{
-            backgroundColor: "#F0A3B2",
+            backgroundColor: "#8B4513",
             color: "white",
             padding: "10px 15px",
           }}

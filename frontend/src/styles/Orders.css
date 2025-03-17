@@ -1,13 +1,11 @@
-
 .orders-container {
     padding: 20px;
-
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .orders-title {
-    color: #FF6F91;
+    color: #8B4513;
     margin-bottom: 20px;
     text-align: center;
     font-weight: bold;
@@ -15,7 +13,7 @@
 
 .orders-table {
     margin-top: 20px;
-    border: 1px solid #FFF8DC;
+    border: 1px solid #fdf5e6;
 }
 
 .orders-table th,
@@ -23,16 +21,16 @@
     vertical-align: middle !important;
     text-align: center;
     padding: 10px;
-    border: 1px solid #FFF8DC;
+    border: 1px solid #fdf5e6;
 }
 
 .orders-table thead {
-    background-color: #FFB6C1;
+    background-color: #8B4513;
     color: #fff;
 }
 
 .orders-table tbody tr:hover {
-    background-color: #E6E6FA;
+    background-color: #f3e0d7;
     cursor: pointer;
 }
 
@@ -42,22 +40,20 @@
 }
 
 .order-modal .modal-header {
-    background-color: #FFB6C1;
+    background-color: #8B4513;
     color: #fff;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
-    border-bottom: 1px solid #FFF8DC;
+    border-bottom: 1px solid #fdf5e6;
 }
 
 .order-modal .modal-title {
     font-weight: bold;
 }
 
-
-
 .order-modal .modal-footer {
-    background-color: #FFF4E6;
-    border-top: 1px solid #FFF8DC;
+    background-color: #fdf5e6;
+    border-top: 1px solid #fdf5e6;
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
 }
@@ -65,20 +61,20 @@
 .order-modal select {
     padding: 5px 10px;
     border-radius: 4px;
-    border: 1px solid #FFF8DC;
+    border: 1px solid #fdf5e6;
     margin-top: 5px;
-    background-color: #FFB6C1;
+    background-color: #8B4513;
     color: #fff;
 }
-
 
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-primary:active {
-    background-color: #FFB6C1 !important;
-    border-color: #FFF8DC !important;
+    background-color: #8B4513 !important;
+    border-color: #fdf5e6 !important;
     color: #fff;
 }
+
 .css-hlbajn-MuiRating-label {
     font-size: 30px;
     cursor: inherit;

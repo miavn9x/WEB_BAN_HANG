@@ -1,5 +1,5 @@
 .register-container {
-    max-width: 400px!important;
+    max-width: 400px !important;
     margin: 48px auto;
     padding: 0 16px;
 }
@@ -29,7 +29,7 @@
 .register-button {
     width: 100%;
     padding: 12px;
-    background-color: #ffc0cb !important;
+    background-color: #8B4513 !important;
     border: none !important;
     border-radius: 25px !important;
     font-weight: 500;
@@ -37,17 +37,14 @@
 }
 
 .register-button:hover {
-    background-color: #ffb6c1 !important;
+    background-color: #7A3C0E !important;
 }
 
 .form-label {
     font-weight: 500;
 }
 
-
-
 .form-control:focus {
-    border-color: #ffc0cb;
-    box-shadow: 0 0 0 0.2rem rgba(255, 192, 203, 0.25);
+    border-color: #8B4513;
+    box-shadow: 0 0 0 0.2rem rgba(139, 69, 19, 0.25);
 }
-

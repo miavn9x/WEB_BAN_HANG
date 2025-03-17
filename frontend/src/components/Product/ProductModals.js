@@ -1,4 +1,9 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+} from "react";
 import debounce from "lodash.debounce";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -75,7 +80,7 @@ const ProductModals = () => {
           "/api/products?randomDiscount=true&limit=16"
         );
         const validDiscountProducts = discountedResponse.data.products.filter(
-          (prod) => prod.discountPercentage > 1
+          (prod) => prod.discountPercentage > 5
         );
         setDiscountedProducts(validDiscountProducts);
 
@@ -144,14 +149,14 @@ const ProductModals = () => {
   }, [product, saveViewHistory]);
 
   // Cấu hình slider cho hình ảnh chính và thumbnails
-const settingsMain = {
-  dots: false,
-  infinite: false,
-  speed: 700,
-  slidesToShow: 1,
-  slidesToScroll: 1,
-  initialSlide: 0, // Thêm dòng này để tránh nhảy trang
-};
+  const settingsMain = {
+    dots: false,
+    infinite: false,
+    speed: 700,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    initialSlide: 0,
+  };
 
   const settingsThumb = {
     dots: false,
@@ -234,7 +239,7 @@ const settingsMain = {
   const productTitle = product.name;
   const productDescription = product.description
     ? product.description.substring(0, 150) + "..."
-    : "Thông tin sản phẩm của BabyMart.vn";
+    : "Thông tin sản phẩm của Go Book";
   const productImage =
     product.images && product.images.length > 0
       ? product.images[0]
@@ -243,7 +248,7 @@ const settingsMain = {
   return (
     <>
       <Helmet>
-        <title>{`${productTitle} - BabyMart.vn`}</title>
+        <title>{`${productTitle} - Go Book`}</title>
         <meta name="description" content={productDescription} />
         <meta property="og:title" content={productTitle} />
         <meta property="og:description" content={productDescription} />
@@ -267,7 +272,11 @@ const settingsMain = {
                       {product.discountPercentage > 0 && (
                         <div
                           className="badge badge-primary product__discount"
-                          style={{ fontSize: "12px", padding: "8px 5px" }}
+                          style={{
+                            fontSize: "12px",
+                            padding: "8px 5px",
+                            backgroundColor: "#8B4513",
+                          }}
                         >
                           - {product.discountPercentage} %
                         </div>
@@ -385,7 +394,7 @@ const settingsMain = {
                     </button>
                     <button
                       className="btn btn-lg mt-auto w-50"
-                      style={{ backgroundColor: "#FF6F91", color: "white" }}
+                      style={{ backgroundColor: "#8B4513", color: "white" }}
                       onClick={handleBuyNow}
                     >
                       MUA NGAY
@@ -401,10 +410,6 @@ const settingsMain = {
               filter={filter}
               setFilter={setFilter}
             />
-          
-
-            {/* Render Evaluate, truyền _id sản phẩm đã load từ backend */}
-      
 
             {/* Phần mô tả sản phẩm (nội dung bài viết nếu có) */}
             <div className="product-description">
@@ -435,7 +440,7 @@ const settingsMain = {
           {/* Sidebar: Danh sách sản phẩm đang giảm giá */}
           <div className="col-lg-3 col-md-4 mt-4 mt-md-0">
             <div className="sidebar bg-white p-4 rounded shadow">
-              <h5 className="text-center mb-3" style={{ color: "#339" }}>
+              <h5 className="text-center mb-3" style={{ color: "#8B4513" }}>
                 Đang giảm giá
               </h5>
               <ul className="list-group">

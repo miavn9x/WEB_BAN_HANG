@@ -303,7 +303,7 @@ useEffect(() => {
     } else {
       finalImageUrl =
         existingImageUrl ||
-        "https://res.cloudinary.com/div27nz1j/image/upload/v1737451253/1_vmcjnj.png";
+        "https://res.cloudinary.com/dhbyhp8nw/image/upload/v1742030869/logo_ch4fq2.png";
     }
 
     const postData = {

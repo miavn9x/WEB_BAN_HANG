@@ -1,8 +1,7 @@
-
 .user-page {
     font-family: Arial, sans-serif;
     color: #333;
-    max-width: 500px!important;
+    max-width: 500px !important;
     margin: 0 auto;
     padding: 20px;
     justify-content: center;
@@ -44,13 +43,13 @@
 }
 
 .user-page .btn-primary {
-    background-color: #FF6F91;
+    background-color: #8B4513;
     border: none;
     color: #ffffff;
 }
 
 .user-page .btn-primary:hover {
-    background-color: #375534;
+    background-color: #7A3C0E;
     color: #ffffff;
 }
 
@@ -65,13 +64,13 @@
 }
 
 .user-page .btn-warning {
-    background-color: #FF6F91;
+    background-color: #8B4513;
     border: none;
     color: #ffffff;
 }
 
 .user-page .btn-warning:hover {
-    background-color: #FF6F91;
+    background-color: #7A3C0E;
 }
 
 .user-page .mt-5 {
@@ -130,7 +129,7 @@
     width: 50px;
     height: 50px;
     border: 6px solid #f3f3f3;
-    border-top: 6px solid #FF6F91;
+    border-top: 6px solid #8B4513;
     border-radius: 50%;
     animation: spin 0.5s linear infinite;
 }

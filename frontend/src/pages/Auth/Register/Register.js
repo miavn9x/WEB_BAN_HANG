@@ -18,7 +18,6 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Xử lý thay đổi giá trị input
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -27,7 +26,6 @@ const Register = () => {
     }));
   };
 
-  // Gửi dữ liệu đăng ký
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -35,22 +33,23 @@ const Register = () => {
     setMessage("");
 
     try {
-      await axios.post(`/api/auth/register/`, formData);
-
-      setMessage("Đăng ký thành công! Vui lòng đăng nhập.");
+      const response = await axios.post("/api/auth/register/", formData);
+      setMessage(
+        response.data.message || "Đăng ký thành công! Vui lòng đăng nhập."
+      );
       setError("");
-
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       console.error("Lỗi đăng ký:", err.response?.data);
-      setError(err.response?.data?.message || "Đăng ký thất bại!");
+      setError(
+        err.response?.data?.message || "Đăng ký thất bại! Vui lòng thử lại."
+      );
       setMessage("");
     } finally {
       setLoading(false);
     }
   };
 
-  // Thông báo tự động ẩn sau 2 giây
   useEffect(() => {
     if (message || error) {
       const timer = setTimeout(() => {
@@ -63,13 +62,13 @@ const Register = () => {
 
   return (
     <Container className="register-container">
-      <h3 className="text-center mb-2">ĐĂNG KÝ TÀI KHOẢN</h3>
+      <h3 className="text-center mb-2">ĐĂNG KÝ TÀI KHOẢN Go Book</h3>
       <p className="text-center mb-4">
-        Bạn đã có tài khoản?&nbsp;
+        Bạn đã có tài khoản?{" "}
         <Link
           to="/login"
           className="text-decoration-none"
-          style={{ color: "#FF6F91" }}
+          style={{ color: "#8B4513" }}
         >
           Đăng nhập tại đây
         </Link>
@@ -77,7 +76,6 @@ const Register = () => {
 
       <h5 className="text-center mb-4">THÔNG TIN CÁ NHÂN</h5>
 
-      {/* Hiển thị thông báo */}
       <div className="text-center pb-3">
         {message && <div className="text-success">{message}</div>}
         {error && <div className="text-danger">{error}</div>}
@@ -158,7 +156,7 @@ const Register = () => {
           type="submit"
           className="w-100 rounded-pill fw-bold"
           style={{
-            backgroundColor: "#ffc0cb",
+            backgroundColor: "#8B4513",
             border: "none",
             padding: "10px 0",
           }}

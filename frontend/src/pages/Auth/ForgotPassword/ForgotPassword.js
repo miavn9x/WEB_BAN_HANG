@@ -17,11 +17,9 @@ const ForgotPassword = () => {
     setError("");
 
     try {
-      const response = await axios.post(
-        `/api/auth/forgot-password/`,
-        { email }
-      );
-
+      const response = await axios.post(`/api/auth/forgot-password/`, {
+        email,
+      });
       setMessage(response.data.message);
     } catch (err) {
       setError(
@@ -31,21 +29,23 @@ const ForgotPassword = () => {
       setLoading(false);
     }
   };
-// thông báo tắt sau 2 giây
+
+  // Thông báo tự tắt sau 2 giây
   useEffect(() => {
     if (message || error) {
       const timer = setTimeout(() => {
         setMessage("");
         setError("");
       }, 2000);
-      return () => clearTimeout(timer); 
+      return () => clearTimeout(timer);
     }
   }, [message, error]);
+
   return (
     <Container className="forgot-password-container">
       <h2 className="text-center mb-2">ĐẶT LẠI MẬT KHẨU</h2>
       <p className="text-center mb-4">
-        Chúng tôi sẽ gửi cho bạn một email để kích hoạt việc đặt lại mật khẩu.
+        Chúng tôi sẽ gửi cho bạn email kích hoạt đặt lại mật khẩu
       </p>
 
       <div className="text-center pb-3">
@@ -59,9 +59,9 @@ const ForgotPassword = () => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
+            placeholder="Email của bạn..."
             required
-            style={{padding: "10px 12px"}}
+            style={{ padding: "10px 12px" }}
           />
         </Form.Group>
 
@@ -69,7 +69,7 @@ const ForgotPassword = () => {
           type="submit"
           className="w-100 rounded-pill mb-3 fw-bold"
           style={{
-            backgroundColor: "#ffc0cb",
+            backgroundColor: "#8B4513",
             border: "none",
             padding: "10px 0",
           }}
@@ -79,7 +79,11 @@ const ForgotPassword = () => {
         </Button>
 
         <div className="text-center">
-          <Link to="/login" className="text-dark text-decoration-none">
+          <Link
+            to="/login"
+            className="text-decoration-none"
+            style={{ color: "#8B4513" }}
+          >
             Quay lại
           </Link>
         </div>

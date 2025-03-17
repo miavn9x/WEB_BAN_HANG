@@ -11,7 +11,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/autoplay";
 import { Autoplay, Pagination } from "swiper/modules";
-import { Card, Col, Row, Spinner } from "react-bootstrap";
+import { Card, Col, Container, Row, Spinner } from "react-bootstrap";
 
 function slugify(text) {
   return text
@@ -52,7 +52,7 @@ const HomeProduct = () => {
         "/api/products?randomDiscount=true&limit=12"
       );
       const filteredProducts = response.data.products.filter(
-        (product) => product.discountPercentage > 14 // % giảm giá
+        (product) => product.discountPercentage > 5 // % giảm giá
       );
       // Random đơn giản:
       const shuffledProducts = filteredProducts.sort(() => Math.random() - 0.5);
@@ -160,13 +160,19 @@ const HomeProduct = () => {
     []
   );
 
+  // --- Cập nhật hàm lọc sản phẩm theo danh mục ---
   const getCombinedProducts = useCallback(() => {
     return products.filter((product) => {
       if (!product.category || !product.category.name) return false;
       const name = product.category.name.trim().toLowerCase();
       return (
-        name === "sữa bột cao cấp".toLowerCase() ||
-        name === "sữa dinh dưỡng".toLowerCase()
+        name === "văn học" ||
+        name === "kinh tế" ||
+        name === "tâm lý - kỹ năng sống" ||
+        name === "nuôi dạy con" ||
+        name === "sách thiếu nhi" ||
+        name === "tiểu sử - hồi ký" ||
+        name === "sách học ngoại ngữ"
       );
     });
   }, [products]);
@@ -222,7 +228,7 @@ const HomeProduct = () => {
 
   if (loading)
     return (
-      <div className="loading-container text-center my-5">
+      <div className="loading-container-fluid text-center my-5">
         <Spinner
           animation="border"
           variant="success"
@@ -248,7 +254,7 @@ const HomeProduct = () => {
   };
 
   return (
-    <>
+    <Container>
       <div>
         {/* --- PHẦN FLASH SALE --- */}
         <div className="home__product bg-pink py-5 d-flex justify-content-center">
@@ -257,7 +263,7 @@ const HomeProduct = () => {
               <div className="col-12 col-md-6 col-lg-4 text-center text-md-start">
                 <h4 className="Flash__sale">
                   {timeState.currentPhase === "main"
-                    ? " Flash sale mỗi ngày"
+                    ? " Sách hay đang giảm giá"
                     : "Chuẩn bị đợt sale mới"}
                 </h4>
                 <p className="lead__sale mx-5">
@@ -410,56 +416,51 @@ const HomeProduct = () => {
                 >
                   <SwiperSlide>
                     <img
-                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869250/Neocare_wz0hac.jpg"
+                      src="https://res.cloudinary.com/dhbyhp8nw/image/upload/v1742042824/share_fb_home_bpahdp.webp"
                       alt="Brand 1"
                       style={{
                         width: "100%",
                         height: "100%",
-                        objectFit: "contain",
                       }}
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
-                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869251/1719561306_ifukka.png"
+                      src="https://res.cloudinary.com/dhbyhp8nw/image/upload/v1742042825/cay-chuoi-non-di-giay-xanh_ovlp2r.png"
                       alt="Brand 2"
                       style={{
                         width: "100%",
                         height: "100%",
-                        objectFit: "contain",
                       }}
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
-                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869251/section_hot_banner_auqels.webp"
+                      src="https://res.cloudinary.com/dhbyhp8nw/image/upload/v1742042825/nhom-san-pham--qua-tang-cuoc-song_eedb8e4716cd458e814922e56bebfd89_xiccwp.webp"
                       alt="Brand 3"
                       style={{
                         width: "100%",
                         height: "100%",
-                        objectFit: "contain",
                       }}
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
-                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869250/Neocare_wz0hac.jpg"
+                      src="https://res.cloudinary.com/dhbyhp8nw/image/upload/v1742042826/100-dau-sach-noi-1068x559_kedc7x.jpg"
                       alt="Brand 4"
                       style={{
                         width: "100%",
                         height: "100%",
-                        objectFit: "contain",
                       }}
                     />
                   </SwiperSlide>
                   <SwiperSlide>
                     <img
-                      src="https://res.cloudinary.com/div27nz1j/image/upload/v1739869523/Delimax_vkt3gc.jpg"
+                      src="https://res.cloudinary.com/dhbyhp8nw/image/upload/v1742042825/3_nj1kmq.jpg"
                       alt="Brand 5"
                       style={{
                         width: "100%",
                         height: "100%",
-                        objectFit: "contain",
                       }}
                     />
                   </SwiperSlide>
@@ -467,18 +468,20 @@ const HomeProduct = () => {
               </div>
 
               <div className="row  d-flex">
-                <div className="col-lg-6 col-md-12  pt-4 d-flex justify-content-center align-items-center flex-column">
+                <div className="col-lg-6 col-md-12 pt-4 d-flex justify-content-center align-items-center flex-column">
                   <h4
                     className="text-center Flash__sale"
                     style={{ color: "#555", padding: "0px" }}
                   >
-                    Các Loại Sữa:&nbsp;{" "}
+                    Các Loại Sách:&nbsp;{" "}
                     <span className="animated-words mb-2">
-                      <span>cho bé 0-6 tháng</span>
-                      <span>cho bé 6-12 tháng</span>
-                      <span>cho bé 1-3 tuổi</span>
-                      <span>Sữa dinh dưỡng</span>
-                      <span>cho bé 0-6 tháng</span>
+                      <span>Văn Học</span>
+                      <span>Kinh Tế</span>
+                      <span>Tâm Lý - Kỹ Năng Sống</span>
+                      <span>Nuôi Dạy Con</span>
+                      <span>Sách Thiếu Nhi</span>
+                      <span>Tiểu Sử - Hồi Ký</span>
+                      <span>Sách Học Ngoại Ngữ</span>
                     </span>
                   </h4>
                 </div>
@@ -488,7 +491,7 @@ const HomeProduct = () => {
                     style={{ color: "#555", fontSize: "13px" }}
                     className="custom-category-button lead__sale px-3"
                     onClick={() =>
-                      handleViewCategory("categoryName", "Sữa bột cao cấp")
+                      handleViewCategory("categoryName", "Văn Học")
                     }
                     sx={{
                       border: "1px solid #ccc",
@@ -499,15 +502,15 @@ const HomeProduct = () => {
                       },
                     }}
                   >
-                    Sữa bột cao cấp
+                    Văn Học
                   </Button>
                 </div>
-                <div className="col-lg-3 mb-3 col-md-6 pt-4 ">
+                <div className="col-lg-3 mb-3 col-md-6 pt-4">
                   <Button
                     style={{ color: "#555", fontSize: "13px" }}
-                    className="custom-category-button lead__sale px-3 "
+                    className="custom-category-button lead__sale px-3"
                     onClick={() =>
-                      handleViewCategory("categoryName", "Sữa dinh dưỡng")
+                      handleViewCategory("categoryName", "Kinh Tế")
                     }
                     sx={{
                       border: "1px solid #ccc",
@@ -518,7 +521,7 @@ const HomeProduct = () => {
                       },
                     }}
                   >
-                    Sữa dinh dưỡng
+                    Kinh Tế
                   </Button>
                 </div>
               </div>
@@ -532,9 +535,9 @@ const HomeProduct = () => {
             </div>
           ) : randomizedCombinedProducts.length > 0 ? (
             <div className="custom__cat__row">
-              <div className="custom__cat__banner">
+              <div className="custom__cat__banner justify-content-center ">
                 <img
-                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739557196/banner_coll_1_aoko1r.jpg"
+                  src="https://res.cloudinary.com/dhbyhp8nw/image/upload/v1742044098/MinhLong__310x210_upscayl_4x_digital-art-4x_tkcjvs.png"
                   alt="Giỏ hàng trống"
                   style={{ width: "100%" }}
                 />
@@ -552,7 +555,7 @@ const HomeProduct = () => {
           )}
         </div>
 
-        {/* --- PHẦN SẢN PHẨM THEO DANH MỤC "Bỉm & tã em bé" --- */}
+        {/* --- PHẦN SẢN PHẨM THEO DANH MỤC "Giáo Khoa - Tham Khảo" --- */}
         <div
           className="custom__cat__container py-2 my-2 container"
           style={{
@@ -563,7 +566,7 @@ const HomeProduct = () => {
           <div className="container content__wrapper">
             <div className="row mb-3">
               <div className="col-12 text-center text-md-start pt-4">
-                <h4 className="Flash__sale fs-5">Bỉm & tã em bé</h4>
+                <h4 className="Flash__sale fs-5">Giáo Khoa - Tham Khảo</h4>
               </div>
             </div>
             <div className="row">
@@ -571,7 +574,7 @@ const HomeProduct = () => {
                 if (!product.category || !product.category.name) return false;
                 return (
                   product.category.name.trim().toLowerCase() ===
-                  "bỉm & tã em bé".toLowerCase()
+                  "giáo khoa - tham khảo".toLowerCase()
                 );
               }).length > 0 ? (
                 products
@@ -580,7 +583,7 @@ const HomeProduct = () => {
                       return false;
                     return (
                       product.category.name.trim().toLowerCase() ===
-                      "bỉm & tã em bé".toLowerCase()
+                      "giáo khoa - tham khảo".toLowerCase()
                     );
                   })
                   .map((product) => (
@@ -603,7 +606,7 @@ const HomeProduct = () => {
                 className="common-view-all-btn"
                 onClick={() =>
                   navigate("/products?categoryName=Bỉm%20%26%20tã%20em%20bé", {
-                    state: { categoryName: "Bỉm & tã em bé" },
+                    state: { categoryName: "Giáo Khoa - Tham Khảo" },
                   })
                 }
               >
@@ -612,16 +615,16 @@ const HomeProduct = () => {
             </div>
           </div>
 
-          {/* --- PHẦN THƯƠNG HIỆU NỔI BẬT --- */}
+          {/* --- NHÀ PHÂN PHỐI --- */}
           <div className="container py-4  my-4">
             <div>
               <span className="Flash__sale fs-5 py-2 text__box__border ">
-                THƯƠNG HIỆU NỔI BẬT{" "}
+                NHÀ PHÂN PHỐI
               </span>
             </div>
             <br />
             <Swiper
-              spaceBetween={10}
+              spaceBetween={6}
               pagination={{ clickable: true }}
               autoplay={{
                 delay: 3000,
@@ -639,49 +642,49 @@ const HomeProduct = () => {
             >
               <SwiperSlide onClick={() => handleBrandClick("cosmic light")}>
                 <img
-                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739172432/brand_1_gp8jdq.webp"
+                  src="https://cdn1.fahasa.com/media/wysiwyg/Hien_UI/LogoNCC/NCC_DinhTi_115x115.png"
                   alt="Brand 1"
                 />
               </SwiperSlide>
               <SwiperSlide onClick={() => handleBrandClick("aptamil")}>
                 <img
-                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_6_unpnuu.webp"
+                  src="https://cdn1.fahasa.com/media/wysiwyg/Hien_UI/LogoNCC/5_NCC_McBook_115x115.png"
                   alt="Brand 6"
                 />
               </SwiperSlide>
               <SwiperSlide onClick={() => handleBrandClick("arifood")}>
                 <img
-                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_2_hayrt8.webp"
+                  src="https://cdn1.fahasa.com/media/wysiwyg/Hien_UI/LogoNCC/NCC_SBooks_115x115.png"
                   alt="Brand 2"
                 />
               </SwiperSlide>
               <SwiperSlide onClick={() => handleBrandClick("blackmores")}>
                 <img
-                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_7_rsbgoe.webp"
+                  src="https://cdn1.fahasa.com/media/wysiwyg/Hien_UI/LogoNCC/3_NCC_TanViet_115x115.png"
                   alt="Brand 7"
                 />
               </SwiperSlide>
               <SwiperSlide onClick={() => handleBrandClick("blackmores")}>
                 <img
-                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175174/brand_3_vsl8yu.webp"
+                  src="https://cdn1.fahasa.com/media/wysiwyg/Hien_UI/LogoNCC/9_NCC_MinhLong_115x115.png"
                   alt="Brand 3"
                 />
               </SwiperSlide>
               <SwiperSlide onClick={() => handleBrandClick("hikid")}>
                 <img
-                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_8_bfeshq.webp"
+                  src="https://cdn1.fahasa.com/media/wysiwyg/Hien_UI/LogoNCC/10_NCC_ThaiHa_115x115.png"
                   alt="Brand 8"
                 />
               </SwiperSlide>
               <SwiperSlide onClick={() => handleBrandClick("aribaly")}>
                 <img
-                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_9_jczh9e.webp"
+                  src="https://cdn1.fahasa.com/media/wysiwyg/Hien_UI/LogoNCC/7_NCC_SGBook_115x115.png"
                   alt="Brand 9"
                 />
               </SwiperSlide>
               <SwiperSlide onClick={() => handleBrandClick("Pampers")}>
                 <img
-                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1739175175/brand_10_cfzlzm.webp"
+                  src="https://cdn1.fahasa.com/media/wysiwyg/Hien_UI/LogoNCC/8_NCC_ZenBooks_115x115.png"
                   alt="Brand 10"
                 />
               </SwiperSlide>
@@ -742,7 +745,7 @@ const HomeProduct = () => {
           </div>
         </div>
       </div>
-    </>
+    </Container>
   );
 };
 

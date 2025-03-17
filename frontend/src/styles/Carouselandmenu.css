@@ -1,14 +1,14 @@
 .container_custom {
-
     margin: 0 auto;
-    font-size: 13px!important;
+    font-size: 13px !important;
 }
-
 
 .category-list {
     border: none;
-    background-color: #f8f9fa;
-    box-shadow: 2px 2px 8px #f8c8d0;
+    background-color: #fdf5e6;
+    /* nền sáng kiểu OldLace */
+    box-shadow: 2px 2px 8px #d2b48c;
+    /* bóng nhẹ với sắc tan */
     border-radius: 8px;
     overflow: visible;
 }
@@ -25,7 +25,8 @@
 }
 
 .category-list .list-group-item:hover {
-    background-color: #FF6F91;
+    background-color: #8B4513;
+    /* màu chủ đạo khi hover */
     color: white;
 }
 
@@ -43,9 +44,9 @@
     top: 0;
     left: 100%;
     background-color: #ffffff;
-    border: 1px solid #f8c8d0;
+    border: 1px solid #d2b48c;
     border-radius: 7px;
-    box-shadow: 0 4px 8px #f8c8d0;
+    box-shadow: 0 4px 8px #d2b48c;
     z-index: 1000;
     min-width: 300px;
     height: auto;
@@ -66,14 +67,15 @@
 }
 
 .subcategory-item:hover {
-    background-color: #FF6F91;
+    background-color: #8B4513;
+    /* màu chủ đạo khi hover */
     color: white;
     border-radius: 7px;
 }
 
 /* Carousel */
 .carousel-item img {
-    height: 400px;
+    height: auto;
     object-fit: cover;
     width: 100%;
     border-radius: 8px;
@@ -86,7 +88,8 @@
 
 .info-section .info-item {
     background-color: #ffffff;
-    box-shadow: 0 2px 12px #f8c8d0;
+    box-shadow: 0 2px 12px #d2b48c;
+    /* bóng nhẹ với sắc tan */
     border-radius: 8px;
     text-align: center;
     padding: 5px 0px;
@@ -100,15 +103,16 @@
 
 .info-section .info-item:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 20px #f8c8d0;
+    box-shadow: 0 4px 20px #d2b48c;
+    /* tăng bóng khi hover */
 }
 
 .info-section .info-item .me-2 {
     font-size: 25px;
-    color: #dc3545;
+    color: #8B4513;
+    /* màu chủ đạo */
     margin-bottom: 10px;
 }
-
 
 @media (max-width: 768px) {
     .info-section .info-item {
@@ -129,10 +133,6 @@
         font-size: 14px;
     }
 }
-
-
-
-
 
 .info-item .card-body {
     display: flex;
@@ -156,9 +156,8 @@
     font-weight: bold;
 }
 
-
 .category-list .text-uppercase {
     text-transform: uppercase;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    color: #FF6F91;
+    color: #8B4513;
 }

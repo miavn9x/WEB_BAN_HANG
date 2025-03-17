@@ -124,8 +124,8 @@ const NotificationModal = ({ show, handleClose }) => {
     >
       <Modal.Header closeButton>
         <Modal.Title className="d-flex align-items-center">
-          <FaBell size={25} className="text-warning me-2" />
-          <span className="fs-4">Thông báo của tôi</span>
+          <FaBell size={25} style={{ color: "#8B4513" }} className="me-2" />
+          <span className="fs-4">Thông báo của Go Book</span>
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -134,7 +134,7 @@ const NotificationModal = ({ show, handleClose }) => {
             <img
               className="cart-empty-image"
               src="https://theme.hstatic.net/200000381339/1001207774/14/cart_empty_background.png?v=164"
-              alt="Giỏ hàng trống"
+              alt="Không có thông báo"
             />
             <p>Không có thông báo nào.</p>
           </div>

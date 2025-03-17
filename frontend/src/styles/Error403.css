@@ -3,7 +3,7 @@
     justify-content: center;
     align-items: center;
     height: 50vh;
-    background-color: #f8f9fa;
+    background-color: #fdf5e6;
 }
 
 .error-403-content {
@@ -14,7 +14,7 @@
 
 .error-403-title {
     font-size: 6rem;
-    color: #dc3545;
+    color: #8B4513;
     margin: 0;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
@@ -35,18 +35,17 @@
     display: inline-block;
     padding: 10px 20px;
     font-size: 1rem;
-    color: #FF6F91 !important;
-    background-color: #E6E6FA;
+    color: #8B4513 !important;
+    background-color: #fffaf0;
     text-decoration: none;
     border-radius: 5px;
     transition: background-color 0.3s;
     text-decoration: none !important;
     font-weight: 500 !important;
-    border:solid 1px #FF6F91 !important;
-
+    border: solid 1px #8B4513 !important;
 }
 
 .error-403-button:hover {
-    background-color: #FF6F91;
+    background-color: #8B4513;
     color: #ffffff !important;
 }

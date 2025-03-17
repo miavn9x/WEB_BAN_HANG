@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import {  Spinner } from "react-bootstrap";
+import { Link, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { Spinner } from "react-bootstrap";
 import "../../styles/post-detail.css";
 
 function slugify(text) {
@@ -117,7 +117,7 @@ const PostDetail = () => {
   return (
     <div className="post-detail container my-4">
       <Helmet>
-        <title>{`${postTitle} - BabyMart.vn`}</title>
+        <title>{`${postTitle} - Go Book`}</title>
         <meta name="description" content={postDescription} />
         <meta property="og:title" content={postTitle} />
         <meta property="og:description" content={postDescription} />
@@ -128,12 +128,18 @@ const PostDetail = () => {
         <meta name="twitter:image" content={postImage} />
       </Helmet>
 
-      <Link to="/posts-list" className="btn btn-secondary mb-3">
+      <Link
+        to="/posts-list"
+        className="btn btn-secondary mb-3"
+        style={{ backgroundColor: "#8B4513", border: "none" }}
+      >
         Quay lại danh sách
       </Link>
       <div className="row">
         <div className="col-12 col-md-9">
-          <h1 className="mb-4">{post.title}</h1>
+          <h1 className="mb-4" style={{ color: "#8B4513" }}>
+            {post.title}
+          </h1>
           {post.content ? (
             <div
               className="post-content"
@@ -149,7 +155,8 @@ const PostDetail = () => {
                 {post.tags.map((tag, index) => (
                   <li
                     key={index}
-                    className="list-inline-item badge bg-info text-dark me-2"
+                    className="list-inline-item badge me-2"
+                    style={{ backgroundColor: "#8B4513", color: "white" }}
                   >
                     {tag}
                   </li>
@@ -163,7 +170,9 @@ const PostDetail = () => {
         </div>
 
         <div className="col-12 col-md-3">
-          <h4 className="mb-3">Sản phẩm liên quan</h4>
+          <h4 className="mb-3" style={{ color: "#8B4513" }}>
+            Sản phẩm liên quan
+          </h4>
           {loadingRelated ? (
             <p>Đang tải sản phẩm liên quan...</p>
           ) : relatedProducts && relatedProducts.length > 0 ? (

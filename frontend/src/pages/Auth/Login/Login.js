@@ -84,9 +84,9 @@ const Login = () => {
           <Link
             to="/register"
             className="text-decoration-none"
-            style={{ color: "#FF6F91" }}
+            style={{ color: "#8B4513" }}
           >
-            Đăng ký tại đây
+            Đăng ký tại 
           </Link>
         </p>
 
@@ -128,7 +128,7 @@ const Login = () => {
               <Link
                 to="/ForgotPassword"
                 className="text-decoration-none"
-                style={{ color: "#FF6F91" }}
+                style={{ color: "#8B4513" }}
               >
                 Nhấn vào đây
               </Link>
@@ -139,7 +139,7 @@ const Login = () => {
             type="submit"
             className="w-100 rounded-pill fw-bold"
             style={{
-              backgroundColor: "#ffc0cb",
+              backgroundColor: "#8B4513",
               border: "none",
               padding: "10px 0",
             }}
@@ -149,7 +149,7 @@ const Login = () => {
               <div className="loading-container text-center">
                 <Spinner
                   animation="border"
-                  variant="success"
+                  variant="primary"
                   className="loading-spinner"
                 />
                 <div>Đang tải...</div>

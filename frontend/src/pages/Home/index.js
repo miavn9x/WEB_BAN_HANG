@@ -6,9 +6,7 @@ const Home = () => {
   return (
     <div>
       <CarouselAndMenu />
-      {/* <ProductPage /> */}
-      {/* <Product/> */}
-      {/* <Footer /> */}
+
     </div>
   );
 };

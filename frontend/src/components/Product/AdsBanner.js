@@ -74,14 +74,14 @@ const AdsBanner = ({ imageUrl, redirectUrl, bannerId }) => {
             fontWeight: "bold",
             cursor: "pointer",
             zIndex: 1,
-            color: "#fff",
+            color: "#8B4513",
           }}
         >
           ×
         </button>
         <img
           src={imageUrl}
-          alt="Quảng cáo"
+          alt="Quảng cáo Go Book"
           style={{
             width: "100%",
             height: "auto",

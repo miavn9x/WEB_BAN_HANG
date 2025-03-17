@@ -1,3 +1,268 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import 'react-inner-image-zoom/lib/InnerImageZoom/styles.min.css';
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+
+.product__modal .MuiPaper-elevation {
+    padding: 35px;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 10px !important;
+    position: relative;
+    width: 900px !important;
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+.product__modal .close__ {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 100;
+    min-width: 50px !important;
+    height: 50px !important;
+    width: 50px !important;
+    border-radius: 50% !important;
+    color: #8B4513;
+    border: 0px !important;
+}
+
+.product__modal .close__ svg {
+    font-size: 30px;
+}
+
+.product__modal h4 {
+    font-size: 20px !important;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #8B4513;
+}
+
+.product__modal__zoom {
+    width: 100%;
+    height: auto;
+}
+
+.product__modal__zoom .badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+}
+
+.zoomSliderBig .item {
+    overflow: hidden;
+    border-radius: 15px;
+}
+
+.zoomSliderBig .item img {
+    transition: transform 0.3s ease;
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+}
+
+.zoomSliderBig .item:hover img {
+    transform: scale(1.1);
+    border-radius: 15px;
+}
+
+.zoomSlider {
+    padding-top: 30px;
+}
+
+.zoomSlider .slick-slide {
+    padding-right: 30px !important;
+}
+
+.zoomSlider * {
+    outline: none !important;
+}
+
+/* css hinh nhỏ */
+.zoomSlider .item {
+    border: 2px solid transparent !important;
+    overflow: hidden;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 60px !important;
+}
+
+.zoomSlider .slick-current .item {
+    border: 2px solid rgba(139, 69, 19, 0.75) !important;
+}
+
+.zoomSlider .slick-arrow {
+    top: 50% !important;
+    zoom: 60% !important;
+}
+
+.d-flex {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.iiz__btn {
+    background: #ffffff;
+    width: 40px;
+    height: 40px;
+    border-radius: 19%;
+}
+
+.iiz__hint::before {
+    content: "";
+    background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 19.9 19.9%27%3E%3Cpath d=%27M13.9 7.4C13.9 3.8 11 .9 7.4.9S.9 3.8.9 7.4s2.9 6.5 6.5 6.5 6.5-2.9 6.5-6.5zm5.3 12.5l-6.7-7.2c-1.4 1.3-3.2 2.1-5.1 2.1-4.1 0-7.4-3.3-7.4-7.4S3.3 0 7.4 0s7.4 3.3 7.4 7.4c0 1.7-.6 3.4-1.7 4.7l6.8 7.2-.7.6z%27 fill=%27%23000000%27/%3E%3C/svg%3E");
+    width: 30px;
+    height: 30px;
+}
+
+.quantity-input {
+    width: 50px;
+    text-align: center;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    color: #333;
+}
+
+button {
+    background-color: #ffffff;
+    border: 0px solid #ccc;
+    padding: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn__buy {
+    background-color: #8B4513;
+    color: #fff;
+    border: none;
+    padding: 12px 18px !important;
+    font-size: 14px !important;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+.btn__buy:hover {
+    background-color: #7A3C0E;
+    transform: scale(1.05);
+}
+
+.btn__buy:active {
+    background-color: #6D360A;
+    transform: scale(0.95);
+}
+
+.col-md-7 .btn-round {
+    border-radius: 30px !important;
+    color: rgba(0, 0, 0, 0.4) !important;
+}
+
+.col-md-7 button {
+    text-transform: capitalize !important;
+}
+
+.col-md-7 .product__price {
+    font-size: 18px !important;
+    font-weight: 600;
+}
+
+.col-md-7 .product__price__old {
+    font-size: 24px !important;
+    font-weight: 400;
+}
+
+.d-flex.align-items-center:last-child {
+    margin-top: auto;
+}
+
+.post-content.truncated {
+    position: relative;
+    display: -webkit-box !important;
+    --webkit-line-clamp: 10;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+}
+
+.toggle-button-wrapper {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.post-content.truncated::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3em;
+    background: linear-gradient(transparent, #fff);
+    pointer-events: none;
+}
+
+@media (max-width: 767px) {
+    .thumbnail-container {
+        justify-content: center !important;
+    }
+
+    .thumbnail-container img {
+        margin: 0 5px;
+    }
+}
+
+@media (max-width: 992px) {
+    .thumbnail-container {
+        justify-content: center !important;
+    }
+
+    .thumbnail-container img {
+        margin: 0 5px;
+    }
+
+    .product-title {
+        padding: 1rem 0;
+    }
+
+    .product__price {
+        justify-content: center !important;
+    }
+}
+
+.thumbnail-container img {
+    object-fit: cover;
+    margin-right: 0.5rem;
+}
+
+.quantity-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.quantity-wrapper .d-flex {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quantity-wrapper label {
+    margin-right: 0.5rem;
+    text-align: center;
+}
+
+/* End of product modal and gallery styles */
+
+/* Additional styles for product modal, zoom slider, and buttons have been updated above */
+
+/* Filter Modal Styles */
 .filter-modal {
     position: fixed;
     right: 0;
@@ -35,7 +300,6 @@
     transform: translateX(0);
 }
 
-
 .filter-header {
     width: 100%;
     padding: 15px 0;
@@ -47,19 +311,19 @@
 }
 
 .filter-controls {
-    padding: 0!important;
+    padding: 0 !important;
     margin: 0 !important;
 }
 
 .filter-button {
     padding: 6px 12px;
-    border: 1px solid #dee2e6;
+    border: 1px solid #8B4513;
     border-radius: 4px;
     background: white;
     font-size: 14px;
     display: flex;
     align-items: center;
-        transition: all 0.3s ease!important;
+    transition: all 0.3s ease !important;
 }
 
 .sort-dropdown {
@@ -93,13 +357,13 @@
         padding: 6px 10px;
         min-width: 160px;
     }
-        .filter-button {
-            transition: all 0.3s ease !important;
-        }
+
+    .filter-button {
+        transition: all 0.3s ease !important;
+    }
 }
 
 @media (min-width: 992px) {
-    
     .filter-header {
         flex-direction: row;
         justify-content: space-between;
@@ -123,9 +387,10 @@
     .sort-label {
         line-height: 38px;
     }
-        .filter-button {
-            transition: all 0.3s ease !important;
-        }
+
+    .filter-button {
+        transition: all 0.3s ease !important;
+    }
 }
 
 @media (max-width: 350px) {
@@ -147,7 +412,6 @@
     .filter-controls {
         width: 100%;
         transition: all 0.3s ease !important;
-
     }
 
     .filter-controls>div {
@@ -155,23 +419,23 @@
     }
 
     .filter-button {
-  transition: all 0.3s ease!important;
+        transition: all 0.3s ease !important;
     }
 
     .sort-wrapper {
         width: 100%;
-    justify-content: center;
+        justify-content: center;
     }
 
     .sort-dropdown {
         width: 100%;
-      
     }
-        .d-flex.align-items-center:last-child {
-            margin-top: auto;
-            justify-content: center;
-            padding: 10px;
-        }
+
+    .d-flex.align-items-center:last-child {
+        margin-top: auto;
+        justify-content: center;
+        padding: 10px;
+    }
 
     /* Căn giữa nút dropdown */
     .dropdown-toggle {
@@ -186,12 +450,12 @@
     }
 }
 
-
 @media (min-width: 992px) and (max-width: 1199px) {
     .sidebar-wrapper {
         display: none !important;
     }
 }
+
 .sort-wrapper .dropdown-toggle {
     vertical-align: middle;
 }
@@ -204,20 +468,17 @@
 .custom-close {
     border: none;
     background: none;
-    color: #bb2d3b;
+    color: #8B4513;
     font-size: 38px;
     font-weight: bold;
     position: absolute;
     top: 0px !important;
     right: 20px !important;
-    
 }
 
 .custom-close:hover {
-    color: #FF6F91;
+    color: #7A3C0E;
 }
-
-
 
 .products__container {
     display: grid;
@@ -318,7 +579,6 @@
     }
 }
 
-
 /* loading thoi gian chờ */
 .loading-container {
     position: fixed;
@@ -339,7 +599,7 @@
     width: 50px;
     height: 50px;
     border: 6px solid #f3f3f3;
-    border-top: 6px solid #FF6F91;
+    border-top: 6px solid #8B4513;
     border-radius: 50%;
     animation: spin 10s linear infinite;
 }
@@ -359,4 +619,3 @@
         display: none !important;
     }
 }
-

@@ -4,19 +4,23 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const adminMiddleware = require("../middleware/adminMiddleware");
-const authMiddleware = require("../middleware/authMiddleware"); 
+const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 
-
 // Route chỉ admin và accountant mới được truy cập
-router.get("/admin-or-accountant-route", authMiddleware, roleMiddleware("admin", "accountant"), (req, res) => {
-  res.json({ message: "Bạn có quyền truy cập route này." });
-});
+router.get(
+  "/admin-or-accountant-route",
+  authMiddleware,
+  roleMiddleware("admin", "accountant"),
+  (req, res) => {
+    res.json({ message: "Bạn có quyền truy cập route này." });
+  }
+);
 
 // API lấy thông tin người dùng
 router.get("/users", adminMiddleware, async (req, res) => {
   try {
-    const users = await User.find().select("-password"); 
+    const users = await User.find().select("-password");
     res.json(users);
   } catch (error) {
     // console.error("Error fetching users:", error);
@@ -70,9 +74,6 @@ router.put("/users/:id", adminMiddleware, async (req, res) => {
   }
 });
 
-
-
-
 // API lấy thông tin người dùng
 router.get("/profile", authMiddleware, async (req, res) => {
   try {
@@ -89,7 +90,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
         lastName: user.lastName,
         phone: user.phone,
         email: user.email,
-        coupons: user.coupons, 
+        coupons: user.coupons,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
@@ -101,7 +102,6 @@ router.get("/profile", authMiddleware, async (req, res) => {
       .json({ message: "Lỗi server khi lấy thông tin người dùng" });
   }
 });
-
 
 // API sửa thông tin người dùng
 router.put("/profile", authMiddleware, async (req, res) => {
@@ -160,17 +160,17 @@ router.put("/profile/password", authMiddleware, async (req, res) => {
         .status(400)
         .json({ message: "Vui lòng nhập mật khẩu cũ và mật khẩu mới" });
     }
-    const isMatch = await user.comparePassword(oldPassword); 
+    const isMatch = await user.comparePassword(oldPassword);
     if (!isMatch) {
       return res.status(401).json({ message: "Mật khẩu cũ không đúng" });
     }
-    user.password = newPassword; 
-    const updatedUser = await user.save(); 
-    const token = user.generateAuthToken(); 
+    user.password = newPassword;
+    const updatedUser = await user.save();
+    const token = user.generateAuthToken();
 
     res.status(200).json({
       message: "Cập nhật mật khẩu thành công",
-      token, 
+      token,
       user: {
         id: updatedUser._id,
         firstName: updatedUser.firstName,
@@ -204,8 +204,6 @@ router.delete("/users/:id", adminMiddleware, async (req, res) => {
   }
 });
 
-
-
 // routes/user.js
 router.patch("/update-coupons", authMiddleware, async (req, res) => {
   try {
@@ -221,7 +219,7 @@ router.patch("/update-coupons", authMiddleware, async (req, res) => {
 
     // Tìm coupon theo couponCode đã chuẩn hóa
     const couponIndex = user.coupons.findIndex(
-      c => c.couponCode.normalize("NFC") === normalizedCoupon
+      (c) => c.couponCode.normalize("NFC") === normalizedCoupon
     );
 
     if (couponIndex === -1) {
@@ -232,15 +230,14 @@ router.patch("/update-coupons", authMiddleware, async (req, res) => {
     user.coupons.splice(couponIndex, 1);
     await user.save();
 
-    res.json({ 
+    res.json({
       success: true,
-      message: "Coupon đã được xóa thành công"
+      message: "Coupon đã được xóa thành công",
     });
   } catch (error) {
     console.error("Error updating coupons:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 module.exports = router;

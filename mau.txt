@@ -1,9 +1,0 @@
-Màu chính: #FFB6C1 (Hồng nhạt)
-Màu nền chính: #FFF4E6 (Trắng kem)
-Tiêu đề chính: #FF6F91 (Hồng đậm)
-Nút CTA chính: #ffd5db (Hồng nhạt)
-Chi tiết nhỏ hoặc icon: #E6E6FA (Tím lavender)
-Viền hoặc đường chia: #FFF8DC (Vàng nhạt)
-
-
-   

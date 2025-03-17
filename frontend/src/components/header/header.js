@@ -1,5 +1,5 @@
 // import Carouselandmenu from "../Carousel/Carouselandmenu";
-import Banner from "../Nav/Banner";
+// import Banner from "../Nav/Banner";
 import MyNavbar from "../Nav/Navbar";
 
 
@@ -7,7 +7,7 @@ const Header = () => {
   return (
     <>
       <div>
-        <Banner/>
+        {/* <Banner/> */}
         <MyNavbar />
       </div>
       {/* <div>

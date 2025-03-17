@@ -1,6 +1,7 @@
 /* Ghi đè style cho nút “x” (dấu x) của thẻ tags */
 .ReactTags__remove {
-  color: #333 !important;       /* Đổi màu chữ thành màu xám đậm */
+  color: #8B4513 !important;
+  /* Đổi màu chữ thành màu chủ đạo */
   background-color: transparent !important;
   font-weight: bold;
   font-size: 13px;
@@ -10,8 +11,10 @@
 
 /* Ghi đè style cho thẻ tag */
 .ReactTags__tag {
-  background: #9b9b9b !important; /* Màu nền của thẻ tag */
-  color: #fff !important;          /* Màu chữ của thẻ tag */
+  background: #8B4513 !important;
+  /* Màu nền của thẻ tag chuyển sang màu chủ đạo */
+  color: #fff !important;
+  /* Màu chữ trắng */
   border: none !important;
   padding: 5px 5px !important;
   border-radius: 3px !important;
@@ -20,7 +23,6 @@
   align-items: center;
 }
 
-
 .notification-modal .icon-active svg {
-  color: #ff69b4;
+  color: #8B4513;
 }

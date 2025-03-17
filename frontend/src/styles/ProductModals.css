@@ -22,7 +22,7 @@
     height: 50px !important;
     width: 50px !important;
     border-radius: 50% !important;
-    color: #ff1515;
+    color: #8B4513;
     border: 0px !important;
 }
 
@@ -34,7 +34,7 @@
     font-size: 20px !important;
     font-weight: 600;
     margin-bottom: 20px;
-    color: rgba(0, 0, 0, 0.8);
+    color: #8B4513;
 }
 
 .product__modal__zoom {
@@ -51,7 +51,6 @@
 
 .zoomSliderBig .item {
     overflow: hidden;
- 
     border-radius: 15px;
 }
 
@@ -60,16 +59,12 @@
     width: 100%;
     height: auto;
     border-radius: 15px;
-    
 }
 
 .zoomSliderBig .item:hover img {
     transform: scale(1.1);
     border-radius: 15px;
-    
 }
-
-
 
 .zoomSlider {
     padding-top: 30px;
@@ -82,17 +77,18 @@
 .zoomSlider * {
     outline: none !important;
 }
+
 /* css hinh nhỏ */
 .zoomSlider .item {
     border: 2px solid transparent !important;
     overflow: hidden;
     border-radius: 10px;
     cursor: pointer;
-    width: 60px!important; 
+    width: 60px !important;
 }
 
 .zoomSlider .slick-current .item {
-    border: 2px solid rgba(0, 0, 0, 0.4) !important;
+    border: 2px solid rgba(139, 69, 19, 0.75) !important;
 }
 
 .zoomSlider .slick-arrow {
@@ -106,14 +102,12 @@
     justify-content: flex-start;
 }
 
-
 .iiz__btn {
     background: #ffffff;
     width: 40px;
     height: 40px;
     border-radius: 19%;
 }
-
 
 .iiz__hint::before {
     content: "";
@@ -143,16 +137,8 @@ button {
     transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.zoomSlider .slick-current .item {
-    border: 2px solid rgba(195, 38, 38, 0.751) !important;
-}
-
-/* .btn__add__cart:hover {
-    background-color: #218838;
-} */
-
 .btn__buy {
-    background-color: #ff5722;
+    background-color: #8B4513;
     color: #fff;
     border: none;
     padding: 12px 18px !important;
@@ -165,12 +151,12 @@ button {
 }
 
 .btn__buy:hover {
-    background-color: #e64a19;
+    background-color: #7A3C0E;
     transform: scale(1.05);
 }
 
 .btn__buy:active {
-    background-color: #d84315;
+    background-color: #6D360A;
     transform: scale(0.95);
 }
 
@@ -270,5 +256,5 @@ button {
 .quantity-wrapper label {
     margin-right: 0.5rem;
     text-align: center;
-    /* Center the label text */
 }
+

@@ -4,11 +4,12 @@
     right: 35px;
     z-index: 1000;
 }
+
 .scroll-button {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: #FF6F91;
+    background-color: #8B4513;
     border: none;
     display: flex;
     align-items: center;
@@ -23,6 +24,7 @@
     opacity: 1;
     transform: scale(1.1);
 }
+
 .scroll-button .icon {
     color: #fff;
     font-size: 20px;

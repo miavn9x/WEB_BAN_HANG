@@ -33,7 +33,6 @@ const Cart = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // State cho coupon
-  // selectedCoupon sẽ lưu cả đối tượng coupon (bao gồm couponCode, expiryDate,…)
   const [userCoupons, setUserCoupons] = useState([]);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [showCouponDropdown, setShowCouponDropdown] = useState(false);
@@ -43,7 +42,6 @@ const Cart = () => {
     dispatch(fetchUserProfile());
   }, [dispatch]);
 
-  // Khi userProfile thay đổi, cập nhật thông tin người dùng và lọc các coupon chưa hết hạn (ví dụ: thời hạn > hiện tại)
   useEffect(() => {
     if (userProfile) {
       setEditableUserInfo({
@@ -128,7 +126,6 @@ const Cart = () => {
   const getDiscount = () => {
     if (effectiveSubtotal === 0) return 0;
     if (!selectedCoupon) return 0;
-    // Nếu coupon đã hết hạn, không giảm giá
     if (new Date(selectedCoupon.expiryDate) < new Date()) return 0;
     const couponCode = selectedCoupon.couponCode;
     if (/FREESHIP/gi.test(couponCode)) return 0;
@@ -225,7 +222,7 @@ const Cart = () => {
 
   return (
     <div className="container">
-      <div className="cart-title text-center my-4"></div>
+      {/* Cart Title */}
       {isLoading && (
         <div className="loading-overlay d-flex justify-content-center align-items-center">
           <div className="spinner-border text-primary" role="status">
@@ -236,16 +233,16 @@ const Cart = () => {
       <div className="row">
         <div className="col-md-8">
           {!isLoading && !cartItems.length ? (
-            <p className="text-center">
-              <div className="cart-empty-container">
-                <img
-                  className="cart-empty-image"
-                  src="https://theme.hstatic.net/200000381339/1001207774/14/cart_empty_background.png?v=164"
-                  alt="Giỏ hàng trống"
-                />
-                <i className="cart-empty-text my-4 mx-auto">Giỏ hàng trống</i>
-              </div>
-            </p>
+            <div className="cart-empty-container">
+              <img
+                className="cart-empty-image"
+                src="https://theme.hstatic.net/200000381339/1001207774/14/cart_empty_background.png?v=164"
+                alt="Giỏ hàng trống"
+              />
+              <i className="cart-empty-text my-4 mx-auto">
+                Giỏ hàng  đang trống
+              </i>
+            </div>
           ) : (
             <>
               <div
@@ -284,7 +281,7 @@ const Cart = () => {
                         <div className="item-details_name mx-auto">
                           {item.product.name || "Sản phẩm không tên"}
                         </div>
-                        <div style={{ color: "red" }}>
+                        <div style={{ color: "#8B4513" }}>
                           {formatter(
                             Number(item.product.priceAfterDiscount) || 0
                           )}
@@ -411,7 +408,7 @@ const Cart = () => {
             <div>Tổng cộng: {formatter(effectiveSubtotal)}</div>
             <div>
               Phí vận chuyển:{" "}
-              <span style={{ color: "blue" }}>
+              <span style={{ color: "#8B4513" }}>
                 {formatter(getShippingFee())}
               </span>
             </div>

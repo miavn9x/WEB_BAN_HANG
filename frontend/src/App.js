@@ -84,36 +84,36 @@ function App() {
       <ScrollToTopButton />
       <AdsBanner
         imageUrl="https://res.cloudinary.com/div27nz1j/image/upload/v1740391271/e1c95a7e024623979c_kzrsze.png"
-        redirectUrl="http://localhost:3000/posts/quy-dinh-chung-ve-mua-hang-tai-baby-chill-67a4709e8cb516e37058c69a"
-        bannerId="baby-chill-ads"
+        redirectUrl="http://localhost:3000/posts/quy-dinh-chung-ve-mua-hang-tai-gobook-67a4709e8cb516e37058c69a"
+        bannerId="gobook-ads"
       />
 
       <Header userRole={userRole} isAuthenticated={isAuthenticated} />
       <Helmet>
-        <title>Chuỗi hệ thống siêu thị mẹ và bé - Babychill.vn</title>
+        <title>Chuỗi hệ thống cửa hàng sách - Go Book</title>
         <meta
           name="description"
-          content="Mua sắm sản phẩm chất lượng với dịch vụ tốt nhất tại cửa hàng trực tuyến của chúng tôi."
+          content="Mua sắm sách chất lượng cao, đa dạng thể loại với dịch vụ chuyên nghiệp tại Go Book."
         />
         <meta
           property="og:title"
-          content="Chuỗi hệ thống siêu thị mẹ và bé - BabyMart.vn"
+          content="Chuỗi hệ thống cửa hàng sách - Go Book"
         />
         <meta
           property="og:description"
-          content="Mua sắm sản phẩm chất lượng với dịch vụ tốt nhất tại cửa hàng trực tuyến của chúng tôi."
+          content="Mua sắm sách chất lượng cao, đa dạng thể loại với dịch vụ chuyên nghiệp tại Go Book."
         />
-        <meta property="og:image" content="/path/to/your/image.jpg" />
+        <meta property="og:image" content="/path/to/your/gobook-image.jpg" />
         <meta property="og:url" content={window.location.href} />
         <meta
           name="twitter:title"
-          content="Chuỗi hệ thống siêu thị mẹ và bé - BabyMart.vn"
+          content="Chuỗi hệ thống cửa hàng sách - Go Book"
         />
         <meta
           name="twitter:description"
-          content="Mua sắm sản phẩm chất lượng với dịch vụ tốt nhất tại cửa hàng trực tuyến của chúng tôi."
+          content="Mua sắm sách chất lượng cao, đa dạng thể loại với dịch vụ chuyên nghiệp tại Go Book."
         />
-        <meta name="twitter:image" content="/path/to/your/image.jpg" />
+        <meta name="twitter:image" content="/path/to/your/gobook-image.jpg" />
       </Helmet>
       <Routes>
         {/* Public Routes */}

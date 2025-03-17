@@ -5,14 +5,14 @@ import { Container, Row, Col, ListGroup, Card } from "react-bootstrap";
 import "../../styles/Info.css"; // Thêm tệp CSS riêng biệt
 
 const Info = () => {
-  const pageTitle = "Giới thiệu về Baby chill - Cửa hàng mẹ và bé uy tín";
+  const pageTitle = "Giới thiệu về Go Book - Cửa hàng sách uy tín";
   const pageDescription =
-    "Baby chill là cửa hàng chuyên cung cấp sản phẩm an toàn, chất lượng cao cho mẹ và bé. Sữa, bỉm, đồ chơi giáo dục, chăm sóc sức khỏe - tất cả đều có tại Baby chill!";
-  const pageUrl = "https://babychill.com/gioi-thieu";
-  const logoUrl = "https://babychill.com/logo.png"; // Cập nhật link logo thật của bạn
+    "Go Book là cửa hàng chuyên cung cấp sản phẩm sách chất lượng cao cho độc giả. Sách văn học, kinh tế, tâm lý và nhiều thể loại khác đều có tại Go Book!";
+  const pageUrl = "https://gobook.com/gioi-thieu";
+  const logoUrl = "https://gobook.com/logo.png"; // Cập nhật link logo thật của bạn
 
   return (
-    <Container className="baby-chill-container my-5">
+    <Container className="go-book-container my-5">
       {/* 🛠 SEO Optimization */}
       <Helmet>
         <title>{pageTitle}</title>
@@ -32,7 +32,7 @@ const Info = () => {
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Store",
-            name: "Baby chill",
+            name: "Go Book",
             url: pageUrl,
             logo: logoUrl,
             description: pageDescription,
@@ -52,80 +52,80 @@ const Info = () => {
       </Helmet>
 
       {/* 🏪 Header Section */}
-      <header className="text-center mb-5 baby-chill-header">
-        <h1 className="display-4 text-primary">Chào mừng đến với Baby chill</h1>
+      <header className="text-center mb-5 go-book-header">
+        <h1 className="display-4 text-primary">Chào mừng đến với Go Book</h1>
         <p className="lead text-muted">
-          Điểm đến tin cậy cho mẹ và bé - Sản phẩm chất lượng cao, an toàn và
-          tiện lợi.
+          Điểm đến tin cậy cho độc giả - Sách chất lượng cao, đa dạng thể loại.
         </p>
       </header>
 
       {/* 📌 Giới thiệu */}
-      <section className="mb-5 baby-chill-about">
-        <h2 className="text-center mb-4">Giới thiệu về Baby chill</h2>
+      <section className="mb-5 go-book-about">
+        <h2 className="text-center mb-4">Giới thiệu về Go Book</h2>
         <p className="text-justify">
-          Baby chill chuyên cung cấp các sản phẩm cao cấp cho mẹ và bé từ sơ sinh
-          đến trưởng thành. Tất cả sản phẩm đều được chọn lọc kỹ lưỡng từ các
-          thương hiệu uy tín.
+          Go Book chuyên cung cấp các sản phẩm sách cao cấp cho độc giả từ nhiều
+          thể loại như văn học, kinh tế, tâm lý, kỹ năng sống và nhiều thể loại
+          khác. Tất cả sách đều được chọn lọc kỹ lưỡng từ các nhà xuất bản uy
+          tín.
         </p>
       </section>
 
-      {/* ⭐ Lý do chọn Baby chill */}
-      <section className="mb-5 baby-chill-reasons">
-        <h2 className="text-center mb-4">Lý do chọn Baby chill</h2>
+      {/* ⭐ Lý do chọn Go Book */}
+      <section className="mb-5 go-book-reasons">
+        <h2 className="text-center mb-4">Lý do chọn Go Book</h2>
         <Row>
           <Col md={6} className="mb-4">
             <ListGroup>
               <ListGroup.Item>
-                <strong>✅ Sản phẩm chất lượng:</strong> Được kiểm định nghiêm
-                ngặt, an toàn cho bé.
+                <strong>✅ Sản phẩm chất lượng:</strong> Sách được biên tập và
+                in ấn đạt tiêu chuẩn cao.
               </ListGroup.Item>
               <ListGroup.Item>
-                <strong>👩‍⚕️ Đội ngũ tư vấn:</strong> Luôn hỗ trợ cha mẹ chọn sản
-                phẩm tốt nhất.
+                <strong>👩‍⚕️ Đội ngũ tư vấn:</strong> Luôn hỗ trợ độc giả chọn lựa
+                những tựa sách phù hợp.
               </ListGroup.Item>
             </ListGroup>
           </Col>
           <Col md={6} className="mb-4">
             <ListGroup>
               <ListGroup.Item>
-                <strong>🏆 Thương hiệu uy tín:</strong> Hợp tác với nhiều nhãn
-                hàng lớn.
+                <strong>🏆 Thương hiệu uy tín:</strong> Hợp tác với nhiều nhà
+                xuất bản hàng đầu.
               </ListGroup.Item>
               <ListGroup.Item>
                 <strong>🛍️ Không gian mua sắm thân thiện:</strong> Trải nghiệm
-                thoải mái, an toàn.
+                mua sắm dễ chịu, hiện đại.
               </ListGroup.Item>
             </ListGroup>
           </Col>
         </Row>
       </section>
 
-      {/* 🛒 Sản phẩm tại Baby chill */}
-      <section className="mb-5 baby-chill-products">
-        <h2 className="text-center mb-4">Sản phẩm tại Baby chill</h2>
+      {/* 🛒 Sản phẩm tại Go Book */}
+      <section className="mb-5 go-book-products">
+        <h2 className="text-center mb-4">Sản phẩm tại Go Book</h2>
         <Row>
           <Col md={6} className="mb-4">
             <ListGroup>
               <ListGroup.Item>
-                <strong>👶 Đồ dùng sơ sinh:</strong> Bỉm, tã, bình sữa, yếm,
-                chăn, áo khoác.
+                <strong>📚 Văn học:</strong> Tiểu thuyết, truyện ngắn, thơ, và
+                nhiều tác phẩm kinh điển.
               </ListGroup.Item>
               <ListGroup.Item>
-                <strong>🌿 Chăm sóc sức khỏe:</strong> Kem dưỡng da, sữa tắm,
-                dầu massage.
+                <strong>💼 Kinh tế & quản trị:</strong> Sách kinh tế, quản trị,
+                marketing và đầu tư.
               </ListGroup.Item>
             </ListGroup>
           </Col>
           <Col md={6} className="mb-4">
             <ListGroup>
               <ListGroup.Item>
-                <strong>📚 Đồ chơi giáo dục:</strong> Đồ chơi trí tuệ, đồ chơi
-                phát triển thể chất.
+                <strong>🧠 Tâm lý & kỹ năng sống:</strong> Sách hướng dẫn phát
+                triển bản thân, tâm lý, và kỹ năng sống.
               </ListGroup.Item>
               <ListGroup.Item>
-                <strong>🥛 Thực phẩm & sữa:</strong> Sữa bột, thức ăn dặm, thực
-                phẩm dinh dưỡng.
+                <strong>🔖 Sách tham khảo:</strong> Tài liệu học thuật, sách học
+                ngoại ngữ và nhiều tựa sách đa dạng.
               </ListGroup.Item>
             </ListGroup>
           </Col>
@@ -133,8 +133,8 @@ const Info = () => {
       </section>
 
       {/* 📞 Thông tin liên hệ */}
-      <section className="mb-5 baby-chill-contact">
-        <h2 className="text-center mb-4">Liên hệ Baby chill</h2>
+      <section className="mb-5 go-book-contact">
+        <h2 className="text-center mb-4">Liên hệ Go Book</h2>
         <ListGroup className="text-center">
           <ListGroup.Item>
             <strong>📍 Địa chỉ:</strong>{" "}
@@ -146,17 +146,15 @@ const Info = () => {
           </ListGroup.Item>
           <ListGroup.Item>
             <strong>📧 Email:</strong>{" "}
-            <a href="mailto:support@babychill.com">support@babychill.com</a>
+            <a href="mailto:support@gobook.com">support@gobook.com</a>
           </ListGroup.Item>
         </ListGroup>
       </section>
 
       {/* 📌 Footer */}
-      <footer className="text-center py-4 baby-chill-footer">
+      <footer className="text-center py-4 go-book-footer">
         <Card className="text-muted">
-          <Card.Body>
-            &copy; 2025 Baby chill. Tất cả quyền được bảo lưu.
-          </Card.Body>
+          <Card.Body>&copy; 2025 Go Book. Tất cả quyền được bảo lưu.</Card.Body>
         </Card>
       </footer>
     </Container>

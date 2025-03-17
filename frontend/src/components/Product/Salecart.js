@@ -115,41 +115,44 @@ function Salecart() {
   }
 
   return (
-    <Container>
+    <Container fluid>
       <Row>
         {coupons.map((coupon, idx) => (
           <Col key={idx} xs={12} sm={6} md={6} lg={3}>
             <Card className={`${styles.couponCard} mb-4`}>
-              <Card.Body className="d-flex flex-row align-items-center">
+              <Card.Body className="d-flex align-items-center justify-content-center">
                 <Image
                   src={coupon.image}
                   alt="Coupon"
                   roundedCircle
                   width={80}
                   height={80}
-                  className="mb-0"
+                  className="me-3"
                 />
-                <div className="text-center ms-3">
-                  <Card.Title className="text-danger fs-6" >{coupon.code}</Card.Title>
-                  <Card.Text>{coupon.description}</Card.Text>
+                <div>
+                  <Card.Title className="text-danger fs-6 text-center">
+                    {coupon.code}
+                  </Card.Title>
+                  <Card.Text className="text-center">
+                    {coupon.description}
+                  </Card.Text>
                   <div className="d-flex justify-content-center mt-3">
                     <Button
                       variant="danger"
                       onClick={() => handleClaimCoupon(coupon.code)}
                       disabled={userCoupons.some(
-                        (coupon) => coupon.couponCode === coupon.code
-                      )} // Disable nút khi đã nhận mã
+                        (userCoupon) => userCoupon.couponCode === coupon.code
+                      )}
                       style={{
-                        
                         opacity: userCoupons.some(
-                          (coupon) => coupon.couponCode === coupon.code
+                          (userCoupon) => userCoupon.couponCode === coupon.code
                         )
                           ? 0.5
-                          : 1, // Làm mờ nút khi đã nhận mã
+                          : 1,
                       }}
                     >
                       {userCoupons.some(
-                        (coupon) => coupon.couponCode === coupon.code
+                        (userCoupon) => userCoupon.couponCode === coupon.code
                       )
                         ? "Đã nhận"
                         : "Nhận"}

@@ -41,8 +41,8 @@ html {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background-color: #f5f5f5;
-    color: #666 !important;
+    background-color: #fdf5e6;
+    color: #8B4513 !important;
     font-size: 13px;
     transition: all 0.2s ease;
 }

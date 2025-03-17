@@ -6,15 +6,22 @@ const User = require("../models/User");
 const nodemailer = require("nodemailer");
 const { generateToken } = require("../middleware/auth");
 const adminMiddleware = require("../middleware/adminMiddleware");
+
 // Đăng ký neww
 router.post("/register", async (req, res) => {
   try {
     const { firstName, lastName, phone, email, password, role } = req.body;
+
+    console.log("Dữ liệu nhận được từ client:", req.body);
+
+    // Kiểm tra các trường bắt buộc
     if (!firstName || !lastName || !phone || !email || !password) {
       return res.status(400).json({
         message: "Vui lòng điền đầy đủ thông tin",
       });
     }
+
+    // Kiểm tra email hoặc số điện thoại đã tồn tại
     const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
     if (existingUser) {
       return res.status(400).json({
@@ -22,14 +29,17 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    // Tạo người dùng mới
+    // Tạo người dùng mới với role hợp lệ
     const newUser = new User({
       firstName,
       lastName,
       phone,
       email,
       password,
-      role: role === "admin" ? "admin" : "user",
+      role:
+        role && ["user", "admin", "posts", "warehouse", "accountant"].includes(role)
+          ? role
+          : "user", // Mặc định là "user" nếu role không hợp lệ
     });
 
     const savedUser = await newUser.save();
@@ -39,7 +49,11 @@ router.post("/register", async (req, res) => {
       user: savedUser.toJSON(),
     });
   } catch (error) {
-    res.status(500).json({ message: "Lỗi server, vui lòng thử lại sau" });
+    console.error("Lỗi trong route /register:", error);
+    res.status(500).json({
+      message: "Lỗi server, vui lòng thử lại sau",
+      error: error.message,
+    });
   }
 });
 
@@ -91,7 +105,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// // Route quên mật khẩu
+// Route quên mật khẩu
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
@@ -118,43 +132,31 @@ router.post("/forgot-password", async (req, res) => {
       to: user.email,
       subject: "Yêu cầu đặt lại mật khẩu",
       html: `
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đặt lại mật khẩu</title>
   </head>
-  <body style="margin: 0; padding: 0;  font-family: Arial, sans-serif;">
-    <table
-      role="presentation"
-      width="100%"
-      cellspacing="0"
-      cellpadding="0"
-      border="0"
-      style="max-width: 600px; margin: 30px auto; background-color: #ffffff; border-collapse: collapse; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden;"
-    >
+  <body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; margin: 30px auto; background-color: #ffffff; border-collapse: collapse; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden;">
       <!-- Header -->
       <tr>
-        <td style="background-color: #FFB6C1; padding: 15px; text-align: center;">
-          <img
-            src="https://res.cloudinary.com/div27nz1j/image/upload/v1737451253/1_vmcjnj.png"
-            alt="Logo"
-            width="80"
-            style="display: block; margin: auto;"
-          />
-          <h1 style="margin: 10px 0 5px; font-size: 24px; color: #FF6F91; font-weight: bold;">
-            Baby <span style="color: #ffffff;">Chill</span>
+        <td style="background-color: #8B4513; padding: 15px; text-align: center;">
+          <img src="https://res.cloudinary.com/dhbyhp8nw/image/upload/v1742030869/logo_ch4fq2.png" alt="Logo" width="80" style="display: block; margin: auto;" />
+          <h1 style="margin: 10px 0 5px; font-size: 24px; color: #ffffff; font-weight: bold;">
+            Go <span style="color: #ffffff;">Book</span>
           </h1>
           <p style="margin: 0; font-size: 12px; color: #ffffff;">
-            CHUỖI HỆ THÔNG SIÊU THỊ MẸ VÀ BÉ
+            CHUỖI HỆ THỐNG CỬA HÀNG SÁCH
           </p>
         </td>
       </tr>
       <!-- Nội dung chính -->
       <tr>
         <td style="padding: 20px 30px; background-color: #ffffff;">
-          <h2 style="font-size: 22px; color: #FF6F91; text-align: center; margin-bottom: 15px;">
+          <h2 style="font-size: 22px; color: #8B4513; text-align: center; margin-bottom: 15px;">
             Yêu cầu đặt lại mật khẩu
           </h2>
           <p style="font-size: 15px; color: #333333; margin-bottom: 15px;">
@@ -168,7 +170,7 @@ router.post("/forgot-password", async (req, res) => {
           <div style="text-align: center; margin: 20px 0;">
             <a
               href="${resetUrl}"
-              style="background-color: #ffd5db; color: #FF6F91; text-decoration: none; padding: 10px 25px; border-radius: 4px; font-size: 15px; font-weight: bold; display: inline-block;"
+              style="background-color: #8B4513; color: #ffffff; text-decoration: none; padding: 10px 25px; border-radius: 4px; font-size: 15px; font-weight: bold; display: inline-block;"
             >
               Đặt lại mật khẩu
             </a>
@@ -185,23 +187,22 @@ router.post("/forgot-password", async (req, res) => {
           <hr style="border: none; border-top: 1px solid #E6E6FA; margin: 20px 0;">
           <p style="font-size: 12px; color: #999999; text-align: center; margin: 0;">
             Email này được gửi tự động, vui lòng không trả lời. Nếu cần hỗ trợ, hãy liên hệ với chúng tôi qua 
-            <a href="mailto:miavn9x@gmail.com" style="color: #FF6F91; text-decoration: none;">support@gmail.com</a>.
+            <a href="mailto:support@gmail.com" style="color: #8B4513; text-decoration: none;">support@gmail.com</a>.
           </p>
         </td>
       </tr>
       <!-- Footer -->
       <tr>
-        <td style="background-color: #FFB6C1; padding: 10px; text-align: center;">
+        <td style="background-color: #8B4513; padding: 10px; text-align: center;">
           <p style="font-size: 12px; color: #ffffff; margin: 0;">
-            © ${new Date().getFullYear()} Babychill.vn. All rights reserved.
+            © ${new Date().getFullYear()} Go Book. All rights reserved.
           </p>
         </td>
       </tr>
     </table>
   </body>
 </html>
-
-  `,
+      `,
     };
 
     await transporter.sendMail(mailOptions);
@@ -247,7 +248,6 @@ router.post("/reset-password/:token", async (req, res) => {
       message: "Đặt lại mật khẩu thành công",
     });
   } catch (error) {
-    // console.error("Lỗi reset password:", error);
     res.status(500).json({ message: "Lỗi server" });
   }
 });

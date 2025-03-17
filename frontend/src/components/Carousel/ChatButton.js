@@ -33,26 +33,30 @@ const ChatToggle = () => {
       <button className="chat-main-button" onClick={toggleMenu}>
         {/* Ẩn icon chat chính khi menu hiển thị */}
         {!menuVisible && (
-          <img src={chatIcon} alt="Chat" className="chat-main-icon" />
+          <img src={chatIcon} alt="Tư vấn Go Book" className="chat-main-icon" />
         )}
       </button>
       {menuVisible && (
         <div className="chat-menu">
           <a
-            href="https://zalo.me/your-zalo-id"
+            href="https://zalo.me/gobook"
             target="_blank"
             rel="noopener noreferrer"
             className="chat-menu-item"
           >
-            <img src={zaloIcon} alt="Zalo" className="chat-menu-icon" />
+            <img src={zaloIcon} alt="Zalo Go Book" className="chat-menu-icon" />
           </a>
           <a
-            href="https://m.me/your-facebook-page"
+            href="https://m.me/gobook"
             target="_blank"
             rel="noopener noreferrer"
             className="chat-menu-item"
           >
-            <img src={facebookIcon} alt="Facebook" className="chat-menu-icon" />
+            <img
+              src={facebookIcon}
+              alt="Facebook Go Book"
+              className="chat-menu-icon"
+            />
           </a>
         </div>
       )}

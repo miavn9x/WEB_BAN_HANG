@@ -17,8 +17,14 @@ const UserSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
     },
+    username: {
+      type: String,
+      unique: true,
+      default: function () {
+        return this.email;
+      },
+    },
     password: { type: String, required: [true, "Vui lòng nhập mật khẩu"] },
-    // Cập nhật enum cho role bao gồm: user, admin, posts, warehouse, accountant
     role: {
       type: String,
       enum: ["user", "admin", "posts", "warehouse", "accountant"],
@@ -37,15 +43,13 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Virtual field để lấy tên đầy đủ
+
 UserSchema.virtual("name").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
 
-// Đưa virtual vào JSON
 UserSchema.set("toJSON", { virtuals: true });
 
-// Mã băm mật khẩu trước khi lưu vào DB
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   try {
@@ -57,7 +61,6 @@ UserSchema.pre("save", async function (next) {
   }
 });
 
-// So sánh mật khẩu
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   try {
     return await bcrypt.compare(candidatePassword, this.password);
@@ -66,7 +69,6 @@ UserSchema.methods.comparePassword = async function (candidatePassword) {
   }
 };
 
-// Tạo JWT token cho user
 UserSchema.methods.generateAuthToken = function () {
   return jwt.sign(
     { userId: this._id, role: this.role },
@@ -75,7 +77,6 @@ UserSchema.methods.generateAuthToken = function () {
   );
 };
 
-// Loại bỏ các trường nhạy cảm khi trả về client
 UserSchema.methods.toJSON = function () {
   const userObject = this.toObject();
   delete userObject.password;

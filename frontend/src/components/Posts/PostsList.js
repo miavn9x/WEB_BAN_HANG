@@ -32,7 +32,9 @@ const SidebarPostItem = ({ post }) => (
         {post.imageUrl && (
           <img src={post.imageUrl} alt={post.title} className="img-fluid" />
         )}
-        <div className="sidebar-text">{post.title}</div>
+        <div className="sidebar-text" style={{ color: "#8B4513" }}>
+          {post.title}
+        </div>
       </div>
     </Link>
   </Col>
@@ -73,12 +75,12 @@ const PostsList = () => {
   // SEO Meta Tags
   const pageTitle = "Danh Sách Bài Viết";
   const pageDescription =
-    "Xem danh sách bài viết mới nhất và nổi bật trên trang của chúng tôi.";
+    "Xem danh sách bài viết mới nhất và nổi bật trên trang của Go Book.";
 
   return (
     <div className="posts-list-page">
       <Helmet>
-        <title>{`${pageTitle} - BabyMart.vn`}</title>
+        <title>{`${pageTitle} - Go Book`}</title>
         <meta name="description" content={pageDescription} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
@@ -89,9 +91,7 @@ const PostsList = () => {
       <Container>
         {/* Tiêu đề trang */}
         <Row className="my-4">
-          <Col>
-            {/* Bạn có thể thêm tiêu đề trang ở đây nếu cần */}
-          </Col>
+          <Col>{/* Tiêu đề có thể được thêm vào đây nếu cần */}</Col>
         </Row>
 
         <Row>
@@ -125,11 +125,14 @@ const PostsList = () => {
                               variant="top"
                               src={post.imageUrl}
                               className="posts-list-card-img"
-                              loading="lazy" // Lazy load hình ảnh
+                              loading="lazy"
                             />
                           )}
                           <Card.Body>
-                            <Card.Title className="posts-list-card-title">
+                            <Card.Title
+                              className="posts-list-card-title"
+                              style={{ color: "#8B4513" }}
+                            >
                               {post.title}
                             </Card.Title>
                           </Card.Body>
@@ -139,15 +142,19 @@ const PostsList = () => {
                   ))}
                 </Row>
               ) : (
-                !loading &&
-                !error && <div>Không có bài viết nào.</div>
+                !loading && !error && <div>Không có bài viết nào.</div>
               )}
             </div>
           </Col>
 
           {/* Cột sidebar TIN NỔI BẬT */}
           <Col xs={12} lg={3}>
-            <h4 className="posts-list-sidebar-title">TIN NỔI BẬT</h4>
+            <h4
+              className="posts-list-sidebar-title"
+              style={{ color: "#8B4513" }}
+            >
+              TIN NỔI BẬT
+            </h4>
             <Row>
               {highlightPosts.length === 0 ? (
                 <Col>

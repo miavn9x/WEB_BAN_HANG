@@ -29,128 +29,94 @@ const AddProduct = () => {
 
   // Các tùy chọn danh mục sản phẩm
   const categoryOptions = {
-    "Sữa bột cao cấp": [
-      "Sữa bột cho bé 0-6 tháng",
-      "Sữa bột cho bé 6-12 tháng",
-      "Sữa bột cho bé 1-3 tuổi",
-      "Sữa bột cho bé 3-5 tuổi",
-      "Sữa bột organic",
-      "Sữa non tăng đề kháng",
+    "Văn Học": [
+      "Tiểu Thuyết",
+      "Truyện Ngắn - Tản Văn",
+      "Light Novel",
+      "Ngôn Tình",
+      "Tác Phẩm Kinh Điển",
+      "Thơ",
     ],
-    "Sữa dinh dưỡng": [
-      "Sữa cho mẹ bầu",
-      "Sữa tăng canxi cho bà bầu",
-      "Sữa cho mẹ sau sinh",
-      "Sữa cho bé từ 1 tuổi",
-      "Sữa tăng chiều cao cho bé 3-5 tuổi",
+    "Kinh Tế": [
+      "Nhân Vật - Bài Học Kinh Doanh",
+      "Quản Trị - Lãnh Đạo",
+      "Marketing - Bán Hàng",
+      "Phân Tích Kinh Tế",
+      "Đầu Tư Tài Chính",
+      "Khởi Nghiệp",
     ],
-    "Bỉm & Tã em bé": [
-      "Bỉm sơ sinh (< 5kg)",
-      "Bỉm size S (4-8kg)",
-      "Bỉm size M (6-11kg)",
-      "Bỉm size L (9-14kg)",
-      "Bỉm size XL (12-17kg)",
-      "Bỉm quần cho bé tập đi",
+    "Tâm Lý - Kỹ Năng Sống": [
+      "Kỹ Năng Sống",
+      "Rèn Luyện Nhân Cách",
+      "Tâm Lý",
+      "Sách Cho Tuổi Mới Lớn",
+      "Hôn Nhân - Gia Đình",
+      "Sách Self-Help",
     ],
-    "Đồ chơi em bé": [
-      "Đồ chơi bé gái",
-      "Đồ chơi bé trai",
-      "Sách, học tập",
-      "Đồ chơi sơ sinh",
-      "Scooter, vận động",
+    "Nuôi Dạy Con": [
+      "Cẩm Nang Làm Cha Mẹ",
+      "Phương Pháp Giáo Dục Trẻ",
+      "Phát Triển Trí Tuệ Cho Trẻ",
+      "Phát Triển Kỹ Năng Cho Trẻ",
+      "Thai Giáo",
+      "Sức Khỏe Trẻ Em",
     ],
-    "Chăm sóc gia đình": [
-      "Chăm sóc da bầu (chống rạn)",
-      "Dầu massage bầu",
-      "Kem dưỡng da cho bé",
-      "Dầu tắm gội cho bé",
-      "Phấn rôm chống hăm",
-      "Nhiệt kế & Máy hút mũi",
+    "Sách Thiếu Nhi": [
+      "Manga - Comic",
+      "Kiến Thức Bách Khoa",
+      "Sách Tranh Kỹ Năng Sống",
+      "Vừa Học - Vừa Chơi",
+      "Truyện Cổ Tích",
+      "Truyện Tranh",
     ],
-    "Thời trang mẹ và bé": [
-      "Đồ bầu theo tháng (1-8 tháng)",
-      "Váy bầu công sở",
-      "Đồ sau sinh",
-      "Quần áo sơ sinh (0-12 tháng)",
-      "Quần áo bé 1-3 tuổi",
-      "Quần áo bé 3-5 tuổi",
+    "Tiểu Sử - Hồi Ký": [
+      "Câu Chuyện Cuộc Đời",
+      "Chính Trị",
+      "Kinh Tế",
+      "Nghệ Thuật - Giải Trí",
+      "Tự Truyện",
+      "Nhân Vật Lịch Sử",
     ],
-    "Dinh dưỡng bà bầu": [
-      "Vitamin tổng hợp cho bà bầu",
-      "Sắt và axit folic",
-      "Canxi và Vitamin D3",
-      "Omega 3 và DHA",
-      "Sữa bầu công thức đặc biệt",
+    "Giáo Khoa - Tham Khảo": [
+      "Sách Giáo Khoa",
+      "Sách Tham Khảo",
+      "Luyện Thi THPT Quốc Gia",
+      "Mẫu Giáo",
+      "Sách Ôn Thi Đại Học",
+      "Sách Bài Tập",
     ],
-    "Ăn dặm cho bé": [
-      "Bột ăn dặm 6-8 tháng",
-      "Bột ăn dặm 8-12 tháng",
-      "Cháo ăn dặm 12-24 tháng",
-      "Bánh ăn dặm",
-      "Vitamin & Khoáng chất ăn dặm",
-      "Dụng cụ ăn dặm",
-    ],
-    "Dinh dưỡng cho bé": [
-      "Vitamin tổng hợp cho bé 0-12 tháng",
-      "Vitamin cho bé 1-3 tuổi",
-      "Vitamin cho bé 3-5 tuổi",
-      "Men vi sinh cho bé",
-      "Kẽm & Sắt cho bé",
-      "DHA cho bé",
-    ],
-    "Đồ dùng thiết yếu": [
-      "Máy hút sữa & Phụ kiện",
-      "Bình sữa & Núm ti",
-      "Máy tiệt trùng & Hâm sữa",
-      "Nôi & Cũi cho bé",
-      "Xe đẩy & Địu",
-      "Ghế ăn & Ghế rung",
+    "Sách Học Ngoại Ngữ": [
+      "Tiếng Anh",
+      "Tiếng Nhật",
+      "Tiếng Hoa",
+      "Tiếng Hàn",
+      "Tiếng Pháp",
+      "Tiếng Đức",
     ],
   };
 
-  // Mảng thương hiệu được phân nhóm theo danh mục
-  const predefinedBrandsByCategory = {
-    Sữa: [
-      "Vinamilk",
-      "Dielac",
-      "TH True Milk",
-      "Mami",
-      "Friso",
-      "Meiji",
-      "Aptamil",
-      "Similac",
-      "Enfamil",
-      "Nestlé",
-    ],
-    "Bỉm & Tã": ["Pampers", "Huggies", "MamyPoko", "Bambo Nature"],
-    "Chăm sóc & Dinh dưỡng": [
-      "Pigeon",
-      "Mee Mee",
-      "Johnson's Baby",
-      "Abbott",
-      "Mead Johnson",
-      "Hersheys",
-    ],
-    "Thời trang & Đồ dùng": [
-      "Mothercare",
-      "Carter's",
-      "OshKosh B'gosh",
-      "Zara Kids",
-      "Mother & Baby",
-    ],
-    "Nổi Bật": [
-      "Fisher-Price",
-      "Chicco",
-      "Blackmores",
-      "aribaly",
-      "hikid",
-      "meadjohnson",
-      "blackmores",
-      "arifood",
-      "aptamil",
-      "cosmic light",
-    ],
-  };
+
+  // Mảng Nhà xuất bản được phân nhóm theo danh mục
+const predefinedBrandsByCategory = {
+  "Văn Học": ["NXB Trẻ", "NXB Hội Nhà Văn", "NXB Văn Hóa", "NXB Phụ Nữ"],
+  "Kinh Tế": [
+    "NXB Tài Chính",
+    "NXB Kinh Tế & Quản Trị",
+    "NXB Lao Động",
+    "NXB Tri thức",
+  ],
+  "Tâm Lý - Kỹ Năng Sống": ["NXB Đời Sống", "NXB Tâm Lý", "NXB Phát Triển"],
+  "Nuôi Dạy Con": ["NXB Gia Đình", "NXB Mẹ và Bé"],
+  "Sách Thiếu Nhi": ["NXB Kim Đồng", "NXB Trẻ Em", "NXB Thiếu Nhi"],
+  "Tiểu Sử - Hồi Ký": ["NXB Lịch Sử", "NXB Tiểu Sử", "NXB Sự Thật"],
+  "Giáo Khoa - Tham Khảo": ["NXB Giáo Dục", "NXB Giáo Khoa", "NXB Tham Khảo"],
+  "Sách Học Ngoại Ngữ": [
+    "NXB Ngoại Ngữ",
+    "NXB Quốc Tế",
+    "NXB Đại Học Ngoại Ngữ",
+  ],
+};
+
 
   // Xử lý nhập dữ liệu
   const handleInputChange = (e) => {
@@ -189,7 +155,7 @@ const AddProduct = () => {
     }));
   };
 
-  // Chọn thương hiệu
+  // Chọn Nhà xuất bản
   const handleBrandSelectChange = (e) => {
     const value = e.target.value;
     setSelectedBrand(value);
@@ -385,10 +351,10 @@ const AddProduct = () => {
                   />
                 </div>
               </div>
-              {/* Các trường giá, số lượng, hình ảnh và thương hiệu */}
+              {/* Các trường giá, số lượng, hình ảnh và Nhà xuất bản */}
               <div className="col-md-6">
                 <div className="form-group">
-                  <label>Thương hiệu</label>
+                  <label>Nhà xuất bản</label>
                   <select
                     name="brandSelect"
                     className="form-control"
@@ -396,7 +362,7 @@ const AddProduct = () => {
                     onChange={handleBrandSelectChange}
                     required
                   >
-                    <option value="">Chọn thương hiệu</option>
+                    <option value="">Chọn Nhà xuất bản</option>
                     {Object.entries(predefinedBrandsByCategory).map(
                       ([group, brands]) => (
                         <optgroup key={group} label={group}>
@@ -408,14 +374,14 @@ const AddProduct = () => {
                         </optgroup>
                       )
                     )}
-                    <option value="other">Nhập Thương Hiệu</option>
+                    <option value="other">Nhập Nhà xuất bản</option>
                   </select>
                   {selectedBrand === "other" && (
                     <input
                       type="text"
                       name="brand"
                       className="form-control mt-2"
-                      placeholder="Nhập thương hiệu"
+                      placeholder="Nhập Nhà xuất bản"
                       value={product.brand}
                       onChange={handleInputChange}
                       required

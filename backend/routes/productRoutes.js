@@ -218,7 +218,7 @@ router.get("/products/:id", async (req, res) => {
 
 
 
-// Route sửa sản phẩm (PUT)
+// Route sửa sản phẩm (PUT)// Route sửa sản phẩm (PUT)
 router.put("/products/:id", upload.array("images", 20), async (req, res) => {
   const productId = req.params.id;
 
@@ -234,38 +234,53 @@ router.put("/products/:id", upload.array("images", 20), async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy sản phẩm." });
     }
 
-    // Extract category data from request body
-    const categoryName = req.body['category[name]'] || req.body.category?.name;
-    const categoryGeneric = req.body['category[generic]'] || req.body.category?.generic;
+    const categoryName =
+      req.body["category[name]"] ||
+      (req.body.category && req.body.category.name) ||
+      req.body.categoryName;
+    const categoryGeneric =
+      req.body["category[generic]"] ||
+      (req.body.category && req.body.category.generic) ||
+      req.body.categoryGeneric;
+    const parseNumberField = (fieldName, existingValue) => {
+      const fieldValue = req.body[fieldName];
+      if (fieldValue === undefined || fieldValue === "" || fieldValue === "null") {
+        return existingValue;
+      }
+      const parsed = Number(fieldValue);
+      return isNaN(parsed) ? existingValue : parsed;
+    };
 
-    // Construct updated product data
     const updatedProductData = {
       name: req.body.name || existingProduct.name,
       brand: req.body.brand || existingProduct.brand,
       description: req.body.description || existingProduct.description,
-      originalPrice: req.body.originalPrice || existingProduct.originalPrice,
-      discountPercentage: req.body.discountPercentage || existingProduct.discountPercentage,
-      priceAfterDiscount: req.body.priceAfterDiscount || existingProduct.priceAfterDiscount,
+      originalPrice: parseNumberField("originalPrice", existingProduct.originalPrice),
+      discountPercentage: parseNumberField("discountPercentage", 0),
+      priceAfterDiscount: parseNumberField("priceAfterDiscount", existingProduct.priceAfterDiscount),
       discountCode: req.body.discountCode || existingProduct.discountCode,
-      remainingStock: req.body.remainingStock || existingProduct.remainingStock,
-      stock: req.body.stock || existingProduct.stock,
+      remainingStock: parseNumberField("remainingStock", existingProduct.remainingStock),
+      stock: parseNumberField("stock", existingProduct.stock),
       category: {
         name: categoryName || existingProduct.category.name,
-        generic: categoryGeneric || existingProduct.category.generic
-      }
+        generic: categoryGeneric || existingProduct.category.generic,
+      },
     };
 
-    // Handle image upload
+    // Handle image upload nếu có file mới được gửi
     if (req.files && req.files.length > 0) {
       try {
-        // Delete old images from Cloudinary
+        // Xóa các ảnh cũ trên Cloudinary
         const deleteImagePromises = existingProduct.images.map((url) => {
-          const publicId = url.split("/").pop().split(".")[0];
+          // Giả sử các ảnh được upload vào folder "products"
+          const segments = url.split("/");
+          const publicIdWithExtension = segments.pop();
+          const publicId = publicIdWithExtension.split(".")[0];
           return cloudinary.uploader.destroy(`products/${publicId}`);
         });
         await Promise.all(deleteImagePromises);
 
-        // Upload new images to Cloudinary
+        // Upload các ảnh mới
         const imageUploadPromises = req.files.map((file) => {
           return new Promise((resolve, reject) => {
             cloudinary.uploader
@@ -278,34 +293,36 @@ router.put("/products/:id", upload.array("images", 20), async (req, res) => {
         });
 
         const uploadResults = await Promise.all(imageUploadPromises);
-        updatedProductData.images = uploadResults.map(
-          (result) => result.secure_url
-        );
+        updatedProductData.images = uploadResults.map((result) => result.secure_url);
       } catch (error) {
         console.error("Error handling images:", error);
-        return res.status(500).json({ message: "Lỗi khi xử lý hình ảnh." });
+        return res
+          .status(500)
+          .json({ message: "Lỗi khi xử lý hình ảnh.", error: error.message });
       }
     }
 
-    // Update the product with new data
+    // Update product in database
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
       updatedProductData,
       { new: true }
     );
 
-
     res.status(200).json({
       message: "Sản phẩm đã được cập nhật thành công.",
       product: updatedProduct,
     });
   } catch (error) {
-    res.status(500).json({ 
+    console.error("Error updating product:", error);
+    res.status(500).json({
       message: "Có lỗi xảy ra khi cập nhật sản phẩm.",
-      error: error.message 
+      error: error.message,
     });
   }
 });
+
+
 // Route xóa sản phẩm
 router.delete("/products/:id", async (req, res) => {
   const productId = req.params.id;

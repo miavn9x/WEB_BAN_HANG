@@ -5,14 +5,12 @@
     padding: 2px !important;
     transition: all 0.3s ease;
     border: 1px solid #f1f1f1 !important;
-
-    box-shadow: 0 2px 4px rgba(255, 111, 145, 0.5) !important;
+    box-shadow: 0 2px 4px rgba(139, 69, 19, 0.5) !important;
     display: flex;
     flex-direction: column;
     height: 100%;
     position: relative;
 }
-
 
 .product__item:hover {
     box-shadow: 0 1px 20px rgba(0, 0, 0, 0.05);
@@ -43,14 +41,13 @@
     object-fit: contain;
     justify-content: center;
     border-radius: 7px;
-
 }
 
 .product__discount {
     position: absolute;
     top: 20px;
     left: 10px;
-    background: #FF6F91;
+    background: #8B4513;
     color: #fff;
     padding: 2px 6px;
     border-radius: 4px;
@@ -84,12 +81,12 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 1px 4px rgba(251, 203, 203, 0.9);
-    color: #FF6F91 !important;
+    box-shadow: 0 1px 4px rgba(139, 69, 19, 0.9);
+    color: #8B4513 !important;
 }
 
 .action__btn:hover {
-    background: #FF6F91;
+    background: #8B4513;
     color: #fff;
 }
 
@@ -103,7 +100,6 @@
     flex: 1;
     padding-top: 12px;
     height: 100%;
-
 }
 
 .product__name {
@@ -156,7 +152,7 @@
 .product__price__increase {
     font-size: 14px;
     font-weight: 600;
-    color: #FF6F91 !important;
+    color: #8B4513 !important;
 }
 
 .MuiRating-root {

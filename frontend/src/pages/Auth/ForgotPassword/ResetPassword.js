@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Container, Form, Button } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import "../../../styles/ForgotPassword.css";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -66,12 +67,10 @@ const ResetPassword = () => {
   return (
     <Container className="login-container">
       <h2 className="text-center mb-4">ĐẶT LẠI MẬT KHẨU</h2>
-
       <div className="text-center">
         {message && <div className="text-success">{message}</div>}
         {error && <div className="text-danger">{error}</div>}
       </div>
-
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
           <Form.Label>
@@ -86,7 +85,6 @@ const ResetPassword = () => {
             minLength={6}
           />
         </Form.Group>
-
         <Form.Group className="mb-4">
           <Form.Label>
             Xác nhận mật khẩu <span className="text-danger">*</span>
@@ -100,12 +98,11 @@ const ResetPassword = () => {
             minLength={6}
           />
         </Form.Group>
-
         <Button
           type="submit"
           className="w-100 rounded-pill fw-bold"
           style={{
-            backgroundColor: "#ffc0cb",
+            backgroundColor: "#8B4513",
             border: "none",
             padding: "10px 0",
           }}

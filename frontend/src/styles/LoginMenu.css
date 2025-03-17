@@ -1,15 +1,13 @@
 .login__menu {
     position: absolute;
     top: 100%;
-  
     z-index: 1000;
-    background-color: white;
+    background-color: #fdf5e6;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-top: 32.2px !important;
     width: 200px;
-    left: -85px!important;
-    border-radius: 2px!important;
-    
+    left: -85px !important;
+    border-radius: 2px !important;
 }
 
 .login__menu .dropdown-item {
@@ -18,7 +16,7 @@
 }
 
 .login__menu .dropdown-item:hover {
-    background-color: #F0A3B2;
+    background-color: #8B4513;
 }
 
 .login__menu .dropdown-divider {
@@ -26,16 +24,15 @@
 }
 
 .login__menu .dropdown-item:last-child {
-    background-color: #F0A3B2;
+    background-color: #8B4513;
     color: white;
 }
 
 .dropdown-divider {
     height: 1px;
-    background-color: #e0e0e0;
+    background-color: #d2b48c;
     margin: 5px 0;
 }
-
 
 @media (min-width: 91px) and (max-width: 991px) {
     .login__menu {
@@ -46,7 +43,7 @@
         transform: translate(-50%, -50%) !important;
         width: 80% !important;
         max-width: 400px !important;
-    border-radius: 2px !important;
+        border-radius: 2px !important;
         z-index: 1050 !important;
         margin-top: 0 !important;
     }
@@ -62,7 +59,7 @@
 
     .close-button {
         position: absolute;
-        top: 0px ;
+        top: 0px;
         right: 0px;
         background: transparent;
         border: none;
@@ -77,5 +74,4 @@
     .dropdown-menu {
         border: none !important;
     }
-
 }

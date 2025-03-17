@@ -5,7 +5,7 @@
 }
 
 .order-history-title {
-    color: #ff6f91;
+    color: #8B4513;
     margin-bottom: 20px;
     text-align: center;
     font-weight: bold;
@@ -13,7 +13,7 @@
 
 .order-history-table {
     margin-top: 20px;
-    border: 1px solid #fff8dc;
+    border: 1px solid #fdf5e6;
 }
 
 .order-history-table th,
@@ -21,16 +21,16 @@
     vertical-align: middle !important;
     text-align: center;
     padding: 10px;
-    border: 1px solid #fff8dc;
+    border: 1px solid #fdf5e6;
 }
 
 .order-history-table thead {
-    background-color: #ffb6c1;
+    background-color: #8B4513;
     color: #fff;
 }
 
 .order-history-table tbody tr:hover {
-    background-color: #e6e6fa;
+    background-color: #f3e0d7;
     cursor: pointer;
 }
 
@@ -41,11 +41,11 @@
 
 /* Các style cho modal với tiền tố riêng để tránh xung đột */
 .order-history-modal .modal-header {
-    background-color: #ffb6c1;
+    background-color: #8B4513;
     color: #fff;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
-    border-bottom: 1px solid #fff8dc;
+    border-bottom: 1px solid #fdf5e6;
 }
 
 .order-history-modal .modal-title {
@@ -53,8 +53,8 @@
 }
 
 .order-history-modal .modal-footer {
-    background-color: #fff4e6;
-    border-top: 1px solid #fff8dc;
+    background-color: #fdf5e6;
+    border-top: 1px solid #fdf5e6;
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
 }
@@ -62,36 +62,36 @@
 .order-history-modal select {
     padding: 5px 10px;
     border-radius: 4px;
-    border: 1px solid #fff8dc;
+    border: 1px solid #fdf5e6;
     margin-top: 5px;
-    background-color: #ffb6c1;
+    background-color: #8B4513;
     color: #fff;
 }
 
 .btn-danger {
-    background-color: #ffd5db !important;
-    border-color: #fff8dc !important;
+    background-color: #f3e0d7 !important;
+    border-color: #fdf5e6 !important;
     color: #333;
 }
 
 .btn-danger:hover,
 .btn-danger:focus,
 .btn-danger:active {
-    background-color: #ffb6c1 !important;
-    border-color: #fff8dc !important;
+    background-color: #8B4513 !important;
+    border-color: #fdf5e6 !important;
     color: #fff;
 }
 
 .btn-info:hover,
 .btn-info:focus,
 .btn-info:active {
-    background-color: #ffb6c1 !important;
-    border-color: #fff8dc !important;
+    background-color: #8B4513 !important;
+    border-color: #fdf5e6 !important;
     color: #fff;
 }
 
 .text-detail {
-    color: #e6e6fa;
+    color: #d2b48c;
 }
 
 .payment-details p {

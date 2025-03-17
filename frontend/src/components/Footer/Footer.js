@@ -11,28 +11,27 @@ const Footer = () => {
     <footer className="footer" role="contentinfo">
       <div
         className="footer-container"
-        style={{ background: "#FFB6C1", color: "#323d42", width: "100%" }}
+        style={{ background: "#fdf5e6", color: "#323d42", width: "100%" }}
       >
-        <div className="container py-4">
+        <div className="container-fluid py-4 px-5">
           <div className="row">
             {/* Thông tin công ty */}
             <div className="col-lg-3 col-md-6 col-sm-12 mb-4">
               <div className="logo d-flex align-items-center">
                 <img
-                  src="https://res.cloudinary.com/div27nz1j/image/upload/v1737451253/1_vmcjnj.png"
-                  alt="Logo của Baby chill"
+                  src="https://res.cloudinary.com/dhbyhp8nw/image/upload/v1742030869/logo_ch4fq2.png"
+                  alt="Logo của Go Book"
                   width="60"
                   height="auto"
                 />
                 <span className="logo-text ms-2" style={{ fontSize: "16px" }}>
-                  <span className="text-danger fw-bold"> Baby </span>
-                  <span className="text-primary fw-bold"> chill </span>
+                  <span className="text-danger fs-3 fw-bold me-1">Go</span>
+                  <span className="text-primary fs-3 fw-bold">Book</span>
                 </span>
               </div>
               <p className="pt-1">
-                Siêu thị Baby chill <br /> Thương hiệu mẹ và bé uy tín và chất
-                lượng, cam kết mang đến trải nghiệm mua sắm tiện lợi, hiện đại
-                và phong phú.
+                Go Book <br /> Cửa hàng sách uy tín, cam kết mang đến trải
+                nghiệm mua sắm sách hiện đại, phong phú và chất lượng cao.
               </p>
               <p>Mã số thuế: 12345678999</p>
               <address className="contact-info">
@@ -48,8 +47,8 @@ const Footer = () => {
                 </p>
                 <p>
                   <i className="fas fa-envelope"></i> Email:
-                  <a href="mailto:support.babychill@gmail.com" className="ms-1">
-                    support.babychill@gmail.com
+                  <a href="mailto:support@gobook.com" className="ms-1">
+                    support@gobook.com
                   </a>
                 </p>
               </address>
@@ -178,9 +177,8 @@ const Footer = () => {
             <div className="col-lg-3 col-md-6 col-sm-12 mb-4">
               <h5>Đăng ký nhận ưu đãi</h5>
               <p>
-                Bạn muốn nhận khuyến mãi đặc biệt? Đăng kí tham gia ngay cộng
-                đồng hơn 68.000+ người theo dõi để cập nhật khuyến mãi ngay lập
-                tức.
+                Bạn muốn nhận khuyến mãi đặc biệt? Đăng kí tham gia ngay cùng
+                hơn 68.000+ độc giả để cập nhật khuyến mãi mới nhất.
               </p>
               <form className="mb-3" action="/subscribe" method="post">
                 <div className="input-group">
@@ -195,7 +193,7 @@ const Footer = () => {
                     className="btn"
                     type="submit"
                     style={{
-                      backgroundColor: "#FF6F91",
+                      backgroundColor: "#8B4513",
                       borderColor: "#FFF",
                       color: "#fff",
                     }}
@@ -218,7 +216,7 @@ const Footer = () => {
           <div className="row">
             <div className="col-12">
               <p className="copyright text-center mb-0">
-                © Bản quyền thuộc về Mía VN | Bài thi Design web
+                © Bản quyền thuộc team [ Tuấn, Tùng, Hiếu] | Đồ án môn ứng dụng web
               </p>
             </div>
           </div>

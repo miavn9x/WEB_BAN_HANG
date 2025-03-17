@@ -1,6 +1,7 @@
 /* ------------------ Rating & Review ------------------ */
 .ratingBox {
-    background-color: #fff7f0;
+    background-color: #fdf5e6;
+    /* nền light beige */
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 20px;
@@ -8,11 +9,12 @@
 
 .ratingValue {
     font-size: 2.5rem;
-    color: #ff007f;
+    color: #8B4513;
 }
 
 .ratingStars {
-    color: #ffc107;
+    color: #DAA520;
+    /* sắc vàng ấm, hài hòa với chủ đề */
 }
 
 .ratingCount {
@@ -21,8 +23,8 @@
 
 .btnCustom {
     background-color: #fff;
-    border: 1px solid #ff007f;
-    color: #ff007f;
+    border: 1px solid #8B4513;
+    color: #8B4513;
     border-radius: 20px;
     padding: 5px 15px;
     font-size: 0.9rem;
@@ -30,18 +32,17 @@
 }
 
 .btnCustomActive {
-    background-color: #ff007f;
+    background-color: #8B4513;
     color: #fff;
 }
 
 .reviewLike {
-    color: #ff007f;
+    color: #8B4513;
     font-size: 1.5rem;
     cursor: pointer;
 }
 
 /* ------------------  / Hỏi – Đáp ------------------ */
-
 .messageItem {
     display: flex;
     width: 100%;
@@ -64,19 +65,19 @@
 }
 
 .outgoing .messageContent {
-    background-color: #FADCD9;
+    background-color: #f9e3d3;
+    /* nền beige với chút sắc nâu */
     color: #333;
     text-align: right;
 }
 
 .incoming .messageContent {
-    background-color: #D0E8F2;
+    background-color: #f3e8d9;
+    /* tông màu beige nhẹ khác */
     color: #333;
     text-align: left;
     border: 1px solid #ccc;
 }
-
-
 
 .chatTimestamp {
     font-size: 0.8rem;
@@ -89,26 +90,24 @@
 /* Style cho box chứa tin nhắn reply (trong danh sách tin nhắn) */
 .replyBox {
     padding: 5px 10px;
-    background: rgba(0, 0, 0, 0.05);
-    border-left: 3px solid #ccc;
+    background: rgba(139, 69, 19, 0.1);
+    border-left: 3px solid #8B4513;
     margin-bottom: 5px;
     font-size: 0.9rem;
-    color: #555;
+    color: #8B4513;
 }
 
-/* Style cho nút "Trả lời" ở dưới mỗi tin nhắn */
 .replyButton {
     font-size: 0.85rem;
-    color: #007bff;
+    color: #8B4513;
     cursor: pointer;
     margin-top: 5px;
 }
 
-/* Style cho preview tin nhắn đang được trả lời, hiển thị bên trên ô nhập */
 .replyPreview {
-    background: #f0f8ff;
+    background: #fdf5e6;
     padding: 8px 12px;
-    border-left: 4px solid #007bff;
+    border-left: 4px solid #8B4513;
     margin-bottom: 10px;
     font-size: 0.9rem;
     display: flex;
@@ -119,7 +118,7 @@
 /* Nút hủy bỏ reply */
 .cancelReply {
     margin-left: 10px;
-    color: #ff4d4f;
+    color: #8B4513;
     cursor: pointer;
     font-weight: bold;
 }

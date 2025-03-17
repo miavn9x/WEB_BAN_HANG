@@ -29,13 +29,21 @@ const Error403 = () => {
         <div className="col-12">
           <div className="error-403-container">
             <div className="error-403-content">
-              <h1 className="error-403-title">403</h1>
-              <h2 className="error-403-subtitle">Forbidden</h2>
+              <h1 className="error-403-title" style={{ color: "#8B4513" }}>
+                403
+              </h1>
+              <h2 className="error-403-subtitle" style={{ color: "#8B4513" }}>
+                Truy cập Bị Từ Chối
+              </h2>
               <p className="error-403-text">
-                Bạn không có quyền truy cập trang này. Vui lòng quay lại trang
-                chủ để truy cập.
+                Bạn không có quyền truy cập trang này của Go Book. Vui lòng quay
+                lại Trang chủ để tiếp tục.
               </p>
-              <Link href="/" className="error-403-button">
+              <Link
+                href="/"
+                className="error-403-button"
+                style={{ backgroundColor: "#8B4513", color: "#fff" }}
+              >
                 Quay lại Trang chủ
               </Link>
             </div>
